@@ -50,11 +50,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>no.posten.dpost</groupId>
-			<artifactId>dpost-xsd</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.6.1</version>
@@ -77,6 +72,10 @@
 		<dependency>
 			<groupId>commons-httpclient</groupId>
 			<artifactId>commons-httpclient</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
@@ -142,6 +141,7 @@
 						<exclude>**/*.p12</exclude>
 						<exclude>**/*.txt</exclude>
 						<exclude>**/*.xml</exclude>
+						<exclude>**/*.xsd</exclude>
 					</excludes>
 				</configuration>
 				<executions>
