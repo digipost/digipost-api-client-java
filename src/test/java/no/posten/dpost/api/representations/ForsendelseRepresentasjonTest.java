@@ -15,12 +15,12 @@
  */
 package no.posten.dpost.api.representations;
 
-import static no.posten.dpost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import no.posten.dpost.api.client.representations.DigipostAddress;
-import no.posten.dpost.api.client.representations.Message;
+import no.digipost.api.client.representations.DigipostAddress;
+import no.digipost.api.client.representations.Message;
 
 import org.junit.Test;
 

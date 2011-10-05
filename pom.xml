@@ -162,7 +162,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>no.posten.dpost.api.client.swing.DigipostSwingClient</mainClass>
+							<mainClass>no.digipost.api.client.swing.DigipostSwingClient</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -290,7 +290,7 @@
 						<configuration>
 							<programs>
 								<program>
-									<mainClass>no.posten.dpost.api.client.swing.DigipostSwingClient</mainClass>
+									<mainClass>no.digipost.api.client.swing.DigipostSwingClient</mainClass>
 									<name>dpost-api-client</name>
 									<platforms>
 										<platform>windows</platform>
@@ -298,7 +298,7 @@
 									</platforms>
 								</program>
 								<program>
-									<mainClass>no.posten.dpost.api.client.cmd.DigipostCmdClient</mainClass>
+									<mainClass>no.digipost.api.client.cmd.DigipostCmdClient</mainClass>
 									<name>dpost-api-cmd</name>
 									<platforms>
 										<platform>windows</platform>

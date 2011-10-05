@@ -25,11 +25,15 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import no.posten.dpost.api.client.DigipostClientException.ErrorType;
-import no.posten.dpost.api.client.representations.AuthenticationLevel;
-import no.posten.dpost.api.client.representations.Message;
-import no.posten.dpost.api.client.representations.MessageStatus;
-import no.posten.dpost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.ApiService;
+import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientException;
+import no.digipost.api.client.MessageSender;
+import no.digipost.api.client.DigipostClientException.ErrorType;
+import no.digipost.api.client.representations.AuthenticationLevel;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageStatus;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
 
 import org.junit.Before;
 import org.junit.Test;

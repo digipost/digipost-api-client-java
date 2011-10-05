@@ -15,15 +15,15 @@
  */
 package no.posten.dpost.api.eksempelkode;
 
-import static no.posten.dpost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import no.posten.dpost.api.client.DigipostClient;
-import no.posten.dpost.api.client.representations.DigipostAddress;
-import no.posten.dpost.api.client.representations.Message;
+import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.representations.DigipostAddress;
+import no.digipost.api.client.representations.Message;
 
 import org.apache.commons.io.FileUtils;
 

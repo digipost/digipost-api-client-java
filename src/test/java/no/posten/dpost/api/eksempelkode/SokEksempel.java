@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import no.posten.dpost.api.client.DigipostClient;
-import no.posten.dpost.api.client.representations.Recipient;
+import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.representations.Recipient;
 
 import org.apache.commons.io.FileUtils;
 

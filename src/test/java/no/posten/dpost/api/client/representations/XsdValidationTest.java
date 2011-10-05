@@ -25,6 +25,18 @@ import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import no.digipost.api.client.representations.Address;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.DigipostUri;
+import no.digipost.api.client.representations.EntryPoint;
+import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.MediaTypes;
+import no.digipost.api.client.representations.Recipient;
+import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.Relation;
+import no.digipost.api.client.representations.Suggestion;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -38,7 +50,7 @@ public class XsdValidationTest {
 	public void setUp() throws SAXException, JAXBException {
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api/api_v1.xsd"));
-		marshaller = JAXBContext.newInstance("no.posten.dpost.api.client.representations").createMarshaller();
+		marshaller = JAXBContext.newInstance("no.digipost.api.client.representations").createMarshaller();
 		marshaller.setSchema(schema);
 	}
 
