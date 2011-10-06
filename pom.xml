@@ -109,13 +109,13 @@
 			<artifactId>scala-library</artifactId>
 			<version>2.9.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
 			<artifactId>jersey-apache-client</artifactId>
 			<version>1.9</version>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>
@@ -245,7 +245,9 @@
 										<include>org.springframework:spring-oxm:3.0.5.RELEASE:jar:compile</include>
 									</includes>
 									<searchTransitive>true</searchTransitive>
-									<message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før distribusjon. Husk også å oppdatere fila «NOTICE».</message>
+									<message>Maven-avhengigheter har forandret seg. Sjekk at alle
+										lisenser er OK før distribusjon. Husk også å oppdatere fila
+										«NOTICE».</message>
 								</bannedDependencies>
 							</rules>
 						</configuration>
@@ -253,23 +255,23 @@
 				</executions>
 			</plugin>
 			<plugin>
-        <groupId>org.scala-tools</groupId>
-        <artifactId>maven-scala-plugin</artifactId>
-        <version>2.15.2</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <includes>
-            <include>**/*.scala</include>
-          </includes>
-        </configuration>
-      </plugin>
+				<groupId>org.scala-tools</groupId>
+				<artifactId>maven-scala-plugin</artifactId>
+				<version>2.15.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<includes>
+						<include>**/*.scala</include>
+					</includes>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -387,5 +389,11 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
+	<scm>
+		<connection>scm:git:git@github.com:digipost/digipost-api-client-java.git</connection>
+		<developerConnection>scm:git:git@github.com:digipost/digipost-api-client-java.git</developerConnection>
+		<url>scm:git:git@github.com:digipost/digipost-api-client-java</url>
+	</scm>
 
 </project>
