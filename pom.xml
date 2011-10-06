@@ -400,5 +400,26 @@
 		<developerConnection>scm:git:git@github.com:digipost/digipost-api-client-java.git</developerConnection>
 		<url>scm:git:git@github.com:digipost/digipost-api-client-java</url>
 	</scm>
+	
+	<repositories>
+    <repository>
+      <id>sonatype-nexus-public</id>
+      <url>https://oss.sonatype.org/content/groups/public</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>sonatype-nexus-releases</id>
+      <url>https://oss.sonatype.org/content/repositories/releases</url>
+    </repository>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+  </repositories>
 
 </project>
