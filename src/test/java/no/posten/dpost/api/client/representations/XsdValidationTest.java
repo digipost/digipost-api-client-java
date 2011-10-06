@@ -26,12 +26,16 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import no.digipost.api.client.representations.Address;
+import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.DigipostUri;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MediaTypes;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.Recipient;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.Relation;
@@ -45,6 +49,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class XsdValidationTest {
 
 	private Marshaller marshaller;
+	private Link link;
 
 	@Before
 	public void setUp() throws SAXException, JAXBException {
@@ -52,25 +57,46 @@ public class XsdValidationTest {
 		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api/api_v1.xsd"));
 		marshaller = JAXBContext.newInstance("no.digipost.api.client.representations").createMarshaller();
 		marshaller.setSchema(schema);
+
+		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V1);
 	}
 
 	@Test
-	public void validateAll() throws JAXBException {
-		Link link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V1);
-		Recipients recipients = new Recipients();
+	public void validateRecipients() throws JAXBException {
 		Address address = new Address("Streetn", "houseNumber", "houseLetter", "additionalAddressLine", "zipCode", "city");
 		ArrayList<Address> addresses = new ArrayList<Address>();
 		addresses.add(address);
+		Recipients recipients = new Recipients();
 		Recipient recipient = new Recipient("Even", "Emmil", "Beinlaus", "even.beinlaus#1234", addresses, link);
 		recipients.add(recipient);
-		EntryPoint entryPoint = new EntryPoint(link);
-
-		marshallAndValidate(entryPoint);
 		marshallAndValidate(recipients);
+	}
+
+	@Test
+	public void validateErrorMessage() throws JAXBException {
 		marshallAndValidate(new ErrorMessage("Error message", link));
+	}
+
+	@Test
+	public void validateAutocomplete() throws JAXBException {
 		List<Suggestion> suggestions = new ArrayList<Suggestion>();
 		suggestions.add(new Suggestion("even", link));
 		marshallAndValidate(new Autocomplete(suggestions, link));
+	}
+
+	@Test
+	public void validateEntryPoint() throws JAXBException {
+		marshallAndValidate(new EntryPoint(link, link, link));
+	}
+
+	@Test
+	public void validateMessage() throws JAXBException {
+		Message messageWithDigipostAddress = new Message("messageId", "subject", new DigipostAddress("even.beinlaus#1234"), true,
+				AuthenticationLevel.TWO_FACTOR, link);
+		Message messageWithPersonalIdentificationNumber = new Message("messageId", "subject", new PersonalIdentificationNumber(
+				"12345678901"), true, AuthenticationLevel.TWO_FACTOR, link);
+		marshallAndValidate(messageWithDigipostAddress);
+		marshallAndValidate(messageWithPersonalIdentificationNumber);
 	}
 
 	public void marshallAndValidate(final Object element) throws JAXBException {
