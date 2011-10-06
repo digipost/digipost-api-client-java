@@ -18,43 +18,31 @@ package no.digipost.api.client.representations;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.commons.lang.StringUtils;
+import no.digipost.api.client.DigipostClientException;
+import no.digipost.api.client.DigipostClientException.ErrorType;
 
 public class DigipostUri {
 	private final URI uri;
-
-	public DigipostUri(final String... uriComponents) {
-		try {
-			uri = new URI(StringUtils.join(uriComponents, "/").replaceAll("([^:])/+", "$1/"));
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	public DigipostUri(final URI uri) {
 		this.uri = uri;
 	}
 
-	public URI getFullUri() {
+	public DigipostUri(final String uri) {
+		try {
+			this.uri = new URI(uri);
+		} catch (URISyntaxException e) {
+			throw new DigipostClientException(ErrorType.GENERAL_ERROR, e.getMessage());
+		}
+	}
+
+	public URI getUri() {
 		return uri;
 	}
 
 	@Override
 	public String toString() {
 		return uri.toString();
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (obj instanceof DigipostUri) {
-			return ((DigipostUri) obj).uri.equals(uri);
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		return uri.hashCode();
 	}
 
 	public String getBaseUri() {

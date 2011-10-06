@@ -36,15 +36,11 @@ public class Autocomplete extends Representation {
 	}
 
 	Autocomplete() {
-		suggestions = new ArrayList<Suggestion>();
+		this(new ArrayList<Suggestion>());
 	}
 
 	public List<Suggestion> getSuggestions() {
 		return suggestions;
-	}
-
-	public Link getSelfLink() {
-		return getLinkByRelationName(Relation.SELF);
 	}
 
 	@XmlElement(name = "link")

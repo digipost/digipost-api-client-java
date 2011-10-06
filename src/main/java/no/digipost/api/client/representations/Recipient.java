@@ -67,38 +67,6 @@ public class Recipient extends Representation {
 		return addresses;
 	}
 
-	public static class Builder {
-		private final String firstName;
-		private final String middleName;
-		private final String lastName;
-		private final String digipostAddress;
-		private final List<Address> addresses;
-		private final List<Link> links;
-
-		public Builder(final String firstName, final String middleName, final String lastName, final String digipostAddress) {
-			this.lastName = lastName;
-			this.middleName = middleName;
-			this.firstName = firstName;
-			this.digipostAddress = digipostAddress;
-			addresses = new ArrayList<Address>();
-			links = new ArrayList<Link>();
-		}
-
-		public Builder address(final Address address) {
-			addresses.add(address);
-			return this;
-		}
-
-		public Builder link(final Link link) {
-			links.add(link);
-			return this;
-		}
-
-		public Recipient build() {
-			return new Recipient(firstName, middleName, lastName, digipostAddress, addresses, links.toArray(new Link[links.size()]));
-		}
-	}
-
 	public Link getSelfLink() {
 		return getLinkByRelationName(Relation.SELF);
 	}

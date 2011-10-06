@@ -46,7 +46,7 @@ public class Link {
 	public Link(final Relation relation, final DigipostUri uri, final String mediaType) {
 		rel = relation;
 		relationBaseUri = uri.getBaseUri() + RELATIONS_BASE_PATH;
-		this.uri = uri.getFullUri().toString();
+		this.uri = uri.getUri().toString();
 		this.mediaType = mediaType;
 	}
 

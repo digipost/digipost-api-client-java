@@ -19,10 +19,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Suggestion {
 	private String searchString;
@@ -43,28 +39,6 @@ public class Suggestion {
 
 	public Link getSearchLink() {
 		return searchLink;
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(31, 1).append(searchLink).append(searchString).toHashCode();
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Suggestion other = (Suggestion) obj;
-		return new EqualsBuilder().append(searchLink, other.searchLink).append(searchString, other.searchString).isEquals();
-	}
-
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
 	}
 
 }

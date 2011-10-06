@@ -90,10 +90,6 @@ public class Message extends Representation {
 		return smsNotification;
 	}
 
-	/**
-	 * To forsendelser regnes som identiske hvis de har samme forsendelses-id og
-	 * emne og mottakerne har samme kunde-id.
-	 */
 	public boolean isIdenticalTo(final Message message) {
 		return messageId.equals(message.getMessageId()) && subject.equals(message.getSubject());
 	}
