@@ -43,14 +43,5 @@
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
-		<fileSet>
-			<directory>${basedir}</directory>
-			<includes>
-				<include>config.properties</include>
-			</includes>
-			<outputDirectory>/bin</outputDirectory>
-			<fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>
-		</fileSet>
 	</fileSets>
 </assembly>

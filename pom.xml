@@ -110,12 +110,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<version>2.9.1</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
 			<artifactId>jersey-apache-client</artifactId>
 			<version>1.9</version>
@@ -221,7 +215,6 @@
 									<includes>
 										<include>ch.qos.logback:logback-core:0.9.28:jar:compile</include>
 										<include>ch.qos.logback:logback-classic:0.9.28:jar:compile</include>
-										<include>org.scala-lang:scala-library:2.9.0:jar:compile</include>
 										<include>aopalliance:aopalliance:1.0:jar:compile</include>
 										<include>com.sun.jersey:jersey-client:1.7:jar:compile</include>
 										<include>com.sun.jersey:jersey-core:1.7:jar:compile</include>
@@ -258,24 +251,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.scala-tools</groupId>
-				<artifactId>maven-scala-plugin</artifactId>
-				<version>2.15.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>compile</goal>
-							<goal>testCompile</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<includes>
-						<include>**/*.scala</include>
-					</includes>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
