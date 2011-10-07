@@ -17,20 +17,20 @@
 		<fileSet>
 			<directory>${project.build.directory}/</directory>
 			<includes>
-				<include>dpost-api-client-${project.version}-javadoc.jar</include>
-				<include>dpost-api-client-${project.version}-sources.jar</include>
+				<include>${project.artifactId}-${project.version}-javadoc.jar</include>
+				<include>${project.artifactId}-${project.version}-sources.jar</include>
 			</includes>
 			<outputDirectory>/</outputDirectory>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
-			<directory>${project.build.directory}/../../dpost-xsd/target</directory>
+			<directory>${project.build.directory}/classes/xsd/api</directory>
 			<includes>
-				<include>dpost-xsd-${project.version}-sources.jar</include>
+				<include>*.xsd</include>
 			</includes>
 			<outputDirectory>/</outputDirectory>
-			<fileMode>0755</fileMode>
+			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
