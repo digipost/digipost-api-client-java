@@ -41,12 +41,6 @@
 				<groupId>commons-httpclient</groupId>
 				<artifactId>commons-httpclient</artifactId>
 				<version>3.1</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>commons-logging</artifactId>
-						<groupId>commons-logging</groupId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -272,15 +266,7 @@
 							<programs>
 								<program>
 									<mainClass>no.digipost.api.client.swing.DigipostSwingClient</mainClass>
-									<name>dpost-api-client</name>
-									<platforms>
-										<platform>windows</platform>
-										<platform>unix</platform>
-									</platforms>
-								</program>
-								<program>
-									<mainClass>no.digipost.api.client.cmd.DigipostCmdClient</mainClass>
-									<name>dpost-api-cmd</name>
+									<name>digipost-api-client</name>
 									<platforms>
 										<platform>windows</platform>
 										<platform>unix</platform>
