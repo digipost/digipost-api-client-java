@@ -20,7 +20,7 @@ import java.net.URISyntaxException;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
@@ -38,9 +38,9 @@ public class Link {
 	@XmlTransient
 	private String relationBaseUri;
 
-	@XmlElement(required = true)
+	@XmlAttribute(required = true)
 	private String uri;
-	@XmlElement(required = true)
+	@XmlAttribute
 	private String mediaType;
 
 	public Link(final Relation relation, final DigipostUri uri, final String mediaType) {
@@ -69,7 +69,7 @@ public class Link {
 		return relationBaseUri + "/" + rel.name().toLowerCase();
 	}
 
-	@XmlElement(required = true)
+	@XmlAttribute
 	public String getRel() {
 		return getRelationUri();
 	}
