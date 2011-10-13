@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.posten.dpost.api.client.representations;
+package no.digipost.api.client.representations;
 
 import java.util.ArrayList;
 import java.util.List;

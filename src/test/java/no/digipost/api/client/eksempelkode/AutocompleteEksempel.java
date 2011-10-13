@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.posten.dpost.api.eksempelkode;
-
-import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+package no.digipost.api.client.eksempelkode;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.DigipostAddress;
-import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.Suggestion;
 
 import org.apache.commons.io.FileUtils;
 
@@ -31,7 +29,8 @@ import org.apache.commons.io.FileUtils;
  * Kode som brukes i dokumentasjonen for klientbiblioteket.
  * 
  */
-public class ForsendelseEksempelDigipostadresse {
+@SuppressWarnings("unused")
+public class AutocompleteEksempel {
 	// Din virksomhets Digipost-kontoid
 	private static final long AVSENDERS_KONTOID = 10987;
 
@@ -47,17 +46,9 @@ public class ForsendelseEksempelDigipostadresse {
 		// 2. Vi oppretter en DigipostClient
 		DigipostClient client = new DigipostClient("https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
-		// 3. Vi oppretter et digipostadresseobjekt
-		DigipostAddress address = new DigipostAddress("fornavn.etternavn#6789");
+		// 3. Vi ber om forslag til autofullføring
+		List<Suggestion> suggestions = client.getAutocompleteSuggestions("Gunn").getSuggestions();
 
-		// 4. Vi oppretter en forsendelse
-		Message message = new Message("dinForsendelseId", "Brevets emne", address, false, PASSWORD);
-
-		// 5. Vi henter inputstreamen til PDF-filen vi ønsker å sende
-		InputStream messageContent = getMessageContent();
-
-		// 6. Vi lar klientbiblioteket håndtere utsendelsen
-		client.sendMessage(message, messageContent);
 	}
 
 	private static InputStream getMessageContent() {

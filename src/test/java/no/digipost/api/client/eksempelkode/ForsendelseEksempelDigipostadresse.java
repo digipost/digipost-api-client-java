@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.posten.dpost.api.eksempelkode;
+package no.digipost.api.client.eksempelkode;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 
@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
 
 import org.apache.commons.io.FileUtils;
 
@@ -31,7 +31,7 @@ import org.apache.commons.io.FileUtils;
  * Kode som brukes i dokumentasjonen for klientbiblioteket.
  * 
  */
-public class ForsendelseEksempel {
+public class ForsendelseEksempelDigipostadresse {
 	// Din virksomhets Digipost-kontoid
 	private static final long AVSENDERS_KONTOID = 10987;
 
@@ -47,11 +47,11 @@ public class ForsendelseEksempel {
 		// 2. Vi oppretter en DigipostClient
 		DigipostClient client = new DigipostClient("https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
-		// 3. Vi oppretter et fødselsnummerobjekt
-		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+		// 3. Vi oppretter et digipostadresseobjekt
+		DigipostAddress address = new DigipostAddress("fornavn.etternavn#6789");
 
 		// 4. Vi oppretter en forsendelse
-		Message message = new Message("dinForsendelseId", "Brevets emne", pin, false, PASSWORD);
+		Message message = new Message("dinForsendelseId", "Brevets emne", address, false, PASSWORD);
 
 		// 5. Vi henter inputstreamen til PDF-filen vi ønsker å sende
 		InputStream messageContent = getMessageContent();
