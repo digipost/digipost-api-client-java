@@ -67,7 +67,7 @@ public class Message extends Representation {
 	}
 
 	public Link getFileLink() {
-		return getLinkByRelationName(Relation.ADD_CONTENT);
+		return getLinkByRelationName(Relation.ADD_CONTENT_AND_SEND);
 	}
 
 	public String getSubject() {
