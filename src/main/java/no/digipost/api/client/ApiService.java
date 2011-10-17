@@ -70,6 +70,7 @@ public class ApiService {
 	private final long senderAccountId;
 
 	private EntryPoint cachedEntryPoint;
+	private long entryPointLastCached;
 
 	public ApiService(final WebResource webResource, final long senderAccountId) {
 		this.webResource = webResource;
@@ -170,14 +171,20 @@ public class ApiService {
 	}
 
 	private EntryPoint getCachedEntryPoint() {
-		if (cachedEntryPoint == null) {
+		if (cachedEntryPoint == null || entryPointCacheExpired()) {
 			ClientResponse response = getEntryPoint();
 			if (response.getStatus() != ClientResponse.Status.OK.getStatusCode()) {
 				throw new DigipostClientException(ErrorType.GENERAL_ERROR, response.getEntity(ErrorMessage.class).getErrorMessage());
 			} else {
 				cachedEntryPoint = response.getEntity(EntryPoint.class);
+				entryPointLastCached = System.currentTimeMillis();
 			}
 		}
 		return cachedEntryPoint;
+	}
+
+	private boolean entryPointCacheExpired() {
+		int fiveMinutes = 300000;
+		return (System.currentTimeMillis() - entryPointLastCached) > fiveMinutes;
 	}
 }
