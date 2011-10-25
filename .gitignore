@@ -4,3 +4,4 @@ target
 .project
 .scala_dependencies
 .settings
+*.iml
