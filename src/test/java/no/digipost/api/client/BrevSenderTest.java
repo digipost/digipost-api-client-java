@@ -25,10 +25,6 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import no.digipost.api.client.ApiService;
-import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.DigipostClientException;
-import no.digipost.api.client.MessageSender;
 import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.Message;
@@ -56,7 +52,7 @@ public class BrevSenderTest {
 		when(api.createMessage(forsendelseIn)).thenReturn(new MockClientResponse(Status.CONFLICT));
 
 		Message eksisterendeForsendelse = lagDefaultForsendelse();
-		eksisterendeForsendelse.setStatus(MessageStatus.EXPECTING_CONTENT);
+                eksisterendeForsendelse.setStatus(MessageStatus.NOT_COMPLETE);
 		when(api.fetchExistingMessage((URI) any())).thenReturn(new MockClientResponse(Status.OK, eksisterendeForsendelse));
 
 		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);

@@ -15,8 +15,6 @@
  */
 package no.digipost.api.client.representations;
 
-import static no.digipost.api.client.representations.MessageStatus.EXPECTING_CONTENT;
-
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -45,7 +43,7 @@ public class Message extends Representation {
 
 	public Message(final String messageId, final String subject, final RecipientIdentifier recipientIdentifier,
 			final boolean smsNotification, final AuthenticationLevel authenticationLevel, final Link... links) {
-		this(messageId, subject, recipientIdentifier, smsNotification, EXPECTING_CONTENT, authenticationLevel, links);
+                this(messageId, subject, recipientIdentifier, smsNotification, MessageStatus.NOT_COMPLETE, authenticationLevel, links);
 	}
 
 	public Message(final String messageId, final String subject, final RecipientIdentifier recipientIdentifier,

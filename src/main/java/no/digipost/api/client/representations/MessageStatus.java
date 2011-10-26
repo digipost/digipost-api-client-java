@@ -19,14 +19,12 @@ import javax.xml.bind.annotation.XmlEnum;
 
 @XmlEnum
 public enum MessageStatus {
-	EXPECTING_CONTENT,
+        NOT_COMPLETE,
+        COMPLETE,
 	DELIVERED;
-
-	public String value() {
-		return name();
-	}
 
 	public static MessageStatus fromValue(final String v) {
 		return valueOf(v);
 	}
+
 }
