@@ -253,7 +253,7 @@
 			<id>assembly</id>
 			<activation>
 				<property>
-					<name>!skip.assembly</name>
+					<name>!skipAssembly</name>
 				</property>
 			</activation>
 			<build>
