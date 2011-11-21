@@ -102,7 +102,7 @@ public class MessageSender {
 	 * 
 	 */
 	public Message addToContentAndSendMessage(final Message createdMessage, final InputStream letterContent) {
-                verifyCorrectStatus(createdMessage, MessageStatus.NOT_COMPLETE);
+		verifyCorrectStatus(createdMessage, MessageStatus.EXPECTING_CONTENT);
 		ClientResponse response = apiService.addToContentAndSend(createdMessage, letterContent);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);

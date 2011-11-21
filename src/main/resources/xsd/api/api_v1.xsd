@@ -57,25 +57,16 @@
 			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:restriction base="xsd:string">
-                        <xsd:enumeration value="NOT_COMPLETE">
+			<xsd:enumeration value="EXPECTING_CONTENT">
 				<xsd:annotation>
-                                        <xsd:documentation>The message resource is not complete. Consult the provided links to see what options are availiable.</xsd:documentation>
+					<xsd:documentation>The message resource has been created and is awaiting content.</xsd:documentation>
 					<xsd:appinfo>
-                                                <jaxb:typesafeEnumMember name="NOT_COMPLETE" />
-                                        </xsd:appinfo>
-                                </xsd:annotation>
-                        </xsd:enumeration>
-                        <xsd:enumeration value="COMPLETE">
-                                <xsd:annotation>
-                                        <xsd:documentation>The message resource is complete, and can be sent. Note that you can also tweak the message before sending it. Consult the provided links to see what options are availiable.</xsd:documentation>
-                                        <xsd:appinfo>
-                                                <jaxb:typesafeEnumMember name="COMPLETE" />
+						<jaxb:typesafeEnumMember name="EXPECTING_CONTENT" />
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:enumeration>
 			<xsd:enumeration value="DELIVERED">
 				<xsd:annotation>
-                                        <xsd:documentation>The message is delivered. Consult the provided links to see what options are availiable.</xsd:documentation>
 					<xsd:appinfo>
 						<jaxb:typesafeEnumMember name="DELIVERED" />
 					</xsd:appinfo>
