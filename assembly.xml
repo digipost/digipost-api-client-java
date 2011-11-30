@@ -9,10 +9,16 @@
 	</formats>
 	<fileSets>
 		<fileSet>
-			<directory>${project.build.directory}/appassembler</directory>
-			<outputDirectory>/</outputDirectory>
+			<directory>target/appassembler/bin</directory>
+			<outputDirectory>bin</outputDirectory>
 			<fileMode>0755</fileMode>
-			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<fileSet>
+			<directory>${project.build.directory}/appassembler</directory>
+			<excludes>
+				<exclude>bin</exclude>
+			</excludes>
+			<outputDirectory>/</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/</directory>
@@ -21,8 +27,6 @@
 				<include>${project.artifactId}-${project.version}-sources.jar</include>
 			</includes>
 			<outputDirectory>/</outputDirectory>
-			<fileMode>0755</fileMode>
-			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/classes/xsd/api</directory>
@@ -30,8 +34,6 @@
 				<include>*.xsd</include>
 			</includes>
 			<outputDirectory>/</outputDirectory>
-			<fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
 			<directory>${basedir}</directory>
@@ -40,8 +42,6 @@
 				<include>NOTICE</include>
 			</includes>
 			<outputDirectory>/</outputDirectory>
-			<fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>
 		</fileSet>
 	</fileSets>
 </assembly>
