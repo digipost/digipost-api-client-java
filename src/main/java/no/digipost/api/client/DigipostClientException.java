@@ -26,7 +26,9 @@ public class DigipostClientException extends RuntimeException {
 		MESSAGE_DOES_NOT_EXIST,
 		DUPLICATE_MESSAGE_ID,
 		MESSAGE_DELIVERED,
-		GENERAL_ERROR;
+		GENERAL_ERROR,
+		CANNOT_PREENCRYPT,
+		FAILED_PREENCRYPTION;
 	}
 
 	private final ErrorType errorType;

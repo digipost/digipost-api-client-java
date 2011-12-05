@@ -17,7 +17,9 @@ package no.digipost.api.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -27,6 +29,7 @@ import javax.ws.rs.core.Response.Status;
 import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageStatus;
 
@@ -68,10 +71,15 @@ public class MessageSender {
 	 * også gjøres ett kall for å hente mottakers publike nøkkel.
 	 */
 	public Message sendMessage(final Message message, final InputStream letterContent) {
+		InputStream content = letterContent;
+
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
 		Message createdMessage = createOrFetchMessage(message);
 
-		InputStream content = fetchKeyAndEncrypt(message, letterContent, createdMessage);
+		if (message.getPrekrypter()) {
+			log("\n\n---FORSENDELSE SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
+			content = fetchKeyAndEncrypt(createdMessage, letterContent);
+		}
 
 		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
 		Message sentMessage = addToContentAndSendMessage(createdMessage, content);
@@ -79,46 +87,25 @@ public class MessageSender {
 		return sentMessage;
 	}
 
-	private InputStream fetchKeyAndEncrypt(final Message message, final InputStream content, final Message createdMessage) {
-		InputStream returnContent = content;
-		if (message.getPrekrypter()) {
-			log("\n\n---STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
-			ClientResponse encryptionKeyResponse = apiService.getEncryptionKey(createdMessage.getEncryptionKeyLink().getUri());
-			EncryptionKey key = encryptionKeyResponse.getEntity(EncryptionKey.class);
-
-			try {
-				byte[] encryptedContent = preencrypt(IOUtils.toByteArray(content), key.getKeyId(), key.getValue());
-				returnContent = new ByteArrayInputStream(encryptedContent);
-			} catch (Exception e) {
-				eventLogger.log(e.getMessage());
-				e.printStackTrace();
-			}
-		}
-		return returnContent;
-	}
-
-	private OutputEncryptor buildEncryptor() throws CMSException {
-		return new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
-	}
-
 	/**
-	 * Krypterer <code>data</code> med brukers pubklike nøkkel
-	 * 
-	 * @param data
-	 * @param keyId
-	 * @param keyContent
-	 * @return
-	 * @throws Exception
+	 * Henter brukers publike nøkkel fra servern og krypterer brevet som skal
+	 * sendes med denne.
 	 */
-	private byte[] preencrypt(final byte[] data, final String keyId, final String keyContent) throws Exception {
-		PEMReader reader = new PEMReader(new StringReader(keyContent));
-		X509EncodedKeySpec spec = new X509EncodedKeySpec(((JCERSAPublicKey) reader.readObject()).getEncoded());
-		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
+	public InputStream fetchKeyAndEncrypt(final Message message, final InputStream content) {
+		checkThatMessageCanBePreEncrypted(message);
 
-		CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
-		gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(keyId.getBytes(), publicKey));
-		CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(data), buildEncryptor());
-		return d.getEncoded();
+		ClientResponse encryptionKeyResponse = apiService.getEncryptionKey(message.getEncryptionKeyLink().getUri());
+		checkResponse(encryptionKeyResponse);
+
+		EncryptionKey key = encryptionKeyResponse.getEntity(EncryptionKey.class);
+
+		try {
+			byte[] encryptedContent = preencrypt(IOUtils.toByteArray(content), key.getKeyId(), key.getValue());
+			return new ByteArrayInputStream(encryptedContent);
+		} catch (Exception e) {
+			logThrowable(e);
+			throw new DigipostClientException(ErrorType.FAILED_PREENCRYPTION, "Inneholdet kunne ikke prekrypteres.");
+		}
 	}
 
 	/**
@@ -177,6 +164,30 @@ public class MessageSender {
 		return response.getEntity(Message.class);
 	}
 
+	private OutputEncryptor buildEncryptor() throws CMSException {
+		return new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+	}
+
+	/**
+	 * Krypterer <code>data</code> med brukers pubklike nøkkel
+	 * 
+	 * @param data
+	 * @param keyId
+	 * @param keyContent
+	 * @return
+	 * @throws Exception
+	 */
+	private byte[] preencrypt(final byte[] data, final String keyId, final String keyContent) throws Exception {
+		PEMReader reader = new PEMReader(new StringReader(keyContent));
+		X509EncodedKeySpec spec = new X509EncodedKeySpec(((JCERSAPublicKey) reader.readObject()).getEncoded());
+		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
+
+		CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
+		gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(keyId.getBytes(), publicKey));
+		CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(data), buildEncryptor());
+		return d.getEncoded();
+	}
+
 	private void verifyCorrectStatus(final Message createdMessage, final MessageStatus expectedStatus) {
 		if (createdMessage.getStatus() != expectedStatus) {
 			throw new DigipostClientException(ErrorType.INVALID_TRANSACTION,
@@ -224,6 +235,15 @@ public class MessageSender {
 		}
 	}
 
+	private void checkThatMessageCanBePreEncrypted(final Message message) {
+		Link encryptionKeyLink = message.getEncryptionKeyLink();
+		if (encryptionKeyLink == null) {
+			String errorMessage = "Forsendelse med id [" + message.getMessageId() + "] kan ikke prekrypteres.";
+			log(errorMessage);
+			throw new DigipostClientException(ErrorType.CANNOT_PREENCRYPT, errorMessage);
+		}
+	}
+
 	private boolean messageAlreadyExists(final ClientResponse response) {
 		return Status.CONFLICT.equals(Status.fromStatusCode(response.getStatus()));
 	}
@@ -256,5 +276,13 @@ public class MessageSender {
 	private void log(final String message) {
 		LOG.debug(message);
 		eventLogger.log(message);
+	}
+
+	private void logThrowable(final Throwable t) {
+		LOG.debug("Feil.", t);
+
+		StringWriter stacktrace = new StringWriter();
+		t.printStackTrace(new PrintWriter(stacktrace));
+		eventLogger.log(stacktrace.toString());
 	}
 }
