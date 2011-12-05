@@ -68,28 +68,33 @@ public class MessageSender {
 	 * også gjøres ett kall for å hente mottakers publike nøkkel.
 	 */
 	public Message sendMessage(final Message message, final InputStream letterContent) {
-		InputStream content = letterContent;
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
 		Message createdMessage = createOrFetchMessage(message);
 
+		InputStream content = fetchKeyAndEncrypt(message, letterContent, createdMessage);
+
+		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
+		Message sentMessage = addToContentAndSendMessage(createdMessage, content);
+		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
+		return sentMessage;
+	}
+
+	private InputStream fetchKeyAndEncrypt(final Message message, final InputStream content, final Message createdMessage) {
+		InputStream returnContent = content;
 		if (message.getPrekrypter()) {
 			log("\n\n---STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
 			ClientResponse encryptionKeyResponse = apiService.getEncryptionKey(createdMessage.getEncryptionKeyLink().getUri());
 			EncryptionKey key = encryptionKeyResponse.getEntity(EncryptionKey.class);
 
 			try {
-				byte[] encryptedContent = preencrypt(IOUtils.toByteArray(letterContent), key.getKeyId(), key.getValue());
-				content = new ByteArrayInputStream(encryptedContent);
+				byte[] encryptedContent = preencrypt(IOUtils.toByteArray(content), key.getKeyId(), key.getValue());
+				returnContent = new ByteArrayInputStream(encryptedContent);
 			} catch (Exception e) {
 				eventLogger.log(e.getMessage());
 				e.printStackTrace();
 			}
 		}
-
-		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
-		Message sentMessage = addToContentAndSendMessage(createdMessage, content);
-		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
-		return sentMessage;
+		return returnContent;
 	}
 
 	private OutputEncryptor buildEncryptor() throws CMSException {
