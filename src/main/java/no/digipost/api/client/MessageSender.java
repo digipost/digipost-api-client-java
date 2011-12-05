@@ -15,15 +15,33 @@
  */
 package no.digipost.api.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.ws.rs.core.Response.Status;
 
 import no.digipost.api.client.DigipostClientException.ErrorType;
+import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageStatus;
 
+import org.apache.commons.io.IOUtils;
+import org.bouncycastle.cms.CMSAlgorithm;
+import org.bouncycastle.cms.CMSEnvelopedData;
+import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.JCERSAPublicKey;
+import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.operator.OutputEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,18 +61,59 @@ public class MessageSender {
 	}
 
 	/**
-	 * Sender et brev gjennom Digipost. Denne metoden gjør begge HTTP-kallene
-	 * som er nødvendige for å sende brevet. Det vil si at den først gjør et
-	 * kall for å opprette en forsendelsesressurs på serveren og deretter poster
-	 * brevets innhold.
+	 * Sender et brev gjennom Digipost. Denne metoden gjør alle HTTP-kallene som
+	 * er nødvendige for å sende brevet. Det vil si at den først gjør et kall
+	 * for å opprette en forsendelsesressurs på serveren og deretter poster
+	 * brevets innhold. Hvis forsendelsen skal sendes ferdigkryptert, så vil det
+	 * også gjøres ett kall for å hente mottakers publike nøkkel.
 	 */
 	public Message sendMessage(final Message message, final InputStream letterContent) {
-		log("\n\n---STARTER FØRSTE INTERAKSJON MED API (OPPRETTE FORSENDELSE)---");
+		InputStream content = letterContent;
+		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
 		Message createdMessage = createOrFetchMessage(message);
-		log("\n\n---STARTER ANDRE INTERAKSJON MED API (LEGGE TIL FIL)---");
-		Message sentMessage = addToContentAndSendMessage(createdMessage, letterContent);
+
+		if (message.getPrekrypter()) {
+			log("\n\n---STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
+			ClientResponse encryptionKeyResponse = apiService.getEncryptionKey(createdMessage.getEncryptionKeyLink().getUri());
+			EncryptionKey key = encryptionKeyResponse.getEntity(EncryptionKey.class);
+
+			try {
+				byte[] encryptedContent = preencrypt(IOUtils.toByteArray(letterContent), key.getKeyId(), key.getValue());
+				content = new ByteArrayInputStream(encryptedContent);
+			} catch (Exception e) {
+				eventLogger.log(e.getMessage());
+				e.printStackTrace();
+			}
+		}
+
+		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
+		Message sentMessage = addToContentAndSendMessage(createdMessage, content);
 		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
 		return sentMessage;
+	}
+
+	private OutputEncryptor buildEncryptor() throws CMSException {
+		return new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+	}
+
+	/**
+	 * Krypterer <code>data</code> med brukers pubklike nøkkel
+	 * 
+	 * @param data
+	 * @param keyId
+	 * @param keyContent
+	 * @return
+	 * @throws Exception
+	 */
+	private byte[] preencrypt(final byte[] data, final String keyId, final String keyContent) throws Exception {
+		PEMReader reader = new PEMReader(new StringReader(keyContent));
+		X509EncodedKeySpec spec = new X509EncodedKeySpec(((JCERSAPublicKey) reader.readObject()).getEncoded());
+		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
+
+		CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
+		gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(keyId.getBytes(), publicKey));
+		CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(data), buildEncryptor());
+		return d.getEncoded();
 	}
 
 	/**
@@ -69,6 +128,7 @@ public class MessageSender {
 	 * Dersom forsendelsen ikke eksisterer fra før, vil denne metoden opprette
 	 * en ny forsendelsesressurs på serveren og returnere en representasjon av
 	 * ressursen.
+	 * 
 	 */
 	public Message createOrFetchMessage(final Message message) {
 		ClientResponse response = apiService.createMessage(message);
@@ -102,7 +162,7 @@ public class MessageSender {
 	 * 
 	 */
 	public Message addToContentAndSendMessage(final Message createdMessage, final InputStream letterContent) {
-		verifyCorrectStatus(createdMessage, MessageStatus.EXPECTING_CONTENT);
+		verifyCorrectStatus(createdMessage, MessageStatus.NOT_COMPLETE);
 		ClientResponse response = apiService.addToContentAndSend(createdMessage, letterContent);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);

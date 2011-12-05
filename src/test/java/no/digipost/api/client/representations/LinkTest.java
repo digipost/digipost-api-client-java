@@ -20,6 +20,7 @@ import static no.digipost.api.client.representations.Relation.SELF;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+
 import org.junit.Test;
 
 public class LinkTest {

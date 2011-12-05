@@ -15,51 +15,70 @@
  */
 package no.digipost.api.client.representations;
 
-import static no.digipost.api.client.representations.MessageStatus.EXPECTING_CONTENT;
-
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = { "messageId", "subject", "digipostAddress", "personalIdentificationNumber", "smsNotification", "status", "link",
-		"authenticationLevel" })
-@XmlRootElement
+@XmlType(name = "message", propOrder = { "messageId", "deliveredDate", "subject", "recipients", "personalIdentificationNumbers",
+		"smsNotification", "preEncrypt", "status", "links", "authenticationLevel" })
+@XmlRootElement(name = "message")
 public class Message extends Representation {
 	@XmlElement(required = true)
-	private String messageId;
+	protected String messageId;
+	@XmlElement(type = String.class)
+	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+	@XmlSchemaType(name = "dateTime")
+	protected DateTime deliveredDate;
 	@XmlElement(required = true)
-	private String subject;
-	@XmlTransient
-	private RecipientIdentifier recipientIdentifier;
-	private boolean smsNotification;
-	private MessageStatus status;
-	private AuthenticationLevel authenticationLevel;
+	protected String subject;
+	@XmlElement(name = "recipient")
+	protected List<Recipient> recipients;
+	@XmlElement(name = "personalIdentificationNumber")
+	protected List<String> personalIdentificationNumbers;
+	protected boolean smsNotification;
+	protected Boolean preEncrypt;
+	protected MessageStatus status;
+	protected AuthenticationLevel authenticationLevel;
 
-	public Message(final String messageId, final String subject, final RecipientIdentifier recipientIdentifier,
-			final boolean smsNotification, final AuthenticationLevel authenticationLevel, final Link... links) {
-		this(messageId, subject, recipientIdentifier, smsNotification, EXPECTING_CONTENT, authenticationLevel, links);
+	Message() {
 	}
 
-	public Message(final String messageId, final String subject, final RecipientIdentifier recipientIdentifier,
-			final boolean smsNotification, final MessageStatus status, final AuthenticationLevel authenticationLevel, final Link... links) {
+	public Message(final String messageId, final String subject, final PersonalIdentificationNumber id, final boolean smsVarsling,
+			final AuthenticationLevel authenticationLevel, final boolean preencrypt, final Link... links) {
+		this(messageId, subject, smsVarsling, authenticationLevel, preencrypt, links);
+		personalIdentificationNumbers = new ArrayList<String>();
+		personalIdentificationNumbers.add(id.asString());
+	}
+
+	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final boolean smsVarsling,
+			final AuthenticationLevel authenticationLevel, final boolean preencrypt, final Link... links) {
+		this(messageId, subject, smsVarsling, authenticationLevel, preencrypt, links);
+
+		recipients = new ArrayList<Recipient>();
+		recipients.add(new Recipient(null, null, null, digipostAdress.asString(), null));
+	}
+
+	private Message(final String messageId, final String subject, final boolean smsVarsling, final AuthenticationLevel authenticationLevel,
+			final boolean preEncrypt, final Link... links) {
 		super(links);
 		this.messageId = messageId;
 		this.subject = subject;
-		this.recipientIdentifier = recipientIdentifier;
-		this.smsNotification = smsNotification;
-		this.status = status;
+		smsNotification = smsVarsling;
 		this.authenticationLevel = authenticationLevel;
-	}
-
-	Message() {
+		this.preEncrypt = preEncrypt;
 	}
 
 	public Link getSelfLink() {
@@ -94,50 +113,28 @@ public class Message extends Representation {
 		return messageId.equals(message.getMessageId()) && subject.equals(message.getSubject());
 	}
 
-	public RecipientIdentifier getRecipientIdentifier() {
-		return recipientIdentifier;
-	}
-
 	public AuthenticationLevel getAuthenticationLevel() {
 		return authenticationLevel;
-	}
-
-	@XmlElement
-	protected String getDigipostAddress() {
-		if (recipientIdentifier.isPersonalIdentificationNumber()) {
-			return null;
-		} else {
-			return recipientIdentifier.asString();
-		}
-	}
-
-	protected void setDigipostAddress(final String digipostAddress) {
-		recipientIdentifier = new DigipostAddress(digipostAddress);
-	}
-
-	@XmlElement
-	protected String getPersonalIdentificationNumber() {
-		if (recipientIdentifier.isPersonalIdentificationNumber()) {
-			return recipientIdentifier.asString();
-		} else {
-			return null;
-		}
-	}
-
-	protected void setPersonalIdentificationNumber(final String personalIdentificationNumber) {
-		recipientIdentifier = new PersonalIdentificationNumber(personalIdentificationNumber);
 	}
 
 	public void setStatus(final MessageStatus status) {
 		this.status = status;
 	}
 
+	public boolean getPrekrypter() {
+		return preEncrypt;
+	}
+
+	public Link getEncryptionKeyLink() {
+		return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY);
+	}
+
 	@XmlElement(name = "link")
-	protected List<Link> getLink() {
+	protected List<Link> getLinks() {
 		return links;
 	}
 
-	protected void setLink(final List<Link> links) {
+	protected void setLinks(final List<Link> links) {
 		this.links = links;
 	}
 }

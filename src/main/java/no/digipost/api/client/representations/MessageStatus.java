@@ -16,10 +16,14 @@
 package no.digipost.api.client.representations;
 
 import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
 
+@XmlType(name = "messageStatus")
 @XmlEnum
 public enum MessageStatus {
-	EXPECTING_CONTENT,
+
+	NOT_COMPLETE,
+	COMPLETE,
 	DELIVERED;
 
 	public String value() {
@@ -29,4 +33,5 @@ public enum MessageStatus {
 	public static MessageStatus fromValue(final String v) {
 		return valueOf(v);
 	}
+
 }

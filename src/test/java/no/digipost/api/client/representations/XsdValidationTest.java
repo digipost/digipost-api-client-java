@@ -25,22 +25,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import no.digipost.api.client.representations.Address;
-import no.digipost.api.client.representations.AuthenticationLevel;
-import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.DigipostAddress;
-import no.digipost.api.client.representations.DigipostUri;
-import no.digipost.api.client.representations.EntryPoint;
-import no.digipost.api.client.representations.ErrorMessage;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MediaTypes;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.Recipient;
-import no.digipost.api.client.representations.Recipients;
-import no.digipost.api.client.representations.Relation;
-import no.digipost.api.client.representations.Suggestion;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -54,11 +38,11 @@ public class XsdValidationTest {
 	@Before
 	public void setUp() throws SAXException, JAXBException {
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api/api_v1.xsd"));
+		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api/api_v2.xsd"));
 		marshaller = JAXBContext.newInstance("no.digipost.api.client.representations").createMarshaller();
 		marshaller.setSchema(schema);
 
-		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V1);
+		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V2);
 	}
 
 	@Test
@@ -92,9 +76,9 @@ public class XsdValidationTest {
 	@Test
 	public void validateMessage() throws JAXBException {
 		Message messageWithDigipostAddress = new Message("messageId", "subject", new DigipostAddress("even.beinlaus#1234"), true,
-				AuthenticationLevel.TWO_FACTOR, link);
+				AuthenticationLevel.TWO_FACTOR, false, link);
 		Message messageWithPersonalIdentificationNumber = new Message("messageId", "subject", new PersonalIdentificationNumber(
-				"12345678901"), true, AuthenticationLevel.TWO_FACTOR, link);
+				"12345678901"), true, AuthenticationLevel.TWO_FACTOR, false, link);
 		marshallAndValidate(messageWithDigipostAddress);
 		marshallAndValidate(messageWithPersonalIdentificationNumber);
 	}

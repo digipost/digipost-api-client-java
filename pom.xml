@@ -109,6 +109,23 @@
 			<artifactId>jersey-apache-client</artifactId>
 			<version>1.9</version>
 		</dependency>
+        <!-- BOUNCYCASTLE -->
+	    <dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk16</artifactId>
+			<version>1.46</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcmail-jdk16</artifactId>
+			<version>1.46</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>1.6.2</version>
+		</dependency>
 
 	</dependencies>
 

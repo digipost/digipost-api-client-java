@@ -28,8 +28,9 @@ public class Recipient extends Representation {
 	private String firstName;
 	private String middleName;
 	private String lastName;
-	@XmlElement(name = "digipostAddress")
+	@XmlElement(required = true)
 	private String digipostAddress;
+	protected String mobileNumber;
 	@XmlElement(name = "address")
 	private final List<Address> addresses;
 
@@ -72,11 +73,11 @@ public class Recipient extends Representation {
 	}
 
 	@XmlElement(name = "link")
-	protected List<Link> getLink() {
+	protected List<Link> getLinks() {
 		return links;
 	}
 
-	protected void setLink(final List<Link> links) {
+	protected void setLinks(final List<Link> links) {
 		this.links = links;
 	}
 

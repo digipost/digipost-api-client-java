@@ -19,8 +19,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlTransient;
+
+@XmlTransient
 public abstract class Representation {
 
+	@XmlTransient
 	protected List<Link> links;
 
 	public Representation(final Link... linker) {

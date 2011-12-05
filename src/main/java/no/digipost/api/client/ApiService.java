@@ -16,7 +16,7 @@
 package no.digipost.api.client;
 
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
-import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V1;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V2;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,7 +80,7 @@ public class ApiService {
 	public ClientResponse getEntryPoint() {
 		return webResource
 				.path(ENTRY_POINT)
-				.accept(DIGIPOST_MEDIA_TYPE_V1)
+				.accept(DIGIPOST_MEDIA_TYPE_V2)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(ClientResponse.class);
 	}
@@ -93,9 +93,9 @@ public class ApiService {
 		EntryPoint entryPoint = getCachedEntryPoint();
 		return webResource
 				.path(entryPoint.getCreateMessageUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V1)
+				.accept(DIGIPOST_MEDIA_TYPE_V2)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(DIGIPOST_MEDIA_TYPE_V1)
+				.type(DIGIPOST_MEDIA_TYPE_V2)
 				.post(ClientResponse.class, message);
 	}
 
@@ -105,7 +105,15 @@ public class ApiService {
 	public ClientResponse fetchExistingMessage(final URI location) {
 		return webResource
 				.path(location.getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V1)
+				.accept(DIGIPOST_MEDIA_TYPE_V2)
+				.header(X_Digipost_UserId, senderAccountId)
+				.get(ClientResponse.class);
+	}
+
+	public ClientResponse getEncryptionKey(final URI location) {
+		return webResource
+				.path(location.getPath())
+				.accept(DIGIPOST_MEDIA_TYPE_V2)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(ClientResponse.class);
 	}
@@ -126,7 +134,7 @@ public class ApiService {
 
 		return webResource
 				.path(addFileLink.getUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V1)
+				.accept(DIGIPOST_MEDIA_TYPE_V2)
 				.header(X_Digipost_UserId, senderAccountId)
 				.type(MediaType.APPLICATION_OCTET_STREAM)
 				.post(ClientResponse.class, content);
@@ -153,7 +161,7 @@ public class ApiService {
 	public Recipients search(final String searchString) {
 		return webResource
 				.path(getCachedEntryPoint().getSearchUri().getPath() + "/" + searchString)
-				.accept(DIGIPOST_MEDIA_TYPE_V1)
+				.accept(DIGIPOST_MEDIA_TYPE_V2)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(Recipients.class);
 	}
@@ -161,7 +169,7 @@ public class ApiService {
 	public Autocomplete searchSuggest(final String searchString) {
 		return webResource
 				.path(getCachedEntryPoint().getAutocompleteUri().getPath() + "/" + searchString)
-				.accept(MediaTypes.DIGIPOST_MEDIA_TYPE_V1)
+				.accept(MediaTypes.DIGIPOST_MEDIA_TYPE_V2)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(Autocomplete.class);
 	}

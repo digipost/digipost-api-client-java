@@ -15,10 +15,6 @@
  */
 package no.digipost.api.client.swing;
 
-import static java.lang.String.valueOf;
-import static java.lang.System.currentTimeMillis;
-import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
@@ -56,6 +52,7 @@ import javax.swing.border.EmptyBorder;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Message;
 
@@ -444,7 +441,8 @@ public class DigipostSwingClient {
 	}
 
 	private Message createMessage(final String subject, final String address) {
-		return new Message(valueOf(currentTimeMillis()), subject, new DigipostAddress(address), false, PASSWORD);
+		return new Message(String.valueOf(System.currentTimeMillis()), subject, new DigipostAddress(address), false,
+				AuthenticationLevel.PASSWORD, false);
 	}
 
 	/**
