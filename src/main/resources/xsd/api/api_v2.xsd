@@ -7,6 +7,15 @@
 	<xsd:complexType name="message">
 		<xsd:sequence>
 			<xsd:element name="messageId" type="xsd:string" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="senderId" type="xsd:long" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation>
+						The actual sender of the message. This is used in scenarios where one party, the broker, is creating a message 
+						on behalf of another, the sender. It is only possible if the sender has granted the broker the right to send
+						on its behalf. 
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
 			<xsd:element name="deliveredDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />  
 			<xsd:element name="subject" minOccurs="1" maxOccurs="1">
 				<xsd:simpleType>

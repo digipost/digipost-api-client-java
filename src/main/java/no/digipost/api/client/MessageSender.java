@@ -76,7 +76,7 @@ public class MessageSender {
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
 		Message createdMessage = createOrFetchMessage(message);
 
-		if (message.getPrekrypter()) {
+		if (message.skalPrekrypteres()) {
 			log("\n\n---FORSENDELSE SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
 			content = fetchKeyAndEncrypt(createdMessage, letterContent);
 		}

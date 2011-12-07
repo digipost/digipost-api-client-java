@@ -80,7 +80,14 @@ public class XsdValidationTest {
 		Message messageWithPersonalIdentificationNumber = new Message("messageId", "subject", new PersonalIdentificationNumber(
 				"12345678901"), true, AuthenticationLevel.TWO_FACTOR, link);
 		marshallAndValidate(messageWithDigipostAddress);
+		Message messageWithPreEncryptAndSenderId = new Message("messageId", "subject", new PersonalIdentificationNumber("12345678901"),
+				true, AuthenticationLevel.TWO_FACTOR, link);
+		messageWithPreEncryptAndSenderId.setSenderId(10);
+		messageWithPreEncryptAndSenderId.setPreEncrypt(true);
+
+		marshallAndValidate(messageWithDigipostAddress);
 		marshallAndValidate(messageWithPersonalIdentificationNumber);
+		marshallAndValidate(messageWithPreEncryptAndSenderId);
 	}
 
 	public void marshallAndValidate(final Object element) throws JAXBException {
