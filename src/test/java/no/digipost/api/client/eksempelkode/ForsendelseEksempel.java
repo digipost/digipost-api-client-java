@@ -51,7 +51,7 @@ public class ForsendelseEksempel {
 		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 		// 4. Vi oppretter en forsendelse
-		Message message = new Message("dinForsendelseId", "Brevets emne", pin, false, PASSWORD, false);
+		Message message = new Message("dinForsendelseId", "Brevets emne", pin, false, PASSWORD);
 
 		// 5. Vi henter inputstreamen til PDF-filen vi ønsker å sende
 		InputStream messageContent = getMessageContent();

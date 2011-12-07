@@ -51,7 +51,7 @@ public class ForsendelseEksempelDigipostadresse {
 		DigipostAddress address = new DigipostAddress("fornavn.etternavn#6789");
 
 		// 4. Vi oppretter en forsendelse
-		Message message = new Message("dinForsendelseId", "Brevets emne", address, false, PASSWORD, false);
+		Message message = new Message("dinForsendelseId", "Brevets emne", address, false, PASSWORD);
 
 		// 5. Vi henter inputstreamen til PDF-filen vi ønsker å sende
 		InputStream messageContent = getMessageContent();

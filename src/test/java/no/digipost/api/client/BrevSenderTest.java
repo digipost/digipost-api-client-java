@@ -89,7 +89,7 @@ public class BrevSenderTest {
 	}
 
 	private Message lagEnkeltForsendelse(final String subject, final String messageId, final String fnr) {
-		return new Message(messageId, subject, new PersonalIdentificationNumber(fnr), true, AuthenticationLevel.PASSWORD, false);
+		return new Message(messageId, subject, new PersonalIdentificationNumber(fnr), true, AuthenticationLevel.PASSWORD);
 	}
 
 	private class MockClientResponse extends ClientResponse {

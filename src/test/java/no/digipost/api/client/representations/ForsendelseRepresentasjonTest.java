@@ -19,7 +19,6 @@ import static no.digipost.api.client.representations.AuthenticationLevel.PASSWOR
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-
 import org.junit.Test;
 
 public class ForsendelseRepresentasjonTest {
@@ -27,8 +26,8 @@ public class ForsendelseRepresentasjonTest {
 	@Test
 	public void skalHanteraDuplikatForsendelse() {
 		DigipostAddress digipostAddress = new DigipostAddress("peter.pan#0000");
-		Message adresseForsendelse1 = new Message("id", "emne", digipostAddress, false, PASSWORD, false);
-		Message adresseForsendelse3 = new Message("id", "annetemne", digipostAddress, false, PASSWORD, false);
+		Message adresseForsendelse1 = new Message("id", "emne", digipostAddress, false, PASSWORD);
+		Message adresseForsendelse3 = new Message("id", "annetemne", digipostAddress, false, PASSWORD);
 
 		assertTrue(adresseForsendelse1.isIdenticalTo(adresseForsendelse1));
 		assertTrue(adresseForsendelse3.isIdenticalTo(adresseForsendelse3));

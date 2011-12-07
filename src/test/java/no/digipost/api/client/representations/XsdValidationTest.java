@@ -76,9 +76,9 @@ public class XsdValidationTest {
 	@Test
 	public void validateMessage() throws JAXBException {
 		Message messageWithDigipostAddress = new Message("messageId", "subject", new DigipostAddress("even.beinlaus#1234"), true,
-				AuthenticationLevel.TWO_FACTOR, false, link);
+				AuthenticationLevel.TWO_FACTOR, link);
 		Message messageWithPersonalIdentificationNumber = new Message("messageId", "subject", new PersonalIdentificationNumber(
-				"12345678901"), true, AuthenticationLevel.TWO_FACTOR, false, link);
+				"12345678901"), true, AuthenticationLevel.TWO_FACTOR, link);
 		marshallAndValidate(messageWithDigipostAddress);
 		marshallAndValidate(messageWithPersonalIdentificationNumber);
 	}

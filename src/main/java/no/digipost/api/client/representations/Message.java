@@ -32,12 +32,13 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "messageId", "deliveredDate", "subject", "recipients", "personalIdentificationNumbers",
-		"smsNotification", "preEncrypt", "status", "links", "authenticationLevel" })
+@XmlType(name = "message", propOrder = { "messageId", "senderId", "deliveredDate", "subject", "recipients",
+		"personalIdentificationNumbers", "smsNotification", "preEncrypt", "status", "links", "authenticationLevel" })
 @XmlRootElement(name = "message")
 public class Message extends Representation {
 	@XmlElement(required = true)
 	protected String messageId;
+	protected Long senderId;
 	@XmlElement(type = String.class)
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
@@ -57,28 +58,26 @@ public class Message extends Representation {
 	}
 
 	public Message(final String messageId, final String subject, final PersonalIdentificationNumber id, final boolean smsVarsling,
-			final AuthenticationLevel authenticationLevel, final boolean preencrypt, final Link... links) {
-		this(messageId, subject, smsVarsling, authenticationLevel, preencrypt, links);
+			final AuthenticationLevel authenticationLevel, final Link... links) {
+		this(messageId, subject, smsVarsling, authenticationLevel, links);
 		personalIdentificationNumbers = new ArrayList<String>();
 		personalIdentificationNumbers.add(id.asString());
 	}
 
 	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final boolean smsVarsling,
-			final AuthenticationLevel authenticationLevel, final boolean preencrypt, final Link... links) {
-		this(messageId, subject, smsVarsling, authenticationLevel, preencrypt, links);
-
+			final AuthenticationLevel authenticationLevel, final Link... links) {
+		this(messageId, subject, smsVarsling, authenticationLevel, links);
 		recipients = new ArrayList<Recipient>();
 		recipients.add(new Recipient(null, null, null, digipostAdress.asString(), null));
 	}
 
 	private Message(final String messageId, final String subject, final boolean smsVarsling, final AuthenticationLevel authenticationLevel,
-			final boolean preEncrypt, final Link... links) {
+			final Link... links) {
 		super(links);
 		this.messageId = messageId;
 		this.subject = subject;
 		smsNotification = smsVarsling;
 		this.authenticationLevel = authenticationLevel;
-		this.preEncrypt = preEncrypt;
 	}
 
 	public Link getSelfLink() {
@@ -121,8 +120,16 @@ public class Message extends Representation {
 		this.status = status;
 	}
 
-	public boolean getPrekrypter() {
-		return preEncrypt;
+	public void setPreEncrypt(final boolean preEncrypt) {
+		this.preEncrypt = preEncrypt;
+	}
+
+	public void setSenderId(final long senderId) {
+		this.senderId = senderId;
+	}
+
+	public boolean skalPrekrypteres() {
+		return preEncrypt != null && preEncrypt;
 	}
 
 	public Link getEncryptionKeyLink() {
