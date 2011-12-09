@@ -136,6 +136,14 @@ public class Message extends Representation {
 		return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY);
 	}
 
+	public List<Recipient> getRecipients() {
+		return recipients;
+	}
+
+	public List<String> getPersonalIdentificationNumbers() {
+		return personalIdentificationNumbers;
+	}
+
 	@XmlElement(name = "link")
 	protected List<Link> getLinks() {
 		return links;
