@@ -35,6 +35,7 @@ public class DigipostClientException extends RuntimeException {
 	private final String errorMessage;
 
 	public DigipostClientException(final ErrorType errorType, final String errorMessage) {
+		super(errorType.name() + ": " + errorMessage);
 		this.errorType = errorType;
 		this.errorMessage = errorMessage;
 	}

@@ -22,6 +22,7 @@ import no.digipost.api.client.filters.DateFilter;
 import no.digipost.api.client.filters.SignatureFilter;
 import no.digipost.api.client.filters.UserAgentFilter;
 import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.security.FileKeystoreSigner;
@@ -81,6 +82,10 @@ public class DigipostClient {
 		apiService = new ApiService(webResource, senderAccountId);
 	}
 
+	public Message sendMessage(final Message message, final InputStream letterContent) {
+		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, ContentType.PDF);
+	}
+
 	/**
 	 * Sender et brev gjennom Digipost. Denne metoden gjør alle HTTP-kallene som
 	 * er nødvendige for å sende brevet. Det vil si at den først gjør et kall
@@ -88,8 +93,8 @@ public class DigipostClient {
 	 * innhold. Hvis forsendelsen skal sendes ferdigkryptert, så vil det også
 	 * gjøres ett kall for å hente mottakers publike nøkkel.
 	 */
-	public Message sendMessage(final Message message, final InputStream letterContent) {
-		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent);
+	public Message sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
+		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, contentType);
 	}
 
 	public Recipients search(final String searchString) {

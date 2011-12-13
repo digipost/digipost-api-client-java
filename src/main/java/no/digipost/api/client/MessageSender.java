@@ -27,6 +27,7 @@ import java.security.spec.X509EncodedKeySpec;
 import javax.ws.rs.core.Response.Status;
 
 import no.digipost.api.client.DigipostClientException.ErrorType;
+import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Link;
@@ -70,7 +71,7 @@ public class MessageSender {
 	 * brevets innhold. Hvis forsendelsen skal sendes ferdigkryptert, så vil det
 	 * også gjøres ett kall for å hente mottakers publike nøkkel.
 	 */
-	public Message sendMessage(final Message message, final InputStream letterContent) {
+	public Message sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
 		InputStream content = letterContent;
 
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
@@ -82,7 +83,7 @@ public class MessageSender {
 		}
 
 		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
-		Message sentMessage = addToContentAndSendMessage(createdMessage, content);
+		Message sentMessage = addToContentAndSendMessage(createdMessage, content, contentType);
 		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
 		return sentMessage;
 	}
@@ -152,10 +153,12 @@ public class MessageSender {
 	 * forsendelsesressursen på serveren ved metoden
 	 * {@code createOrFetchMesssage}.
 	 * 
+	 * @param contentType
+	 * 
 	 */
-	public Message addToContentAndSendMessage(final Message createdMessage, final InputStream letterContent) {
+	public Message addToContentAndSendMessage(final Message createdMessage, final InputStream letterContent, final ContentType contentType) {
 		verifyCorrectStatus(createdMessage, MessageStatus.NOT_COMPLETE);
-		ClientResponse response = apiService.addToContentAndSend(createdMessage, letterContent);
+		ClientResponse response = apiService.addToContentAndSend(createdMessage, letterContent, contentType);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);

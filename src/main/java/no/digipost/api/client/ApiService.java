@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 
 import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Link;
@@ -126,8 +127,10 @@ public class ApiService {
 	 * 
 	 * Før man kaller denne metoden, må man allerede ha opprettet en
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
+	 * 
+	 * @param contentType
 	 */
-	public ClientResponse addToContentAndSend(final Message createdMessage, final InputStream letterContent) {
+	public ClientResponse addToContentAndSend(final Message createdMessage, final InputStream letterContent, final ContentType contentType) {
 		Link addFileLink = fetchAddFileLink(createdMessage);
 
 		byte[] content = readLetterContent(letterContent);
@@ -136,7 +139,7 @@ public class ApiService {
 				.path(addFileLink.getUri().getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V2)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(MediaType.APPLICATION_OCTET_STREAM)
+				.type(contentType.getRequestMediaType())
 				.post(ClientResponse.class, content);
 
 	}
