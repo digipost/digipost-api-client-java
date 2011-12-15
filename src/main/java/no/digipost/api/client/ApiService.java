@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-import javax.ws.rs.core.MediaType;
-
 import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
