@@ -7,6 +7,7 @@
 		<groupId>no.digipost</groupId>
 		<artifactId>digipost-open-super-pom</artifactId>
 		<version>0.1</version>
+		<relativePath />
 	</parent>
 
 	<artifactId>digipost-api-client-java</artifactId>
