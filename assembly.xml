@@ -29,7 +29,7 @@
 			<outputDirectory>/</outputDirectory>
 		</fileSet>
 		<fileSet>
-			<directory>${project.build.directory}/classes/xsd/api</directory>
+			<directory>${project.build.directory}/classes/xsd</directory>
 			<includes>
 				<include>*.xsd</include>
 			</includes>

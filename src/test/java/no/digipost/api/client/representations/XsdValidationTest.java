@@ -38,7 +38,7 @@ public class XsdValidationTest {
 	@Before
 	public void setUp() throws SAXException, JAXBException {
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api/api_v2.xsd"));
+		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api_v2.xsd"));
 		marshaller = JAXBContext.newInstance("no.digipost.api.client.representations").createMarshaller();
 		marshaller.setSchema(schema);
 
