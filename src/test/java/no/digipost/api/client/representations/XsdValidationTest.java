@@ -83,7 +83,7 @@ public class XsdValidationTest {
 		Message messageWithPreEncryptAndSenderId = new Message("messageId", "subject", new PersonalIdentificationNumber("12345678901"),
 				true, AuthenticationLevel.TWO_FACTOR, link);
 		messageWithPreEncryptAndSenderId.setSenderId(10);
-		messageWithPreEncryptAndSenderId.setPreEncrypt(true);
+		messageWithPreEncryptAndSenderId.setContentIsPreencrypted(true);
 
 		marshallAndValidate(messageWithDigipostAddress);
 		marshallAndValidate(messageWithPersonalIdentificationNumber);

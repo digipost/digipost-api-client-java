@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 
 import no.digipost.api.client.filters.ContentMD5Filter;
@@ -25,6 +26,7 @@ import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.print.LetterToPrint;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
@@ -97,6 +99,10 @@ public class DigipostClient {
 		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, contentType);
 	}
 
+	public LetterToPrint orderPrint(final LetterToPrint letterToPrint, final FileInputStream letterContent) {
+		return new PrintOrderer(apiService, eventLogger).orderPrint(letterToPrint, letterContent);
+	}
+
 	public Recipients search(final String searchString) {
 		return apiService.search(searchString);
 	}
@@ -113,4 +119,5 @@ public class DigipostClient {
 	public void addFilter(final ClientFilter filter) {
 		apiService.addFilter(filter);
 	}
+
 }
