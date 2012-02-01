@@ -26,7 +26,7 @@ import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.Recipients;
-import no.digipost.api.client.representations.print.LetterToPrint;
+import no.digipost.api.client.representations.print.PrintMessage;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
@@ -99,7 +99,7 @@ public class DigipostClient {
 		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, contentType);
 	}
 
-	public LetterToPrint orderPrint(final LetterToPrint letterToPrint, final FileInputStream letterContent) {
+	public PrintMessage orderPrint(final PrintMessage letterToPrint, final FileInputStream letterContent) {
 		return new PrintOrderer(apiService, eventLogger).orderPrint(letterToPrint, letterContent);
 	}
 

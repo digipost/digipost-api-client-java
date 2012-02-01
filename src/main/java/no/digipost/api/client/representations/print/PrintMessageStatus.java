@@ -13,21 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.representations.print;
 
-import java.io.FileInputStream;
-
-import no.digipost.api.client.representations.print.PrintMessage;
-
-public class PrintOrderer {
-
-	public PrintOrderer(final ApiService apiService, final EventLogger eventLogger) {
-		// TODO Auto-generated constructor stub
-	}
-
-	public PrintMessage orderPrint(final PrintMessage letterToPrint, final FileInputStream letterContent) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+public class PrintMessageStatus {
 
 }

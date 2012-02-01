@@ -29,7 +29,7 @@ public class MessageBase extends Representation {
 	protected Long senderId;
 	protected Boolean preEncrypt;
 
-	MessageBase() {
+	protected MessageBase() {
 	}
 
 	public MessageBase(final String messageId, final Link[] links) {
