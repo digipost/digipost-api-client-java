@@ -24,6 +24,7 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import no.digipost.api.client.DigipostClientException.ErrorType;
@@ -109,8 +110,9 @@ public class Communicator {
 		try {
 			return response.getEntity(ErrorMessage.class).getErrorMessage();
 		} catch (ClientHandlerException e) {
-			throw new DigipostClientException(ErrorType.SERVER_ERROR,
-					"Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.");
+			return "Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.";
+		} catch (WebApplicationException spe) {
+			return "Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.";
 		} catch (UniformInterfaceException e) {
 			return "";
 		}

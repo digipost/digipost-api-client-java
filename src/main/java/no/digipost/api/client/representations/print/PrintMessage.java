@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client.representations.print;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -57,8 +56,6 @@ public class PrintMessage extends MessageBase {
 	@XmlElement(name = "ea-code")
 	protected String eaCode;
 	protected PrintMessageStatus status;
-	@XmlElement(name = "link")
-	protected List<Link> links;
 
 	public PrintRecipient getRecipient() {
 		return recipient;
@@ -100,17 +97,13 @@ public class PrintMessage extends MessageBase {
 		status = value;
 	}
 
-	public List<Link> getLinks() {
-		if (links == null) {
-			links = new ArrayList<Link>();
-		}
+	@XmlElement(name = "link")
+	protected List<Link> getLinks() {
 		return links;
 	}
 
-	public void setLinks(final List<Link> value) {
-		links = null;
-		List<Link> draftl = getLinks();
-		draftl.addAll(value);
+	protected void setLinks(final List<Link> links) {
+		this.links = links;
 	}
 
 	@Override
