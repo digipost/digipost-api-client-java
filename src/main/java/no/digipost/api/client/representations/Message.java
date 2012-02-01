@@ -32,13 +32,10 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "messageId", "senderId", "deliveredDate", "subject", "recipients",
-		"personalIdentificationNumbers", "smsNotification", "preEncrypt", "status", "links", "authenticationLevel" })
+@XmlType(name = "message", propOrder = { "deliveredDate", "subject", "recipients", "personalIdentificationNumbers", "smsNotification",
+		"status", "links", "authenticationLevel" })
 @XmlRootElement(name = "message")
-public class Message extends Representation {
-	@XmlElement(required = true)
-	protected String messageId;
-	protected Long senderId;
+public class Message extends MessageBase {
 	@XmlElement(type = String.class)
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
@@ -50,7 +47,6 @@ public class Message extends Representation {
 	@XmlElement(name = "personalIdentificationNumber")
 	protected List<String> personalIdentificationNumbers;
 	protected boolean smsNotification;
-	protected Boolean preEncrypt;
 	protected MessageStatus status;
 	protected AuthenticationLevel authenticationLevel;
 
@@ -73,19 +69,10 @@ public class Message extends Representation {
 
 	private Message(final String messageId, final String subject, final boolean smsVarsling, final AuthenticationLevel authenticationLevel,
 			final Link... links) {
-		super(links);
-		this.messageId = messageId;
+		super(messageId, links);
 		this.subject = subject;
 		smsNotification = smsVarsling;
 		this.authenticationLevel = authenticationLevel;
-	}
-
-	public Link getSelfLink() {
-		return getLinkByRelationName(Relation.SELF);
-	}
-
-	public Link getFileLink() {
-		return getLinkByRelationName(Relation.ADD_CONTENT_AND_SEND);
 	}
 
 	public String getSubject() {
@@ -100,16 +87,8 @@ public class Message extends Representation {
 		return !StringUtils.isBlank(subject);
 	}
 
-	public String getMessageId() {
-		return messageId;
-	}
-
 	public boolean isSmsNotification() {
 		return smsNotification;
-	}
-
-	public boolean isIdenticalTo(final Message message) {
-		return messageId.equals(message.getMessageId()) && subject.equals(message.getSubject());
 	}
 
 	public AuthenticationLevel getAuthenticationLevel() {
@@ -120,28 +99,16 @@ public class Message extends Representation {
 		this.status = status;
 	}
 
-	public void setPreEncrypt(final boolean preEncrypt) {
-		this.preEncrypt = preEncrypt;
-	}
-
-	public void setSenderId(final long senderId) {
-		this.senderId = senderId;
-	}
-
-	public boolean skalPrekrypteres() {
-		return preEncrypt != null && preEncrypt;
-	}
-
-	public Link getEncryptionKeyLink() {
-		return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY);
-	}
-
 	public List<Recipient> getRecipients() {
 		return recipients;
 	}
 
 	public List<String> getPersonalIdentificationNumbers() {
 		return personalIdentificationNumbers;
+	}
+
+	public boolean isIdenticalTo(final Message message) {
+		return messageId.equals(message.getMessageId()) && subject.equals(message.getSubject());
 	}
 
 	@XmlElement(name = "link")
@@ -152,4 +119,5 @@ public class Message extends Representation {
 	protected void setLinks(final List<Link> links) {
 		this.links = links;
 	}
+
 }
