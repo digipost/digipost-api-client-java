@@ -32,7 +32,7 @@ public abstract class MessageBase extends Representation {
 	protected MessageBase() {
 	}
 
-	public MessageBase(final String messageId, final Link[] links) {
+	public MessageBase(final String messageId, final Link... links) {
 		super(links);
 		this.messageId = messageId;
 	}

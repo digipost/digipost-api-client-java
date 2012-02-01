@@ -37,6 +37,17 @@ public class PrintMessage extends MessageBase {
 	public PrintMessage() {
 	}
 
+	// TODO: fjerne linker fra konstruktøren? I tilfelle gjør det samme i
+	// MessageBase og Message
+	public PrintMessage(final String messageId, final PrintRecipient recipient, final PrintRecipient returnAddress, final String postType,
+			final Link... links) {
+		super(messageId, links);
+		this.recipient = recipient;
+		this.returnAddress = returnAddress;
+		this.postType = postType;
+
+	}
+
 	@XmlElement(required = true)
 	protected PrintRecipient recipient;
 	@XmlElement(name = "return-address", required = true)
