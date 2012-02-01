@@ -50,7 +50,7 @@ public class Message extends Representation {
 	@XmlElement(name = "personalIdentificationNumber")
 	protected List<String> personalIdentificationNumbers;
 	protected boolean smsNotification;
-	protected Boolean contentIsPreencrypted;
+	protected Boolean preEncrypt;
 	protected MessageStatus status;
 	protected AuthenticationLevel authenticationLevel;
 
@@ -120,8 +120,8 @@ public class Message extends Representation {
 		this.status = status;
 	}
 
-	public void setContentIsPreencrypted(final boolean preEncrypt) {
-		this.contentIsPreencrypted = preEncrypt;
+	public void setPreEncrypt(final boolean preEncrypt) {
+		this.preEncrypt = preEncrypt;
 	}
 
 	public void setSenderId(final long senderId) {
@@ -129,7 +129,7 @@ public class Message extends Representation {
 	}
 
 	public boolean skalPrekrypteres() {
-		return contentIsPreencrypted != null && contentIsPreencrypted;
+		return preEncrypt != null && preEncrypt;
 	}
 
 	public Link getEncryptionKeyLink() {
