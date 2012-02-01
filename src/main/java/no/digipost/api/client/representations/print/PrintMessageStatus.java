@@ -15,6 +15,22 @@
  */
 package no.digipost.api.client.representations.print;
 
-public class PrintMessageStatus {
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlType(name = "printMessageStatus")
+@XmlEnum
+public enum PrintMessageStatus {
+
+	NOT_COMPLETE,
+	DELIVERED_TO_PRINT;
+
+	public String value() {
+		return name();
+	}
+
+	public static PrintMessageStatus fromValue(final String v) {
+		return valueOf(v);
+	}
 
 }

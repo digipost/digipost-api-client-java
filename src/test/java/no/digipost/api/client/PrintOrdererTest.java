@@ -13,8 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations.print;
+package no.digipost.api.client;
 
-public class LetterToPrint {
+import org.junit.Before;
+import org.junit.Test;
+
+public class PrintOrdererTest {
+
+	@Before
+	public void setUp() {
+	}
+
+	@Test
+	public void skalHenteEksisterendeForsendelseHvisDenFinnesFraForr() {
+		// implement?
+	}
+
+	@Test
+	public void skalKasteFeilHvisForsendelseAlleredeLevert() {
+		// implement?
+
+	}
 
 }

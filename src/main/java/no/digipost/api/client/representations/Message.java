@@ -107,10 +107,6 @@ public class Message extends MessageBase {
 		return personalIdentificationNumbers;
 	}
 
-	public boolean isIdenticalTo(final Message message) {
-		return messageId.equals(message.getMessageId()) && subject.equals(message.getSubject());
-	}
-
 	@XmlElement(name = "link")
 	protected List<Link> getLinks() {
 		return links;
@@ -118,6 +114,13 @@ public class Message extends MessageBase {
 
 	protected void setLinks(final List<Link> links) {
 		this.links = links;
+	}
+
+	@Override
+	public boolean isIdenticalTo(final Object message) {
+		if (!(message instanceof Message))
+			return false;
+		return messageId.equals(((Message) message).getMessageId()) && subject.equals(((Message) message).getSubject());
 	}
 
 }

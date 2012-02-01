@@ -39,7 +39,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.api.client.UniformInterfaceException;
 
-public class BrevSenderTest {
+public class MessageSenderTest {
 
 	@Before
 	public void setUp() {
@@ -79,7 +79,7 @@ public class BrevSenderTest {
 		} catch (Exception e) {
 			assertTrue(e instanceof DigipostClientException);
 			DigipostClientException de = (DigipostClientException) e;
-			assertEquals(ErrorType.MESSAGE_DELIVERED, de.getErrorType());
+			assertEquals(ErrorType.MESSAGE_ALREADY_DELIVERED, de.getErrorType());
 		}
 
 	}

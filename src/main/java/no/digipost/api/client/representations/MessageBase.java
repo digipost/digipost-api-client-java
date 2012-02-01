@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message-base", propOrder = { "messageId", "senderId", "preEncrypt" })
-public class MessageBase extends Representation {
+public abstract class MessageBase extends Representation {
 
 	@XmlElement(required = true)
 	protected String messageId;
@@ -65,12 +65,15 @@ public class MessageBase extends Representation {
 		return getLinkByRelationName(Relation.SELF);
 	}
 
-	public Link getFileLink() {
+	public Link getAddContentAndSendLink() {
 		return getLinkByRelationName(Relation.ADD_CONTENT_AND_SEND);
 	}
 
 	public Link getEncryptionKeyLink() {
 		return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY);
 	}
+
+	// TODO: hvor streng skal denne være? - sjekke alle felter
+	public abstract boolean isIdenticalTo(final Object message);
 
 }

@@ -30,7 +30,9 @@ import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageBase;
 import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.print.PrintMessage;
 
 import org.apache.commons.io.IOUtils;
 
@@ -49,6 +51,11 @@ import com.sun.jersey.api.client.filter.ClientFilter;
  * <li>Hente en allerede opprettet forsendelsesressurs fra serveren
  * <li>Sende innholdet (PDF) for en allerede opprettet forsendelsesressurs til
  * serveren, og dermed sende brevet til mottakeren
+ * <li>Opprette en printforsendelsesressurs på serveren
+ * <li>Hente en allerede opprettet printforsendelsesressurs fra serveren
+ * <li>Sende innholdet (PDF) for en allerede opprettet printforsendelsesressurs
+ * til serveren, og dermed bestille print av brevet.
+ * 
  * <ul>
  * 
  * For å sende et brev gjennom Digipost er det tilstrekkelig å gjøre disse to
@@ -99,6 +106,20 @@ public class ApiService {
 	}
 
 	/**
+	 * Oppretter en ny printforsendelsesressurs på serveren ved å sende en
+	 * POST-forespørsel.
+	 */
+	public ClientResponse createPrintMessage(final PrintMessage message) {
+		EntryPoint entryPoint = getCachedEntryPoint();
+		return webResource
+				.path(entryPoint.getCreatePrintMessageUri().getPath())
+				.accept(DIGIPOST_MEDIA_TYPE_V2)
+				.header(X_Digipost_UserId, senderAccountId)
+				.type(DIGIPOST_MEDIA_TYPE_V2)
+				.post(ClientResponse.class, message);
+	}
+
+	/**
 	 * Henter en allerede eksisterende forsendelsesressurs fra serveren.
 	 */
 	public ClientResponse fetchExistingMessage(final URI location) {
@@ -128,7 +149,8 @@ public class ApiService {
 	 * 
 	 * @param contentType
 	 */
-	public ClientResponse addToContentAndSend(final Message createdMessage, final InputStream letterContent, final ContentType contentType) {
+	public ClientResponse addToContentAndSend(final MessageBase createdMessage, final InputStream letterContent,
+			final ContentType contentType) {
 		Link addFileLink = fetchAddFileLink(createdMessage);
 
 		byte[] content = readLetterContent(letterContent);
@@ -142,8 +164,8 @@ public class ApiService {
 
 	}
 
-	private Link fetchAddFileLink(final Message createdMessage) {
-		Link addContentLink = createdMessage.getFileLink();
+	private Link fetchAddFileLink(final MessageBase createdMessage) {
+		Link addContentLink = createdMessage.getAddContentAndSendLink();
 		if (addContentLink == null) {
 			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST,
 					"Kan ikke legge til innhold til en forsendelse som ikke har en link for å gjøre dette.");
