@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 import no.digipost.api.client.DigipostClientException.ErrorType;
@@ -31,7 +30,16 @@ public class PrintOrderer extends Communicator {
 		super(apiService, eventLogger);
 	}
 
-	public PrintMessage orderPrint(final PrintMessage letterToPrint, final FileInputStream letterContent) {
+	/**
+	 * Bestiller print av et brev gjennom Digipost. Denne metoden gjør alle
+	 * HTTP-kallene som er nødvendige for å bestille print av ett enkeltbrev.
+	 * Det vil si at den først gjør et kall for å opprette en
+	 * printforsendelsesressurs på serveren og deretter poster brevets innhold.
+	 * Hvis printforsendelsen skal sendes ferdigkryptert fra klienten vil det
+	 * gjøres et kall for å hente mottakers offentlige nøkkel (public key), for
+	 * så å kryptere innholdet før det sendes over.
+	 */
+	public PrintMessage orderPrint(final PrintMessage letterToPrint, final InputStream letterContent) {
 		InputStream content = letterContent;
 
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTER Printforsendelse---");

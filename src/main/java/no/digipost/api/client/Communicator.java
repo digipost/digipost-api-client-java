@@ -52,6 +52,11 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 
+/**
+ * Superklasse for MessageSender og PrintOrderer som samler felles
+ * funksjonalitet for å snakke med ApiService.
+ * 
+ */
 public class Communicator {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Communicator.class);

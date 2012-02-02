@@ -17,7 +17,6 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
-
 import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
@@ -39,8 +38,9 @@ public class MessageSender extends Communicator {
 	 * Sender et brev gjennom Digipost. Denne metoden gjør alle HTTP-kallene som
 	 * er nødvendige for å sende brevet. Det vil si at den først gjør et kall
 	 * for å opprette en forsendelsesressurs på serveren og deretter poster
-	 * brevets innhold. Hvis forsendelsen skal sendes ferdigkryptert, så vil det
-	 * også gjøres ett kall for å hente mottakers publike nøkkel.
+	 * brevets innhold. Hvis forsendelsen skal sendes ferdigkryptert fra
+	 * klienten vil det gjøres et kall for å hente mottakers offentlige nøkkel
+	 * (public key), for så å kryptere innholdet før det sendes over.
 	 */
 	public Message sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
 		InputStream content = letterContent;

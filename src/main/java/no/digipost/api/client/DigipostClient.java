@@ -15,9 +15,11 @@
  */
 package no.digipost.api.client;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
+import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.filters.ContentMD5Filter;
 import no.digipost.api.client.filters.DateFilter;
 import no.digipost.api.client.filters.SignatureFilter;
@@ -84,23 +86,37 @@ public class DigipostClient {
 		apiService = new ApiService(webResource, senderAccountId);
 	}
 
+	/**
+	 * Sender et brev gjennom Digipost. Se MessageSender.sendMessage()
+	 */
 	public Message sendMessage(final Message message, final InputStream letterContent) {
 		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, ContentType.PDF);
 	}
 
 	/**
-	 * Sender et brev gjennom Digipost. Denne metoden gjør alle HTTP-kallene som
-	 * er nødvendige for å sende brevet. Det vil si at den først gjør et kall
-	 * for å opprette en message-ressurs på serveren og deretter poster brevets
-	 * innhold. Hvis forsendelsen skal sendes ferdigkryptert, så vil det også
-	 * gjøres ett kall for å hente mottakers publike nøkkel.
+	 * Muliggjør sending med HTML content type.
 	 */
 	public Message sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
 		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, contentType);
 	}
 
-	public PrintMessage orderPrint(final PrintMessage letterToPrint, final FileInputStream letterContent) {
-		return new PrintOrderer(apiService, eventLogger).orderPrint(letterToPrint, letterContent);
+	/**
+	 * Sender brev i Digipost. Dersom mottaker ikke er digipostbruker, bestiller
+	 * vi print av brevet til vanlig postgang.
+	 */
+	public void sendMessageWithFallbackToPrint(final Message message, final InputStream messageContent, final PrintMessage printMessage)
+			throws IOException {
+		byte[] messageContentAsByteArray = apiService.readLetterContent(messageContent);
+		try {
+			sendMessage(message, new ByteArrayInputStream(messageContentAsByteArray));
+		} catch (DigipostClientException e) {
+			if (e.getErrorType() == ErrorType.RECIPIENT_DOES_NOT_EXIST) {
+				log("\n\n---DIGIPOSTBRUKER IKKE FUNNET - SENDER BREV TIL PRINT---");
+				new PrintOrderer(apiService, eventLogger).orderPrint(printMessage, new ByteArrayInputStream(messageContentAsByteArray));
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	public Recipients search(final String searchString) {

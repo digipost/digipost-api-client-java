@@ -93,7 +93,7 @@ public class ApiService {
 
 	/**
 	 * Oppretter en ny forsendelsesressurs på serveren ved å sende en
-	 * POST-forespørsel.
+	 * POST-forespørsel. Brukes for å sende brev i Digipost.
 	 */
 	public ClientResponse createMessage(final Message message) {
 		EntryPoint entryPoint = getCachedEntryPoint();
@@ -107,7 +107,8 @@ public class ApiService {
 
 	/**
 	 * Oppretter en ny printforsendelsesressurs på serveren ved å sende en
-	 * POST-forespørsel.
+	 * POST-forespørsel. Brukes for bestille print av et brev dersom mottaker
+	 * ikke er Digipostbruker.
 	 */
 	public ClientResponse createPrintMessage(final PrintMessage message) {
 		EntryPoint entryPoint = getCachedEntryPoint();
@@ -173,7 +174,7 @@ public class ApiService {
 		return addContentLink;
 	}
 
-	private byte[] readLetterContent(final InputStream letterContent) {
+	byte[] readLetterContent(final InputStream letterContent) {
 		try {
 			return IOUtils.toByteArray(letterContent);
 		} catch (IOException e) {
