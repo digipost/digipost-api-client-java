@@ -16,7 +16,6 @@
 package no.digipost.api.client;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import no.digipost.api.client.DigipostClientException.ErrorType;
@@ -104,8 +103,7 @@ public class DigipostClient {
 	 * Sender brev i Digipost. Dersom mottaker ikke er digipostbruker, bestiller
 	 * vi print av brevet til vanlig postgang.
 	 */
-	public void sendMessageWithFallbackToPrint(final Message message, final InputStream messageContent, final PrintMessage printMessage)
-			throws IOException {
+	public void sendMessageWithFallbackToPrint(final Message message, final InputStream messageContent, final PrintMessage printMessage) {
 		byte[] messageContentAsByteArray = apiService.readLetterContent(messageContent);
 		try {
 			sendMessage(message, new ByteArrayInputStream(messageContentAsByteArray));
