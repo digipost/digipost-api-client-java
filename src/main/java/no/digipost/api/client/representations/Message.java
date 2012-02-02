@@ -79,12 +79,16 @@ public class Message extends MessageBase {
 		return subject;
 	}
 
+	public boolean hasSubject() {
+		return !StringUtils.isBlank(subject);
+	}
+
 	public MessageStatus getStatus() {
 		return status;
 	}
 
-	public boolean hasSubject() {
-		return !StringUtils.isBlank(subject);
+	public void setStatus(final MessageStatus status) {
+		this.status = status;
 	}
 
 	public boolean isSmsNotification() {
@@ -93,10 +97,6 @@ public class Message extends MessageBase {
 
 	public AuthenticationLevel getAuthenticationLevel() {
 		return authenticationLevel;
-	}
-
-	public void setStatus(final MessageStatus status) {
-		this.status = status;
 	}
 
 	public List<Recipient> getRecipients() {
