@@ -59,7 +59,7 @@ public class MessageSenderTest {
 		Message forsendelse = brevSender.createOrFetchMessage(forsendelseIn);
 
 		verify(api).fetchExistingMessage((URI) any());
-		assertTrue(forsendelse.isIdenticalTo(forsendelseIn));
+		assertTrue(forsendelse.isSameMessageAs(forsendelseIn));
 	}
 
 	@Test

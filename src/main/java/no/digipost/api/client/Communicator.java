@@ -155,7 +155,7 @@ public class Communicator {
 	}
 
 	protected void checkThatExistingMessageIsIdenticalToNewMessage(final MessageBase exisitingMessage, final MessageBase message) {
-		if (!exisitingMessage.isIdenticalTo(message)) {
+		if (!exisitingMessage.isSameMessageAs(message)) {
 			String errorMessage = "Forsendelse med id [" + message.getMessageId() + "] finnes fra før med annen spesifikasjon.";
 			log(errorMessage);
 			throw new DigipostClientException(ErrorType.DUPLICATE_MESSAGE_ID, errorMessage);

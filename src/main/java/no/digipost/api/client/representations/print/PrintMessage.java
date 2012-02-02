@@ -26,8 +26,6 @@ import javax.xml.bind.annotation.XmlType;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MessageBase;
 
-import org.apache.commons.lang.NotImplementedException;
-
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "print-message", propOrder = { "recipient", "returnAddress", "postType", "eaCode", "status", "links" })
 @XmlRootElement(name = "print-message")
@@ -107,10 +105,13 @@ public class PrintMessage extends MessageBase {
 	}
 
 	@Override
-	public boolean isIdenticalTo(final Object message) {
+	public boolean isSameMessageAs(final Object message) {
 		if (!(message instanceof PrintMessage))
 			return false;
-		throw new NotImplementedException();
+
+		PrintMessage other = (PrintMessage) message;
+
+		return messageId.equals(other.messageId) && recipient.isSameRecipientAs(other.recipient);
 	}
 
 }

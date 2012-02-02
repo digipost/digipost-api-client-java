@@ -117,7 +117,7 @@ public class Message extends MessageBase {
 	}
 
 	@Override
-	public boolean isIdenticalTo(final Object message) {
+	public boolean isSameMessageAs(final Object message) {
 		if (!(message instanceof Message))
 			return false;
 		return messageId.equals(((Message) message).getMessageId()) && subject.equals(((Message) message).getSubject());

@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.representations.print;
 
+import static org.apache.commons.lang.StringUtils.trimToEmpty;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -89,6 +91,14 @@ public class PrintRecipient {
 
 	public void setCountry(final String value) {
 		country = value;
+	}
+
+	public boolean isSameRecipientAs(final PrintRecipient other) {
+		return trimEquals(name, other.name) && trimEquals(city, other.city) && trimEquals(zipCode, other.zipCode);
+	}
+
+	private boolean trimEquals(final String first, final String second) {
+		return trimToEmpty(first).equals(trimToEmpty(second));
 	}
 
 }

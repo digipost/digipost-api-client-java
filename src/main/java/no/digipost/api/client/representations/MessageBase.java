@@ -74,6 +74,6 @@ public abstract class MessageBase extends Representation {
 	}
 
 	// TODO: hvor streng skal denne være? - sjekke alle felter
-	public abstract boolean isIdenticalTo(final Object message);
+	public abstract boolean isSameMessageAs(final Object message);
 
 }
