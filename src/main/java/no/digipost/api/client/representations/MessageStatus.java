@@ -18,7 +18,7 @@ package no.digipost.api.client.representations;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name = "messageStatus")
+@XmlType(name = "message-status")
 @XmlEnum
 public enum MessageStatus {
 

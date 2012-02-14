@@ -25,8 +25,8 @@ import java.security.Security;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.print.PrintMessage;
-import no.digipost.api.client.representations.print.PrintRecipient;
+import no.digipost.api.client.representations.PrintMessage;
+import no.digipost.api.client.representations.PrintRecipient;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;

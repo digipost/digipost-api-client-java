@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Suggestion {
+	@XmlElement(name = "search-string")
 	private String searchString;
 	@XmlElement(name = "link")
 	private Link searchLink;

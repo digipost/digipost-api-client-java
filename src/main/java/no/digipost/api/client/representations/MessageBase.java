@@ -24,9 +24,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "message-base", propOrder = { "messageId", "senderId", "preEncrypt" })
 public abstract class MessageBase extends Representation {
 
-	@XmlElement(required = true)
+	@XmlElement(name = "message-id", required = true)
 	protected String messageId;
+	@XmlElement(name = "sender-id")
 	protected Long senderId;
+	@XmlElement(name = "pre-encrypt")
 	protected Boolean preEncrypt;
 
 	protected MessageBase() {

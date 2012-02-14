@@ -16,7 +16,9 @@
 package no.digipost.api.client.representations;
 
 import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
 
+@XmlType(name = "authentication-level")
 @XmlEnum
 public enum AuthenticationLevel {
 	PASSWORD(2),

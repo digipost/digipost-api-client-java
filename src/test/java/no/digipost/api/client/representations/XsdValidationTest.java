@@ -25,6 +25,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -88,6 +89,13 @@ public class XsdValidationTest {
 		marshallAndValidate(messageWithDigipostAddress);
 		marshallAndValidate(messageWithPersonalIdentificationNumber);
 		marshallAndValidate(messageWithPreEncryptAndSenderId);
+	}
+
+	@Test
+	public void validatePrintMessage() throws JAXBException {
+		PrintRecipient address = new PrintRecipient("name", "1234", "Oslo");
+		PrintMessage message = new PrintMessage("messageId", address, address, "B");
+		marshallAndValidate(message);
 	}
 
 	public void marshallAndValidate(final Object element) throws JAXBException {

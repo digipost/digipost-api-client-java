@@ -25,11 +25,12 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Recipient extends Representation {
 
-	private String firstName;
-	private String middleName;
-	private String lastName;
-	@XmlElement(required = true)
+	private String firstname;
+	private String middlename;
+	private String lastname;
+	@XmlElement(name = "digipost-address", required = true)
 	private String digipostAddress;
+	@XmlElement(name = "mobile-number")
 	protected String mobileNumber;
 	@XmlElement(name = "address")
 	private final List<Address> addresses;
@@ -37,9 +38,9 @@ public class Recipient extends Representation {
 	public Recipient(final String firstName, final String middleName, final String lastName, final String digipostAddress,
 			final List<Address> addresses, final Link... links) {
 		super(links);
-		this.firstName = firstName;
-		this.middleName = middleName;
-		this.lastName = lastName;
+		firstname = firstName;
+		middlename = middleName;
+		lastname = lastName;
 		this.digipostAddress = digipostAddress;
 		this.addresses = addresses;
 	}
@@ -48,16 +49,16 @@ public class Recipient extends Representation {
 		addresses = new ArrayList<Address>();
 	}
 
-	public String getFirstName() {
-		return firstName;
+	public String getFirstname() {
+		return firstname;
 	}
 
-	public String getMiddleName() {
-		return middleName;
+	public String getMiddlename() {
+		return middlename;
 	}
 
-	public String getLastName() {
-		return lastName;
+	public String getLastname() {
+		return lastname;
 	}
 
 	public String getDigipostAddress() {

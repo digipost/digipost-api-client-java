@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations.print;
+package no.digipost.api.client.representations;
 
 import java.util.List;
 
@@ -23,11 +23,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MessageBase;
-
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "print-message", propOrder = { "recipient", "returnAddress", "postType", "eaCode", "status", "links" })
+@XmlType(name = "print-message", propOrder = { "recipient", "returnAddress", "postType", "status", "links" })
 @XmlRootElement(name = "print-message")
 public class PrintMessage extends MessageBase {
 
@@ -51,8 +48,6 @@ public class PrintMessage extends MessageBase {
 	protected PrintRecipient returnAddress;
 	@XmlElement(name = "post-type", required = true)
 	protected String postType;
-	@XmlElement(name = "ea-code")
-	protected String eaCode;
 	protected PrintMessageStatus status;
 
 	public PrintRecipient getRecipient() {
@@ -79,14 +74,6 @@ public class PrintMessage extends MessageBase {
 		postType = value;
 	}
 
-	public String getEaCode() {
-		return eaCode;
-	}
-
-	public void setEaCode(final String value) {
-		eaCode = value;
-	}
-
 	public PrintMessageStatus getStatus() {
 		return status;
 	}
@@ -106,8 +93,9 @@ public class PrintMessage extends MessageBase {
 
 	@Override
 	public boolean isSameMessageAs(final Object message) {
-		if (!(message instanceof PrintMessage))
+		if (!(message instanceof PrintMessage)) {
 			return false;
+		}
 
 		PrintMessage other = (PrintMessage) message;
 

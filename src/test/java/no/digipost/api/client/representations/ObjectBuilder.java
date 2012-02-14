@@ -15,8 +15,6 @@
  */
 package no.digipost.api.client.representations;
 
-import no.digipost.api.client.representations.print.PrintMessage;
-import no.digipost.api.client.representations.print.PrintRecipient;
 
 public class ObjectBuilder {
 

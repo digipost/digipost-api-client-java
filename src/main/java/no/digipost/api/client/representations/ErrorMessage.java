@@ -29,7 +29,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 @XmlRootElement(name = "error")
 public class ErrorMessage extends Representation {
 
-	@XmlElement(required = true)
+	@XmlElement(name = "error-message", required = true)
 	private String errorMessage;
 
 	public ErrorMessage(final String errorMessage, final Link... linker) {
@@ -47,12 +47,15 @@ public class ErrorMessage extends Representation {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		ErrorMessage other = (ErrorMessage) obj;
 		return new EqualsBuilder().append(errorMessage, other.errorMessage).isEquals();
 	}

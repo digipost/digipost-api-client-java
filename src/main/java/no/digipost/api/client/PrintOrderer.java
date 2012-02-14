@@ -19,8 +19,8 @@ import java.io.InputStream;
 
 import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.ContentType;
-import no.digipost.api.client.representations.print.PrintMessage;
-import no.digipost.api.client.representations.print.PrintMessageStatus;
+import no.digipost.api.client.representations.PrintMessage;
+import no.digipost.api.client.representations.PrintMessageStatus;
 
 import com.sun.jersey.api.client.ClientResponse;
 

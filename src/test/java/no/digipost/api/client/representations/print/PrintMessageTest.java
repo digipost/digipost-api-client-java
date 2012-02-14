@@ -20,6 +20,8 @@ import static no.digipost.api.client.representations.ObjectBuilder.newRecipient;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import no.digipost.api.client.representations.PrintRecipient;
+
 import org.junit.Test;
 
 public class PrintMessageTest {

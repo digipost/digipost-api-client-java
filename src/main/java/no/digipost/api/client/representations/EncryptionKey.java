@@ -24,12 +24,12 @@ import javax.xml.bind.annotation.XmlValue;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = { "value" })
-@XmlRootElement(name = "encryptionKey")
+@XmlRootElement(name = "encryption-key")
 public class EncryptionKey extends Representation {
 
 	@XmlValue
 	protected String value;
-	@XmlAttribute(name = "keyId")
+	@XmlAttribute(name = "key-id")
 	protected String keyId;
 
 	public String getValue() {

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations.print;
+package no.digipost.api.client.representations;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name = "printMessageStatus")
+@XmlType(name = "print-message-status")
 @XmlEnum
 public enum PrintMessageStatus {
 

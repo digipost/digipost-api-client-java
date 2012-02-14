@@ -40,7 +40,7 @@ public class Link {
 
 	@XmlAttribute(required = true)
 	private String uri;
-	@XmlAttribute
+	@XmlAttribute(name = "media-type")
 	private String mediaType;
 
 	public Link(final Relation relation, final DigipostUri uri, final String mediaType) {
@@ -111,10 +111,12 @@ public class Link {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null || getClass() != obj.getClass())
+		}
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
+		}
 		Link other = (Link) obj;
 		return new EqualsBuilder()
 				.append(mediaType, other.mediaType)

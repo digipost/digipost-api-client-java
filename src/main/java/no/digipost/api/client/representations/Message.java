@@ -33,10 +33,10 @@ import org.joda.time.DateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message", propOrder = { "deliveredDate", "subject", "recipients", "personalIdentificationNumbers", "smsNotification",
-		"status", "links", "authenticationLevel" })
+		"authenticationLevel", "status", "links" })
 @XmlRootElement(name = "message")
 public class Message extends MessageBase {
-	@XmlElement(type = String.class)
+	@XmlElement(name = "delivered-date", type = String.class)
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
 	protected DateTime deliveredDate;
@@ -44,10 +44,12 @@ public class Message extends MessageBase {
 	protected String subject;
 	@XmlElement(name = "recipient")
 	protected List<Recipient> recipients;
-	@XmlElement(name = "personalIdentificationNumber")
+	@XmlElement(name = "personal-identification-number")
 	protected List<String> personalIdentificationNumbers;
+	@XmlElement(name = "sms-notification")
 	protected boolean smsNotification;
 	protected MessageStatus status;
+	@XmlElement(name = "authentication-level")
 	protected AuthenticationLevel authenticationLevel;
 
 	Message() {
@@ -118,8 +120,9 @@ public class Message extends MessageBase {
 
 	@Override
 	public boolean isSameMessageAs(final Object message) {
-		if (!(message instanceof Message))
+		if (!(message instanceof Message)) {
 			return false;
+		}
 		return messageId.equals(((Message) message).getMessageId()) && subject.equals(((Message) message).getSubject());
 	}
 

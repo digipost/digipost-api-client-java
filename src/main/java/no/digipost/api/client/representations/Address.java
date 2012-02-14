@@ -17,14 +17,19 @@ package no.digipost.api.client.representations;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Address {
 
 	private String street;
+	@XmlElement(name = "house-number")
 	private String houseNumber;
+	@XmlElement(name = "house-letter")
 	private String houseLetter;
-	private String additionalAddressLine;
+	@XmlElement(name = "additional-addressline")
+	private String additionalAddressline;
+	@XmlElement(name = "zip-code")
 	private String zipCode;
 	private String city;
 
@@ -33,7 +38,7 @@ public class Address {
 		this.street = street;
 		this.houseNumber = houseNumber;
 		this.houseLetter = houseLetter;
-		this.additionalAddressLine = additionalAddressLine;
+		additionalAddressline = additionalAddressLine;
 		this.zipCode = zipCode;
 		this.city = city;
 	}
@@ -53,8 +58,8 @@ public class Address {
 		return houseLetter;
 	}
 
-	public String getAdditionalAddressLine() {
-		return additionalAddressLine;
+	public String getAdditionalAddressline() {
+		return additionalAddressline;
 	}
 
 	public String getZipCode() {

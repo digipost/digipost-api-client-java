@@ -31,8 +31,8 @@ import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageBase;
+import no.digipost.api.client.representations.PrintMessage;
 import no.digipost.api.client.representations.Recipients;
-import no.digipost.api.client.representations.print.PrintMessage;
 
 import org.apache.commons.io.IOUtils;
 

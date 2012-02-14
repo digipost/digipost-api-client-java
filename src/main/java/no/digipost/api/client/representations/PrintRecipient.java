@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations.print;
+package no.digipost.api.client.representations;
 
 import static org.apache.commons.lang.StringUtils.trimToEmpty;
 
