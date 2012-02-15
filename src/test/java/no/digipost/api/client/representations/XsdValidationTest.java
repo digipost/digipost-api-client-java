@@ -25,7 +25,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -93,7 +92,21 @@ public class XsdValidationTest {
 
 	@Test
 	public void validatePrintMessage() throws JAXBException {
-		PrintRecipient address = new PrintRecipient("name", "1234", "Oslo");
+		PrintRecipient address = new PrintRecipient("name", new NorwegianAddress("1234", "Oslo"));
+		PrintMessage message = new PrintMessage("messageId", address, address, "B");
+		marshallAndValidate(message);
+	}
+
+	@Test
+	public void validatePrintMessageWithForeignRecipiantWihtCountry() throws JAXBException {
+		PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", "Sverige", null));
+		PrintMessage message = new PrintMessage("messageId", address, address, "B");
+		marshallAndValidate(message);
+	}
+
+	@Test
+	public void validatePrintMessageWithForeignRecipiantWihtCountryCode() throws JAXBException {
+		PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", null, "SE"));
 		PrintMessage message = new PrintMessage("messageId", address, address, "B");
 		marshallAndValidate(message);
 	}

@@ -18,16 +18,22 @@ package no.digipost.api.client.representations;
 
 public class ObjectBuilder {
 
-	public static PrintRecipient newRecipient(final String name, final String zip, final String city, final String country) {
-		return newRecipient(name, null, null, zip, city, country);
+	public static PrintRecipient newNorwegianRecipient(final String name, final String zip, final String city) {
+		return newNorwegianRecipient(name, null, null, zip, city);
 	}
 
-	public static PrintRecipient newRecipient(final String name, final String address1, final String address2, final String zip,
-			final String city, final String country) {
-		PrintRecipient printRecipient = new PrintRecipient(name, zip, city);
-		printRecipient.setAddressline1(address1);
-		printRecipient.setAddressline2(address2);
-		printRecipient.setCountry(country);
+	public static PrintRecipient newNorwegianRecipient(final String name, final String address1, final String address2, final String zip,
+			final String city) {
+		NorwegianAddress norwegianAddress = new NorwegianAddress(zip, city);
+		PrintRecipient printRecipient = new PrintRecipient(name, norwegianAddress);
+		norwegianAddress.setAddressline1(address1);
+		norwegianAddress.setAddressline2(address2);
+		return printRecipient;
+	}
+
+	public static PrintRecipient newForeignAddress(final String name, final String addressline1, final String country, final String countryCode) {
+		ForeignAddress foreignAddress = new ForeignAddress(addressline1, country, countryCode);
+		PrintRecipient printRecipient = new PrintRecipient(name, foreignAddress);
 		return printRecipient;
 	}
 

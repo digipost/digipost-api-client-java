@@ -23,27 +23,28 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "print-recipient", propOrder = { "name", "addressline1", "addressline2", "zipCode", "city", "country" })
+@XmlType(name = "print-recipient", propOrder = { "name", "norwegianAddress", "foreignAddress" })
 public class PrintRecipient {
 
 	public PrintRecipient() {
 	}
 
-	public PrintRecipient(final String name, final String zipCode, final String city) {
+	public PrintRecipient(final String name, final NorwegianAddress norwegianAddress) {
 		this.name = name;
-		this.zipCode = zipCode;
-		this.city = city;
+		this.norwegianAddress = norwegianAddress;
+	}
+
+	public PrintRecipient(final String name, final ForeignAddress foreignAddress) {
+		this.name = name;
+		this.foreignAddress = foreignAddress;
 	}
 
 	@XmlElement(required = true)
 	protected String name;
-	protected String addressline1;
-	protected String addressline2;
-	@XmlElement(required = true)
-	protected String zipCode;
-	@XmlElement(required = true)
-	protected String city;
-	protected String country;
+	@XmlElement(name = "norwegian-address")
+	protected NorwegianAddress norwegianAddress;
+	@XmlElement(name = "foreign-address")
+	protected ForeignAddress foreignAddress;
 
 	public String getName() {
 		return name;
@@ -53,48 +54,15 @@ public class PrintRecipient {
 		name = value;
 	}
 
-	public String getAddressline1() {
-		return addressline1;
-	}
-
-	public void setAddressline1(final String value) {
-		addressline1 = value;
-	}
-
-	public String getAddressline2() {
-		return addressline2;
-	}
-
-	public void setAddressline2(final String value) {
-		addressline2 = value;
-	}
-
-	public String getZipCode() {
-		return zipCode;
-	}
-
-	public void setZipCode(final String value) {
-		zipCode = value;
-	}
-
-	public String getCity() {
-		return city;
-	}
-
-	public void setCity(final String value) {
-		city = value;
-	}
-
-	public String getCountry() {
-		return country;
-	}
-
-	public void setCountry(final String value) {
-		country = value;
-	}
-
 	public boolean isSameRecipientAs(final PrintRecipient other) {
-		return trimEquals(name, other.name) && trimEquals(city, other.city) && trimEquals(zipCode, other.zipCode);
+		boolean nameMatches = trimEquals(name, other.name);
+		if(norwegianAddress != null && other.norwegianAddress != null) {
+			return nameMatches && norwegianAddress.isSameAddressAs(other.norwegianAddress);
+		} else if(foreignAddress != null && other.foreignAddress != null) {
+			return nameMatches && foreignAddress.isSameAddressAs(other.foreignAddress);
+		} else {
+			return false;
+		}
 	}
 
 	private boolean trimEquals(final String first, final String second) {

@@ -15,11 +15,10 @@
  */
 package no.digipost.api.client.representations.print;
 
+import static no.digipost.api.client.representations.ObjectBuilder.newNorwegianRecipient;
 import static no.digipost.api.client.representations.ObjectBuilder.newPrintMessage;
-import static no.digipost.api.client.representations.ObjectBuilder.newRecipient;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import no.digipost.api.client.representations.PrintRecipient;
 
 import org.junit.Test;
@@ -28,9 +27,9 @@ public class PrintMessageTest {
 
 	@Test
 	public void testIsSameMessageAs() {
-		PrintRecipient recipient1 = newRecipient("Name", "Zip", "City", "Country");
-		PrintRecipient recipient2 = newRecipient("Name2", "Zip2", "City2", "Country2");
-		PrintRecipient returnAddress = newRecipient("SenderName", "SenderZip", "SenderCity", "SenderCountry");
+		PrintRecipient recipient1 = newNorwegianRecipient("Name", "Zip", "City");
+		PrintRecipient recipient2 = newNorwegianRecipient("Name2", "Zip2", "City2");
+		PrintRecipient returnAddress = newNorwegianRecipient("SenderName", "SenderZip", "SenderCity");
 
 		assertTrue(newPrintMessage("unique-id", recipient1, returnAddress).isSameMessageAs(
 				newPrintMessage("unique-id", recipient1, returnAddress)));
