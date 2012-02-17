@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import no.digipost.api.client.DigipostClientException.ErrorType;
@@ -89,7 +88,7 @@ public class DigipostClient {
 	 * Sender et brev gjennom Digipost. Se MessageSender.sendMessage()
 	 */
 	public Message sendMessage(final Message message, final InputStream letterContent) {
-		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, ContentType.PDF);
+		return sendMessage(message, letterContent, ContentType.PDF);
 	}
 
 	/**
@@ -99,18 +98,23 @@ public class DigipostClient {
 		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, contentType);
 	}
 
+	public void sendMessageWithFallbackToPrint(final Message message, final ContentType digipostMessageContentType,
+			final InputStream digipostMessageContent, final PrintMessage printMessage) {
+		sendMessageWithFallbackToPrint(message, digipostMessageContentType, digipostMessageContent, printMessage, digipostMessageContent);
+	}
+
 	/**
 	 * Sender brev i Digipost. Dersom mottaker ikke er digipostbruker, bestiller
 	 * vi print av brevet til vanlig postgang.
 	 */
-	public void sendMessageWithFallbackToPrint(final Message message, final InputStream messageContent, final PrintMessage printMessage) {
-		byte[] messageContentAsByteArray = apiService.readLetterContent(messageContent);
+	public void sendMessageWithFallbackToPrint(final Message message, final ContentType digipostMessageContentType,
+			final InputStream digipostMessageContent, final PrintMessage printMessage, final InputStream printMessageContent) {
 		try {
-			sendMessage(message, new ByteArrayInputStream(messageContentAsByteArray));
+			sendMessage(message, digipostMessageContent, digipostMessageContentType);
 		} catch (DigipostClientException e) {
 			if (e.getErrorType() == ErrorType.RECIPIENT_DOES_NOT_EXIST) {
 				log("\n\n---DIGIPOSTBRUKER IKKE FUNNET - SENDER BREV TIL PRINT---");
-				new PrintOrderer(apiService, eventLogger).orderPrint(printMessage, new ByteArrayInputStream(messageContentAsByteArray));
+				new PrintOrderer(apiService, eventLogger).orderPrint(printMessage, printMessageContent);
 			} else {
 				throw e;
 			}

@@ -27,9 +27,15 @@ import javax.xml.bind.annotation.XmlType;
 public class NorwegianAddress {
 
 	public NorwegianAddress() {
+		this(null, null, null);
 	}
 
 	public NorwegianAddress(final String zipCode, final String city) {
+		this(null, zipCode, city);
+	}
+
+	public NorwegianAddress(final String addressline1, final String zipCode, final String city) {
+		this.addressline1 = addressline1;
 		this.zipCode = zipCode;
 		this.city = city;
 	}

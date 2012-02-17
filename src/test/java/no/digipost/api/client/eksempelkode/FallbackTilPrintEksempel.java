@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.security.Security;
 
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.NorwegianAddress;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
@@ -35,7 +36,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * Kode som brukes i dokumentasjonen for klientbiblioteket.
- *
+ * 
  */
 public class FallbackTilPrintEksempel {
 	// Din virksomhets Digipost-kontoid
@@ -66,8 +67,8 @@ public class FallbackTilPrintEksempel {
 
 		// 6. Vi oppretter en printforsendelse med adresseinformasjon som vil
 		// benyttes dersom mottaker ikke er Digipostbruker
-		PrintMessage printMessage = new PrintMessage("en id til", new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer", "Mottakers poststed")),
-				new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), "A");
+		PrintMessage printMessage = new PrintMessage("en id til", new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer",
+				"Mottakers poststed")), new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), "A");
 
 		// 7. Foreløpig støtter Digipost kun å sende krypterte brev til print. Å
 		// spesifisere PreEncrypt gjør at klientbiblioteket krypterer filen for
@@ -78,7 +79,7 @@ public class FallbackTilPrintEksempel {
 		InputStream messageContent = getMessageContent();
 
 		// 9. Vi lar klientbiblioteket håndtere utsendelsen
-		client.sendMessageWithFallbackToPrint(message, messageContent, printMessage);
+		client.sendMessageWithFallbackToPrint(message, ContentType.PDF, messageContent, printMessage, messageContent);
 
 		IOUtils.closeQuietly(messageContent);
 	}
