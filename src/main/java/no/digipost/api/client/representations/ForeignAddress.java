@@ -26,15 +26,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "foreign-address", propOrder = { "addressline1", "addressline2", "addressline3", "addressline4", "country", "countryCode" })
 public class ForeignAddress {
 
-	public ForeignAddress() {
-	}
-
-	public ForeignAddress(final String addressline1, final String country, final String counryCode) {
-		this.addressline1 = addressline1;
-		this.country = country;
-		countryCode = counryCode;
-	}
-
 	@XmlElement(required = true)
 	protected String addressline1;
 	protected String addressline2;
@@ -44,6 +35,23 @@ public class ForeignAddress {
 	protected String country;
 	@XmlElement(name = "country-code", required = true)
 	protected String countryCode;
+
+	public ForeignAddress() {
+	}
+
+	public ForeignAddress(final String addressline1, final String country, final String counryCode) {
+		this(addressline1, null, null, null, country, counryCode);
+	}
+
+	public ForeignAddress(final String addressline1, final String addressline2, final String addressline3, final String addressline4, final String country,
+			final String counryCode) {
+		this.addressline1 = addressline1;
+		this.addressline2 = addressline2;
+		this.addressline3 = addressline3;
+		this.addressline4 = addressline4;
+		this.country = country;
+		countryCode = counryCode;
+	}
 
 	public String getAddressline1() {
 		return addressline1;
@@ -94,7 +102,8 @@ public class ForeignAddress {
 	}
 
 	public boolean isSameAddressAs(final ForeignAddress other) {
-		return other != null && trimEquals(addressline1, other.addressline1) && trimEquals(country, other.country) && trimEquals(countryCode, other.countryCode);
+		return other != null && trimEquals(addressline1, other.addressline1) && trimEquals(country, other.country)
+				&& trimEquals(countryCode, other.countryCode);
 	}
 
 	private boolean trimEquals(final String first, final String second) {

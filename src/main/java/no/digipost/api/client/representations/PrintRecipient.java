@@ -50,15 +50,23 @@ public class PrintRecipient {
 		return name;
 	}
 
+	public NorwegianAddress getNorwegianAddress() {
+		return norwegianAddress;
+	}
+
+	public ForeignAddress getForeignAddress() {
+		return foreignAddress;
+	}
+
 	public void setName(final String value) {
 		name = value;
 	}
 
 	public boolean isSameRecipientAs(final PrintRecipient other) {
 		boolean nameMatches = trimEquals(name, other.name);
-		if(norwegianAddress != null && other.norwegianAddress != null) {
+		if (norwegianAddress != null && other.norwegianAddress != null) {
 			return nameMatches && norwegianAddress.isSameAddressAs(other.norwegianAddress);
-		} else if(foreignAddress != null && other.foreignAddress != null) {
+		} else if (foreignAddress != null && other.foreignAddress != null) {
 			return nameMatches && foreignAddress.isSameAddressAs(other.foreignAddress);
 		} else {
 			return false;
