@@ -112,6 +112,9 @@ public class ApiService {
 	 */
 	public ClientResponse createPrintMessage(final PrintMessage message) {
 		EntryPoint entryPoint = getCachedEntryPoint();
+		if (entryPoint.getCreatePrintMessageUri() == null) {
+			throw new DigipostClientException(ErrorType.NOT_AUTHORIZED_FOR_PRINT, "You are not authorized for sending to print.");
+		}
 		return webResource
 				.path(entryPoint.getCreatePrintMessageUri().getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V2)

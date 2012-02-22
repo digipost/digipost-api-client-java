@@ -40,7 +40,8 @@ public class EntryPoint extends Representation {
 	}
 
 	public URI getCreatePrintMessageUri() {
-		return getLinkByRelationName(CREATE_PRINT_MESSAGE).getUri();
+		Link printMessageUri = getLinkByRelationName(CREATE_PRINT_MESSAGE);
+		return printMessageUri == null ? null : printMessageUri.getUri();
 	}
 
 	public URI getCreateMessageUri() {

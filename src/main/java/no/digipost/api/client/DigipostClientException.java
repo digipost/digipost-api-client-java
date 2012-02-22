@@ -28,7 +28,8 @@ public class DigipostClientException extends RuntimeException {
 		MESSAGE_ALREADY_DELIVERED,
 		GENERAL_ERROR,
 		CANNOT_PREENCRYPT,
-		FAILED_PREENCRYPTION;
+		FAILED_PREENCRYPTION,
+		NOT_AUTHORIZED_FOR_PRINT;
 	}
 
 	private final ErrorType errorType;
