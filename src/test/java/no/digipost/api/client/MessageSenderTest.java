@@ -79,7 +79,7 @@ public class MessageSenderTest {
 		} catch (Exception e) {
 			assertTrue(e instanceof DigipostClientException);
 			DigipostClientException de = (DigipostClientException) e;
-			assertEquals(ErrorType.MESSAGE_ALREADY_DELIVERED, de.getErrorType());
+			assertEquals(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, de.getErrorType());
 		}
 
 	}

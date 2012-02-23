@@ -121,7 +121,7 @@ public class MessageSender extends Communicator {
 		if (MessageStatus.DELIVERED == existingMessage.getStatus()) {
 			String errorMessage = "En identisk forsendelse er allerede levert til mottaker. Dette skyldes sannsynligvis doble kall til Digipost.";
 			log(errorMessage);
-			throw new DigipostClientException(ErrorType.MESSAGE_ALREADY_DELIVERED, errorMessage);
+			throw new DigipostClientException(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, errorMessage);
 		}
 	}
 

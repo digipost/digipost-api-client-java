@@ -89,7 +89,7 @@ public class PrintOrderer extends Communicator {
 		if (PrintMessageStatus.NOT_COMPLETE != existingMessage.getStatus()) {
 			String errorMessage = "Print av en identisk forsendelse er allerede bestilt. Dette skyldes sannsynligvis doble kall til Digipost.";
 			log(errorMessage);
-			throw new DigipostClientException(ErrorType.MESSAGE_ALREADY_DELIVERED, errorMessage);
+			throw new DigipostClientException(ErrorType.PRINT_MESSAGE_ALREADY_DELIVERED, errorMessage);
 		}
 	}
 
