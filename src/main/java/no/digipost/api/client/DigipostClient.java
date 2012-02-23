@@ -98,23 +98,26 @@ public class DigipostClient {
 		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, contentType);
 	}
 
-	public void sendMessageWithFallbackToPrint(final Message message, final ContentType digipostMessageContentType,
+	public SendResult sendMessageWithFallbackToPrint(final Message message, final ContentType digipostMessageContentType,
 			final InputStream digipostMessageContent, final PrintMessage printMessage) {
-		sendMessageWithFallbackToPrint(message, digipostMessageContentType, digipostMessageContent, printMessage, digipostMessageContent);
+		return sendMessageWithFallbackToPrint(message, digipostMessageContentType, digipostMessageContent, printMessage,
+				digipostMessageContent);
 	}
 
 	/**
 	 * Sender brev i Digipost. Dersom mottaker ikke er digipostbruker, bestiller
 	 * vi print av brevet til vanlig postgang.
 	 */
-	public void sendMessageWithFallbackToPrint(final Message message, final ContentType digipostMessageContentType,
+	public SendResult sendMessageWithFallbackToPrint(final Message message, final ContentType digipostMessageContentType,
 			final InputStream digipostMessageContent, final PrintMessage printMessage, final InputStream printMessageContent) {
 		try {
 			sendMessage(message, digipostMessageContent, digipostMessageContentType);
+			return SendResult.DIGIPOST;
 		} catch (DigipostClientException e) {
 			if (e.getErrorType() == ErrorType.RECIPIENT_DOES_NOT_EXIST) {
 				log("\n\n---DIGIPOSTBRUKER IKKE FUNNET - SENDER BREV TIL PRINT---");
 				new PrintOrderer(apiService, eventLogger).orderPrint(printMessage, printMessageContent);
+				return SendResult.PRINT;
 			} else {
 				throw e;
 			}
@@ -136,6 +139,11 @@ public class DigipostClient {
 
 	public void addFilter(final ClientFilter filter) {
 		apiService.addFilter(filter);
+	}
+
+	public enum SendResult {
+		DIGIPOST,
+		PRINT;
 	}
 
 }
