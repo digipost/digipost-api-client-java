@@ -35,7 +35,12 @@ public class NorwegianAddress {
 	}
 
 	public NorwegianAddress(final String addressline1, final String zipCode, final String city) {
+		this(addressline1, null, zipCode, city);
+	}
+
+	public NorwegianAddress(final String addressline1, final String addressline2, final String zipCode, final String city) {
 		this.addressline1 = addressline1;
+		this.addressline2 = addressline2;
 		this.zipCode = zipCode;
 		this.city = city;
 	}
