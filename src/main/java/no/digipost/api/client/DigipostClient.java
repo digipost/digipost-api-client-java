@@ -100,7 +100,7 @@ public class DigipostClient {
 
 	public SendResult sendMessageWithFallbackToPrint(final Message message, final ContentType digipostMessageContentType,
 			final InputStream digipostMessageContent, final PrintMessage printMessage) {
-		return sendMessageWithFallbackToPrint(message, digipostMessageContentType, digipostMessageContent, printMessage,
+		return sendMessageToDigipostOrDeliverToPrint(message, digipostMessageContentType, digipostMessageContent, printMessage,
 				digipostMessageContent);
 	}
 
@@ -108,7 +108,7 @@ public class DigipostClient {
 	 * Sender brev i Digipost. Dersom mottaker ikke er digipostbruker, bestiller
 	 * vi print av brevet til vanlig postgang.
 	 */
-	public SendResult sendMessageWithFallbackToPrint(final Message message, final ContentType digipostMessageContentType,
+	public SendResult sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
 			final InputStream digipostMessageContent, final PrintMessage printMessage, final InputStream printMessageContent) {
 		try {
 			sendMessage(message, digipostMessageContent, digipostMessageContentType);
