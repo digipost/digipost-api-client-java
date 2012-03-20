@@ -19,5 +19,6 @@ public class MediaTypes {
 
 	public static final String DIGIPOST_MEDIA_TYPE_V1 = "application/vnd.digipost-v1+xml";
 	public static final String DIGIPOST_MEDIA_TYPE_V2 = "application/vnd.digipost-v2+xml";
+	public static final String APPLICATION_PDF = "application/pdf";
 
 }

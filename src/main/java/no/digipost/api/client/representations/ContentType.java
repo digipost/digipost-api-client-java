@@ -19,7 +19,7 @@ import javax.ws.rs.core.MediaType;
 
 public enum ContentType {
 
-	PDF(MediaType.APPLICATION_OCTET_STREAM),
+	PDF(MediaTypes.APPLICATION_PDF),
 	HTML(MediaType.TEXT_HTML);
 
 	private final String requestMediaType;
