@@ -98,7 +98,7 @@ public class DigipostClient {
 		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, contentType);
 	}
 
-	public SendResult sendMessageWithFallbackToPrint(final Message message, final ContentType digipostMessageContentType,
+	public SendResult sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
 			final InputStream digipostMessageContent, final PrintMessage printMessage) {
 		return sendMessageToDigipostOrDeliverToPrint(message, digipostMessageContentType, digipostMessageContent, printMessage,
 				digipostMessageContent);
@@ -106,7 +106,8 @@ public class DigipostClient {
 
 	/**
 	 * Sender brev i Digipost. Dersom mottaker ikke er digipostbruker, bestiller
-	 * vi print av brevet til vanlig postgang.
+	 * vi print av brevet til vanlig postgang. Krever at avsender har fått
+	 * tilgang til print.
 	 */
 	public SendResult sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
 			final InputStream digipostMessageContent, final PrintMessage printMessage, final InputStream printMessageContent) {
@@ -116,12 +117,21 @@ public class DigipostClient {
 		} catch (DigipostClientException e) {
 			if (e.getErrorType() == ErrorType.RECIPIENT_DOES_NOT_EXIST) {
 				log("\n\n---DIGIPOSTBRUKER IKKE FUNNET - SENDER BREV TIL PRINT---");
-				new PrintOrderer(apiService, eventLogger).orderPrint(printMessage, printMessageContent);
+				deliverToPrint(printMessage, printMessageContent);
 				return SendResult.PRINT;
 			} else {
 				throw e;
 			}
+
 		}
+	}
+
+	/**
+	 * Bestiller print av brevet til utsending gjennom vanlig postgang. Krever
+	 * at avsender har tilgang til å sende direkte til print.
+	 */
+	public PrintMessage deliverToPrint(final PrintMessage printMessage, final InputStream printMessageContent) {
+		return new PrintOrderer(apiService, eventLogger).orderPrint(printMessage, printMessageContent);
 	}
 
 	public Recipients search(final String searchString) {
