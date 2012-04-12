@@ -36,7 +36,7 @@ public class EntryPoint extends Representation {
 		super(links);
 	}
 
-	EntryPoint() {
+	public EntryPoint() {
 	}
 
 	public URI getCreatePrintMessageUri() {
