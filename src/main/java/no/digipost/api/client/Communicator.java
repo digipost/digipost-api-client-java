@@ -27,7 +27,6 @@ import java.security.spec.X509EncodedKeySpec;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Link;
@@ -194,8 +193,12 @@ public class Communicator {
 
 	protected void check404Error(final ClientResponse response, final ErrorType errorBy404) {
 		if (Status.fromStatusCode(response.getStatus()) == Status.NOT_FOUND) {
-			throw new DigipostClientException(errorBy404, fetchErrorMessageString(response));
+			throw new DigipostClientServerException(errorBy404, fetchErrorMessageEntity(response));
 		}
+	}
+
+	private ErrorMessage fetchErrorMessageEntity(final ClientResponse response) {
+		return response.getEntity(ErrorMessage.class);
 	}
 
 }

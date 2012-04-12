@@ -22,6 +22,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import no.digipost.api.client.DigipostClientException;
+import no.digipost.api.client.ErrorType;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -78,4 +81,12 @@ public class ErrorMessage extends Representation {
 		this.links = links;
 	}
 
+	public Link getCreatePrintMessageLink() {
+		Link link = getLinkByRelationName(Relation.CREATE_PRINT_MESSAGE);
+		if (link == null) {
+			throw new DigipostClientException(ErrorType.NOT_AUTHORIZED_FOR_PRINT,
+					"Your organization is not authorized to send messages to print.");
+		}
+		return link;
+	}
 }

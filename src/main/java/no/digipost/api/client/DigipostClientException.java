@@ -18,21 +18,6 @@ package no.digipost.api.client;
 public class DigipostClientException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
-	public enum ErrorType {
-		RECIPIENT_DOES_NOT_EXIST,
-		PROBLEM_WITH_REQUEST,
-		SERVER_ERROR,
-		INVALID_TRANSACTION,
-		MESSAGE_DOES_NOT_EXIST,
-		DUPLICATE_MESSAGE_ID,
-		DIGIPOST_MESSAGE_ALREADY_DELIVERED,
-		PRINT_MESSAGE_ALREADY_DELIVERED,
-		GENERAL_ERROR,
-		CANNOT_PREENCRYPT,
-		FAILED_PREENCRYPTION,
-		NOT_AUTHORIZED_FOR_PRINT;
-	}
-
 	private final ErrorType errorType;
 	private final String errorMessage;
 

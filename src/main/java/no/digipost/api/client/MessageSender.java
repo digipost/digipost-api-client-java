@@ -17,7 +17,6 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
-import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageStatus;

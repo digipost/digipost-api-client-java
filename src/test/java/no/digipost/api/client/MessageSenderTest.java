@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageStatus;

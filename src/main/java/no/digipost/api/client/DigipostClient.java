@@ -17,7 +17,6 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
-import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.filters.ContentMD5Filter;
 import no.digipost.api.client.filters.DateFilter;
 import no.digipost.api.client.filters.SignatureFilter;
@@ -114,10 +113,13 @@ public class DigipostClient {
 		try {
 			sendMessage(message, digipostMessageContent, digipostMessageContentType);
 			return SendResult.DIGIPOST;
-		} catch (DigipostClientException e) {
+		} catch (DigipostClientServerException e) {
 			if (e.getErrorType() == ErrorType.RECIPIENT_DOES_NOT_EXIST) {
 				log("\n\n---DIGIPOSTBRUKER IKKE FUNNET - SENDER BREV TIL PRINT---");
-				deliverToPrint(printMessage, printMessageContent);
+
+				new PrintOrderer(apiService, eventLogger).orderPrintAfterFailedDigipostDelivery(printMessage, printMessageContent, e
+						.getErrorMessageEntity()
+						.getCreatePrintMessageLink());
 				return SendResult.PRINT;
 			} else {
 				throw e;
@@ -131,7 +133,7 @@ public class DigipostClient {
 	 * at avsender har tilgang til å sende direkte til print.
 	 */
 	public PrintMessage deliverToPrint(final PrintMessage printMessage, final InputStream printMessageContent) {
-		return new PrintOrderer(apiService, eventLogger).orderPrint(printMessage, printMessageContent);
+		return new PrintOrderer(apiService, eventLogger).orderPrintDirectly(printMessage, printMessageContent);
 	}
 
 	public Recipients search(final String searchString) {

@@ -19,7 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import no.digipost.api.client.DigipostClientException;
-import no.digipost.api.client.DigipostClientException.ErrorType;
+import no.digipost.api.client.ErrorType;
 
 public class DigipostUri {
 	private final URI uri;

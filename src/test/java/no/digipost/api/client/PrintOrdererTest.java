@@ -15,24 +15,39 @@
  */
 package no.digipost.api.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
+import no.digipost.api.client.representations.EntryPoint;
+import no.digipost.api.client.representations.PrintMessage;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class PrintOrdererTest {
 
+	@Mock
+	private ApiService apiService;
+
 	@Before
 	public void setUp() {
+		MockitoAnnotations.initMocks(this);
 	}
 
 	@Test
-	public void skalHenteEksisterendeForsendelseHvisDenFinnesFraForr() {
-		// implement?
-	}
+	public void shouldThrowNotAuthorizedExceptionIfCreatePrintMessageLinkIsNotAvailable() {
+		when(apiService.getEntryPoint()).thenReturn(new EntryPoint());
 
-	@Test
-	public void skalKasteFeilHvisForsendelseAlleredeLevert() {
-		// implement?
+		try {
+			new PrintOrderer(apiService, DigipostClient.NOOP_EVENT_LOGGER).orderPrintDirectly(new PrintMessage(), null);
+		} catch (DigipostClientException e) {
+			assertEquals(ErrorType.NOT_AUTHORIZED_FOR_PRINT, e.getErrorType());
+			return;
+		}
 
+		fail("Should have thrown exception");
 	}
 
 }

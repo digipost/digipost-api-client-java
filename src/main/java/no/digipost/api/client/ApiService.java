@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.EntryPoint;
@@ -83,7 +82,20 @@ public class ApiService {
 		this.senderAccountId = senderAccountId;
 	}
 
-	public ClientResponse getEntryPoint() {
+	public EntryPoint getEntryPoint() {
+		if (cachedEntryPoint == null || entryPointCacheExpired()) {
+			ClientResponse response = getEntryPointFromServer();
+			if (response.getStatus() != ClientResponse.Status.OK.getStatusCode()) {
+				throw new DigipostClientException(ErrorType.GENERAL_ERROR, response.getEntity(ErrorMessage.class).getErrorMessage());
+			} else {
+				cachedEntryPoint = response.getEntity(EntryPoint.class);
+				entryPointLastCached = System.currentTimeMillis();
+			}
+		}
+		return cachedEntryPoint;
+	}
+
+	private ClientResponse getEntryPointFromServer() {
 		return webResource
 				.path(ENTRY_POINT)
 				.accept(DIGIPOST_MEDIA_TYPE_V2)
@@ -96,7 +108,7 @@ public class ApiService {
 	 * POST-forespørsel. Brukes for å sende brev i Digipost.
 	 */
 	public ClientResponse createMessage(final Message message) {
-		EntryPoint entryPoint = getCachedEntryPoint();
+		EntryPoint entryPoint = getEntryPoint();
 		return webResource
 				.path(entryPoint.getCreateMessageUri().getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V2)
@@ -109,14 +121,12 @@ public class ApiService {
 	 * Oppretter en ny printforsendelsesressurs på serveren ved å sende en
 	 * POST-forespørsel. Brukes for bestille print av et brev dersom mottaker
 	 * ikke er Digipostbruker.
+	 * 
+	 * @param createPrintMessageUri
 	 */
-	public ClientResponse createPrintMessage(final PrintMessage message) {
-		EntryPoint entryPoint = getCachedEntryPoint();
-		if (entryPoint.getCreatePrintMessageUri() == null) {
-			throw new DigipostClientException(ErrorType.NOT_AUTHORIZED_FOR_PRINT, "You are not authorized for sending to print.");
-		}
+	public ClientResponse createPrintMessage(final PrintMessage message, final URI createPrintMessageUri) {
 		return webResource
-				.path(entryPoint.getCreatePrintMessageUri().getPath())
+				.path(createPrintMessageUri.getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V2)
 				.header(X_Digipost_UserId, senderAccountId)
 				.type(DIGIPOST_MEDIA_TYPE_V2)
@@ -187,7 +197,7 @@ public class ApiService {
 
 	public Recipients search(final String searchString) {
 		return webResource
-				.path(getCachedEntryPoint().getSearchUri().getPath() + "/" + searchString)
+				.path(getEntryPoint().getSearchUri().getPath() + "/" + searchString)
 				.accept(DIGIPOST_MEDIA_TYPE_V2)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(Recipients.class);
@@ -195,7 +205,7 @@ public class ApiService {
 
 	public Autocomplete searchSuggest(final String searchString) {
 		return webResource
-				.path(getCachedEntryPoint().getAutocompleteUri().getPath() + "/" + searchString)
+				.path(getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString)
 				.accept(MediaTypes.DIGIPOST_MEDIA_TYPE_V2)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(Autocomplete.class);
@@ -203,19 +213,6 @@ public class ApiService {
 
 	public void addFilter(final ClientFilter filter) {
 		webResource.addFilter(filter);
-	}
-
-	private EntryPoint getCachedEntryPoint() {
-		if (cachedEntryPoint == null || entryPointCacheExpired()) {
-			ClientResponse response = getEntryPoint();
-			if (response.getStatus() != ClientResponse.Status.OK.getStatusCode()) {
-				throw new DigipostClientException(ErrorType.GENERAL_ERROR, response.getEntity(ErrorMessage.class).getErrorMessage());
-			} else {
-				cachedEntryPoint = response.getEntity(EntryPoint.class);
-				entryPointLastCached = System.currentTimeMillis();
-			}
-		}
-		return cachedEntryPoint;
 	}
 
 	private boolean entryPointCacheExpired() {

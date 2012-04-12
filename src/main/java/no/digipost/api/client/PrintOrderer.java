@@ -16,9 +16,11 @@
 package no.digipost.api.client;
 
 import java.io.InputStream;
+import java.net.URI;
 
-import no.digipost.api.client.DigipostClientException.ErrorType;
 import no.digipost.api.client.representations.ContentType;
+import no.digipost.api.client.representations.EntryPoint;
+import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.PrintMessage;
 import no.digipost.api.client.representations.PrintMessageStatus;
 
@@ -31,6 +33,18 @@ public class PrintOrderer extends Communicator {
 	}
 
 	/**
+	 * Brukes for å bestille print av et brev etter sending gjennom Digipost
+	 * feilet pga at mottaker ikke er Digipost-bruker. Dette krever at avsender
+	 * har rettighet å bestille print.
+	 * 
+	 * @see PrintOrderer#orderPrintDirectly
+	 */
+	public PrintMessage orderPrintAfterFailedDigipostDelivery(final PrintMessage printMessage, final InputStream printMessageContent,
+			final Link createPrintMessageLink) {
+		return orderPrint(printMessage, printMessageContent, createPrintMessageLink.getUri());
+	}
+
+	/**
 	 * Bestiller print av et brev gjennom Digipost. Denne metoden gjør alle
 	 * HTTP-kallene som er nødvendige for å bestille print av ett enkeltbrev.
 	 * Det vil si at den først gjør et kall for å opprette en
@@ -38,12 +52,25 @@ public class PrintOrderer extends Communicator {
 	 * Hvis printforsendelsen skal sendes ferdigkryptert fra klienten vil det
 	 * gjøres et kall for å hente mottakers offentlige nøkkel (public key), for
 	 * så å kryptere innholdet før det sendes over.
+	 * 
+	 * Dette krever at avsender har rettighet å bestille print direkte uten å
+	 * først prøve å sende gjennom Digipost.
 	 */
-	public PrintMessage orderPrint(final PrintMessage letterToPrint, final InputStream letterContent) {
+	public PrintMessage orderPrintDirectly(final PrintMessage letterToPrint, final InputStream letterContent) {
+		EntryPoint entryPoint = apiService.getEntryPoint();
+		if (entryPoint.getCreatePrintMessageUri() == null) {
+			throw new DigipostClientException(ErrorType.NOT_AUTHORIZED_FOR_PRINT,
+					"Your organization is not authorized to send directly to print.");
+		}
+
+		return orderPrint(letterToPrint, letterContent, entryPoint.getCreatePrintMessageUri());
+	}
+
+	private PrintMessage orderPrint(final PrintMessage letterToPrint, final InputStream letterContent, final URI createPrintMessageUri) {
 		InputStream content = letterContent;
 
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTER Printforsendelse---");
-		PrintMessage createdMessage = createOrFetchMessage(letterToPrint);
+		PrintMessage createdMessage = createOrFetchMessage(letterToPrint, createPrintMessageUri);
 
 		if (createdMessage.skalPrekrypteres()) {
 			log("\n\n---PRINTFORSENDELSE SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
@@ -56,8 +83,8 @@ public class PrintOrderer extends Communicator {
 		return sentMessage;
 	}
 
-	public PrintMessage createOrFetchMessage(final PrintMessage message) {
-		ClientResponse response = apiService.createPrintMessage(message);
+	public PrintMessage createOrFetchMessage(final PrintMessage message, final URI createPrintMessageUri) {
+		ClientResponse response = apiService.createPrintMessage(message, createPrintMessageUri);
 
 		if (messageAlreadyExists(response)) {
 			ClientResponse existingMessageResponse = apiService.fetchExistingMessage(response.getLocation());
