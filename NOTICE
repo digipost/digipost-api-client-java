@@ -39,7 +39,7 @@ jersey-apache-client:1.9 - http://jersey.java.net/
 **********************************************************************
 MIT - LICENSE_MIT - http://opensource.org/licenses/mit-license.php
 **********************************************************************
-bouncycastle:1.46 - http://www.bouncycastle.org/
+bouncycastle:1.47 - http://www.bouncycastle.org/
 slf4j:1.6.1 - http://www.slf4j.org/
 
 
