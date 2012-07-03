@@ -233,7 +233,7 @@
 										<include>javax.xml.bind:jaxb-api:2.2.2:jar:compile</include>
 										<include>javax.xml.stream:stax-api:1.0-2:jar:compile</include>
 										<include>joda-time:joda-time:1.6.2:jar:compile</include>
-										<include>no.posten.dpost:dpost-xsd:${project.version}:jar:compile</include>
+										<include>no.posten.dpost:dpost-xsd:3.4:jar:compile</include>
 										<include>org.bouncycastle:bcprov-jdk15on:1.47:jar:compile</include>
 										<include>org.bouncycastle:bcmail-jdk15on:1.47:jar:compile</include>
 										<include>org.bouncycastle:bcpkix-jdk15on:1.47:jar:compile</include>
