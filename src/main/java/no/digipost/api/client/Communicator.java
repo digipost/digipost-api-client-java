@@ -54,7 +54,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 /**
  * Superklasse for MessageSender og PrintOrderer som samler felles
  * funksjonalitet for å snakke med ApiService.
- * 
+ *
  */
 public class Communicator {
 
@@ -74,7 +74,7 @@ public class Communicator {
 
 	/**
 	 * Krypterer <code>data</code> med brukers pubklike nøkkel
-	 * 
+	 *
 	 * @param data
 	 * @param keyId
 	 * @param keyContent
@@ -84,6 +84,7 @@ public class Communicator {
 	private byte[] preencrypt(final byte[] data, final String keyId, final String keyContent) throws Exception {
 		PEMReader reader = new PEMReader(new StringReader(keyContent));
 		X509EncodedKeySpec spec = new X509EncodedKeySpec(((BCRSAPublicKey) reader.readObject()).getEncoded());
+		IOUtils.closeQuietly(reader);
 		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
 
 		CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
