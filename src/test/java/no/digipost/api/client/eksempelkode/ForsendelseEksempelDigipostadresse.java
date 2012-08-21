@@ -16,6 +16,7 @@
 package no.digipost.api.client.eksempelkode;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class ForsendelseEksempelDigipostadresse {
 		DigipostAddress address = new DigipostAddress("fornavn.etternavn#6789");
 
 		// 4. Vi oppretter en forsendelse
-		Message message = new Message("dinForsendelseId", "Brevets emne", address, false, PASSWORD);
+		Message message = new Message("dinForsendelseId", "Brevets emne", address, false, PASSWORD, NORMAL);
 
 		// 5. Vi henter inputstreamen til PDF-filen vi ønsker å sende
 		InputStream messageContent = getMessageContent();

@@ -29,6 +29,7 @@ import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageStatus;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.SensitivityLevel;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -88,7 +89,8 @@ public class MessageSenderTest {
 	}
 
 	private Message lagEnkeltForsendelse(final String subject, final String messageId, final String fnr) {
-		return new Message(messageId, subject, new PersonalIdentificationNumber(fnr), true, AuthenticationLevel.PASSWORD);
+		return new Message(messageId, subject, new PersonalIdentificationNumber(fnr), true, AuthenticationLevel.PASSWORD,
+				SensitivityLevel.NORMAL);
 	}
 
 	private class MockClientResponse extends ClientResponse {

@@ -55,6 +55,7 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.SensitivityLevel;
 
 import org.apache.commons.io.FileUtils;
 
@@ -442,7 +443,7 @@ public class DigipostSwingClient {
 
 	private Message createMessage(final String subject, final String address) {
 		return new Message(String.valueOf(System.currentTimeMillis()), subject, new DigipostAddress(address), false,
-				AuthenticationLevel.PASSWORD);
+				AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
 	}
 
 	/**

@@ -33,7 +33,7 @@ import org.joda.time.DateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message", propOrder = { "deliveredDate", "subject", "recipients", "personalIdentificationNumbers", "smsNotification",
-		"authenticationLevel", "status", "links" })
+		"authenticationLevel", "sensitivityLevel", "status", "links" })
 @XmlRootElement(name = "message")
 public class Message extends MessageBase {
 	@XmlElement(name = "delivered-date", type = String.class)
@@ -51,30 +51,33 @@ public class Message extends MessageBase {
 	protected MessageStatus status;
 	@XmlElement(name = "authentication-level")
 	protected AuthenticationLevel authenticationLevel;
+	@XmlElement(name = "sensitivity-level")
+	protected SensitivityLevel sensitivityLevel;
 
 	Message() {
 	}
 
 	public Message(final String messageId, final String subject, final PersonalIdentificationNumber id, final boolean smsVarsling,
-			final AuthenticationLevel authenticationLevel, final Link... links) {
-		this(messageId, subject, smsVarsling, authenticationLevel, links);
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final Link... links) {
+		this(messageId, subject, smsVarsling, authenticationLevel, sensitivityLevel, links);
 		personalIdentificationNumbers = new ArrayList<String>();
 		personalIdentificationNumbers.add(id.asString());
 	}
 
 	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final boolean smsVarsling,
-			final AuthenticationLevel authenticationLevel, final Link... links) {
-		this(messageId, subject, smsVarsling, authenticationLevel, links);
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final Link... links) {
+		this(messageId, subject, smsVarsling, authenticationLevel, sensitivityLevel, links);
 		recipients = new ArrayList<Recipient>();
 		recipients.add(new Recipient(null, null, null, digipostAdress.asString(), null));
 	}
 
 	private Message(final String messageId, final String subject, final boolean smsVarsling, final AuthenticationLevel authenticationLevel,
-			final Link... links) {
+			final SensitivityLevel sensitivityLevel, final Link... links) {
 		super(messageId, links);
 		this.subject = subject;
 		smsNotification = smsVarsling;
 		this.authenticationLevel = authenticationLevel;
+		this.sensitivityLevel = sensitivityLevel;
 	}
 
 	public String getSubject() {
@@ -99,6 +102,10 @@ public class Message extends MessageBase {
 
 	public AuthenticationLevel getAuthenticationLevel() {
 		return authenticationLevel;
+	}
+
+	public SensitivityLevel getSensitivityLevel() {
+		return sensitivityLevel;
 	}
 
 	public List<Recipient> getRecipients() {

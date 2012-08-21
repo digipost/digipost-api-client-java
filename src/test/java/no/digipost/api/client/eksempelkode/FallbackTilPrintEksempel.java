@@ -16,6 +16,7 @@
 package no.digipost.api.client.eksempelkode;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,7 +64,7 @@ public class FallbackTilPrintEksempel {
 		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 		// 5. Vi oppretter en forsendelse for sending av brevet i Digipost
-		Message message = new Message("dinForsendelseId", "Brevets emne", pin, false, PASSWORD);
+		Message message = new Message("dinForsendelseId", "Brevets emne", pin, false, PASSWORD, NORMAL);
 
 		// 6. Vi oppretter en printforsendelse med adresseinformasjon som vil
 		// benyttes dersom mottaker ikke er Digipostbruker
