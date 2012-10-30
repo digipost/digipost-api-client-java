@@ -15,9 +15,6 @@
  */
 package no.digipost.api.client.representations;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -25,9 +22,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
@@ -47,7 +45,7 @@ public class Message extends MessageBase {
 	@XmlElement(name = "personal-identification-number")
 	protected List<String> personalIdentificationNumbers;
 	@XmlElement(name = "sms-notification")
-	protected boolean smsNotification;
+	protected SmsNotification smsNotification;
 	protected MessageStatus status;
 	@XmlElement(name = "authentication-level")
 	protected AuthenticationLevel authenticationLevel;
@@ -57,21 +55,21 @@ public class Message extends MessageBase {
 	Message() {
 	}
 
-	public Message(final String messageId, final String subject, final PersonalIdentificationNumber id, final boolean smsVarsling,
+	public Message(final String messageId, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
 			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final Link... links) {
 		this(messageId, subject, smsVarsling, authenticationLevel, sensitivityLevel, links);
 		personalIdentificationNumbers = new ArrayList<String>();
 		personalIdentificationNumbers.add(id.asString());
 	}
 
-	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final boolean smsVarsling,
+	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
 			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final Link... links) {
 		this(messageId, subject, smsVarsling, authenticationLevel, sensitivityLevel, links);
 		recipients = new ArrayList<Recipient>();
 		recipients.add(new Recipient(null, null, null, digipostAdress.asString(), null));
 	}
 
-	private Message(final String messageId, final String subject, final boolean smsVarsling, final AuthenticationLevel authenticationLevel,
+	private Message(final String messageId, final String subject, final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel,
 			final SensitivityLevel sensitivityLevel, final Link... links) {
 		super(messageId, links);
 		this.subject = subject;
@@ -96,7 +94,7 @@ public class Message extends MessageBase {
 		this.status = status;
 	}
 
-	public boolean isSmsNotification() {
+	public SmsNotification getSmsNotification() {
 		return smsNotification;
 	}
 

@@ -31,6 +31,7 @@ import no.digipost.api.client.representations.MessageStatus;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.SensitivityLevel;
 
+import no.digipost.api.client.representations.SmsNotification;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -89,7 +90,7 @@ public class MessageSenderTest {
 	}
 
 	private Message lagEnkeltForsendelse(final String subject, final String messageId, final String fnr) {
-		return new Message(messageId, subject, new PersonalIdentificationNumber(fnr), true, AuthenticationLevel.PASSWORD,
+		return new Message(messageId, subject, new PersonalIdentificationNumber(fnr), new SmsNotification(0), AuthenticationLevel.PASSWORD,
 				SensitivityLevel.NORMAL);
 	}
 

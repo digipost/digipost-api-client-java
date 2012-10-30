@@ -17,14 +17,12 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
+import com.sun.jersey.api.client.ClientResponse;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageStatus;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.jersey.api.client.ClientResponse;
 
 public class MessageSender extends Communicator {
 	static final Logger LOG = LoggerFactory.getLogger(MessageSender.class);
@@ -79,7 +77,7 @@ public class MessageSender extends Communicator {
 
 			ClientResponse existingMessageResponse = apiService.fetchExistingMessage(response.getLocation());
 			checkResponse(existingMessageResponse);
-			Message exisitingMessage = existingMessageResponse.getEntity(Message.class);
+			Message exisitingMessage = existingMessageResponse.getEntity(message.getClass());
 			checkThatExistingMessageIsIdenticalToNewMessage(exisitingMessage, message);
 			checkThatMessageHasNotAlreadyBeenDelivered(exisitingMessage);
 			log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
@@ -90,7 +88,7 @@ public class MessageSender extends Communicator {
 			check404Error(response, ErrorType.RECIPIENT_DOES_NOT_EXIST);
 			checkResponse(response);
 			log("Forsendelse opprettet. Status: [" + response.toString() + "]");
-			return response.getEntity(Message.class);
+			return response.getEntity(message.getClass());
 
 		}
 
@@ -113,7 +111,7 @@ public class MessageSender extends Communicator {
 		checkResponse(response);
 
 		log("Innhold ble lagt til og brevet sendt. Status: [" + response.toString() + "]");
-		return response.getEntity(Message.class);
+		return response.getEntity(createdMessage.getClass());
 	}
 
 	private void checkThatMessageHasNotAlreadyBeenDelivered(final Message existingMessage) {

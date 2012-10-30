@@ -15,39 +15,21 @@
  */
 package no.digipost.api.client.swing;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientException;
@@ -56,7 +38,7 @@ import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.SensitivityLevel;
-
+import no.digipost.api.client.representations.SmsNotification;
 import org.apache.commons.io.FileUtils;
 
 public class DigipostSwingClient {
@@ -442,7 +424,7 @@ public class DigipostSwingClient {
 	}
 
 	private Message createMessage(final String subject, final String address) {
-		return new Message(String.valueOf(System.currentTimeMillis()), subject, new DigipostAddress(address), false,
+		return new Message(String.valueOf(System.currentTimeMillis()), subject, new DigipostAddress(address), new SmsNotification(),
 				AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
 	}
 

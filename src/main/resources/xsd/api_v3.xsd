@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Digipost - grensesnitt for avsendere -->
+<xsd:schema version="1.0"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://api.digipost.no/schema/v3" xmlns="http://api.digipost.no/schema/v3"
+            xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0" elementFormDefault="qualified" xmlns:annox="http://annox.dev.java.net"
+            jaxb:extensionBindingPrefixes="annox">
+
+    <xsd:simpleType name="authentication-level">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:typesafeEnumClass />
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="PASSWORD">
+                <xsd:annotation>
+                    <xsd:documentation>Default. Password is required to read the message.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="PASSWORD" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="TWO_FACTOR">
+                <xsd:annotation>
+                    <xsd:documentation>Two factor authentication will be required to read it.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="TWO_FACTOR" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="sensitivity-level">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:typesafeEnumClass />
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="NORMAL">
+                <xsd:annotation>
+                    <xsd:documentation>Default. Non sensitive message. Metadata about the message, like the sender and subject,
+                        will be revealed in user notifications (eg. email and SMS), and can also be seen when logged in at a
+                        security level below the one specified for the message.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="NORMAL" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="SENSITIVE">
+                <xsd:annotation>
+                    <xsd:documentation>Sensitive message. Metadata about the message, like the sender and subject, will be hidden
+                        until logged in at the appropriate security level specified for the message.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="SENSITIVE" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+
+    <xsd:complexType name="link">
+        <xsd:attribute name="rel" type="xsd:string" />
+        <xsd:attribute name="uri" type="xsd:string" use="required" />
+        <xsd:attribute name="media-type" type="xsd:string" />
+    </xsd:complexType>
+
+    <xsd:element name="recipients" type="recipients" />
+
+    <xsd:complexType name="recipients">
+        <xsd:sequence>
+            <xsd:element name="recipient" type="recipient" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="links">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="recipient">
+        <xsd:sequence>
+            <xsd:element name="firstname" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="middlename" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="lastname" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="digipost-address" type="xsd:string" nillable="false" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="mobile-number" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="address" type="address" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="recipient" type="recipient" />
+
+    <xsd:complexType name="address">
+        <xsd:all>
+            <xsd:element name="street" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="house-number" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="house-letter" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="additional-addressline" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="zip-code" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="city" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+        </xsd:all>
+    </xsd:complexType>
+
+    <xsd:simpleType name="zip-code">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[\d]{4}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="non-empty-string">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value=".*[^\s]+.*"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="name">
+        <xsd:restriction base="non-empty-string">
+            <xsd:maxLength value="130"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="addressline">
+        <xsd:restriction base="non-empty-string">
+            <xsd:maxLength value="100"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="city">
+        <xsd:restriction base="non-empty-string">
+            <xsd:maxLength value="80"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="country">
+        <xsd:restriction base="non-empty-string">
+            <xsd:maxLength value="80"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:element name="print-message" type="print-message" />
+
+    <xsd:complexType name="message-base" abstract="true">
+        <xsd:sequence>
+            <xsd:element name="message-id" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="sender-id" type="xsd:long" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The actual sender of the message. This is used in scenarios where one party, the broker, is creating a message
+                        on behalf of another, the sender. It is only possible if the sender has granted the broker the right to send
+                        on its behalf.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="pre-encrypt" type="xsd:boolean" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Sender will encrypt the letter with the receivers public key before sending it.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="print-message">
+        <xsd:complexContent>
+            <xsd:extension base="message-base">
+                <xsd:sequence>
+                    <xsd:element name="recipient" type="print-recipient"  minOccurs="1" maxOccurs="1"  />
+                    <xsd:element name="return-address" type="print-recipient"  minOccurs="1" maxOccurs="1"  />
+                    <xsd:element name="post-type"  minOccurs="1" maxOccurs="1" >
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Currently, only PostType B is supported.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:enumeration value="B"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="status" type="print-message-status" minOccurs="0" maxOccurs="1">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                This field is populated in the response by Digipost.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                This field is populated in the response by Digipost.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="print-recipient">
+        <xsd:sequence>
+            <xsd:element name="name" type="name" minOccurs="1" maxOccurs="1" />
+            <xsd:choice>
+                <xsd:element name="norwegian-address" type="norwegian-address"/>
+                <xsd:element name="foreign-address" type="foreign-address"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="norwegian-address">
+        <xsd:sequence>
+            <xsd:element name="addressline1" type="addressline" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="addressline2" type="addressline" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="zip-code" type="zip-code" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="city" type="city" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="foreign-address">
+        <xsd:sequence>
+            <xsd:element name="addressline1" type="addressline" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="addressline2" type="addressline" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="addressline3" type="addressline" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="addressline4" type="addressline" minOccurs="0" maxOccurs="1" />
+            <xsd:choice>
+                <xsd:element name="country" type="country" minOccurs="1" maxOccurs="1">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Country name in Norwegian or English.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="country-code" minOccurs="1" maxOccurs="1">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Country code according to the ISO 3166-1 alpha-2 standard.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                            <xsd:pattern value="[A-Z]{2}"/>
+                        </xsd:restriction>
+                    </xsd:simpleType>
+                </xsd:element>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <xsd:element name="encryption-key">
+        <xsd:complexType>
+            <xsd:simpleContent>
+                <xsd:extension base="xsd:string">
+                    <xsd:attribute name="key-id" type="xsd:string" />
+                </xsd:extension>
+            </xsd:simpleContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="digipost-address" type="xsd:string" />
+
+
+
+    <xsd:simpleType name="message-status">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:typesafeEnumClass />
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="NOT_COMPLETE">
+                <xsd:annotation>
+                    <xsd:documentation>The message resource is not complete. Consult the provided links to see what options are availiable.
+                    </xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="NOT_COMPLETE" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="COMPLETE">
+                <xsd:annotation>
+                    <xsd:documentation>The message resource is complete, and can be sent. Note that you can also tweak the message before sending it.
+                        Consult the provided links to see what options are availiable.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="COMPLETE" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="DELIVERED">
+                <xsd:annotation>
+                    <xsd:documentation>The message is delivered. Consult the provided links to see what options are availiable.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="DELIVERED" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="print-message-status">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:typesafeEnumClass />
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="NOT_COMPLETE">
+                <xsd:annotation>
+                    <xsd:documentation>The message resource is not complete. Consult the provided links to see what options are availiable.
+                    </xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="NOT_COMPLETE" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="DELIVERED_TO_PRINT">
+                <xsd:annotation>
+                    <xsd:documentation>The message is delivered to print. Consult the provided links to see what options are availiable.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="DELIVERED_TO_PRINT" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+
+
+    <xsd:element name="autocomplete">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="suggestion" type="suggestion" minOccurs="0" maxOccurs="unbounded" />
+                <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="suggestion">
+        <xsd:sequence>
+            <xsd:element name="search-string" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="link" type="link" nillable="false" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="error">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="error-code" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="false" />
+                <xsd:element name="error-message" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
+                <xsd:element name="link" type="link" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="password-authentication">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="username" type="xsd:string" nillable="false" minOccurs="1" maxOccurs="1" />
+                <xsd:element name="password" type="xsd:string" nillable="false" minOccurs="1" maxOccurs="1" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+	<xsd:element name="message" type="message" />
+
+	<xsd:element name="messages">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="message" type="message" minOccurs="0" maxOccurs="unbounded" />
+				<xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="message">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <annox:annotate target="class">
+                    <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="message"/>
+                </annox:annotate>
+            </xsd:appinfo>
+        </xsd:annotation>
+		<xsd:complexContent>
+        	<xsd:extension base="message-base">
+				<xsd:sequence>
+					<xsd:element name="delivered-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />  
+					<xsd:element name="subject" minOccurs="1" maxOccurs="1">
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:maxLength value="100" />
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:element>
+					<xsd:choice>
+						<xsd:element name="personal-identification-number" minOccurs="0" maxOccurs="unbounded">
+							<xsd:annotation>
+								<xsd:documentation>
+									Fødselsnummer.
+								</xsd:documentation>
+							</xsd:annotation>
+							<xsd:simpleType>
+								<xsd:restriction base="xsd:string">
+									<xsd:length value="11" />
+								</xsd:restriction>
+							</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="recipient" type="recipient" minOccurs="0" maxOccurs="unbounded" />
+					</xsd:choice>
+					<xsd:element name="sms-notification" type="sms-notification" minOccurs="1" maxOccurs="1">
+						<xsd:annotation>
+							<xsd:documentation>
+								Optional SMS notification to Recipient.
+								Additional charges apply.
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="authentication-level" type="authentication-level" minOccurs="0" maxOccurs="1" nillable="false" />
+					<xsd:element name="sensitivity-level" type="sensitivity-level" minOccurs="0" maxOccurs="1" nillable="false" />
+					<xsd:element name="status" type="message-status" minOccurs="0" maxOccurs="1">
+						<xsd:annotation>
+							<xsd:documentation>
+								This field is populated in the response by Digipost.
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded">
+						<xsd:annotation>
+							<xsd:documentation>
+								This field is populated in the response by Digipost.
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+    <xsd:element name="invoice" type="invoice" />
+
+    <xsd:complexType name="invoice">
+        <xsd:complexContent>
+            <xsd:extension base="message">
+                <xsd:sequence>
+                    <xsd:element name="kid" minOccurs="1" maxOccurs="1" nillable="false">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:pattern value="[0-9]{2,25}"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="amount" minOccurs="1" maxOccurs="1" nillable="false">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:decimal">
+                                <xsd:fractionDigits value="2"/>
+                                <xsd:totalDigits value="15"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="account" minOccurs="1" maxOccurs="1" nillable="false">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Receiving account. 11 digits with no spaces or dots.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:pattern value="[0-9]{11}"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="due-date" type="xsd:date" minOccurs="1" maxOccurs="1" nillable="false" />
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+	<xsd:complexType name="sms-notification">
+        <xsd:sequence>
+        	<xsd:element name="at" type="listedTime" minOccurs="0" maxOccurs="unbounded">
+		        <xsd:annotation>
+		            <xsd:documentation>
+		                If the message is unread, a notification will be sent at these times.
+		                SMS is only sent between 9-20. Any notification falling outside this interval, will be sent around 9 the next morning.
+		            </xsd:documentation>
+		        </xsd:annotation>
+			</xsd:element>
+			<xsd:element name="after-hours" type="after-hours" minOccurs="0" maxOccurs="unbounded">
+		        <xsd:annotation>
+		            <xsd:documentation>
+		                If the message is unread, a notification will be sent after the given amount of hours after delivery.
+		                SMS is only sent between 9-20. Any notification falling outside this interval, will be sent around 9 the next morning.
+		            </xsd:documentation>
+		        </xsd:annotation>
+			</xsd:element>
+        </xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="listedTime"> 
+		<xsd:attribute name="time" type="xsd:dateTime" />
+	</xsd:complexType>
+
+	
+	<xsd:simpleType name="after-hours"> 
+		<xsd:restriction base="xsd:int">
+			<xsd:minInclusive value="0"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+</xsd:schema>

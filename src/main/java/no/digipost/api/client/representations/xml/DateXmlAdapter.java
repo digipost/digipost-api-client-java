@@ -13,11 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations;
+package no.digipost.api.client.representations.xml;
 
-public class MediaTypes {
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-	public static final String DIGIPOST_MEDIA_TYPE_V3 = "application/vnd.digipost-v3+xml";
-	public static final String APPLICATION_PDF = "application/pdf";
+import org.joda.time.LocalDate;
 
+public class DateXmlAdapter extends XmlAdapter<String, LocalDate> {
+
+	@Override
+	public LocalDate unmarshal(final String value) {
+		return new LocalDate(DatatypeConverter.parseDate(value));
+	}
+
+	@Override
+	public String marshal(final LocalDate date) {
+		return date.toString();
+	}
 }

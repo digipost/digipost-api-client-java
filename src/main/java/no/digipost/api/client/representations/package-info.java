@@ -13,11 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://api.digipost.no/schema/v3", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package no.digipost.api.client.representations;
-
-public class MediaTypes {
-
-	public static final String DIGIPOST_MEDIA_TYPE_V3 = "application/vnd.digipost-v3+xml";
-	public static final String APPLICATION_PDF = "application/pdf";
-
-}

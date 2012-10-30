@@ -27,8 +27,8 @@ public class ForsendelseRepresentasjonTest {
 	@Test
 	public void skalHanteraDuplikatForsendelse() {
 		DigipostAddress digipostAddress = new DigipostAddress("peter.pan#0000");
-		Message adresseForsendelse1 = new Message("id", "emne", digipostAddress, false, PASSWORD, NORMAL);
-		Message adresseForsendelse3 = new Message("id", "annetemne", digipostAddress, false, PASSWORD, NORMAL);
+		Message adresseForsendelse1 = new Message("id", "emne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL);
+		Message adresseForsendelse3 = new Message("id", "annetemne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL);
 
 		assertTrue(adresseForsendelse1.isSameMessageAs(adresseForsendelse1));
 		assertTrue(adresseForsendelse3.isSameMessageAs(adresseForsendelse3));

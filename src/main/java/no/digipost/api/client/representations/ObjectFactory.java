@@ -46,4 +46,8 @@ public class ObjectFactory {
 	public EntryPoint createEntryPoint() {
 		return new EntryPoint();
 	}
+
+	public Invoice createInvoice() {
+		return new Invoice();
+	}
 }

@@ -26,6 +26,7 @@ import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Message;
 
+import no.digipost.api.client.representations.SmsNotification;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -52,7 +53,7 @@ public class ForsendelseEksempelDigipostadresse {
 		DigipostAddress address = new DigipostAddress("fornavn.etternavn#6789");
 
 		// 4. Vi oppretter en forsendelse
-		Message message = new Message("dinForsendelseId", "Brevets emne", address, false, PASSWORD, NORMAL);
+		Message message = new Message("dinForsendelseId", "Brevets emne", address, new SmsNotification(), PASSWORD, NORMAL);
 
 		// 5. Vi henter inputstreamen til PDF-filen vi ønsker å sende
 		InputStream messageContent = getMessageContent();

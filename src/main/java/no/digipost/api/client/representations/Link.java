@@ -15,14 +15,13 @@
  */
 package no.digipost.api.client.representations;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -51,7 +50,7 @@ public class Link {
 	}
 
 	public Link(final Relation relation, final DigipostUri uri) {
-		this(relation, uri, MediaTypes.DIGIPOST_MEDIA_TYPE_V1);
+		this(relation, uri, MediaTypes.DIGIPOST_MEDIA_TYPE_V3);
 	}
 
 	Link() {
