@@ -91,4 +91,8 @@ public class MessageDelivery extends Representation {
 	public boolean isDeliveredToDigipost() {
 		return "DIGIPOST".equals(deliveryMethod);
 	}
+
+	public Link getSelfLink() {
+		return getLinkByRelationName(Relation.SELF);
+	}
 }

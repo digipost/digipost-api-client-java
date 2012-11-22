@@ -120,4 +120,8 @@ public class Message {
 	public void setSenderId(final long senderId) {
 		this.senderId = senderId;
 	}
+
+	public void setPreEncrypt(final boolean preEncrypt) {
+		this.preEncrypt = preEncrypt;
+	}
 }
