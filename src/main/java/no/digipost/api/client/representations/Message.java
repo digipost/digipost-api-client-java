@@ -19,34 +19,27 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.ArrayList;
-import java.util.List;
 
-import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "deliveredDate", "subject", "recipients", "personalIdentificationNumbers", "smsNotification",
-		"authenticationLevel", "sensitivityLevel", "status", "links" })
+@XmlType(name = "message",
+		propOrder = {"messageId", "senderId", "preEncrypt", "subject", "recipient", "smsNotification", "authenticationLevel", "sensitivityLevel"})
 @XmlRootElement(name = "message")
-public class Message extends MessageBase {
-	@XmlElement(name = "delivered-date", type = String.class)
-	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
-	@XmlSchemaType(name = "dateTime")
-	protected DateTime deliveredDate;
+public class Message {
+	@XmlElement(name = "message-id", required = true)
+	protected String messageId;
+	@XmlElement(name = "sender-id")
+	protected Long senderId;
+	@XmlElement(name = "pre-encrypt")
+	protected Boolean preEncrypt;
 	@XmlElement(required = true)
 	protected String subject;
 	@XmlElement(name = "recipient")
-	protected List<Recipient> recipients;
-	@XmlElement(name = "personal-identification-number")
-	protected List<String> personalIdentificationNumbers;
+	protected RecipientIdentification recipient;
 	@XmlElement(name = "sms-notification")
 	protected SmsNotification smsNotification;
-	protected MessageStatus status;
 	@XmlElement(name = "authentication-level")
 	protected AuthenticationLevel authenticationLevel;
 	@XmlElement(name = "sensitivity-level")
@@ -56,26 +49,27 @@ public class Message extends MessageBase {
 	}
 
 	public Message(final String messageId, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final Link... links) {
-		this(messageId, subject, smsVarsling, authenticationLevel, sensitivityLevel, links);
-		personalIdentificationNumbers = new ArrayList<String>();
-		personalIdentificationNumbers.add(id.asString());
+				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
+		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel);
 	}
 
 	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final Link... links) {
-		this(messageId, subject, smsVarsling, authenticationLevel, sensitivityLevel, links);
-		recipients = new ArrayList<Recipient>();
-		recipients.add(new Recipient(null, null, null, digipostAdress.asString(), null));
+				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
+		this(messageId, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel);
 	}
 
-	private Message(final String messageId, final String subject, final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel,
-			final SensitivityLevel sensitivityLevel, final Link... links) {
-		super(messageId, links);
+	public Message(final String messageId, final String subject, final RecipientIdentification recipient, final SmsNotification smsVarsling,
+				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
+		this.messageId = messageId;
 		this.subject = subject;
+		this.recipient = recipient;
 		smsNotification = smsVarsling;
 		this.authenticationLevel = authenticationLevel;
 		this.sensitivityLevel = sensitivityLevel;
+	}
+
+	public Message(final String messageId, final PrintDetails printDetails) {
+		this(messageId, null, new RecipientIdentification(printDetails), null, null, null);
 	}
 
 	public String getSubject() {
@@ -84,14 +78,6 @@ public class Message extends MessageBase {
 
 	public boolean hasSubject() {
 		return !StringUtils.isBlank(subject);
-	}
-
-	public MessageStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(final MessageStatus status) {
-		this.status = status;
 	}
 
 	public SmsNotification getSmsNotification() {
@@ -106,29 +92,32 @@ public class Message extends MessageBase {
 		return sensitivityLevel;
 	}
 
-	public List<Recipient> getRecipients() {
-		return recipients;
+	public RecipientIdentification getRecipient() {
+		return recipient;
 	}
 
-	public List<String> getPersonalIdentificationNumbers() {
-		return personalIdentificationNumbers;
+	public String getMessageId() {
+		return messageId;
 	}
 
-	@XmlElement(name = "link")
-	protected List<Link> getLinks() {
-		return links;
+	public Boolean isPreEncrypt() {
+		return preEncrypt;
 	}
 
-	protected void setLinks(final List<Link> links) {
-		this.links = links;
+	public boolean isSameMessageAs(final Message message) {
+		return messageId.equals(message.getMessageId());
 	}
 
-	@Override
-	public boolean isSameMessageAs(final Object message) {
-		if (!(message instanceof Message)) {
-			return false;
-		}
-		return messageId.equals(((Message) message).getMessageId()) && subject.equals(((Message) message).getSubject());
+	public void setPreEncrypt() {
+		this.preEncrypt = true;
 	}
 
+	/**
+	 * Only neccessary when sending on behalf of another user.
+	 * In this case senderId must be the party you are sending on behalf of.
+	 * Your own user id should be set in the http header X-Digipost-UserId.
+	 */
+	public void setSenderId(final long senderId) {
+		this.senderId = senderId;
+	}
 }

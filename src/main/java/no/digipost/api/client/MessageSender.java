@@ -20,12 +20,10 @@ import java.io.InputStream;
 import com.sun.jersey.api.client.ClientResponse;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.MessageStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MessageSender extends Communicator {
-	static final Logger LOG = LoggerFactory.getLogger(MessageSender.class);
 
 	public MessageSender(final ApiService apiService, final EventLogger eventLogger) {
 		super(apiService, eventLogger);
@@ -39,59 +37,80 @@ public class MessageSender extends Communicator {
 	 * klienten vil det gjøres et kall for å hente mottakers offentlige nøkkel
 	 * (public key), for så å kryptere innholdet før det sendes over.
 	 */
-	public Message sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
-		InputStream content = letterContent;
+	public MessageDelivery sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
+		return sendMessage(message, letterContent, contentType, null);
+	}
 
+	public MessageDelivery sendMessage(final Message printMessage, final InputStream printContent) {
+		return sendMessage(printMessage, null, null, printContent);
+	}
+
+	public MessageDelivery sendMessage(final Message message, final InputStream letterContent, final ContentType contentType,
+									   final InputStream printContent) {
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
-		Message createdMessage = createOrFetchMessage(message);
+		MessageDelivery createdMessage = createOrFetchMessage(message);
 
-		if (message.skalPrekrypteres()) {
-			log("\n\n---FORSENDELSE SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
-			content = fetchKeyAndEncrypt(createdMessage, letterContent);
+		final InputStream unencryptetContent;
+		final ContentType finalContentType;
+		if (createdMessage.isDeliveredToDigipost()) {
+			unencryptetContent = letterContent;
+			finalContentType = contentType;
+		} else {
+			unencryptetContent = printContent;
+			finalContentType = ContentType.PDF;
 		}
 
-		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
-		Message sentMessage = addToContentAndSendMessage(createdMessage, content, contentType);
+		MessageDelivery delivery;
+		if (message.isPreEncrypt()) {
+			log("\n\n---FORSENDELSE SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
+			final InputStream encryptetContent = fetchKeyAndEncrypt(createdMessage, unencryptetContent);
+			delivery = uploadContent(finalContentType, createdMessage, encryptetContent);
+		} else {
+			delivery = uploadContent(finalContentType, createdMessage, unencryptetContent);
+		}
+
 		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
-		return sentMessage;
+		return delivery;
 	}
+
+	private MessageDelivery uploadContent(final ContentType contentType, final MessageDelivery createdMessage, final InputStream unencryptetContent) {
+		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
+		return addToContentAndSendMessage(createdMessage, unencryptetContent, contentType);
+	}
+
 
 	/**
 	 * Oppretter en forsendelsesressurs på serveren eller henter en allerede
 	 * opprettet forsendelsesressurs.
-	 * 
+	 *
 	 * Dersom forsendelsen allerede er opprettet, vil denne metoden gjøre en
 	 * GET-forespørsel mot serveren for å hente en representasjon av
 	 * forsendelsesressursen slik den er på serveren. Dette vil ikke føre til
 	 * noen endringer av ressursen.
-	 * 
+	 *
 	 * Dersom forsendelsen ikke eksisterer fra før, vil denne metoden opprette
 	 * en ny forsendelsesressurs på serveren og returnere en representasjon av
 	 * ressursen.
-	 * 
+	 *
 	 */
-	public Message createOrFetchMessage(final Message message) {
+	public MessageDelivery createOrFetchMessage(final Message message) {
 		ClientResponse response = apiService.createMessage(message);
 
 		if (messageAlreadyExists(response)) {
 
 			ClientResponse existingMessageResponse = apiService.fetchExistingMessage(response.getLocation());
 			checkResponse(existingMessageResponse);
-			Message exisitingMessage = existingMessageResponse.getEntity(message.getClass());
-			checkThatExistingMessageIsIdenticalToNewMessage(exisitingMessage, message);
-			checkThatMessageHasNotAlreadyBeenDelivered(exisitingMessage);
+			MessageDelivery delivery = existingMessageResponse.getEntity(MessageDelivery.class);
+			checkThatExistingMessageIsIdenticalToNewMessage(delivery, message);
+			checkThatMessageHasNotAlreadyBeenDelivered(delivery);
 			log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
-			return exisitingMessage;
-
+			return delivery;
 		} else {
-
 			check404Error(response, ErrorType.RECIPIENT_DOES_NOT_EXIST);
 			checkResponse(response);
 			log("Forsendelse opprettet. Status: [" + response.toString() + "]");
-			return response.getEntity(message.getClass());
-
+			return response.getEntity(MessageDelivery.class);
 		}
-
 	}
 
 	/**
@@ -99,22 +118,23 @@ public class MessageSender extends Communicator {
 	 * denne metoden skal kunne kalles, må man først ha opprettet
 	 * forsendelsesressursen på serveren ved metoden
 	 * {@code createOrFetchMesssage}.
-	 * 
+	 *
 	 * @param contentType
-	 * 
+	 *
 	 */
-	public Message addToContentAndSendMessage(final Message createdMessage, final InputStream letterContent, final ContentType contentType) {
-		verifyCorrectStatus(createdMessage, MessageStatus.NOT_COMPLETE);
-		ClientResponse response = apiService.addToContentAndSend(createdMessage, letterContent, contentType);
+	public MessageDelivery addToContentAndSendMessage(final MessageDelivery delivery, final InputStream letterContent,
+											  final ContentType contentType) {
+		verifyCorrectStatus(delivery, MessageStatus.NOT_COMPLETE);
+		ClientResponse response = apiService.addToContentAndSend(delivery, letterContent, contentType);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);
 
 		log("Innhold ble lagt til og brevet sendt. Status: [" + response.toString() + "]");
-		return response.getEntity(createdMessage.getClass());
+		return response.getEntity(delivery.getClass());
 	}
 
-	private void checkThatMessageHasNotAlreadyBeenDelivered(final Message existingMessage) {
+	private void checkThatMessageHasNotAlreadyBeenDelivered(final MessageDelivery existingMessage) {
 		if (MessageStatus.DELIVERED == existingMessage.getStatus()) {
 			String errorMessage = "En identisk forsendelse er allerede levert til mottaker. Dette skyldes sannsynligvis doble kall til Digipost.";
 			log(errorMessage);
@@ -122,7 +142,7 @@ public class MessageSender extends Communicator {
 		}
 	}
 
-	protected void verifyCorrectStatus(final Message createdMessage, final MessageStatus expectedStatus) {
+	protected void verifyCorrectStatus(final MessageDelivery createdMessage, final MessageStatus expectedStatus) {
 		if (createdMessage.getStatus() != expectedStatus) {
 			throw new DigipostClientException(ErrorType.INVALID_TRANSACTION,
 					"Kan ikke legge til innhold til en forsendelse som ikke er i tilstanden " + expectedStatus + ".");

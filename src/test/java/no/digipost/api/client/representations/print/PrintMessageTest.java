@@ -39,9 +39,6 @@ public class PrintMessageTest {
 
 		assertFalse(newPrintMessage("unique-id", recipient1, returnAddress).isSameMessageAs(
 				newPrintMessage("other-id", recipient1, returnAddress)));
-
-		assertFalse(newPrintMessage("unique-id", recipient1, returnAddress).isSameMessageAs(
-				newPrintMessage("unique-id", recipient2, returnAddress)));
 	}
 
 }

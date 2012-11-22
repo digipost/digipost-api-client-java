@@ -28,10 +28,11 @@ public class ForsendelseRepresentasjonTest {
 	public void skalHanteraDuplikatForsendelse() {
 		DigipostAddress digipostAddress = new DigipostAddress("peter.pan#0000");
 		Message adresseForsendelse1 = new Message("id", "emne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL);
-		Message adresseForsendelse3 = new Message("id", "annetemne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL);
+		Message adresseForsendelse2 = new Message("id", "emne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL);
+		Message adresseForsendelse3 = new Message("id2", "annetemne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL);
 
-		assertTrue(adresseForsendelse1.isSameMessageAs(adresseForsendelse1));
-		assertTrue(adresseForsendelse3.isSameMessageAs(adresseForsendelse3));
+		assertTrue(adresseForsendelse1.isSameMessageAs(adresseForsendelse2));
+		assertTrue(adresseForsendelse2.isSameMessageAs(adresseForsendelse1));
 
 		assertFalse(adresseForsendelse1.isSameMessageAs(adresseForsendelse3));
 	}

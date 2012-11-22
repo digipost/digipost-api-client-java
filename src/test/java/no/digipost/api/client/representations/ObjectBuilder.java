@@ -37,8 +37,8 @@ public class ObjectBuilder {
 		return printRecipient;
 	}
 
-	public static PrintMessage newPrintMessage(final String string, final PrintRecipient recipient, final PrintRecipient returnAddress) {
-		return new PrintMessage(string, recipient, returnAddress, "A");
+	public static Message newPrintMessage(final String string, final PrintRecipient recipient, final PrintRecipient returnAddress) {
+		return new Message(string, new PrintDetails(recipient, returnAddress, "B"));
 	}
 
 }

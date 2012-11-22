@@ -27,6 +27,7 @@ import java.net.URISyntaxException;
 
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.MessageStatus;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.SensitivityLevel;
@@ -52,12 +53,11 @@ public class MessageSenderTest {
 		Message forsendelseIn = lagDefaultForsendelse();
 		when(api.createMessage(forsendelseIn)).thenReturn(new MockClientResponse(Status.CONFLICT));
 
-		Message eksisterendeForsendelse = lagDefaultForsendelse();
-		eksisterendeForsendelse.setStatus(MessageStatus.NOT_COMPLETE);
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", "DIGIPOST", MessageStatus.NOT_COMPLETE, null);
 		when(api.fetchExistingMessage((URI) any())).thenReturn(new MockClientResponse(Status.OK, eksisterendeForsendelse));
 
 		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);
-		Message forsendelse = brevSender.createOrFetchMessage(forsendelseIn);
+		MessageDelivery forsendelse = brevSender.createOrFetchMessage(forsendelseIn);
 
 		verify(api).fetchExistingMessage((URI) any());
 		assertTrue(forsendelse.isSameMessageAs(forsendelseIn));
@@ -69,8 +69,7 @@ public class MessageSenderTest {
 		Message forsendelseIn = lagDefaultForsendelse();
 		when(api.createMessage(forsendelseIn)).thenReturn(new MockClientResponse(Status.CONFLICT));
 
-		Message eksisterendeForsendelse = lagDefaultForsendelse();
-		eksisterendeForsendelse.setStatus(MessageStatus.DELIVERED);
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", "DIGIPOST", MessageStatus.DELIVERED, null);
 		when(api.fetchExistingMessage((URI) any())).thenReturn(new MockClientResponse(Status.OK, eksisterendeForsendelse));
 
 		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);
@@ -96,14 +95,14 @@ public class MessageSenderTest {
 
 	private class MockClientResponse extends ClientResponse {
 
-		private final Message eksisterendeForsendelse;
+		private final MessageDelivery eksisterendeForsendelse;
 
 		public MockClientResponse(final Status responseStatus) {
 			super(responseStatus.getStatusCode(), null, null, null);
 			eksisterendeForsendelse = null;
 		}
 
-		public MockClientResponse(final Status responseStatus, final Message eksisterendeForsendelse) {
+		public MockClientResponse(final Status responseStatus, final MessageDelivery eksisterendeForsendelse) {
 			super(responseStatus.getStatusCode(), null, null, null);
 			this.eksisterendeForsendelse = eksisterendeForsendelse;
 		}

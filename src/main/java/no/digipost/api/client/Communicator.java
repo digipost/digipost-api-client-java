@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -24,14 +26,14 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
-
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MessageBase;
-
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedData;
@@ -46,10 +48,6 @@ import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.operator.OutputEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
 
 /**
  * Superklasse for MessageSender og PrintOrderer som samler felles
@@ -154,7 +152,7 @@ public class Communicator {
 		return Status.CONFLICT.equals(Status.fromStatusCode(response.getStatus()));
 	}
 
-	protected void checkThatExistingMessageIsIdenticalToNewMessage(final MessageBase exisitingMessage, final MessageBase message) {
+	protected void checkThatExistingMessageIsIdenticalToNewMessage(final MessageDelivery exisitingMessage, final Message message) {
 		if (!exisitingMessage.isSameMessageAs(message)) {
 			String errorMessage = "Forsendelse med id [" + message.getMessageId() + "] finnes fra før med annen spesifikasjon.";
 			log(errorMessage);
@@ -162,10 +160,10 @@ public class Communicator {
 		}
 	}
 
-	protected void checkThatMessageCanBePreEncrypted(final MessageBase message) {
-		Link encryptionKeyLink = message.getEncryptionKeyLink();
+	protected void checkThatMessageCanBePreEncrypted(final MessageDelivery delivery) {
+		Link encryptionKeyLink = delivery.getEncryptionKeyLink();
 		if (encryptionKeyLink == null) {
-			String errorMessage = "Forsendelse med id [" + message.getMessageId() + "] kan ikke prekrypteres.";
+			String errorMessage = "Forsendelse med id [" + delivery.getMessageId() + "] kan ikke prekrypteres.";
 			log(errorMessage);
 			throw new DigipostClientException(ErrorType.CANNOT_PREENCRYPT, errorMessage);
 		}
@@ -175,10 +173,10 @@ public class Communicator {
 	 * Henter brukers publike nøkkel fra servern og krypterer brevet som skal
 	 * sendes med denne.
 	 */
-	public InputStream fetchKeyAndEncrypt(final MessageBase message, final InputStream content) {
-		checkThatMessageCanBePreEncrypted(message);
+	public InputStream fetchKeyAndEncrypt(final MessageDelivery delivery, final InputStream content) {
+		checkThatMessageCanBePreEncrypted(delivery);
 
-		ClientResponse encryptionKeyResponse = apiService.getEncryptionKey(message.getEncryptionKeyLink().getUri());
+		ClientResponse encryptionKeyResponse = apiService.getEncryptionKey(delivery.getEncryptionKeyLink().getUri());
 		checkResponse(encryptionKeyResponse);
 
 		EncryptionKey key = encryptionKeyResponse.getEntity(EncryptionKey.class);

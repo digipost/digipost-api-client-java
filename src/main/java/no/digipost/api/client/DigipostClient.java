@@ -17,6 +17,9 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.ClientFilter;
 import no.digipost.api.client.filters.ContentMD5Filter;
 import no.digipost.api.client.filters.DateFilter;
 import no.digipost.api.client.filters.SignatureFilter;
@@ -24,18 +27,13 @@ import no.digipost.api.client.filters.UserAgentFilter;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.PrintMessage;
+import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
 
 /**
  * En klient for å sende brev gjennom Digipost. Hvis et objekt av denne klassen
@@ -86,20 +84,20 @@ public class DigipostClient {
 	/**
 	 * Sender et brev gjennom Digipost. Se MessageSender.sendMessage()
 	 */
-	public Message sendMessage(final Message message, final InputStream letterContent) {
+	public MessageDelivery sendMessage(final Message message, final InputStream letterContent) {
 		return sendMessage(message, letterContent, ContentType.PDF);
 	}
 
 	/**
 	 * Muliggjør sending med HTML content type.
 	 */
-	public Message sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
+	public MessageDelivery sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
 		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, contentType);
 	}
 
-	public SendResult sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
-			final InputStream digipostMessageContent, final PrintMessage printMessage) {
-		return sendMessageToDigipostOrDeliverToPrint(message, digipostMessageContentType, digipostMessageContent, printMessage,
+	public MessageDelivery sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
+																 final InputStream digipostMessageContent) {
+		return sendMessageToDigipostOrDeliverToPrint(message, digipostMessageContentType, digipostMessageContent,
 				digipostMessageContent);
 	}
 
@@ -108,32 +106,19 @@ public class DigipostClient {
 	 * vi print av brevet til vanlig postgang. Krever at avsender har fått
 	 * tilgang til print.
 	 */
-	public SendResult sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
-			final InputStream digipostMessageContent, final PrintMessage printMessage, final InputStream printMessageContent) {
-		try {
-			sendMessage(message, digipostMessageContent, digipostMessageContentType);
-			return SendResult.DIGIPOST;
-		} catch (DigipostClientServerException e) {
-			if (e.getErrorType() == ErrorType.RECIPIENT_DOES_NOT_EXIST) {
-				log("\n\n---DIGIPOSTBRUKER IKKE FUNNET - SENDER BREV TIL PRINT---");
-
-				new PrintOrderer(apiService, eventLogger).orderPrintAfterFailedDigipostDelivery(printMessage, printMessageContent, e
-						.getErrorMessageEntity()
-						.getCreatePrintMessageLink());
-				return SendResult.PRINT;
-			} else {
-				throw e;
-			}
-
-		}
+	public MessageDelivery sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
+																 final InputStream digipostMessageContent, final InputStream printMessageContent) {
+		return new MessageSender(apiService, eventLogger).sendMessage(message, digipostMessageContent, digipostMessageContentType,
+				printMessageContent);
 	}
 
 	/**
 	 * Bestiller print av brevet til utsending gjennom vanlig postgang. Krever
 	 * at avsender har tilgang til å sende direkte til print.
 	 */
-	public PrintMessage deliverToPrint(final PrintMessage printMessage, final InputStream printMessageContent) {
-		return new PrintOrderer(apiService, eventLogger).orderPrintDirectly(printMessage, printMessageContent);
+	public MessageDelivery deliverToPrint(final Message printMessage, final InputStream printMessageContent) {
+		return new MessageSender(apiService, eventLogger).sendMessage(printMessage, null, null,
+				printMessageContent);
 	}
 
 	public Recipients search(final String searchString) {
@@ -152,10 +137,4 @@ public class DigipostClient {
 	public void addFilter(final ClientFilter filter) {
 		apiService.addFilter(filter);
 	}
-
-	public enum SendResult {
-		DIGIPOST,
-		PRINT;
-	}
-
 }

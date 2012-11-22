@@ -15,22 +15,30 @@
  */
 package no.digipost.api.client.representations;
 
-import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name = "print-message-status")
-@XmlEnum
-public enum PrintMessageStatus {
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "name-and-address", propOrder = {
+    "fullname",
+    "addressline1",
+    "addressline2",
+    "postalcode",
+    "city"
+})
+public class NameAndAddress {
 
-	NOT_COMPLETE,
-	DELIVERED_TO_PRINT;
-
-	public String value() {
-		return name();
-	}
-
-	public static PrintMessageStatus fromValue(final String v) {
-		return valueOf(v);
-	}
+    @XmlElement(required = true)
+    protected String fullname;
+    @XmlElement(required = true)
+    protected String addressline1;
+    @XmlElement(nillable = false)
+    protected String addressline2;
+    @XmlElement(required = true)
+    protected String postalcode;
+    @XmlElement(required = true)
+    protected String city;
 
 }

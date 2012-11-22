@@ -24,7 +24,8 @@ public enum MessageStatus {
 
 	NOT_COMPLETE,
 	COMPLETE,
-	DELIVERED;
+	DELIVERED,
+	DELIVERED_TO_PRINT;
 
 	public String value() {
 		return name();

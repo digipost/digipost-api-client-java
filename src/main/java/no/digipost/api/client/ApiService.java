@@ -29,8 +29,7 @@ import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageBase;
-import no.digipost.api.client.representations.PrintMessage;
+import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
 
 import org.apache.commons.io.IOUtils;
@@ -124,7 +123,7 @@ public class ApiService {
 	 * 
 	 * @param createPrintMessageUri
 	 */
-	public ClientResponse createPrintMessage(final PrintMessage message, final URI createPrintMessageUri) {
+	public ClientResponse createPrintMessage(final Message message, final URI createPrintMessageUri) {
 		return webResource
 				.path(createPrintMessageUri.getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V3)
@@ -160,10 +159,11 @@ public class ApiService {
 	 * 
 	 * Før man kaller denne metoden, må man allerede ha opprettet en
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
-	 * 
+	 *
+	 * @param createdMessage
 	 * @param contentType
 	 */
-	public ClientResponse addToContentAndSend(final MessageBase createdMessage, final InputStream letterContent,
+	public ClientResponse addToContentAndSend(final MessageDelivery createdMessage, final InputStream letterContent,
 			final ContentType contentType) {
 		Link addFileLink = fetchAddFileLink(createdMessage);
 
@@ -178,8 +178,8 @@ public class ApiService {
 
 	}
 
-	private Link fetchAddFileLink(final MessageBase createdMessage) {
-		Link addContentLink = createdMessage.getAddContentAndSendLink();
+	private Link fetchAddFileLink(final MessageDelivery delivery) {
+		Link addContentLink = delivery.getAddContentAndSendLink();
 		if (addContentLink == null) {
 			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST,
 					"Kan ikke legge til innhold til en forsendelse som ikke har en link for å gjøre dette.");
