@@ -100,8 +100,8 @@ public class Message {
 		return messageId;
 	}
 
-	public Boolean isPreEncrypt() {
-		return preEncrypt;
+	public boolean isPreEncrypt() {
+		return preEncrypt != null && preEncrypt;
 	}
 
 	public boolean isSameMessageAs(final Message message) {
