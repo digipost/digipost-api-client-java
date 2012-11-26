@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import no.digipost.api.client.representations.AuthenticationLevel;
+import no.digipost.api.client.representations.DeliveryMethod;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.MessageStatus;
@@ -53,7 +54,7 @@ public class MessageSenderTest {
 		Message forsendelseIn = lagDefaultForsendelse();
 		when(api.createMessage(forsendelseIn)).thenReturn(new MockClientResponse(Status.CONFLICT));
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", "DIGIPOST", MessageStatus.NOT_COMPLETE, null);
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", DeliveryMethod.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
 		when(api.fetchExistingMessage((URI) any())).thenReturn(new MockClientResponse(Status.OK, eksisterendeForsendelse));
 
 		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);
@@ -69,7 +70,7 @@ public class MessageSenderTest {
 		Message forsendelseIn = lagDefaultForsendelse();
 		when(api.createMessage(forsendelseIn)).thenReturn(new MockClientResponse(Status.CONFLICT));
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", "DIGIPOST", MessageStatus.DELIVERED, null);
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED, null);
 		when(api.fetchExistingMessage((URI) any())).thenReturn(new MockClientResponse(Status.OK, eksisterendeForsendelse));
 
 		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);

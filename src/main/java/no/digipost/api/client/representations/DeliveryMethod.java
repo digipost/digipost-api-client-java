@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations.xml;
+package no.digipost.api.client.representations;
 
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
 
-import org.joda.time.DateTime;
 
-@XmlTransient
-public class DateTimeXmlAdapter extends XmlAdapter<String, DateTime> {
+@XmlType(name = "delivery-method")
+@XmlEnum
+public enum DeliveryMethod {
 
-	@Override
-	public String marshal(final DateTime v) throws Exception {
-		return v.toString();
-	}
+    PRINT,
+    DIGIPOST;
 
-	@Override
-	public DateTime unmarshal(final String s) throws Exception {
-		return new DateTime(DatatypeConverter.parseDate(s).getTime());
-	}
+    public String value() {
+        return name();
+    }
+
+    public static DeliveryMethod fromValue(String v) {
+        return valueOf(v);
+    }
 
 }

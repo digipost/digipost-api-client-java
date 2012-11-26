@@ -38,11 +38,7 @@ public class MessageSender extends Communicator {
 	 * (public key), for så å kryptere innholdet før det sendes over.
 	 */
 	public MessageDelivery sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
-		return sendMessage(message, letterContent, contentType, null);
-	}
-
-	public MessageDelivery sendMessage(final Message printMessage, final InputStream printContent) {
-		return sendMessage(printMessage, null, null, printContent);
+		return sendMessage(message, letterContent, contentType, letterContent);
 	}
 
 	public MessageDelivery sendMessage(final Message message, final InputStream letterContent, final ContentType contentType,

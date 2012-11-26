@@ -41,8 +41,8 @@ public class MessageDelivery extends Representation {
 
     @XmlElement(name = "message-id", required = true)
     protected String messageId;
-    @XmlElement(required = true)
-    protected String deliveryMethod;
+	@XmlElement(name = "delivery-method", required = true)
+    protected DeliveryMethod deliveryMethod;
     @XmlElement(required = true)
     protected MessageStatus status;
     @XmlElement(name = "delivered-date", type = String.class, nillable = false)
@@ -52,7 +52,7 @@ public class MessageDelivery extends Representation {
 
 	public MessageDelivery() {}
 
-	public MessageDelivery(final String messageId, final String deliveryMethod, final MessageStatus status, final DateTime deliveredDate) {
+	public MessageDelivery(final String messageId, final DeliveryMethod deliveryMethod, final MessageStatus status, final DateTime deliveredDate) {
 		this.messageId = messageId;
 		this.deliveryMethod = deliveryMethod;
 		this.status = status;
@@ -89,7 +89,7 @@ public class MessageDelivery extends Representation {
 	}
 
 	public boolean isDeliveredToDigipost() {
-		return "DIGIPOST".equals(deliveryMethod);
+		return DeliveryMethod.DIGIPOST.equals(deliveryMethod);
 	}
 
 	public Link getSelfLink() {

@@ -62,18 +62,24 @@
     <xsd:complexType name="message-delivery">
         <xsd:sequence>
             <xsd:element name="message-id" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="deliveryMethod" type="xsd:string"  minOccurs="1" maxOccurs="1" />
-            <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        This field is populated in the response by Digipost.
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
+            <xsd:element name="deliveryMethod" type="delivery-method"  minOccurs="1" maxOccurs="1" />
+            <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1" />
             <xsd:element name="delivered-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
+
+    <xsd:simpleType name="delivery-method">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:typesafeEnumClass/>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="PRINT" />
+            <xsd:enumeration value="DIGIPOST" />
+        </xsd:restriction>
+    </xsd:simpleType>
 
     <xsd:simpleType name="authentication-level">
         <xsd:annotation>
