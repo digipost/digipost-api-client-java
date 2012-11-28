@@ -95,4 +95,8 @@ public class MessageDelivery extends Representation {
 	public Link getSelfLink() {
 		return getLinkByRelationName(Relation.SELF);
 	}
+
+	public DeliveryMethod getDeliveryMethod() {
+		return deliveryMethod;
+	}
 }

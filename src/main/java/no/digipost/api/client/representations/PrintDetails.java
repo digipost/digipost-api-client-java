@@ -43,4 +43,16 @@ public class PrintDetails {
 		this.returnAddress = returnAddress;
 		this.postType = postType;
 	}
+
+	public PrintRecipient getRecipient() {
+		return recipient;
+	}
+
+	public PrintRecipient getReturnAddress() {
+		return returnAddress;
+	}
+
+	public String getPostType() {
+		return postType;
+	}
 }

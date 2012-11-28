@@ -61,4 +61,20 @@ public class RecipientIdentification {
 	public RecipientIdentification(final PrintDetails printDetails) {
 		this.printDetails = printDetails;
 	}
+
+	public NameAndAddress getNameAndAddress() {
+		return nameAndAddress;
+	}
+
+	public String getDigipostAddress() {
+		return digipostAddress;
+	}
+
+	public String getPersonalIdentificationNumber() {
+		return personalIdentificationNumber;
+	}
+
+	public PrintDetails getPrintDetails() {
+		return printDetails;
+	}
 }
