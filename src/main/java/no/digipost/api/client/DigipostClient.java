@@ -28,6 +28,7 @@ import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.RecipientIdentification;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
@@ -117,6 +118,7 @@ public class DigipostClient {
 	 * at avsender har tilgang til å sende direkte til print.
 	 */
 	public MessageDelivery deliverToPrint(final Message printMessage, final InputStream printMessageContent) {
+		assert printMessage.isDirectPrint() : "Direct print messages cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress";
 		return new MessageSender(apiService, eventLogger).sendMessage(printMessage, null, null,
 				printMessageContent);
 	}

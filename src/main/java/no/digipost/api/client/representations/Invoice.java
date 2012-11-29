@@ -64,10 +64,20 @@ public class Invoice
 		this.dueDate = dueDate;
 	}
 
-	public Invoice(final String messageId, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
+//	public Invoice(final String messageId, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
+//				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final String kid, final BigDecimal amount,
+//				   final String account, final LocalDate dueDate) {
+//		super(messageId, subject, digipostAdress, smsVarsling, authenticationLevel, sensitivityLevel);
+//		this.kid = kid;
+//		this.amount = amount;
+//		this.account = account;
+//		this.dueDate = dueDate;
+//	}
+
+	public Invoice(final String messageId, final String subject, final RecipientIdentification recipient, final SmsNotification smsVarsling,
 				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final String kid, final BigDecimal amount,
 				   final String account, final LocalDate dueDate) {
-		super(messageId, subject, digipostAdress, smsVarsling, authenticationLevel, sensitivityLevel);
+		super(messageId, subject, recipient, smsVarsling, authenticationLevel, sensitivityLevel);
 		this.kid = kid;
 		this.amount = amount;
 		this.account = account;

@@ -124,4 +124,8 @@ public class Message {
 	public void setPreEncrypt(final boolean preEncrypt) {
 		this.preEncrypt = preEncrypt;
 	}
+
+	public boolean isDirectPrint() {
+		return recipient.isDirectPrint();
+	}
 }

@@ -48,6 +48,10 @@ public class RecipientIdentification {
 		this.digipostAddress = digipostAddress.asString();
 	}
 
+	public RecipientIdentification(final NameAndAddress nameAndAddress) {
+		this.nameAndAddress = nameAndAddress;
+	}
+
 	public RecipientIdentification(final PersonalIdentificationNumber id, final PrintDetails printDetails) {
 		this(id);
 		this.printDetails = printDetails;
@@ -55,6 +59,11 @@ public class RecipientIdentification {
 
 	public RecipientIdentification(final DigipostAddress digipostAddress, final PrintDetails printDetails) {
 		this(digipostAddress);
+		this.printDetails = printDetails;
+	}
+
+	public RecipientIdentification(final NameAndAddress nameAndAddress, final PrintDetails printDetails) {
+		this.nameAndAddress = nameAndAddress;
 		this.printDetails = printDetails;
 	}
 
@@ -76,5 +85,9 @@ public class RecipientIdentification {
 
 	public PrintDetails getPrintDetails() {
 		return printDetails;
+	}
+
+	public boolean isDirectPrint() {
+		return printDetails != null && digipostAddress == null && personalIdentificationNumber == null && nameAndAddress == null;
 	}
 }
