@@ -17,9 +17,6 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
 import no.digipost.api.client.filters.ContentMD5Filter;
 import no.digipost.api.client.filters.DateFilter;
 import no.digipost.api.client.filters.SignatureFilter;
@@ -28,13 +25,17 @@ import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.RecipientIdentification;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.ClientFilter;
 
 /**
  * En klient for å sende brev gjennom Digipost. Hvis et objekt av denne klassen
@@ -97,9 +98,8 @@ public class DigipostClient {
 	}
 
 	public MessageDelivery sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
-																 final InputStream digipostMessageContent) {
-		return sendMessageToDigipostOrDeliverToPrint(message, digipostMessageContentType, digipostMessageContent,
-				digipostMessageContent);
+			final InputStream digipostMessageContent) {
+		return sendMessageToDigipostOrDeliverToPrint(message, digipostMessageContentType, digipostMessageContent, digipostMessageContent);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class DigipostClient {
 	 * tilgang til print.
 	 */
 	public MessageDelivery sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
-																 final InputStream digipostMessageContent, final InputStream printMessageContent) {
+			final InputStream digipostMessageContent, final InputStream printMessageContent) {
 		return new MessageSender(apiService, eventLogger).sendMessage(message, digipostMessageContent, digipostMessageContentType,
 				printMessageContent);
 	}
@@ -119,8 +119,7 @@ public class DigipostClient {
 	 */
 	public MessageDelivery deliverToPrint(final Message printMessage, final InputStream printMessageContent) {
 		assert printMessage.isDirectPrint() : "Direct print messages cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress";
-		return new MessageSender(apiService, eventLogger).sendMessage(printMessage, null, null,
-				printMessageContent);
+		return new MessageSender(apiService, eventLogger).sendMessage(printMessage, null, null, printMessageContent);
 	}
 
 	public Recipients search(final String searchString) {
