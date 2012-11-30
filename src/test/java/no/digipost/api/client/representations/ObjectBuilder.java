@@ -16,6 +16,8 @@
 package no.digipost.api.client.representations;
 
 
+import static no.digipost.api.client.representations.PrintDetails.PostType.B;
+
 public class ObjectBuilder {
 
 	public static PrintRecipient newNorwegianRecipient(final String name, final String zip, final String city) {
@@ -38,7 +40,7 @@ public class ObjectBuilder {
 	}
 
 	public static Message newPrintMessage(final String string, final PrintRecipient recipient, final PrintRecipient returnAddress) {
-		return new Message(string, new PrintDetails(recipient, returnAddress, "B"));
+		return new Message(string, new PrintDetails(recipient, returnAddress, B));
 	}
 
 }

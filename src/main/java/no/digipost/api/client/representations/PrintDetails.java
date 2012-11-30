@@ -29,6 +29,10 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class PrintDetails {
 
+	public static enum PostType {
+		B
+	}
+
     @XmlElement(required = true)
     protected PrintRecipient recipient;
     @XmlElement(name = "return-address", required = true)
@@ -38,10 +42,10 @@ public class PrintDetails {
 
 	public PrintDetails() {}
 
-	public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final String postType) {
+	public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final PostType postType) {
 		this.recipient = recipient;
 		this.returnAddress = returnAddress;
-		this.postType = postType;
+		this.postType = postType.name();
 	}
 
 	public PrintRecipient getRecipient() {
@@ -52,7 +56,7 @@ public class PrintDetails {
 		return returnAddress;
 	}
 
-	public String getPostType() {
-		return postType;
+	public PostType getPostType() {
+		return PostType.valueOf(postType);
 	}
 }

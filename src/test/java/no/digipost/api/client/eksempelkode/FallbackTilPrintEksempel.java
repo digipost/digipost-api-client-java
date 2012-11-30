@@ -16,6 +16,7 @@
 package no.digipost.api.client.eksempelkode;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 import java.io.File;
@@ -68,7 +69,7 @@ public class FallbackTilPrintEksempel {
 		// 5. Vi oppretter en forsendelse for sending av brevet i Digipost og med adresseinformasjon som vil
 		// benyttes dersom mottaker ikke er Digipostbruker
 		PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer",
-				"Mottakers poststed")), new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), "B");
+				"Mottakers poststed")), new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B);
 		Message message = new Message("dinForsendelseId", "Brevets emne", new RecipientIdentification(pin, printDetails), new SmsNotification(), PASSWORD,
 				NORMAL);
 
