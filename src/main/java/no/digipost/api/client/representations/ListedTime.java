@@ -35,6 +35,14 @@ public class ListedTime {
     @XmlSchemaType(name = "dateTime")
     protected DateTime time;
 
+	ListedTime() {
+
+	}
+
+	public ListedTime(DateTime atTime) {
+		this.time = atTime;
+	}
+
     /**
      * Gets the value of the time property.
      * 

@@ -43,6 +43,11 @@ public class SmsNotification {
 		this.afterHours.add(afterHours);
 	}
 
+	public SmsNotification(final List<ListedTime> ats, final List<Integer> afterHours) {
+		this.ats = ats;
+		this.afterHours = afterHours;
+	}
+
 	/**
      * Gets the value of the ats property.
      * 
