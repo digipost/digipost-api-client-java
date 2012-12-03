@@ -15,15 +15,14 @@
  */
 package no.digipost.api.client.swing;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -31,14 +30,38 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
+
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.NameAndAddress;
+import no.digipost.api.client.representations.RecipientIdentification;
 import no.digipost.api.client.representations.SensitivityLevel;
 import no.digipost.api.client.representations.SmsNotification;
+
 import org.apache.commons.io.FileUtils;
 
 public class DigipostSwingClient {
@@ -51,6 +74,11 @@ public class DigipostSwingClient {
 	private JTextField senderField;
 	private JTextField subjectField;
 	private JTextField recipientField;
+	private JTextField recipientNameField;
+	private JTextField recipientAddress1Field;
+	private JTextField recipientAddress2Field;
+	private JTextField recipientPostalcodeField;
+	private JTextField recipientCityField;
 	private JTextField contentField;
 	private JTextArea logTextArea;
 
@@ -169,12 +197,145 @@ public class DigipostSwingClient {
 		brevMainPanel.add(recipientField, gbc_mottakerField);
 		recipientField.setColumns(10);
 
+		final JRadioButton identifyOnDigipostAddress = new JRadioButton();
+		identifyOnDigipostAddress.setSelected(true);
+		GridBagConstraints gbc_identifyOnDigipostAddressButton = new GridBagConstraints();
+		gbc_identifyOnDigipostAddressButton.anchor = GridBagConstraints.WEST;
+		gbc_identifyOnDigipostAddressButton.insets = new Insets(0, 0, 5, 0);
+		gbc_identifyOnDigipostAddressButton.gridx = 2;
+		gbc_identifyOnDigipostAddressButton.gridy = 1;
+		brevMainPanel.add(identifyOnDigipostAddress, gbc_identifyOnDigipostAddressButton);
+		identifyOnDigipostAddress.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				recipientField.setEnabled(true);
+				recipientNameField.setEnabled(false);
+				recipientAddress1Field.setEnabled(false);
+				recipientAddress2Field.setEnabled(false);
+				recipientPostalcodeField.setEnabled(false);
+				recipientCityField.setEnabled(false);
+			}
+		});
+
+		JLabel mottakerNavnLabel = new JLabel("Mottakers navn");
+		GridBagConstraints gbc_mottakerNavnLabel = new GridBagConstraints();
+		gbc_mottakerNavnLabel.anchor = GridBagConstraints.EAST;
+		gbc_mottakerNavnLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_mottakerNavnLabel.gridx = 0;
+		gbc_mottakerNavnLabel.gridy = 2;
+		brevMainPanel.add(mottakerNavnLabel, gbc_mottakerNavnLabel);
+
+		recipientNameField = new JTextField();
+		recipientNameField.setEnabled(false);
+		GridBagConstraints gbc_mottakerNameField = new GridBagConstraints();
+		gbc_mottakerNameField.insets = new Insets(0, 0, 5, 5);
+		gbc_mottakerNameField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_mottakerNameField.gridx = 1;
+		gbc_mottakerNameField.gridy = 2;
+		brevMainPanel.add(recipientNameField, gbc_mottakerNameField);
+		recipientNameField.setColumns(10);
+
+		JRadioButton identifyOnNameAndAddress = new JRadioButton();
+		GridBagConstraints gbc_identifyOnNameAndAddressButton = new GridBagConstraints();
+		gbc_identifyOnNameAndAddressButton.anchor = GridBagConstraints.WEST;
+		gbc_identifyOnNameAndAddressButton.insets = new Insets(0, 0, 5, 0);
+		gbc_identifyOnNameAndAddressButton.gridx = 2;
+		gbc_identifyOnNameAndAddressButton.gridy = 2;
+		brevMainPanel.add(identifyOnNameAndAddress, gbc_identifyOnNameAndAddressButton);
+		identifyOnNameAndAddress.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent arg0) {
+				recipientField.setEnabled(false);
+				recipientNameField.setEnabled(true);
+				recipientAddress1Field.setEnabled(true);
+				recipientAddress2Field.setEnabled(true);
+				recipientPostalcodeField.setEnabled(true);
+				recipientCityField.setEnabled(true);
+			}
+		});
+
+		ButtonGroup identifierGroup = new ButtonGroup();
+		identifierGroup.add(identifyOnDigipostAddress);
+		identifierGroup.add(identifyOnNameAndAddress);
+
+		JLabel mottakerAdresse1Label = new JLabel("Adresselinje 1");
+		GridBagConstraints gbc_mottakerAdresseLabel = new GridBagConstraints();
+		gbc_mottakerAdresseLabel.anchor = GridBagConstraints.EAST;
+		gbc_mottakerAdresseLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_mottakerAdresseLabel.gridx = 0;
+		gbc_mottakerAdresseLabel.gridy = 3;
+		brevMainPanel.add(mottakerAdresse1Label, gbc_mottakerAdresseLabel);
+
+		recipientAddress1Field = new JTextField();
+		recipientAddress1Field.setEnabled(false);
+		GridBagConstraints gbc_mottakerAdresse1Field = new GridBagConstraints();
+		gbc_mottakerAdresse1Field.insets = new Insets(0, 0, 5, 5);
+		gbc_mottakerAdresse1Field.fill = GridBagConstraints.HORIZONTAL;
+		gbc_mottakerAdresse1Field.gridx = 1;
+		gbc_mottakerAdresse1Field.gridy = 3;
+		brevMainPanel.add(recipientAddress1Field, gbc_mottakerAdresse1Field);
+		recipientAddress1Field.setColumns(10);
+
+		JLabel mottakerAdresse2Label = new JLabel("Adresselinje 2");
+		GridBagConstraints gbc_mottakerAdresse2Label = new GridBagConstraints();
+		gbc_mottakerAdresse2Label.anchor = GridBagConstraints.EAST;
+		gbc_mottakerAdresse2Label.insets = new Insets(0, 0, 5, 5);
+		gbc_mottakerAdresse2Label.gridx = 0;
+		gbc_mottakerAdresse2Label.gridy = 4;
+		brevMainPanel.add(mottakerAdresse2Label, gbc_mottakerAdresse2Label);
+
+		recipientAddress2Field = new JTextField();
+		recipientAddress2Field.setEnabled(false);
+		GridBagConstraints gbc_mottakerAdresse2Field = new GridBagConstraints();
+		gbc_mottakerAdresse2Field.insets = new Insets(0, 0, 5, 5);
+		gbc_mottakerAdresse2Field.fill = GridBagConstraints.HORIZONTAL;
+		gbc_mottakerAdresse2Field.gridx = 1;
+		gbc_mottakerAdresse2Field.gridy = 4;
+		brevMainPanel.add(recipientAddress2Field, gbc_mottakerAdresse2Field);
+		recipientAddress2Field.setColumns(10);
+
+		JLabel mottakerPostnummerLabel = new JLabel("Postnummer");
+		GridBagConstraints gbc_mottakerPostnummerLabel = new GridBagConstraints();
+		gbc_mottakerPostnummerLabel.anchor = GridBagConstraints.EAST;
+		gbc_mottakerPostnummerLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_mottakerPostnummerLabel.gridx = 0;
+		gbc_mottakerPostnummerLabel.gridy = 5;
+		brevMainPanel.add(mottakerPostnummerLabel, gbc_mottakerPostnummerLabel);
+
+		recipientPostalcodeField = new JTextField();
+		recipientPostalcodeField.setEnabled(false);
+		GridBagConstraints gbc_mottakerPostnummerField = new GridBagConstraints();
+		gbc_mottakerPostnummerField.insets = new Insets(0, 0, 5, 5);
+		gbc_mottakerPostnummerField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_mottakerPostnummerField.gridx = 1;
+		gbc_mottakerPostnummerField.gridy = 5;
+		brevMainPanel.add(recipientPostalcodeField, gbc_mottakerPostnummerField);
+		recipientPostalcodeField.setColumns(10);
+
+		JLabel mottakerPoststedLabel = new JLabel("Poststed");
+		GridBagConstraints gbc_mottakerPoststedLabel = new GridBagConstraints();
+		gbc_mottakerPoststedLabel.anchor = GridBagConstraints.EAST;
+		gbc_mottakerPoststedLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_mottakerPoststedLabel.gridx = 0;
+		gbc_mottakerPoststedLabel.gridy = 6;
+		brevMainPanel.add(mottakerPoststedLabel, gbc_mottakerPoststedLabel);
+
+		recipientCityField = new JTextField();
+		recipientCityField.setEnabled(false);
+		GridBagConstraints gbc_mottakerPoststedField = new GridBagConstraints();
+		gbc_mottakerPoststedField.insets = new Insets(0, 0, 5, 5);
+		gbc_mottakerPoststedField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_mottakerPoststedField.gridx = 1;
+		gbc_mottakerPoststedField.gridy = 6;
+		brevMainPanel.add(recipientCityField, gbc_mottakerPoststedField);
+		recipientCityField.setColumns(10);
+
 		JLabel innholdLabel = new JLabel("Brevets innhold (pdf)");
 		GridBagConstraints gbc_innholdLabel = new GridBagConstraints();
 		gbc_innholdLabel.anchor = GridBagConstraints.EAST;
 		gbc_innholdLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_innholdLabel.gridx = 0;
-		gbc_innholdLabel.gridy = 2;
+		gbc_innholdLabel.gridy = 7;
 		brevMainPanel.add(innholdLabel, gbc_innholdLabel);
 
 		contentField = new JTextField();
@@ -182,7 +343,7 @@ public class DigipostSwingClient {
 		gbc_innholdField.insets = new Insets(0, 0, 5, 5);
 		gbc_innholdField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_innholdField.gridx = 1;
-		gbc_innholdField.gridy = 2;
+		gbc_innholdField.gridy = 7;
 		brevMainPanel.add(contentField, gbc_innholdField);
 		contentField.setColumns(10);
 
@@ -203,7 +364,7 @@ public class DigipostSwingClient {
 		gbc_chooseContentButton.anchor = GridBagConstraints.WEST;
 		gbc_chooseContentButton.insets = new Insets(0, 0, 5, 0);
 		gbc_chooseContentButton.gridx = 2;
-		gbc_chooseContentButton.gridy = 2;
+		gbc_chooseContentButton.gridy = 7;
 		brevMainPanel.add(velgInnholdButton, gbc_chooseContentButton);
 
 		JButton sendButton = new JButton("Send brev");
@@ -213,7 +374,19 @@ public class DigipostSwingClient {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
 				try {
-					Message message = createMessage(subjectField.getText(), recipientField.getText());
+					Message message;
+					if (identifyOnDigipostAddress.isSelected()) {
+						message = createMessage(subjectField.getText(), recipientField.getText());
+					} else {
+						String addressline2 = recipientAddress2Field.getText();
+						String addressline1 = recipientAddress1Field.getText();
+						String name = recipientNameField.getText();
+						String zipCode = recipientPostalcodeField.getText();
+						String city = recipientCityField.getText();
+						message = new Message(String.valueOf(System.currentTimeMillis()), "Test", new RecipientIdentification(
+								new NameAndAddress(name, addressline1, addressline2.equals("") ? null : addressline2, zipCode, city)),
+								new SmsNotification(), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
+					}
 					client.sendMessage(message, FileUtils.openInputStream(new File(contentField.getText())));
 				} catch (IOException ex) {
 					eventLogger.log(ex.getMessage() + "\n");
@@ -244,11 +417,11 @@ public class DigipostSwingClient {
 		gbc_btnBack.anchor = GridBagConstraints.EAST;
 		gbc_btnBack.insets = new Insets(0, 0, 0, 5);
 		gbc_btnBack.gridx = 1;
-		gbc_btnBack.gridy = 4;
+		gbc_btnBack.gridy = 8;
 		brevMainPanel.add(btnBack, gbc_btnBack);
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();
 		gbc_sendButton.gridx = 2;
-		gbc_sendButton.gridy = 4;
+		gbc_sendButton.gridy = 8;
 		brevMainPanel.add(sendButton, gbc_sendButton);
 
 		JPanel logPanel = new JPanel();
