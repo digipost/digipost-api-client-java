@@ -39,6 +39,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -58,6 +59,10 @@ import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.NameAndAddress;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PrintDetails;
+import no.digipost.api.client.representations.PrintDetails.PostType;
+import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.RecipientIdentification;
 import no.digipost.api.client.representations.SensitivityLevel;
 import no.digipost.api.client.representations.SmsNotification;
@@ -83,6 +88,8 @@ public class DigipostSwingClient {
 	private JTextField recipientBirthDateField;
 	private JTextField recipientPhoneNumberField;
 	private JTextField recipientEmailAddressField;
+	private JCheckBox fallbackToPrintCheckBox;
+	private JCheckBox directToPrintCheckBox;
 	private JTextField contentField;
 	private JTextArea logTextArea;
 
@@ -294,11 +301,23 @@ public class DigipostSwingClient {
 		brevMainPanel.add(recipientPhoneNumberField, createGridBagConstraintsForField(1, 8));
 		recipientPhoneNumberField.setColumns(10);
 
+		JLabel fallbackToPrintLabel = new JLabel("Fallback til print");
+		brevMainPanel.add(fallbackToPrintLabel, createGridBagConstraintsForLabel(0, 9));
+
+		fallbackToPrintCheckBox = new JCheckBox();
+		brevMainPanel.add(fallbackToPrintCheckBox, createGridBagConstraintsForField(1, 9, 1));
+
+		JLabel directToPrintLabel = new JLabel("Direkte til print");
+		brevMainPanel.add(directToPrintLabel, createGridBagConstraintsForLabel(2, 9));
+
+		directToPrintCheckBox = new JCheckBox();
+		brevMainPanel.add(directToPrintCheckBox, createGridBagConstraintsForField(3, 9, 1));
+
 		JLabel innholdLabel = new JLabel("Brevets innhold (pdf)");
-		brevMainPanel.add(innholdLabel, createGridBagConstraintsForLabel(0, 9));
+		brevMainPanel.add(innholdLabel, createGridBagConstraintsForLabel(0, 10));
 
 		contentField = new JTextField();
-		brevMainPanel.add(contentField, createGridBagConstraintsForField(1, 9));
+		brevMainPanel.add(contentField, createGridBagConstraintsForField(1, 10));
 		contentField.setColumns(10);
 
 		JButton velgInnholdButton = new JButton("Velg...");
@@ -318,7 +337,7 @@ public class DigipostSwingClient {
 		gbc_chooseContentButton.anchor = GridBagConstraints.WEST;
 		gbc_chooseContentButton.insets = new Insets(0, 0, 5, 0);
 		gbc_chooseContentButton.gridx = 5;
-		gbc_chooseContentButton.gridy = 9;
+		gbc_chooseContentButton.gridy = 10;
 		brevMainPanel.add(velgInnholdButton, gbc_chooseContentButton);
 
 		JButton sendButton = new JButton("Send brev");
@@ -337,16 +356,33 @@ public class DigipostSwingClient {
 						String addressline2 = recipientAddress2Field.getText().equals("") ? null : recipientAddress2Field.getText();
 						String zipCode = recipientPostalcodeField.getText();
 						String city = recipientCityField.getText();
-						String birthDateText = recipientBirthDateField.getText();
+						String birthDateAsString = recipientBirthDateField.getText();
 						LocalDate birthDate = null;
-						if (!birthDateText.equals("")) {
-							birthDate = new LocalDate(Integer.parseInt(birthDateText.substring(6)),
-									Integer.parseInt(birthDateText.substring(3, 5)), Integer.parseInt(birthDateText.substring(0, 2)));
+						if (!birthDateAsString.equals("")) {
+							birthDate = new LocalDate(Integer.parseInt(birthDateAsString.substring(6)), Integer.parseInt(birthDateAsString
+									.substring(3, 5)), Integer.parseInt(birthDateAsString.substring(0, 2)));
 						}
 						String phoneNumber = recipientPhoneNumberField.getText().equals("") ? null : recipientPhoneNumberField.getText();
 						String emailAddress = recipientEmailAddressField.getText().equals("") ? null : recipientEmailAddressField.getText();
-						message = new Message(String.valueOf(System.currentTimeMillis()), "Test", new RecipientIdentification(
-								new NameAndAddress(name, addressline1, addressline2, zipCode, city, birthDate, phoneNumber, emailAddress)),
+
+						NameAndAddress nameAndAddress = new NameAndAddress(name, addressline1, addressline2, zipCode, city, birthDate,
+								phoneNumber, emailAddress);
+
+						NorwegianAddress norwegianAddress = new NorwegianAddress(addressline1, addressline2, zipCode, city);
+						PrintRecipient printRecipient, returnAddress;
+						returnAddress = printRecipient = new PrintRecipient(name, norwegianAddress);
+						PrintDetails printDetails = new PrintDetails(printRecipient, returnAddress, PostType.B);
+
+						RecipientIdentification recipient;
+						if (fallbackToPrintCheckBox.isSelected()) {
+							recipient = new RecipientIdentification(nameAndAddress, printDetails);
+						} else if (directToPrintCheckBox.isSelected()) {
+							recipient = new RecipientIdentification(printDetails);
+						} else {
+							recipient = new RecipientIdentification(nameAndAddress);
+						}
+
+						message = new Message(String.valueOf(System.currentTimeMillis()), subjectField.getText(), recipient,
 								new SmsNotification(), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
 					}
 					client.sendMessage(message, FileUtils.openInputStream(new File(contentField.getText())));
@@ -372,11 +408,11 @@ public class DigipostSwingClient {
 		gbc_btnBack.anchor = GridBagConstraints.EAST;
 		gbc_btnBack.insets = new Insets(0, 0, 0, 5);
 		gbc_btnBack.gridx = 3;
-		gbc_btnBack.gridy = 10;
+		gbc_btnBack.gridy = 11;
 		brevMainPanel.add(btnBack, gbc_btnBack);
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();
 		gbc_sendButton.gridx = 5;
-		gbc_sendButton.gridy = 10;
+		gbc_sendButton.gridy = 11;
 		brevMainPanel.add(sendButton, gbc_sendButton);
 
 		JPanel logPanel = new JPanel();
@@ -427,20 +463,10 @@ public class DigipostSwingClient {
 		certPanel.setLayout(gbl_certPanel);
 
 		JLabel certLabel = new JLabel("Sertifikatfil (.p12)");
-		GridBagConstraints gbc_certLabel = new GridBagConstraints();
-		gbc_certLabel.anchor = GridBagConstraints.EAST;
-		gbc_certLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_certLabel.gridx = 0;
-		gbc_certLabel.gridy = 0;
-		certPanel.add(certLabel, gbc_certLabel);
+		certPanel.add(certLabel, createGridBagConstraintsForLabel(0, 0));
 
 		certField = new JTextField();
-		GridBagConstraints gbc_certField = new GridBagConstraints();
-		gbc_certField.insets = new Insets(0, 0, 5, 5);
-		gbc_certField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_certField.gridx = 1;
-		gbc_certField.gridy = 0;
-		certPanel.add(certField, gbc_certField);
+		certPanel.add(certField, createGridBagConstraintsForField(1, 0, 1));
 		certField.setColumns(10);
 
 		JButton certButton = new JButton("Velg...");
@@ -462,54 +488,24 @@ public class DigipostSwingClient {
 		certPanel.add(certButton, gbc_certButton);
 
 		JLabel passordLabel = new JLabel("Sertifikatpassord");
-		GridBagConstraints gbc_passordLabel = new GridBagConstraints();
-		gbc_passordLabel.anchor = GridBagConstraints.EAST;
-		gbc_passordLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_passordLabel.gridx = 0;
-		gbc_passordLabel.gridy = 1;
-		certPanel.add(passordLabel, gbc_passordLabel);
+		certPanel.add(passordLabel, createGridBagConstraintsForLabel(0, 1));
 
 		passwordField = new JPasswordField();
-		GridBagConstraints gbc_passordField = new GridBagConstraints();
-		gbc_passordField.insets = new Insets(0, 0, 5, 5);
-		gbc_passordField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_passordField.gridx = 1;
-		gbc_passordField.gridy = 1;
-		certPanel.add(passwordField, gbc_passordField);
+		certPanel.add(passwordField, createGridBagConstraintsForField(1, 1, 1));
 		passwordField.setColumns(10);
 
 		JLabel avsenderLabel = new JLabel("Avsenders ID");
-		GridBagConstraints gbc_avsenderLabel = new GridBagConstraints();
-		gbc_avsenderLabel.anchor = GridBagConstraints.EAST;
-		gbc_avsenderLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_avsenderLabel.gridx = 0;
-		gbc_avsenderLabel.gridy = 2;
-		certPanel.add(avsenderLabel, gbc_avsenderLabel);
+		certPanel.add(avsenderLabel, createGridBagConstraintsForLabel(0, 2));
 
 		senderField = new JTextField();
-		GridBagConstraints gbc_avsenderField = new GridBagConstraints();
-		gbc_avsenderField.insets = new Insets(0, 0, 5, 5);
-		gbc_avsenderField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_avsenderField.gridx = 1;
-		gbc_avsenderField.gridy = 2;
-		certPanel.add(senderField, gbc_avsenderField);
+		certPanel.add(senderField, createGridBagConstraintsForField(1, 2, 1));
 		senderField.setColumns(10);
 
 		JLabel endpointLabel = new JLabel("API-endpoint URL");
-		GridBagConstraints gbc_endpointLabel = new GridBagConstraints();
-		gbc_endpointLabel.anchor = GridBagConstraints.EAST;
-		gbc_endpointLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_endpointLabel.gridx = 0;
-		gbc_endpointLabel.gridy = 3;
-		certPanel.add(endpointLabel, gbc_endpointLabel);
+		certPanel.add(endpointLabel, createGridBagConstraintsForLabel(0, 3));
 
 		endpointField = new JTextField("https://api.digipost.no");
-		GridBagConstraints gbc_endpointField = new GridBagConstraints();
-		gbc_endpointField.insets = new Insets(0, 0, 5, 5);
-		gbc_endpointField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_endpointField.gridx = 1;
-		gbc_endpointField.gridy = 3;
-		certPanel.add(endpointField, gbc_endpointField);
+		certPanel.add(endpointField, createGridBagConstraintsForField(1, 3, 1));
 		endpointField.setColumns(10);
 
 		JButton nesteButton = new JButton("Neste");
@@ -552,22 +548,22 @@ public class DigipostSwingClient {
 	}
 
 	private GridBagConstraints createGridBagConstraintsForLabel(final int gridx, final int gridy) {
-		GridBagConstraints gbc_emneLabel = new GridBagConstraints();
-		gbc_emneLabel.anchor = GridBagConstraints.EAST;
-		gbc_emneLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_emneLabel.gridx = gridx;
-		gbc_emneLabel.gridy = gridy;
-		return gbc_emneLabel;
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.anchor = GridBagConstraints.EAST;
+		gbc.insets = new Insets(0, 0, 5, 5);
+		gbc.gridx = gridx;
+		gbc.gridy = gridy;
+		return gbc;
 	}
 
 	private GridBagConstraints createGridBagConstraintsForField(final int gridx, final int gridy, final int gridwidth) {
-		GridBagConstraints gbc_mottakerAdresse2Field = new GridBagConstraints();
-		gbc_mottakerAdresse2Field.insets = new Insets(0, 0, 5, 5);
-		gbc_mottakerAdresse2Field.fill = GridBagConstraints.HORIZONTAL;
-		gbc_mottakerAdresse2Field.gridx = gridx;
-		gbc_mottakerAdresse2Field.gridy = gridy;
-		gbc_mottakerAdresse2Field.gridwidth = gridwidth;
-		return gbc_mottakerAdresse2Field;
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.insets = new Insets(0, 0, 5, 5);
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.gridx = gridx;
+		gbc.gridy = gridy;
+		gbc.gridwidth = gridwidth;
+		return gbc;
 	}
 
 	private GridBagConstraints createGridBagConstraintsForField(final int gridx, final int gridy) {
