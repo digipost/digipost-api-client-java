@@ -15,8 +15,6 @@
  */
 package no.digipost.api.client;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -26,14 +24,15 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
+
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedData;
@@ -49,9 +48,13 @@ import org.bouncycastle.operator.OutputEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
+
 /**
- * Superklasse for MessageSender og PrintOrderer som samler felles
- * funksjonalitet for å snakke med ApiService.
+ * Superklasse for MessageSender som har funksjonalitet for å snakke med
+ * ApiService.
  *
  */
 public class Communicator {
@@ -70,15 +73,6 @@ public class Communicator {
 		return new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
 	}
 
-	/**
-	 * Krypterer <code>data</code> med brukers pubklike nøkkel
-	 *
-	 * @param data
-	 * @param keyId
-	 * @param keyContent
-	 * @return
-	 * @throws Exception
-	 */
 	private byte[] preencrypt(final byte[] data, final String keyId, final String keyContent) throws Exception {
 		PEMReader reader = new PEMReader(new StringReader(keyContent));
 		X509EncodedKeySpec spec = new X509EncodedKeySpec(((BCRSAPublicKey) reader.readObject()).getEncoded());
@@ -170,7 +164,7 @@ public class Communicator {
 	}
 
 	/**
-	 * Henter brukers publike nøkkel fra servern og krypterer brevet som skal
+	 * Henter brukers public nøkkel fra serveren og krypterer brevet som skal
 	 * sendes med denne.
 	 */
 	public InputStream fetchKeyAndEncrypt(final MessageDelivery delivery, final InputStream content) {
