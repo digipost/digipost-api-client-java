@@ -17,7 +17,6 @@ package no.digipost.api.client.representations;
 
 import static no.digipost.api.client.representations.Relation.AUTOCOMPLETE;
 import static no.digipost.api.client.representations.Relation.CREATE_MESSAGE;
-import static no.digipost.api.client.representations.Relation.CREATE_PRINT_MESSAGE;
 import static no.digipost.api.client.representations.Relation.SEARCH;
 
 import java.net.URI;
@@ -37,11 +36,6 @@ public class EntryPoint extends Representation {
 	}
 
 	public EntryPoint() {
-	}
-
-	public URI getCreatePrintMessageUri() {
-		Link printMessageUri = getLinkByRelationName(CREATE_PRINT_MESSAGE);
-		return printMessageUri == null ? null : printMessageUri.getUri();
 	}
 
 	public URI getCreateMessageUri() {
