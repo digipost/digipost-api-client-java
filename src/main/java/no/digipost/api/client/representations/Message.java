@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang.StringUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message",
-		propOrder = {"messageId", "senderId", "preEncrypt", "subject", "recipient", "smsNotification", "authenticationLevel", "sensitivityLevel"})
+@XmlType(name = "message", propOrder = { "messageId", "senderId", "preEncrypt", "subject", "recipient", "smsNotification",
+		"authenticationLevel", "sensitivityLevel" })
 @XmlRootElement(name = "message")
 public class Message {
 	@XmlElement(name = "message-id", required = true)
@@ -49,17 +49,22 @@ public class Message {
 	}
 
 	public Message(final String messageId, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
-				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
 		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel);
 	}
 
 	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
-				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
 		this(messageId, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel);
 	}
 
-	public Message(final String messageId, final String subject, final RecipientIdentification recipient, final SmsNotification smsVarsling,
-				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
+	public Message(final String messageId, final String subject, final NameAndAddress nameAndAddress, final SmsNotification smsVarsling,
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
+		this(messageId, subject, new RecipientIdentification(nameAndAddress), smsVarsling, authenticationLevel, sensitivityLevel);
+	}
+
+	public Message(final String messageId, final String subject, final RecipientIdentification recipient,
+			final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
 		this.messageId = messageId;
 		this.subject = subject;
 		this.recipient = recipient;
@@ -109,13 +114,13 @@ public class Message {
 	}
 
 	public void setPreEncrypt() {
-		this.preEncrypt = true;
+		preEncrypt = true;
 	}
 
 	/**
-	 * Only neccessary when sending on behalf of another user.
-	 * In this case senderId must be the party you are sending on behalf of.
-	 * Your own user id should be set in the http header X-Digipost-UserId.
+	 * Only neccessary when sending on behalf of another user. In this case
+	 * senderId must be the party you are sending on behalf of. Your own user id
+	 * should be set in the http header X-Digipost-UserId.
 	 */
 	public void setSenderId(final long senderId) {
 		this.senderId = senderId;
