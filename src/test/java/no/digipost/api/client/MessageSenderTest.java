@@ -81,10 +81,8 @@ public class MessageSenderTest {
 		try {
 			brevSender.createOrFetchMessage(forsendelseIn);
 			fail();
-		} catch (Exception e) {
-			assertTrue(e instanceof DigipostClientException);
-			DigipostClientException de = (DigipostClientException) e;
-			assertEquals(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, de.getErrorType());
+		} catch (DigipostClientException e) {
+			assertEquals(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, e.getErrorType());
 		}
 
 	}
@@ -104,10 +102,8 @@ public class MessageSenderTest {
 		try {
 			brevSender.createOrFetchMessage(forsendelseIn);
 			fail();
-		} catch (Exception e) {
-			assertTrue(e instanceof DigipostClientException);
-			DigipostClientException de = (DigipostClientException) e;
-			assertEquals(ErrorType.PRINT_MESSAGE_ALREADY_DELIVERED, de.getErrorType());
+		} catch (DigipostClientException e) {
+			assertEquals(ErrorType.PRINT_MESSAGE_ALREADY_DELIVERED, e.getErrorType());
 		}
 
 	}
