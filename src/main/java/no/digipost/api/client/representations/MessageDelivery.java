@@ -99,4 +99,8 @@ public class MessageDelivery extends Representation {
 	public DeliveryMethod getDeliveryMethod() {
 		return deliveryMethod;
 	}
+
+	public DateTime getDeliveredDate() {
+		return deliveredDate;
+	}
 }

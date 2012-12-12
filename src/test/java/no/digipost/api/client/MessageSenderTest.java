@@ -17,6 +17,7 @@ package no.digipost.api.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,7 @@ import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.SensitivityLevel;
 
 import no.digipost.api.client.representations.SmsNotification;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -70,17 +72,42 @@ public class MessageSenderTest {
 		Message forsendelseIn = lagDefaultForsendelse();
 		when(api.createMessage(forsendelseIn)).thenReturn(new MockClientResponse(Status.CONFLICT));
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED, null);
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED,
+				DateTime.now());
 		when(api.fetchExistingMessage((URI) any())).thenReturn(new MockClientResponse(Status.OK, eksisterendeForsendelse));
 
 		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);
 
 		try {
 			brevSender.createOrFetchMessage(forsendelseIn);
+			fail();
 		} catch (Exception e) {
 			assertTrue(e instanceof DigipostClientException);
 			DigipostClientException de = (DigipostClientException) e;
 			assertEquals(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, de.getErrorType());
+		}
+
+	}
+
+	@Test
+	public void skalKasteFeilHvisForsendelseAlleredeLevertTilPrint() {
+		ApiService api = mock(ApiService.class);
+		Message forsendelseIn = lagDefaultForsendelse();
+		when(api.createMessage(forsendelseIn)).thenReturn(new MockClientResponse(Status.CONFLICT));
+
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", DeliveryMethod.PRINT, MessageStatus.DELIVERED_TO_PRINT,
+				DateTime.now());
+		when(api.fetchExistingMessage((URI) any())).thenReturn(new MockClientResponse(Status.OK, eksisterendeForsendelse));
+
+		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);
+
+		try {
+			brevSender.createOrFetchMessage(forsendelseIn);
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof DigipostClientException);
+			DigipostClientException de = (DigipostClientException) e;
+			assertEquals(ErrorType.PRINT_MESSAGE_ALREADY_DELIVERED, de.getErrorType());
 		}
 
 	}

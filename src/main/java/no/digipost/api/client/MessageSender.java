@@ -131,10 +131,19 @@ public class MessageSender extends Communicator {
 	}
 
 	private void checkThatMessageHasNotAlreadyBeenDelivered(final MessageDelivery existingMessage) {
-		if (MessageStatus.DELIVERED == existingMessage.getStatus()) {
-			String errorMessage = "En identisk forsendelse er allerede levert til mottaker. Dette skyldes sannsynligvis doble kall til Digipost.";
-			log(errorMessage);
-			throw new DigipostClientException(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, errorMessage);
+		switch (existingMessage.getStatus()) {
+			case DELIVERED: {
+				String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til mottaker den [%s]. " +
+						"Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(), existingMessage.getDeliveredDate());
+				log(errorMessage);
+				throw new DigipostClientException(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, errorMessage);
+			}
+			case DELIVERED_TO_PRINT: {
+				String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til print den [%s]. " +
+						"Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(), existingMessage.getDeliveredDate());
+				log(errorMessage);
+				throw new DigipostClientException(ErrorType.PRINT_MESSAGE_ALREADY_DELIVERED, errorMessage);
+			}
 		}
 	}
 
