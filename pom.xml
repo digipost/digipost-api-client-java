@@ -15,6 +15,10 @@
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jersey.version>1.12</jersey.version>
+    </properties>
 
 	<dependencyManagement>
 		<dependencies>
@@ -62,12 +66,12 @@
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
-			<version>1.12</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
 			<artifactId>jersey-apache-client</artifactId>
-			<version>1.12</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -416,10 +420,6 @@
 			</build>
 		</profile>
 	</profiles>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 
 	<scm>
 		<connection>scm:git:git@github.com:digipost/digipost-api-client-java.git</connection>
