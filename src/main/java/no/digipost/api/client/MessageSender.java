@@ -17,11 +17,12 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
-import com.sun.jersey.api.client.ClientResponse;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.MessageStatus;
+
+import com.sun.jersey.api.client.ClientResponse;
 
 public class MessageSender extends Communicator {
 
@@ -144,6 +145,8 @@ public class MessageSender extends Communicator {
 				log(errorMessage);
 				throw new DigipostClientException(ErrorType.PRINT_MESSAGE_ALREADY_DELIVERED, errorMessage);
 			}
+		default:
+			break;
 		}
 	}
 
