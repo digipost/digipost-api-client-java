@@ -31,15 +31,15 @@ import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 public class JerseyClientProvider {
 	private static ApacheHttpClient client;
 
-	static {
-		ApacheHttpClientHandler clientHandler = new ApacheHttpClientHandler(opprettMultiThreadedHttpClient(), opprettClientConfig());
-		client = new ApacheHttpClient(clientHandler);
-	}
-
 	private static final int MAX_HTTP_CONNECTIONS = 100;
 
 	private static final Integer THREADPOOL_SIZE = 100;
 	private static final Integer CONNECTION_TIMEOUT = 5000;
+
+	static {
+		ApacheHttpClientHandler clientHandler = new ApacheHttpClientHandler(opprettMultiThreadedHttpClient(), opprettClientConfig());
+		client = new ApacheHttpClient(clientHandler);
+	}
 
 	public static Client getClient() {
 		return client;
