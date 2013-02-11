@@ -18,6 +18,9 @@ package no.digipost.api.client.representations;
 public enum Relation {
 	SELF,
 	ADD_CONTENT_AND_SEND,
+	ADD_CONTENT,
+	SEND,
+	ADD_ATTACHMENT,
 	SEARCH,
 	AUTOCOMPLETE,
 	CREATE_MESSAGE,
