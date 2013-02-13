@@ -38,12 +38,40 @@ public class MessageSender extends Communicator {
 	 * klienten vil det gjøres et kall for å hente mottakers offentlige nøkkel
 	 * (public key), for så å kryptere innholdet før det sendes over.
 	 */
-	public MessageDelivery sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
-		return sendMessage(message, letterContent, contentType, letterContent);
+	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
+		return createAndSendMessage(message, letterContent, contentType, letterContent);
 	}
 
-	public MessageDelivery sendMessage(final Message message, final InputStream letterContent, final ContentType contentType,
-									   final InputStream printContent) {
+	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent, final ContentType contentType,
+			final InputStream printContent) {
+		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
+		MessageDelivery createdMessage = createOrFetchMessage(message);
+
+		final InputStream unencryptetContent;
+		final ContentType finalContentType;
+		if (createdMessage.isDeliveredToDigipost()) {
+			unencryptetContent = letterContent;
+			finalContentType = contentType;
+		} else {
+			unencryptetContent = printContent;
+			finalContentType = ContentType.PDF;
+		}
+
+		MessageDelivery delivery;
+		if (message.isPreEncrypt()) {
+			log("\n\n---FORSENDELSE SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
+			final InputStream encryptetContent = fetchKeyAndEncrypt(createdMessage, unencryptetContent);
+			delivery = uploadContentAndSend(finalContentType, createdMessage, encryptetContent);
+		} else {
+			delivery = uploadContentAndSend(finalContentType, createdMessage, unencryptetContent);
+		}
+
+		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
+		return delivery;
+	}
+
+	public MessageDelivery createMessageAndAddContent(final Message message, final InputStream letterContent,
+			final ContentType contentType, final InputStream printContent) {
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
 		MessageDelivery createdMessage = createOrFetchMessage(message);
 
@@ -66,35 +94,53 @@ public class MessageSender extends Communicator {
 			delivery = uploadContent(finalContentType, createdMessage, unencryptetContent);
 		}
 
-		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
+		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED OPPRETTET)---");
 		return delivery;
 	}
 
-	private MessageDelivery uploadContent(final ContentType contentType, final MessageDelivery createdMessage, final InputStream unencryptetContent) {
-		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
-		return addToContentAndSendMessage(createdMessage, unencryptetContent, contentType);
+	public MessageDelivery sendMessage(final Message message) {
+		MessageDelivery createdMessage = createOrFetchMessage(message);
+		MessageDelivery deliveredMessage = null;
+		if (createdMessage.isDeliveredToDigipost()) {
+			log("\n\n---BREVET ER ALLEREDE SENDT");
+		} else if (createdMessage.getSendLink() == null) {
+			log("\n\n---BREVET ER IKKE KOMPLETT, KAN IKKE SENDE");
+		} else {
+			deliveredMessage = send(createdMessage);
+		}
+		return deliveredMessage;
 	}
 
+	private MessageDelivery uploadContentAndSend(final ContentType contentType, final MessageDelivery createdMessage,
+			final InputStream unencryptetContent) {
+		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
+		return addContentAndSendMessage(createdMessage, unencryptetContent, contentType);
+	}
+
+	private MessageDelivery uploadContent(final ContentType contentType, final MessageDelivery createdMessage,
+			final InputStream unencryptetContent) {
+		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
+		return addContent(createdMessage, unencryptetContent, contentType);
+	}
 
 	/**
 	 * Oppretter en forsendelsesressurs på serveren eller henter en allerede
 	 * opprettet forsendelsesressurs.
-	 *
+	 * 
 	 * Dersom forsendelsen allerede er opprettet, vil denne metoden gjøre en
 	 * GET-forespørsel mot serveren for å hente en representasjon av
 	 * forsendelsesressursen slik den er på serveren. Dette vil ikke føre til
 	 * noen endringer av ressursen.
-	 *
+	 * 
 	 * Dersom forsendelsen ikke eksisterer fra før, vil denne metoden opprette
 	 * en ny forsendelsesressurs på serveren og returnere en representasjon av
 	 * ressursen.
-	 *
+	 * 
 	 */
 	public MessageDelivery createOrFetchMessage(final Message message) {
 		ClientResponse response = apiService.createMessage(message);
 
 		if (messageAlreadyExists(response)) {
-
 			ClientResponse existingMessageResponse = apiService.fetchExistingMessage(response.getLocation());
 			checkResponse(existingMessageResponse);
 			MessageDelivery delivery = existingMessageResponse.getEntity(MessageDelivery.class);
@@ -115,14 +161,14 @@ public class MessageSender extends Communicator {
 	 * denne metoden skal kunne kalles, må man først ha opprettet
 	 * forsendelsesressursen på serveren ved metoden
 	 * {@code createOrFetchMesssage}.
-	 *
+	 * 
 	 * @param contentType
-	 *
+	 * 
 	 */
-	public MessageDelivery addToContentAndSendMessage(final MessageDelivery delivery, final InputStream letterContent,
-											  final ContentType contentType) {
+	public MessageDelivery addContentAndSendMessage(final MessageDelivery delivery, final InputStream letterContent,
+			final ContentType contentType) {
 		verifyCorrectStatus(delivery, MessageStatus.NOT_COMPLETE);
-		ClientResponse response = apiService.addToContentAndSend(delivery, letterContent, contentType);
+		ClientResponse response = apiService.addContentAndSend(delivery, letterContent, contentType);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);
@@ -131,20 +177,59 @@ public class MessageSender extends Communicator {
 		return response.getEntity(delivery.getClass());
 	}
 
+	/**
+	 * Legger til innhold (PDF) til en forsendelse. For at denne metoden skal
+	 * kunne kalles, må man først ha opprettet forsendelsesressursen på serveren
+	 * ved metoden {@code createOrFetchMesssage}.
+	 * 
+	 * @param contentType
+	 * 
+	 */
+	public MessageDelivery addContent(final MessageDelivery delivery, final InputStream letterContent, final ContentType contentType) {
+		verifyCorrectStatus(delivery, MessageStatus.NOT_COMPLETE);
+		ClientResponse response = apiService.addContent(delivery, letterContent, contentType);
+
+		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
+		checkResponse(response);
+
+		log("Innhold ble lagt til. Status: [" + response.toString() + "]");
+		return response.getEntity(delivery.getClass());
+	}
+
+	/**
+	 * Sender en forsendelse. For at denne metoden skal kunne kalles, må man
+	 * først ha lagt innhold til forsendelsen med {@code TODO fyll inn navn}.
+	 * 
+	 * @param contentType
+	 * 
+	 */
+	public MessageDelivery send(final MessageDelivery delivery) {
+		verifyCorrectStatus(delivery, MessageStatus.COMPLETE);
+		ClientResponse response = apiService.send(delivery);
+
+		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
+		checkResponse(response);
+
+		log("Brevet ble sendt. Status: [" + response.toString() + "]");
+		return response.getEntity(delivery.getClass());
+	}
+
 	private void checkThatMessageHasNotAlreadyBeenDelivered(final MessageDelivery existingMessage) {
 		switch (existingMessage.getStatus()) {
-			case DELIVERED: {
-				String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til mottaker den [%s]. " +
-						"Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(), existingMessage.getDeliveredDate());
-				log(errorMessage);
-				throw new DigipostClientException(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, errorMessage);
-			}
-			case DELIVERED_TO_PRINT: {
-				String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til print den [%s]. " +
-						"Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(), existingMessage.getDeliveredDate());
-				log(errorMessage);
-				throw new DigipostClientException(ErrorType.PRINT_MESSAGE_ALREADY_DELIVERED, errorMessage);
-			}
+		case DELIVERED: {
+			String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til mottaker den [%s]. "
+					+ "Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(),
+					existingMessage.getDeliveredDate());
+			log(errorMessage);
+			throw new DigipostClientException(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, errorMessage);
+		}
+		case DELIVERED_TO_PRINT: {
+			String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til print den [%s]. "
+					+ "Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(),
+					existingMessage.getDeliveredDate());
+			log(errorMessage);
+			throw new DigipostClientException(ErrorType.PRINT_MESSAGE_ALREADY_DELIVERED, errorMessage);
+		}
 		default:
 			break;
 		}

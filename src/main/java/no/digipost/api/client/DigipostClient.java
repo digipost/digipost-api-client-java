@@ -91,10 +91,26 @@ public class DigipostClient {
 	}
 
 	/**
+	 * Oppretter et brev i Digipost. Se
+	 * MessageSender.createMessageAndAddContent()
+	 */
+	public MessageDelivery createMessage(final Message message, final InputStream letterContent) {
+		return new MessageSender(apiService, eventLogger)
+				.createMessageAndAddContent(message, letterContent, ContentType.PDF, letterContent);
+	}
+
+	/**
+	 * Sender et brev gjennom Digipost
+	 */
+	public MessageDelivery sendMessage(final Message message) {
+		return new MessageSender(apiService, eventLogger).sendMessage(message);
+	}
+
+	/**
 	 * Muliggjør sending med HTML content type.
 	 */
 	public MessageDelivery sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
-		return new MessageSender(apiService, eventLogger).sendMessage(message, letterContent, contentType);
+		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, letterContent, contentType);
 	}
 
 	public MessageDelivery sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
@@ -109,7 +125,7 @@ public class DigipostClient {
 	 */
 	public MessageDelivery sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
 			final InputStream digipostMessageContent, final InputStream printMessageContent) {
-		return new MessageSender(apiService, eventLogger).sendMessage(message, digipostMessageContent, digipostMessageContentType,
+		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, digipostMessageContent, digipostMessageContentType,
 				printMessageContent);
 	}
 
@@ -119,7 +135,7 @@ public class DigipostClient {
 	 */
 	public MessageDelivery deliverToPrint(final Message printMessage, final InputStream printMessageContent) {
 		assert printMessage.isDirectPrint() : "Direct print messages cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress";
-		return new MessageSender(apiService, eventLogger).sendMessage(printMessage, null, null, printMessageContent);
+		return new MessageSender(apiService, eventLogger).createAndSendMessage(printMessage, null, null, printMessageContent);
 	}
 
 	public Recipients search(final String searchString) {

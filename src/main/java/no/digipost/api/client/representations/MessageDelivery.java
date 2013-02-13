@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.representations;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -22,37 +24,32 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.List;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
+
 import org.joda.time.DateTime;
 
-
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message-delivery", propOrder = {
-    "messageId",
-    "deliveryMethod",
-    "status",
-    "deliveredDate",
-    "links"
-})
+@XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveredDate", "links" })
 @XmlRootElement(name = "message-delivery")
 public class MessageDelivery extends Representation {
 
-    @XmlElement(name = "message-id", required = true)
-    protected String messageId;
+	@XmlElement(name = "message-id", required = true)
+	protected String messageId;
 	@XmlElement(name = "delivery-method", required = true)
-    protected DeliveryMethod deliveryMethod;
-    @XmlElement(required = true)
-    protected MessageStatus status;
-    @XmlElement(name = "delivered-date", type = String.class, nillable = false)
-    @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
-    @XmlSchemaType(name = "dateTime")
-    protected DateTime deliveredDate;
+	protected DeliveryMethod deliveryMethod;
+	@XmlElement(required = true)
+	protected MessageStatus status;
+	@XmlElement(name = "delivered-date", type = String.class, nillable = false)
+	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+	@XmlSchemaType(name = "dateTime")
+	protected DateTime deliveredDate;
 
-	public MessageDelivery() {}
+	public MessageDelivery() {
+	}
 
-	public MessageDelivery(final String messageId, final DeliveryMethod deliveryMethod, final MessageStatus status, final DateTime deliveredDate) {
+	public MessageDelivery(final String messageId, final DeliveryMethod deliveryMethod, final MessageStatus status,
+			final DateTime deliveredDate) {
 		this.messageId = messageId;
 		this.deliveryMethod = deliveryMethod;
 		this.status = status;
@@ -86,6 +83,14 @@ public class MessageDelivery extends Representation {
 
 	public Link getAddContentAndSendLink() {
 		return getLinkByRelationName(Relation.ADD_CONTENT_AND_SEND);
+	}
+
+	public Link getAddContentLink() {
+		return getLinkByRelationName(Relation.ADD_CONTENT);
+	}
+
+	public Link getSendLink() {
+		return getLinkByRelationName(Relation.SEND);
 	}
 
 	public boolean isDeliveredToDigipost() {

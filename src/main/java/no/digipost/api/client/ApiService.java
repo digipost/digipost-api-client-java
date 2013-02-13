@@ -159,18 +159,19 @@ public class ApiService {
 	 * 
 	 * Før man kaller denne metoden, må man allerede ha opprettet en
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
-	 *
+	 * 
 	 * @param createdMessage
+	 * @param letterContent
 	 * @param contentType
 	 */
-	public ClientResponse addToContentAndSend(final MessageDelivery createdMessage, final InputStream letterContent,
+	public ClientResponse addContentAndSend(final MessageDelivery createdMessage, final InputStream letterContent,
 			final ContentType contentType) {
-		Link addFileLink = fetchAddFileLink(createdMessage);
+		Link addContentAndSendLink = fetchAddContentAndSendLink(createdMessage);
 
 		byte[] content = readLetterContent(letterContent);
 
 		return webResource
-				.path(addFileLink.getUri().getPath())
+				.path(addContentAndSendLink.getUri().getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V3)
 				.header(X_Digipost_UserId, senderAccountId)
 				.type(contentType.getRequestMediaType())
@@ -178,13 +179,77 @@ public class ApiService {
 
 	}
 
-	private Link fetchAddFileLink(final MessageDelivery delivery) {
+	/**
+	 * Angir innholdet i en allerede opprettet forsendelse
+	 * 
+	 * Før man kaller denne metoden, må man allerede ha opprettet en
+	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
+	 * 
+	 * @param createdMessage
+	 * @param letterContent
+	 * @param contentType
+	 */
+	public ClientResponse addContent(final MessageDelivery createdMessage, final InputStream letterContent, final ContentType contentType) {
+		Link addContentLink = fetchAddContentLink(createdMessage);
+
+		byte[] content = readLetterContent(letterContent);
+
+		return webResource
+				.path(addContentLink.getUri().getPath())
+				.accept(DIGIPOST_MEDIA_TYPE_V3)
+				.header(X_Digipost_UserId, senderAccountId)
+				.type(contentType.getRequestMediaType())
+				.post(ClientResponse.class, content);
+	}
+
+	/**
+	 * Sender innholdet i forsendelsen som en POST-forespørsel til serveren
+	 * 
+	 * OBS! Denne metoden fører til at brevet blir sendt på ordentlig.
+	 * 
+	 * Før man kaller denne metoden, må man ha lagt innhold til forsendelsen ved
+	 * metoden {@code TODO fyll inn metode når den er opprettet}
+	 * 
+	 * @param createdMessage
+	 * @param letterContent
+	 * @param contentType
+	 */
+	public ClientResponse send(final MessageDelivery createdMessage) {
+		Link sendLink = fetchSendLink(createdMessage);
+
+		return webResource
+				.path(sendLink.getUri().getPath())
+				.accept(DIGIPOST_MEDIA_TYPE_V3)
+				.header(X_Digipost_UserId, senderAccountId)
+				.type(DIGIPOST_MEDIA_TYPE_V3)
+				.post(ClientResponse.class);
+	}
+
+	private Link fetchAddContentAndSendLink(final MessageDelivery delivery) {
 		Link addContentLink = delivery.getAddContentAndSendLink();
+		if (addContentLink == null) {
+			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST,
+					"Kan ikke legge til innhold og sende en forsendelse som ikke har en link for å gjøre dette.");
+		}
+		return addContentLink;
+	}
+
+	private Link fetchAddContentLink(final MessageDelivery delivery) {
+		Link addContentLink = delivery.getAddContentLink();
 		if (addContentLink == null) {
 			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST,
 					"Kan ikke legge til innhold til en forsendelse som ikke har en link for å gjøre dette.");
 		}
 		return addContentLink;
+	}
+
+	private Link fetchSendLink(final MessageDelivery delivery) {
+		Link sendLink = delivery.getSendLink();
+		if (sendLink == null) {
+			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST,
+					"Kan ikke sende en forsendelse som ikke har en link for å gjøre dette.");
+		}
+		return sendLink;
 	}
 
 	byte[] readLetterContent(final InputStream letterContent) {
