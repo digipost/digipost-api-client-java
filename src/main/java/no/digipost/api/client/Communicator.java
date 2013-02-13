@@ -27,6 +27,7 @@ import java.security.spec.X509EncodedKeySpec;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
+import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Link;
@@ -55,7 +56,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 /**
  * Superklasse for MessageSender som har funksjonalitet for å snakke med
  * ApiService.
- *
+ * 
  */
 public class Communicator {
 
@@ -142,13 +143,21 @@ public class Communicator {
 		eventLogger.log(stacktrace.toString());
 	}
 
-	protected boolean messageAlreadyExists(final ClientResponse response) {
+	protected boolean resourceAlreadyExists(final ClientResponse response) {
 		return Status.CONFLICT.equals(Status.fromStatusCode(response.getStatus()));
 	}
 
 	protected void checkThatExistingMessageIsIdenticalToNewMessage(final MessageDelivery exisitingMessage, final Message message) {
 		if (!exisitingMessage.isSameMessageAs(message)) {
 			String errorMessage = "Forsendelse med id [" + message.getMessageId() + "] finnes fra før med annen spesifikasjon.";
+			log(errorMessage);
+			throw new DigipostClientException(ErrorType.DUPLICATE_MESSAGE_ID, errorMessage);
+		}
+	}
+
+	protected void checkThatExistingAttachmentIsIdenticalToNewAttachment(final Attachment exisitingAttachment, final Attachment attachment) {
+		if (!exisitingAttachment.isSameAttachmentAs(attachment)) {
+			String errorMessage = "Vedlegg med emne [" + attachment.getSubject() + "] finnes fra før med annen spesifikasjon.";
 			log(errorMessage);
 			throw new DigipostClientException(ErrorType.DUPLICATE_MESSAGE_ID, errorMessage);
 		}

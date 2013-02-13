@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
+import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.EntryPoint;
@@ -133,9 +134,36 @@ public class ApiService {
 	}
 
 	/**
+	 * Oppretter en ny vedleggsressurs på serveren ved å sende en
+	 * POST-forespørsel. Brukes for å legge vedlegg til et brev i Digipost.
+	 * 
+	 * @param message
+	 * @param attachment
+	 */
+	public ClientResponse createAttachment(final MessageDelivery message, final Attachment attachment) {
+		return webResource
+				.path(fetchAddAttachmentLink(message).getUri().getPath())
+				.accept(DIGIPOST_MEDIA_TYPE_V3)
+				.header(X_Digipost_UserId, senderAccountId)
+				.type(DIGIPOST_MEDIA_TYPE_V3)
+				.post(ClientResponse.class, attachment);
+	}
+
+	/**
 	 * Henter en allerede eksisterende forsendelsesressurs fra serveren.
 	 */
 	public ClientResponse fetchExistingMessage(final URI location) {
+		return webResource
+				.path(location.getPath())
+				.accept(DIGIPOST_MEDIA_TYPE_V3)
+				.header(X_Digipost_UserId, senderAccountId)
+				.get(ClientResponse.class);
+	}
+
+	/**
+	 * Henter en allerede eksisterende vedleggsressurs fra serveren.
+	 */
+	public ClientResponse fetchExistingAttachment(final URI location) {
 		return webResource
 				.path(location.getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V3)
@@ -208,7 +236,7 @@ public class ApiService {
 	 * OBS! Denne metoden fører til at brevet blir sendt på ordentlig.
 	 * 
 	 * Før man kaller denne metoden, må man ha lagt innhold til forsendelsen ved
-	 * metoden {@code TODO fyll inn metode når den er opprettet}
+	 * metoden {@code addContent}
 	 * 
 	 * @param createdMessage
 	 * @param letterContent
@@ -225,6 +253,39 @@ public class ApiService {
 				.post(ClientResponse.class);
 	}
 
+	/**
+	 * Angir innholdet i et allerede opprettet vedlegg
+	 * 
+	 * Før man kaller denne metoden, må man allerede ha opprettet en
+	 * vedleggsressurs på serveren ved metoden {@code createAttachment}.
+	 * 
+	 * @param attachment
+	 * @param attachmentContent
+	 * @param contentType
+	 */
+	public ClientResponse addContentToAttachment(final Attachment attachment, final InputStream attachmentContent,
+			final ContentType contentType) {
+		Link addContentLink = fetchAddContentLink(attachment);
+
+		byte[] content = readLetterContent(attachmentContent);
+
+		return webResource
+				.path(addContentLink.getUri().getPath())
+				.accept(DIGIPOST_MEDIA_TYPE_V3)
+				.header(X_Digipost_UserId, senderAccountId)
+				.type(contentType.getRequestMediaType())
+				.post(ClientResponse.class, content);
+	}
+
+	private Link fetchAddAttachmentLink(final MessageDelivery delivery) {
+		Link addAttachmentLink = delivery.getAddAttachmentLink();
+		if (addAttachmentLink == null) {
+			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST,
+					"Kan ikke legge til vedlegg til en forsendelse som ikke har en link til å gjøre dette.");
+		}
+		return addAttachmentLink;
+	}
+
 	private Link fetchAddContentAndSendLink(final MessageDelivery delivery) {
 		Link addContentLink = delivery.getAddContentAndSendLink();
 		if (addContentLink == null) {
@@ -239,6 +300,15 @@ public class ApiService {
 		if (addContentLink == null) {
 			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST,
 					"Kan ikke legge til innhold til en forsendelse som ikke har en link for å gjøre dette.");
+		}
+		return addContentLink;
+	}
+
+	private Link fetchAddContentLink(final Attachment attachment) {
+		Link addContentLink = attachment.getAddContentLink();
+		if (addContentLink == null) {
+			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST,
+					"Kan ikke legge til innhold til et vedlegg som ikke har en link for å gjøre dette.");
 		}
 		return addContentLink;
 	}

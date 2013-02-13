@@ -21,6 +21,7 @@ import no.digipost.api.client.filters.ContentMD5Filter;
 import no.digipost.api.client.filters.DateFilter;
 import no.digipost.api.client.filters.SignatureFilter;
 import no.digipost.api.client.filters.UserAgentFilter;
+import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
@@ -97,6 +98,15 @@ public class DigipostClient {
 	public MessageDelivery createMessage(final Message message, final InputStream letterContent) {
 		return new MessageSender(apiService, eventLogger)
 				.createMessageAndAddContent(message, letterContent, ContentType.PDF, letterContent);
+	}
+
+	/**
+	 * Oppretter et vedlegg i Digipost. Se
+	 * MessageSender.createAttachmentAndAddContent()
+	 */
+	public Attachment createAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream attachmentContent) {
+		return new MessageSender(apiService, eventLogger).createAttachmentAndAddContent(delivery, attachment, attachmentContent,
+				ContentType.PDF, attachmentContent);
 	}
 
 	/**

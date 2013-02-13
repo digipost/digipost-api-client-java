@@ -17,6 +17,7 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
+import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
@@ -98,6 +99,35 @@ public class MessageSender extends Communicator {
 		return delivery;
 	}
 
+	public Attachment createAttachmentAndAddContent(final MessageDelivery delivery, final Attachment attachment,
+			final InputStream attachmentContent, final ContentType contentType, final InputStream printContent) {
+		log("\n\n---OPPRETTER VEDLEGG---");
+		Attachment createdAttachment = createOrFetchAttachment(delivery, attachment);
+
+		final InputStream unencryptetContent;
+		final ContentType finalContentType;
+		if (delivery.isDeliveredToDigipost()) {
+			unencryptetContent = attachmentContent;
+			finalContentType = contentType;
+		} else {
+			unencryptetContent = printContent;
+			finalContentType = ContentType.PDF;
+		}
+
+		Attachment attachmentWithContent;
+		if (delivery.getEncryptionKeyLink() != null) {
+			log("\n\n---VEDLEGG SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
+			final InputStream encryptetContent = fetchKeyAndEncrypt(delivery, unencryptetContent);
+			attachmentWithContent = uploadContentToAttachment(finalContentType, createdAttachment, delivery, encryptetContent);
+		} else {
+			attachmentWithContent = uploadContentToAttachment(finalContentType, createdAttachment, delivery, unencryptetContent);
+		}
+
+		log("\n\n---FERDIG MED Å LASTE OPP INNHOLD TIL VEDLEGG---");
+		return attachmentWithContent;
+
+	}
+
 	public MessageDelivery sendMessage(final Message message) {
 		MessageDelivery createdMessage = createOrFetchMessage(message);
 		MessageDelivery deliveredMessage = null;
@@ -123,6 +153,12 @@ public class MessageSender extends Communicator {
 		return addContent(createdMessage, unencryptetContent, contentType);
 	}
 
+	private Attachment uploadContentToAttachment(final ContentType contentType, final Attachment attachment,
+			final MessageDelivery createdMessage, final InputStream unencryptetContent) {
+		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
+		return addContentToAttachment(createdMessage, attachment, unencryptetContent, contentType);
+	}
+
 	/**
 	 * Oppretter en forsendelsesressurs på serveren eller henter en allerede
 	 * opprettet forsendelsesressurs.
@@ -140,7 +176,7 @@ public class MessageSender extends Communicator {
 	public MessageDelivery createOrFetchMessage(final Message message) {
 		ClientResponse response = apiService.createMessage(message);
 
-		if (messageAlreadyExists(response)) {
+		if (resourceAlreadyExists(response)) {
 			ClientResponse existingMessageResponse = apiService.fetchExistingMessage(response.getLocation());
 			checkResponse(existingMessageResponse);
 			MessageDelivery delivery = existingMessageResponse.getEntity(MessageDelivery.class);
@@ -153,6 +189,38 @@ public class MessageSender extends Communicator {
 			checkResponse(response);
 			log("Forsendelse opprettet. Status: [" + response.toString() + "]");
 			return response.getEntity(MessageDelivery.class);
+		}
+	}
+
+	/**
+	 * Oppretter en vedleggsressurs på serveren eller henter en allerede
+	 * opprettet vedleggsressurs.
+	 * 
+	 * Dersom vedlegget allerede er opprettet, vil denne metoden gjøre en
+	 * GET-forespørsel mot serveren for å hente en representasjon av
+	 * vedleggsressursen slik den er på serveren. Dette vil ikke føre til noen
+	 * endringer av ressursen.
+	 * 
+	 * Dersom vedlegget ikke eksisterer fra før, vil denne metoden opprette en
+	 * ny vedleggsressurs på serveren og returnere en representasjon av
+	 * ressursen.
+	 * 
+	 */
+	public Attachment createOrFetchAttachment(final MessageDelivery delivery, final Attachment attachment) {
+		ClientResponse response = apiService.createAttachment(delivery, attachment);
+
+		if (resourceAlreadyExists(response)) {
+			ClientResponse existingAttachmentResponse = apiService.fetchExistingAttachment(response.getLocation());
+			checkResponse(existingAttachmentResponse);
+			Attachment existingAttachment = existingAttachmentResponse.getEntity(Attachment.class);
+			checkThatExistingAttachmentIsIdenticalToNewAttachment(existingAttachment, attachment);
+			log("Identisk vedlegg fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
+			return attachment;
+		} else {
+			check404Error(response, ErrorType.RECIPIENT_DOES_NOT_EXIST);
+			checkResponse(response);
+			log("Vedlegg opprettet. Status: [" + response.toString() + "]");
+			return response.getEntity(Attachment.class);
 		}
 	}
 
@@ -197,8 +265,30 @@ public class MessageSender extends Communicator {
 	}
 
 	/**
+	 * Legger til innhold (PDF) til et vedlegg. For at denne metoden skal kunne
+	 * kalles, må man først ha opprettet vedleggsressursen på serveren ved
+	 * metoden {@code createOrFetchAttachment}.
+	 * 
+	 * @param delivery
+	 * @param attachment
+	 * @param attachmentContent
+	 * @param contentType
+	 */
+	public Attachment addContentToAttachment(final MessageDelivery delivery, final Attachment attachment,
+			final InputStream attachmentContent, final ContentType contentType) {
+		verifyCorrectStatus(delivery, MessageStatus.NOT_COMPLETE);
+		ClientResponse response = apiService.addContentToAttachment(attachment, attachmentContent, contentType);
+
+		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
+		checkResponse(response);
+
+		log("Innhold ble lagt til. Status: [" + response.toString() + "]");
+		return response.getEntity(attachment.getClass());
+	}
+
+	/**
 	 * Sender en forsendelse. For at denne metoden skal kunne kalles, må man
-	 * først ha lagt innhold til forsendelsen med {@code TODO fyll inn navn}.
+	 * først ha lagt innhold til forsendelsen med {@code addContent}.
 	 * 
 	 * @param contentType
 	 * 
