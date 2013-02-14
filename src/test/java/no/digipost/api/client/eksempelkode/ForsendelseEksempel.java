@@ -59,7 +59,7 @@ public class ForsendelseEksempel {
 		InputStream messageContent = getMessageContent();
 
 		// 6. Vi lar klientbiblioteket håndtere utsendelsen
-		client.sendMessage(message, messageContent);
+		client.addContentAndSendMessage(message, messageContent);
 	}
 
 	private static InputStream getMessageContent() {

@@ -388,7 +388,7 @@ public class DigipostSwingClient {
 						message = new Message(String.valueOf(System.currentTimeMillis()), subject, recipient, new SmsNotification(),
 								AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
 					}
-					client.sendMessage(message, FileUtils.openInputStream(new File(contentField.getText())));
+					client.addContentAndSendMessage(message, FileUtils.openInputStream(new File(contentField.getText())));
 				} catch (IOException ex) {
 					eventLogger.log(ex.getMessage() + "\n");
 				} catch (DigipostClientException ex) {

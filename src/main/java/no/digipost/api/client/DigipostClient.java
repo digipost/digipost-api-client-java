@@ -87,8 +87,8 @@ public class DigipostClient {
 	/**
 	 * Sender et brev gjennom Digipost. Se MessageSender.sendMessage()
 	 */
-	public MessageDelivery sendMessage(final Message message, final InputStream letterContent) {
-		return sendMessage(message, letterContent, ContentType.PDF);
+	public MessageDelivery addContentAndSendMessage(final Message message, final InputStream letterContent) {
+		return addContentAndSendMessage(message, letterContent, ContentType.PDF);
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class DigipostClient {
 	 * Oppretter et vedlegg i Digipost. Se
 	 * MessageSender.createAttachmentAndAddContent()
 	 */
-	public Attachment createAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream attachmentContent) {
+	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream attachmentContent) {
 		return new MessageSender(apiService, eventLogger).createAttachmentAndAddContent(delivery, attachment, attachmentContent,
 				ContentType.PDF, attachmentContent);
 	}
@@ -112,14 +112,14 @@ public class DigipostClient {
 	/**
 	 * Sender et brev gjennom Digipost
 	 */
-	public MessageDelivery sendMessage(final Message message) {
+	public MessageDelivery sendMessage(final MessageDelivery message) {
 		return new MessageSender(apiService, eventLogger).sendMessage(message);
 	}
 
 	/**
 	 * Muliggjør sending med HTML content type.
 	 */
-	public MessageDelivery sendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
+	public MessageDelivery addContentAndSendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
 		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, letterContent, contentType);
 	}
 

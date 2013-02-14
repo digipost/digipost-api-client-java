@@ -99,7 +99,7 @@ public class MessageSender extends Communicator {
 		return delivery;
 	}
 
-	public Attachment createAttachmentAndAddContent(final MessageDelivery delivery, final Attachment attachment,
+	public MessageDelivery createAttachmentAndAddContent(final MessageDelivery delivery, final Attachment attachment,
 			final InputStream attachmentContent, final ContentType contentType, final InputStream printContent) {
 		log("\n\n---OPPRETTER VEDLEGG---");
 		Attachment createdAttachment = createOrFetchAttachment(delivery, attachment);
@@ -114,29 +114,29 @@ public class MessageSender extends Communicator {
 			finalContentType = ContentType.PDF;
 		}
 
-		Attachment attachmentWithContent;
+		MessageDelivery messageWithAttachment;
 		if (delivery.getEncryptionKeyLink() != null) {
 			log("\n\n---VEDLEGG SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
 			final InputStream encryptetContent = fetchKeyAndEncrypt(delivery, unencryptetContent);
-			attachmentWithContent = uploadContentToAttachment(finalContentType, createdAttachment, delivery, encryptetContent);
+			messageWithAttachment = uploadContentToAttachment(finalContentType, createdAttachment, delivery, encryptetContent);
 		} else {
-			attachmentWithContent = uploadContentToAttachment(finalContentType, createdAttachment, delivery, unencryptetContent);
+			messageWithAttachment = uploadContentToAttachment(finalContentType, createdAttachment, delivery, unencryptetContent);
 		}
 
 		log("\n\n---FERDIG MED Å LASTE OPP INNHOLD TIL VEDLEGG---");
-		return attachmentWithContent;
+		return messageWithAttachment;
 
 	}
 
-	public MessageDelivery sendMessage(final Message message) {
-		MessageDelivery createdMessage = createOrFetchMessage(message);
+	public MessageDelivery sendMessage(final MessageDelivery message) {
+		// MessageDelivery createdMessage = createOrFetchMessage(message);
 		MessageDelivery deliveredMessage = null;
-		if (createdMessage.isDeliveredToDigipost()) {
+		if (message.isDeliveredToDigipost()) {
 			log("\n\n---BREVET ER ALLEREDE SENDT");
-		} else if (createdMessage.getSendLink() == null) {
+		} else if (message.getSendLink() == null) {
 			log("\n\n---BREVET ER IKKE KOMPLETT, KAN IKKE SENDE");
 		} else {
-			deliveredMessage = send(createdMessage);
+			deliveredMessage = send(message);
 		}
 		return deliveredMessage;
 	}
@@ -153,7 +153,7 @@ public class MessageSender extends Communicator {
 		return addContent(createdMessage, unencryptetContent, contentType);
 	}
 
-	private Attachment uploadContentToAttachment(final ContentType contentType, final Attachment attachment,
+	private MessageDelivery uploadContentToAttachment(final ContentType contentType, final Attachment attachment,
 			final MessageDelivery createdMessage, final InputStream unencryptetContent) {
 		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
 		return addContentToAttachment(createdMessage, attachment, unencryptetContent, contentType);
@@ -274,16 +274,16 @@ public class MessageSender extends Communicator {
 	 * @param attachmentContent
 	 * @param contentType
 	 */
-	public Attachment addContentToAttachment(final MessageDelivery delivery, final Attachment attachment,
+	public MessageDelivery addContentToAttachment(final MessageDelivery delivery, final Attachment attachment,
 			final InputStream attachmentContent, final ContentType contentType) {
-		verifyCorrectStatus(delivery, MessageStatus.NOT_COMPLETE);
+		verifyCorrectStatus(delivery, MessageStatus.COMPLETE);
 		ClientResponse response = apiService.addContentToAttachment(attachment, attachmentContent, contentType);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);
 
 		log("Innhold ble lagt til. Status: [" + response.toString() + "]");
-		return response.getEntity(attachment.getClass());
+		return response.getEntity(delivery.getClass());
 	}
 
 	/**
@@ -293,7 +293,7 @@ public class MessageSender extends Communicator {
 	 * @param contentType
 	 * 
 	 */
-	public MessageDelivery send(final MessageDelivery delivery) {
+	private MessageDelivery send(final MessageDelivery delivery) {
 		verifyCorrectStatus(delivery, MessageStatus.COMPLETE);
 		ClientResponse response = apiService.send(delivery);
 
