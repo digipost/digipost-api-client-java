@@ -160,17 +160,6 @@ public class ApiService {
 				.get(ClientResponse.class);
 	}
 
-	/**
-	 * Henter en allerede eksisterende vedleggsressurs fra serveren.
-	 */
-	public ClientResponse fetchExistingAttachment(final URI location) {
-		return webResource
-				.path(location.getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V3)
-				.header(X_Digipost_UserId, senderAccountId)
-				.get(ClientResponse.class);
-	}
-
 	public ClientResponse getEncryptionKey(final URI location) {
 		return webResource
 				.path(location.getPath())

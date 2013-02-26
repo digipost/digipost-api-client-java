@@ -102,7 +102,7 @@ public class MessageSender extends Communicator {
 	public MessageDelivery createAttachmentAndAddContent(final MessageDelivery delivery, final Attachment attachment,
 			final InputStream attachmentContent, final ContentType contentType, final InputStream printContent) {
 		log("\n\n---OPPRETTER VEDLEGG---");
-		Attachment createdAttachment = createOrFetchAttachment(delivery, attachment);
+		Attachment createdAttachment = createAttachment(delivery, attachment);
 
 		final InputStream unencryptetContent;
 		final ContentType finalContentType;
@@ -193,31 +193,19 @@ public class MessageSender extends Communicator {
 	}
 
 	/**
-	 * Oppretter en vedleggsressurs på serveren eller henter en allerede
-	 * opprettet vedleggsressurs.
-	 * 
-	 * Dersom vedlegget allerede er opprettet, vil denne metoden gjøre en
-	 * GET-forespørsel mot serveren for å hente en representasjon av
-	 * vedleggsressursen slik den er på serveren. Dette vil ikke føre til noen
-	 * endringer av ressursen.
-	 * 
-	 * Dersom vedlegget ikke eksisterer fra før, vil denne metoden opprette en
-	 * ny vedleggsressurs på serveren og returnere en representasjon av
-	 * ressursen.
+	 * Oppretter en vedleggsressurs på serveren og returnerer en representasjon
+	 * av ressursen.
 	 * 
 	 */
-	public Attachment createOrFetchAttachment(final MessageDelivery delivery, final Attachment attachment) {
+	public Attachment createAttachment(final MessageDelivery delivery, final Attachment attachment) {
 		ClientResponse response = apiService.createAttachment(delivery, attachment);
 
 		if (resourceAlreadyExists(response)) {
-			ClientResponse existingAttachmentResponse = apiService.fetchExistingAttachment(response.getLocation());
-			checkResponse(existingAttachmentResponse);
-			Attachment existingAttachment = existingAttachmentResponse.getEntity(Attachment.class);
-			checkThatExistingAttachmentIsIdenticalToNewAttachment(existingAttachment, attachment);
-			log("Identisk vedlegg fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
-			return attachment;
+			String errorMessage = fetchErrorMessageString(response);
+			log("En feil oppsto under opprettelse av vedlegg: " + errorMessage);
+			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST, errorMessage);
 		} else {
-			check404Error(response, ErrorType.RECIPIENT_DOES_NOT_EXIST);
+			check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 			checkResponse(response);
 			log("Vedlegg opprettet. Status: [" + response.toString() + "]");
 			return response.getEntity(Attachment.class);

@@ -51,12 +51,11 @@ public class MessageDelivery extends Representation {
 	}
 
 	public MessageDelivery(final String messageId, final DeliveryMethod deliveryMethod, final MessageStatus status,
-			final DateTime deliveredDate, final List<Attachment> attachments) {
+			final DateTime deliveredDate) {
 		this.messageId = messageId;
 		this.deliveryMethod = deliveryMethod;
 		this.status = status;
 		this.deliveredDate = deliveredDate;
-		this.attachments = attachments;
 	}
 
 	@XmlElement(name = "link")
