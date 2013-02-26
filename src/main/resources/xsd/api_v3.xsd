@@ -69,6 +69,16 @@
             <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1" />
             <xsd:element name="delivered-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="attachment" type="attachment" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:element name="attachment" type="attachment" />
+
+    <xsd:complexType name="attachment">
+        <xsd:sequence>
+            <xsd:element name="subject" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
 
