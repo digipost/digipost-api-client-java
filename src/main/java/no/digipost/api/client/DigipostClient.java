@@ -144,7 +144,10 @@ public class DigipostClient {
 	 * at avsender har tilgang til å sende direkte til print.
 	 */
 	public MessageDelivery deliverToPrint(final Message printMessage, final InputStream printMessageContent) {
-		assert printMessage.isDirectPrint() : "Direct print messages cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress";
+		if (!printMessage.isDirectPrint()) {
+			throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
+					+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
+		}
 		return new MessageSender(apiService, eventLogger).createAndSendMessage(printMessage, null, null, printMessageContent);
 	}
 

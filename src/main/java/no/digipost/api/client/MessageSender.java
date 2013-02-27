@@ -50,7 +50,7 @@ public class MessageSender extends Communicator {
 
 		final InputStream unencryptetContent;
 		final ContentType finalContentType;
-		if (createdMessage.isDeliveredToDigipost()) {
+		if (createdMessage.willBeDeliveredInDigipost()) {
 			unencryptetContent = letterContent;
 			finalContentType = contentType;
 		} else {
@@ -78,7 +78,7 @@ public class MessageSender extends Communicator {
 
 		final InputStream unencryptetContent;
 		final ContentType finalContentType;
-		if (createdMessage.isDeliveredToDigipost()) {
+		if (createdMessage.willBeDeliveredInDigipost()) {
 			unencryptetContent = letterContent;
 			finalContentType = contentType;
 		} else {
@@ -106,7 +106,7 @@ public class MessageSender extends Communicator {
 
 		final InputStream unencryptetContent;
 		final ContentType finalContentType;
-		if (delivery.isDeliveredToDigipost()) {
+		if (delivery.willBeDeliveredInDigipost()) {
 			unencryptetContent = attachmentContent;
 			finalContentType = contentType;
 		} else {
@@ -131,7 +131,7 @@ public class MessageSender extends Communicator {
 	public MessageDelivery sendMessage(final MessageDelivery message) {
 		// MessageDelivery createdMessage = createOrFetchMessage(message);
 		MessageDelivery deliveredMessage = null;
-		if (message.isDeliveredToDigipost()) {
+		if (message.isAlreadyDeliveredToDigipost()) {
 			log("\n\n---BREVET ER ALLEREDE SENDT");
 		} else if (message.getSendLink() == null) {
 			log("\n\n---BREVET ER IKKE KOMPLETT, KAN IKKE SENDE");

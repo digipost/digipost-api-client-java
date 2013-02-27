@@ -103,7 +103,11 @@ public class MessageDelivery extends Representation {
 		return getLinkByRelationName(Relation.ADD_ATTACHMENT);
 	}
 
-	public boolean isDeliveredToDigipost() {
+	public boolean willBeDeliveredInDigipost() {
+		return DeliveryMethod.DIGIPOST.equals(deliveryMethod);
+	}
+
+	public boolean isAlreadyDeliveredToDigipost() {
 		return DeliveryMethod.DIGIPOST.equals(deliveryMethod) && (deliveredDate != null);
 	}
 
