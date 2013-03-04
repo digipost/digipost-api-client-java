@@ -55,9 +55,11 @@ import javax.swing.border.EmptyBorder;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.NameAndAddress;
 import no.digipost.api.client.representations.NorwegianAddress;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
@@ -72,6 +74,7 @@ import org.apache.commons.io.FileUtils;
 import org.joda.time.LocalDate;
 
 public class DigipostSwingClient {
+	private MessageDelivery messageDelivery = null;
 
 	private static final String BREV = "BREV";
 	private static final String CERT = "CERT";
@@ -92,6 +95,11 @@ public class DigipostSwingClient {
 	private JTextField recipientEmailAddressField;
 	private JCheckBox fallbackToPrintCheckBox;
 	private JCheckBox directToPrintCheckBox;
+	private JTextField attachmentSubjectField;
+	private JTextField attachmentContentField;
+	private JButton addAttachmentContentButton;
+	private JButton btnAddAttachment;
+	private JButton sendButton;
 	private JTextField contentField;
 	private JTextArea logTextArea;
 
@@ -276,8 +284,16 @@ public class DigipostSwingClient {
 
 		recipientBirthDateField = new JTextField();
 		recipientBirthDateField.setEnabled(false);
-		brevMainPanel.add(recipientBirthDateField, createGridBagConstraintsForField(1, 7));
+		brevMainPanel.add(recipientBirthDateField, createGridBagConstraintsForField(1, 7, 1));
 		recipientBirthDateField.setColumns(10);
+
+		JLabel mottakerTelefonnummerLabel = new JLabel("Telefonnummer");
+		brevMainPanel.add(mottakerTelefonnummerLabel, createGridBagConstraintsForLabel(2, 7));
+
+		recipientPhoneNumberField = new JTextField();
+		recipientPhoneNumberField.setEnabled(false);
+		brevMainPanel.add(recipientPhoneNumberField, createGridBagConstraintsForField(3, 7, 1));
+		recipientPhoneNumberField.setColumns(10);
 
 		JLabel mottakerEpostadresseLabel = new JLabel("Epost-adresse");
 		brevMainPanel.add(mottakerEpostadresseLabel, createGridBagConstraintsForLabel(0, 8));
@@ -287,33 +303,25 @@ public class DigipostSwingClient {
 		brevMainPanel.add(recipientEmailAddressField, createGridBagConstraintsForField(1, 8));
 		recipientEmailAddressField.setColumns(10);
 
-		JLabel mottakerTelefonnummerLabel = new JLabel("Telefonnummer");
-		brevMainPanel.add(mottakerTelefonnummerLabel, createGridBagConstraintsForLabel(0, 9));
-
-		recipientPhoneNumberField = new JTextField();
-		recipientPhoneNumberField.setEnabled(false);
-		brevMainPanel.add(recipientPhoneNumberField, createGridBagConstraintsForField(1, 9));
-		recipientPhoneNumberField.setColumns(10);
-
 		JLabel fallbackToPrintLabel = new JLabel("Fallback til print");
-		brevMainPanel.add(fallbackToPrintLabel, createGridBagConstraintsForLabel(0, 10));
+		brevMainPanel.add(fallbackToPrintLabel, createGridBagConstraintsForLabel(0, 9));
 
 		fallbackToPrintCheckBox = new JCheckBox();
 		fallbackToPrintCheckBox.setEnabled(false);
-		brevMainPanel.add(fallbackToPrintCheckBox, createGridBagConstraintsForField(1, 10, 1));
+		brevMainPanel.add(fallbackToPrintCheckBox, createGridBagConstraintsForField(1, 9, 1));
 
 		JLabel directToPrintLabel = new JLabel("Direkte til print");
-		brevMainPanel.add(directToPrintLabel, createGridBagConstraintsForLabel(2, 10));
+		brevMainPanel.add(directToPrintLabel, createGridBagConstraintsForLabel(2, 9));
 
 		directToPrintCheckBox = new JCheckBox();
 		directToPrintCheckBox.setEnabled(false);
-		brevMainPanel.add(directToPrintCheckBox, createGridBagConstraintsForField(3, 10, 1));
+		brevMainPanel.add(directToPrintCheckBox, createGridBagConstraintsForField(3, 9, 1));
 
 		JLabel innholdLabel = new JLabel("Brevets innhold (pdf)");
-		brevMainPanel.add(innholdLabel, createGridBagConstraintsForLabel(0, 11));
+		brevMainPanel.add(innholdLabel, createGridBagConstraintsForLabel(0, 10));
 
 		contentField = new JTextField();
-		brevMainPanel.add(contentField, createGridBagConstraintsForField(1, 11));
+		brevMainPanel.add(contentField, createGridBagConstraintsForField(1, 10));
 		contentField.setColumns(10);
 
 		JButton velgInnholdButton = new JButton("Velg...");
@@ -329,16 +337,85 @@ public class DigipostSwingClient {
 				}
 			}
 		});
-		GridBagConstraints gbc_chooseContentButton = new GridBagConstraints();
-		gbc_chooseContentButton.anchor = GridBagConstraints.WEST;
-		gbc_chooseContentButton.insets = new Insets(0, 0, 5, 0);
-		gbc_chooseContentButton.gridx = 5;
-		gbc_chooseContentButton.gridy = 11;
-		brevMainPanel.add(velgInnholdButton, gbc_chooseContentButton);
+		brevMainPanel.add(velgInnholdButton, createGridBagConstraints(GridBagConstraints.WEST, 5, 10));
 
-		JButton sendButton = new JButton("Send brev");
-		sendButton.setFont(new Font("Dialog", Font.BOLD, 14));
-		sendButton.addActionListener(new ActionListener() {
+		JLabel vedleggTittelLabel = new JLabel("Vedlegg-emne");
+		brevMainPanel.add(vedleggTittelLabel, createGridBagConstraintsForLabel(0, 11));
+
+		attachmentSubjectField = new JTextField();
+		attachmentSubjectField.setEnabled(false);
+		brevMainPanel.add(attachmentSubjectField, createGridBagConstraintsForField(1, 11, 1));
+		attachmentSubjectField.setColumns(10);
+
+		JLabel vedleggInnholdLabel = new JLabel("Vedlegg-innhold");
+		brevMainPanel.add(vedleggInnholdLabel, createGridBagConstraintsForLabel(2, 11));
+
+		attachmentContentField = new JTextField();
+		attachmentContentField.setEnabled(false);
+		brevMainPanel.add(attachmentContentField, createGridBagConstraintsForField(3, 11, 1));
+		attachmentContentField.setColumns(10);
+
+		addAttachmentContentButton = new JButton("Velg...");
+		addAttachmentContentButton.setEnabled(false);
+		addAttachmentContentButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				JFileChooser filChooser = new JFileChooser();
+				filChooser.showOpenDialog(brevPanel);
+				File filFile = filChooser.getSelectedFile();
+				if (filFile != null) {
+					attachmentContentField.setText(filFile.toString());
+				}
+			}
+		});
+		brevMainPanel.add(addAttachmentContentButton, createGridBagConstraints(GridBagConstraints.WEST, 5, 11));
+
+		JButton btnBack = new JButton("Tilbake");
+		btnBack.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				CardLayout layout = (CardLayout) contentPane.getLayout();
+				layout.show(contentPane, CERT);
+			}
+		});
+		GridBagConstraints gbc_btnBack = new GridBagConstraints();
+		gbc_btnBack.gridx = 0;
+		gbc_btnBack.gridy = 12;
+		brevMainPanel.add(btnBack, gbc_btnBack);
+
+		btnAddAttachment = new JButton("Legg til vedlegg");
+		btnAddAttachment.setEnabled(false);
+		btnAddAttachment.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				if (messageDelivery == null) {
+					eventLogger.log("Du må opprette og laste opp innhold til en forsendelse før du kan legge til vedlegg.");
+					return;
+				}
+				try {
+					String subject = attachmentSubjectField.getText();
+					Attachment attachment = new Attachment(subject);
+					client.createAttachment(messageDelivery, attachment,
+							FileUtils.openInputStream(new File(attachmentContentField.getText())));
+				} catch (IOException ex) {
+					eventLogger.log(ex.getMessage() + "\n");
+				} catch (DigipostClientException ex) {
+					eventLogger.log("\nDigipostClient kastet exception. \nFeilkode: " + ex.getErrorType() + "\nFeilmelding: "
+							+ ex.getErrorMessage());
+				}
+			}
+		});
+
+		GridBagConstraints gbc_btnAddAttachment = new GridBagConstraints();
+		gbc_btnAddAttachment.gridx = 1;
+		gbc_btnAddAttachment.gridy = 12;
+		brevMainPanel.add(btnAddAttachment, gbc_btnAddAttachment);
+
+		JButton btnAddContent = new JButton("Opprett og last opp brev");
+		btnAddContent.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -388,7 +465,9 @@ public class DigipostSwingClient {
 						message = new Message(String.valueOf(System.currentTimeMillis()), subject, recipient, new SmsNotification(),
 								AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
 					}
-					client.addContentAndSendMessage(message, FileUtils.openInputStream(new File(contentField.getText())));
+					messageDelivery = client.createMessage(message, FileUtils.openInputStream(new File(contentField.getText())));
+					enableAttachmentFields(true);
+					sendButton.setEnabled(true);
 				} catch (IOException ex) {
 					eventLogger.log(ex.getMessage() + "\n");
 				} catch (DigipostClientException ex) {
@@ -398,21 +477,27 @@ public class DigipostSwingClient {
 			}
 		});
 
-		JButton btnBack = new JButton("Tilbake");
-		btnBack.addActionListener(new ActionListener() {
+		GridBagConstraints gbc_btnAddContent = new GridBagConstraints();
+		gbc_btnAddContent.gridx = 2;
+		gbc_btnAddContent.gridy = 12;
+		gbc_btnAddContent.gridwidth = 2;
+		brevMainPanel.add(btnAddContent, gbc_btnAddContent);
 
+		sendButton = new JButton("Send brev");
+		sendButton.setEnabled(false);
+		sendButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				CardLayout layout = (CardLayout) contentPane.getLayout();
-				layout.show(contentPane, CERT);
+				if (messageDelivery == null) {
+					eventLogger.log("Du må opprette og laste opp innhold til en forsendelse før den kan sendes.");
+					return;
+				}
+				client.sendMessage(messageDelivery);
+				enableAttachmentFields(false);
+				sendButton.setEnabled(false);
+				messageDelivery = null;
 			}
 		});
-		GridBagConstraints gbc_btnBack = new GridBagConstraints();
-		gbc_btnBack.anchor = GridBagConstraints.EAST;
-		gbc_btnBack.insets = new Insets(0, 0, 0, 5);
-		gbc_btnBack.gridx = 3;
-		gbc_btnBack.gridy = 12;
-		brevMainPanel.add(btnBack, gbc_btnBack);
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();
 		gbc_sendButton.gridx = 5;
 		gbc_sendButton.gridy = 12;
@@ -548,6 +633,19 @@ public class DigipostSwingClient {
 
 		CardLayout l = (CardLayout) contentPane.getLayout();
 		l.show(contentPane, CERT);
+	}
+
+	private void enableAttachmentFields(final boolean enabled) {
+		clearAttachmentFields();
+		attachmentContentField.setEnabled(enabled);
+		attachmentSubjectField.setEnabled(enabled);
+		addAttachmentContentButton.setEnabled(enabled);
+		btnAddAttachment.setEnabled(enabled);
+	}
+
+	private void clearAttachmentFields() {
+		attachmentContentField.setText("");
+		attachmentSubjectField.setText("");
 	}
 
 	private void enableDigipostAddressFields() {
