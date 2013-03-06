@@ -24,6 +24,7 @@ import no.digipost.api.client.filters.UserAgentFilter;
 import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
+import no.digipost.api.client.representations.DeliveryMethod;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
@@ -85,71 +86,130 @@ public class DigipostClient {
 	}
 
 	/**
-	 * Sender et brev gjennom Digipost. Se MessageSender.sendMessage()
+	 * Sender et brev gjennom Digipost i et steg.
+	 * Filtype må være PDF.
 	 */
 	public MessageDelivery addContentAndSendMessage(final Message message, final InputStream letterContent) {
-		return addContentAndSendMessage(message, letterContent, ContentType.PDF);
+		return addContentAndSendMessage(message, ContentType.PDF, letterContent);
 	}
 
 	/**
-	 * Oppretter et brev i Digipost. Se
-	 * MessageSender.createMessageAndAddContent()
+	 * Sender et brev gjennom Digipost i et steg.
+	 * Må definere filtype. Støttede filtyper er PDF og HTML.
+	 * Dersom mottaker ikke er digipostbruker og det
+	 * ligger printdetaljer på forsendelsen bestiller vi print av brevet til vanlig postgang.
+	 * (Krever at avsender har fått tilgang til print).
+	 */
+	public MessageDelivery addContentAndSendMessage(final Message message, final ContentType contentType,
+			final InputStream letterContent) {
+		return addContentAndSendMessage(message, contentType, letterContent, letterContent);
+	}
+
+	/**
+	 * Sender et brev gjennom Digipost i et steg med alternativt innhold for print (må være PDF).
+	 * Må definere filtype for innhold til Digipost. Støttede filtyper er PDF og HTML.
+	 * Dersom mottaker ikke er digipostbruker og det
+	 * ligger printdetaljer på forsendelsen bestiller vi print av brevet til vanlig postgang.
+	 * (Krever at avsender har fått tilgang til print).
+	 */
+	public MessageDelivery addContentAndSendMessage(final Message message, final ContentType contentType,
+			final InputStream letterContent, final InputStream printContent) {
+		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, letterContent,
+				contentType, printContent);
+	}
+
+	/**
+	 * Bestiller print av brevet til utsending gjennom vanlig postgang.
+	 * Krever at avsender har tilgang til å sende direkte til print.
+	 * Dersom mottaker ikke er digipostbruker og det
+	 * ligger printdetaljer på forsendelsen bestiller vi print av brevet til vanlig postgang.
+	 * (Krever at avsender har fått tilgang til print).
+	 */
+	public MessageDelivery addContentAndDeliverToPrint(final Message printMessage, final InputStream printMessageContent) {
+		if (!printMessage.isDirectPrint()) {
+			throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
+					+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
+		}
+		return new MessageSender(apiService, eventLogger).createAndSendMessage(printMessage, null,
+				null, printMessageContent);
+	}
+
+
+	/**
+	 * Oppretter et brev med innhold for sending i to steg.
+	 * Filtype må være PDF.
 	 */
 	public MessageDelivery createMessage(final Message message, final InputStream letterContent) {
-		return new MessageSender(apiService, eventLogger)
-				.createMessageAndAddContent(message, letterContent, ContentType.PDF, letterContent);
+		return createMessage(message, ContentType.PDF, letterContent, letterContent);
 	}
 
 	/**
-	 * Oppretter et vedlegg i Digipost. Se
-	 * MessageSender.createAttachmentAndAddContent()
+	 * Oppretter et brev med innhold for sending i to steg.
+	 * Må definere filtype. Støttede filtyper er PDF og HTML.
 	 */
-	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream attachmentContent) {
-		return new MessageSender(apiService, eventLogger).createAttachmentAndAddContent(delivery, attachment, attachmentContent,
-				ContentType.PDF, attachmentContent);
+	public MessageDelivery createMessage(final Message message, final ContentType contentType, final InputStream letterContent) {
+		return createMessage(message, contentType, letterContent, letterContent);
 	}
 
 	/**
-	 * Sender et brev gjennom Digipost
+	 * Oppretter et brev med innhold for sending i to steg med alternativt innhold for print (må være PDF).
+	 * Må definere filtype for innhold til Digipost. Støttede filtyper er PDF og HTML.
+	 */
+	public MessageDelivery createMessage(final Message message, final ContentType contentType, final InputStream letterContent,
+			final InputStream printContent) {
+		return new MessageSender(apiService, eventLogger)
+		.createMessageAndAddContent(message, letterContent, contentType, printContent);
+	}
+
+	/**
+	 * Oppretter et vedlegg i Digipost.
+	 * Filtype må være PDF.
+	 */
+	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment,
+			final InputStream digipostContent) {
+		return createAttachment(delivery, attachment, ContentType.PDF, digipostContent, digipostContent);
+	}
+
+	/**
+	 * Oppretter et vedlegg i Digipost.
+	 * Må definere filtype. Støttede filtyper er PDF og HTML.
+	 */
+	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment,
+			final ContentType contentType, final InputStream digipostContent) {
+		return createAttachment(delivery, attachment, contentType, digipostContent, digipostContent);
+	}
+
+	/**
+	 * Oppretter et vedlegg i Digipost med alternativt innhold for print (må være PDF).
+	 * Må definere filtype for innhold til Digipost. Støttede filtyper er PDF og HTML.
+	 */
+	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment,
+			final ContentType contentType, final InputStream digipostContent, final InputStream printContent) {
+		return new MessageSender(apiService, eventLogger).createAttachmentAndAddContent(delivery, attachment, digipostContent,
+				contentType, printContent);
+	}
+
+	/**
+	 * Sender et brev gjennom Digipost. Dersom mottaker ikke er digipostbruker og det
+	 * ligger printdetaljer på forsendelsen bestiller vi print av brevet til vanlig postgang.
+	 * Krever at avsender har fått tilgang til print.
 	 */
 	public MessageDelivery sendMessage(final MessageDelivery message) {
 		return new MessageSender(apiService, eventLogger).sendMessage(message);
 	}
 
 	/**
-	 * Muliggjør sending med HTML content type.
+	 * Sender et brev direkte til print.
+	 * Krever at avsender tilgang til å sende direkte til print.
 	 */
-	public MessageDelivery addContentAndSendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
-		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, letterContent, contentType);
-	}
-
-	public MessageDelivery sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
-			final InputStream digipostMessageContent) {
-		return sendMessageToDigipostOrDeliverToPrint(message, digipostMessageContentType, digipostMessageContent, digipostMessageContent);
-	}
-
-	/**
-	 * Sender brev i Digipost. Dersom mottaker ikke er digipostbruker, bestiller
-	 * vi print av brevet til vanlig postgang. Krever at avsender har fått
-	 * tilgang til print.
-	 */
-	public MessageDelivery sendMessageToDigipostOrDeliverToPrint(final Message message, final ContentType digipostMessageContentType,
-			final InputStream digipostMessageContent, final InputStream printMessageContent) {
-		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, digipostMessageContent, digipostMessageContentType,
-				printMessageContent);
-	}
-
-	/**
-	 * Bestiller print av brevet til utsending gjennom vanlig postgang. Krever
-	 * at avsender har tilgang til å sende direkte til print.
-	 */
-	public MessageDelivery deliverToPrint(final Message printMessage, final InputStream printMessageContent) {
-		if (!printMessage.isDirectPrint()) {
+	public MessageDelivery deliverToPrint(final MessageDelivery printMessage) {
+		if (printMessage.getDeliveryMethod() != DeliveryMethod.PRINT) {
 			throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
 					+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
 		}
-		return new MessageSender(apiService, eventLogger).createAndSendMessage(printMessage, null, null, printMessageContent);
+		return new MessageSender(apiService, eventLogger).sendMessage(printMessage);
 	}
+
 
 	public Recipients search(final String searchString) {
 		return apiService.search(searchString);

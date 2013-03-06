@@ -31,16 +31,16 @@ import no.digipost.api.client.representations.NorwegianAddress;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
-
 import no.digipost.api.client.representations.RecipientIdentification;
 import no.digipost.api.client.representations.SmsNotification;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * Kode som brukes i dokumentasjonen for klientbiblioteket.
- * 
+ *
  */
 public class FallbackTilPrintEksempel {
 	// Din virksomhets Digipost-kontoid
@@ -81,14 +81,22 @@ public class FallbackTilPrintEksempel {
 		// 8. Vi henter inputstreamen til PDF-filen vi ønsker å sende
 		InputStream messageContent = getMessageContent();
 
-		// 9. Vi lar klientbiblioteket håndtere utsendelsen
-		client.sendMessageToDigipostOrDeliverToPrint(message, ContentType.PDF, messageContent, messageContent);
+		// 9. Vi kan også legge til alternativt innhold som brukes om forsendelsen går til print
+		InputStream printContent = getPrintContent();
+
+		// 10. Vi lar klientbiblioteket håndtere utsendelsen
+		client.addContentAndSendMessage(message, ContentType.PDF, messageContent, printContent);
 
 		IOUtils.closeQuietly(messageContent);
 	}
 
 	private static InputStream getMessageContent() {
-		// Her må du returnere brevinnholdet du ønsker å sende istedenfor null
+		// Her må du returnere brevinnholdet du ønsker for Digipost å sende istedenfor null
+		return null;
+	}
+
+	private static InputStream getPrintContent() {
+		// Her må du returnere brevinnholdet du ønsker for print å sende istedenfor null
 		return null;
 	}
 
