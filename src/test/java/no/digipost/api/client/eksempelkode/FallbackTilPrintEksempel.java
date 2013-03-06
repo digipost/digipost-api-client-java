@@ -85,7 +85,7 @@ public class FallbackTilPrintEksempel {
 		InputStream printContent = getPrintContent();
 
 		// 10. Vi lar klientbiblioteket håndtere utsendelsen
-		client.addContentAndSendMessage(message, ContentType.PDF, messageContent, printContent);
+		client.createAndSendMessage(message, ContentType.PDF, messageContent, printContent);
 
 		IOUtils.closeQuietly(messageContent);
 	}

@@ -129,7 +129,6 @@ public class MessageSender extends Communicator {
 	}
 
 	public MessageDelivery sendMessage(final MessageDelivery message) {
-		// MessageDelivery createdMessage = createOrFetchMessage(message);
 		MessageDelivery deliveredMessage = null;
 		if (message.isAlreadyDeliveredToDigipost()) {
 			log("\n\n---BREVET ER ALLEREDE SENDT");

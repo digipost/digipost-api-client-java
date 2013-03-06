@@ -25,13 +25,13 @@ import java.io.InputStream;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Message;
-
 import no.digipost.api.client.representations.SmsNotification;
+
 import org.apache.commons.io.FileUtils;
 
 /**
  * Kode som brukes i dokumentasjonen for klientbiblioteket.
- * 
+ *
  */
 public class ForsendelseEksempelDigipostadresse {
 	// Din virksomhets Digipost-kontoid
@@ -59,7 +59,7 @@ public class ForsendelseEksempelDigipostadresse {
 		InputStream messageContent = getMessageContent();
 
 		// 6. Vi lar klientbiblioteket håndtere utsendelsen
-		client.addContentAndSendMessage(message, messageContent);
+		client.createAndSendMessage(message, messageContent);
 	}
 
 	private static InputStream getMessageContent() {
