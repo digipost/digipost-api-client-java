@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>digipost-api-client-java</artifactId>
-	<version>4.1</version>
+	<version>4.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
