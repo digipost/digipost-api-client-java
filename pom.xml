@@ -99,12 +99,12 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.47</version>
+			<version>1.49</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcmail-jdk15on</artifactId>
-			<version>1.47</version>
+			<version>1.49</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -244,9 +244,9 @@
 										<include>joda-time:joda-time:1.6.2:jar:compile</include>
 										<include>org.joda:joda-convert:1.1:jar:compile</include>
 										<include>no.posten.dpost:dpost-xsd:3.5:jar:compile</include>
-										<include>org.bouncycastle:bcprov-jdk15on:1.47:jar:compile</include>
-										<include>org.bouncycastle:bcmail-jdk15on:1.47:jar:compile</include>
-										<include>org.bouncycastle:bcpkix-jdk15on:1.47:jar:compile</include>
+										<include>org.bouncycastle:bcprov-jdk15on:1.49:jar:compile</include>
+										<include>org.bouncycastle:bcmail-jdk15on:1.49:jar:compile</include>
+										<include>org.bouncycastle:bcpkix-jdk15on:1.49:jar:compile</include>
 										<include>org.codehaus.castor:castor-core:1.3.1:jar:compile</include>
 										<include>org.codehaus.castor:castor-xml:1.3.1:jar:compile</include>
 										<include>org.slf4j:slf4j-api:1.6.1:jar:compile</include>
