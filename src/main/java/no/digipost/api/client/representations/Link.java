@@ -15,13 +15,16 @@
  */
 package no.digipost.api.client.representations;
 
+import static no.digipost.api.client.representations.Relation.UNSUPPORTED;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -61,7 +64,12 @@ public class Link {
 	}
 
 	private Relation parseRel(final String rel) {
-		return Relation.valueOf(rel.substring(rel.lastIndexOf("/") + 1).toUpperCase());
+		if (rel == null || rel.isEmpty()) return UNSUPPORTED;
+		try {
+			return Relation.valueOf(rel.substring(rel.lastIndexOf("/") + 1).toUpperCase());
+		} catch (IllegalArgumentException e) {
+			return UNSUPPORTED;
+		}
 	}
 
 	public String getRelationUri() {
