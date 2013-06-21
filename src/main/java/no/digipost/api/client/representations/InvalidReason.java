@@ -15,17 +15,23 @@
  */
 package no.digipost.api.client.representations;
 
-public enum Relation {
-	SELF,
-	ADD_CONTENT_AND_SEND,
-	ADD_CONTENT,
-	SEND,
-	ADD_ATTACHMENT,
-	SEARCH,
-	AUTOCOMPLETE,
-	CREATE_MESSAGE,
-	API_DOCUMENTATION,
-	GET_ENCRYPTION_KEY,
-	IDENTIFY_RECIPIENT,
-	UNSUPPORTED
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlType(name = "invalid-reason")
+@XmlEnum
+public enum InvalidReason {
+
+	INVALID_BIRTH_NUMBER,
+	UNKNOWN;
+
+	public String value() {
+		return name();
+	}
+
+	public static InvalidReason fromValue(String v) {
+		return valueOf(v);
+	}
+
 }
+

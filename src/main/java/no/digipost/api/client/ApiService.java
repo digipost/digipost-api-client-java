@@ -27,6 +27,8 @@ import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
@@ -122,7 +124,6 @@ public class ApiService {
 	 * POST-forespørsel. Brukes for bestille print av et brev dersom mottaker
 	 * ikke er Digipostbruker.
 	 * 
-	 * @param createPrintMessageUri
 	 */
 	public ClientResponse createPrintMessage(final Message message, final URI createPrintMessageUri) {
 		return webResource
@@ -137,8 +138,6 @@ public class ApiService {
 	 * Oppretter en ny vedleggsressurs på serveren ved å sende en
 	 * POST-forespørsel. Brukes for å legge vedlegg til et brev i Digipost.
 	 * 
-	 * @param message
-	 * @param attachment
 	 */
 	public ClientResponse createAttachment(final MessageDelivery message, final Attachment attachment) {
 		return webResource
@@ -177,9 +176,6 @@ public class ApiService {
 	 * Før man kaller denne metoden, må man allerede ha opprettet en
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
 	 * 
-	 * @param createdMessage
-	 * @param letterContent
-	 * @param contentType
 	 */
 	public ClientResponse addContentAndSend(final MessageDelivery createdMessage, final InputStream letterContent,
 			final ContentType contentType) {
@@ -202,9 +198,6 @@ public class ApiService {
 	 * Før man kaller denne metoden, må man allerede ha opprettet en
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
 	 * 
-	 * @param createdMessage
-	 * @param letterContent
-	 * @param contentType
 	 */
 	public ClientResponse addContent(final MessageDelivery createdMessage, final InputStream letterContent, final ContentType contentType) {
 		Link addContentLink = fetchAddContentLink(createdMessage);
@@ -227,9 +220,6 @@ public class ApiService {
 	 * Før man kaller denne metoden, må man ha lagt innhold til forsendelsen ved
 	 * metoden {@code addContent}
 	 * 
-	 * @param createdMessage
-	 * @param letterContent
-	 * @param contentType
 	 */
 	public ClientResponse send(final MessageDelivery createdMessage) {
 		Link sendLink = fetchSendLink(createdMessage);
@@ -248,9 +238,6 @@ public class ApiService {
 	 * Før man kaller denne metoden, må man allerede ha opprettet en
 	 * vedleggsressurs på serveren ved metoden {@code createAttachment}.
 	 * 
-	 * @param attachment
-	 * @param attachmentContent
-	 * @param contentType
 	 */
 	public ClientResponse addContentToAttachment(final Attachment attachment, final InputStream attachmentContent,
 			final ContentType contentType) {
@@ -342,5 +329,13 @@ public class ApiService {
 	private boolean entryPointCacheExpired() {
 		int fiveMinutes = 300000;
 		return (System.currentTimeMillis() - entryPointLastCached) > fiveMinutes;
+	}
+
+	public IdentificationResult identifyRecipient(final Identification identification) {
+		return webResource.path(getEntryPoint().getIdentificationUri().getPath())
+				.accept(DIGIPOST_MEDIA_TYPE_V3)
+				.header(X_Digipost_UserId, senderAccountId)
+				.type(DIGIPOST_MEDIA_TYPE_V3)
+				.post(IdentificationResult.class, identification);
 	}
 }

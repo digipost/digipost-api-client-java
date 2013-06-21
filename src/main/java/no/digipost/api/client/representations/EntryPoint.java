@@ -17,6 +17,7 @@ package no.digipost.api.client.representations;
 
 import static no.digipost.api.client.representations.Relation.AUTOCOMPLETE;
 import static no.digipost.api.client.representations.Relation.CREATE_MESSAGE;
+import static no.digipost.api.client.representations.Relation.IDENTIFY_RECIPIENT;
 import static no.digipost.api.client.representations.Relation.SEARCH;
 
 import java.net.URI;
@@ -48,6 +49,10 @@ public class EntryPoint extends Representation {
 
 	public URI getAutocompleteUri() {
 		return getLinkByRelationName(AUTOCOMPLETE).getUri();
+	}
+
+	public URI getIdentificationUri() {
+		return getLinkByRelationName(IDENTIFY_RECIPIENT).getUri();
 	}
 
 	@XmlElement(name = "link")

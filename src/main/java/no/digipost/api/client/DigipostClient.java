@@ -17,6 +17,9 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.ClientFilter;
 import no.digipost.api.client.filters.ContentMD5Filter;
 import no.digipost.api.client.filters.DateFilter;
 import no.digipost.api.client.filters.SignatureFilter;
@@ -25,19 +28,16 @@ import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.DeliveryMethod;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
 
 /**
  * En klient for å sende brev gjennom Digipost. Hvis et objekt av denne klassen
@@ -208,6 +208,10 @@ public class DigipostClient {
 					+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
 		}
 		return new MessageSender(apiService, eventLogger).sendMessage(printMessage);
+	}
+
+	public IdentificationResult identifyRecipient(Identification identification) {
+		return apiService.identifyRecipient(identification);
 	}
 
 

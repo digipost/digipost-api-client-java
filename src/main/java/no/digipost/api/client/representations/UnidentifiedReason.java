@@ -15,17 +15,22 @@
  */
 package no.digipost.api.client.representations;
 
-public enum Relation {
-	SELF,
-	ADD_CONTENT_AND_SEND,
-	ADD_CONTENT,
-	SEND,
-	ADD_ATTACHMENT,
-	SEARCH,
-	AUTOCOMPLETE,
-	CREATE_MESSAGE,
-	API_DOCUMENTATION,
-	GET_ENCRYPTION_KEY,
-	IDENTIFY_RECIPIENT,
-	UNSUPPORTED
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlType(name = "unidentified-reason")
+@XmlEnum
+public enum UnidentifiedReason {
+
+	MULTIPLE_MATCHES,
+	UNKNOWN_ADDRESS;
+
+	public String value() {
+		return name();
+	}
+
+	public static UnidentifiedReason fromValue(String v) {
+		return valueOf(v);
+	}
+
 }
