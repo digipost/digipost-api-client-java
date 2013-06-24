@@ -44,4 +44,34 @@ public class IdentificationResult {
 	@XmlElement(name = "digipost-address", nillable = false)
 	protected String digipostAddress;
 
+	public IdentificationResultCode getResult() {
+		return result;
+	}
+
+	public InvalidReason getInvalidReason() {
+		return invalidReason;
+	}
+
+	public UnidentifiedReason getUnidentifiedReason() {
+		return unidentifiedReason;
+	}
+
+	public String getPersonAlias() {
+		return personAlias;
+	}
+
+	public String getDigipostAddress() {
+		return digipostAddress;
+	}
+
+	@Override
+	public String toString() {
+		return "IdentificationResult{" +
+				"result=" + result +
+				", invalidReason=" + invalidReason +
+				", unidentifiedReason=" + unidentifiedReason +
+				", personAlias='" + personAlias + '\'' +
+				", digipostAddress='" + digipostAddress + '\'' +
+				'}';
+	}
 }

@@ -49,5 +49,35 @@ public class Identification {
 	public Identification(final PersonalIdentificationNumber personalIdentificationNumber) {
 		this.personalIdentificationNumber = personalIdentificationNumber.asString();
 	}
+
+	//JAXB
+	public Identification() {
+
+	}
+
+	public NameAndAddress getNameAndAddress() {
+		return nameAndAddress;
+	}
+
+	public String getDigipostAddress() {
+		return digipostAddress;
+	}
+
+	public String getPersonalIdentificationNumber() {
+		return personalIdentificationNumber;
+	}
+
+	@Override
+	public String toString() {
+		if (digipostAddress != null) {
+			return digipostAddress;
+		} else if (personalIdentificationNumber != null) {
+			return personalIdentificationNumber;
+		} else if (nameAndAddress != null) {
+			return nameAndAddress.toString();
+		} else {
+			return "empty";
+		}
+	}
 }
 

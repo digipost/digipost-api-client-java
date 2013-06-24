@@ -78,4 +78,18 @@ public class NameAndAddress {
 		this.phoneNumber = phoneNumber;
 		this.emailAddress = emailAddress;
 	}
+
+	@Override
+	public String toString() {
+		return "NameAndAddress{" +
+				"fullname='" + fullname + '\'' +
+				", addressline1='" + addressline1 + '\'' +
+				", addressline2='" + addressline2 + '\'' +
+				", postalcode='" + postalcode + '\'' +
+				", city='" + city + '\'' +
+				", birthDate=" + birthDate +
+				", phoneNumber='" + phoneNumber + '\'' +
+				", emailAddress='" + emailAddress + '\'' +
+				'}';
+	}
 }
