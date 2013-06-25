@@ -34,7 +34,8 @@ public class JerseyClientProvider {
 	private static final int MAX_HTTP_CONNECTIONS = 100;
 
 	private static final Integer THREADPOOL_SIZE = 100;
-	private static final Integer CONNECTION_TIMEOUT = 5000;
+	private static final Integer CONNECTION_TIMEOUT = 60000;
+	private static final Integer READ_TIMEOUT = 60000;
 
 	static {
 		ApacheHttpClientHandler clientHandler = new ApacheHttpClientHandler(opprettMultiThreadedHttpClient(), opprettClientConfig());
@@ -58,7 +59,7 @@ public class JerseyClientProvider {
 		DefaultApacheHttpClientConfig config = new DefaultApacheHttpClientConfig();
 		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_THREADPOOL_SIZE, THREADPOOL_SIZE);
 		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_CONNECT_TIMEOUT, CONNECTION_TIMEOUT);
-		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_READ_TIMEOUT, CONNECTION_TIMEOUT);
+		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_READ_TIMEOUT, READ_TIMEOUT);
 		return config;
 	}
 }
