@@ -214,7 +214,6 @@ public class DigipostClient {
 		return apiService.identifyRecipient(identification);
 	}
 
-
 	public Recipients search(final String searchString) {
 		return apiService.search(searchString);
 	}

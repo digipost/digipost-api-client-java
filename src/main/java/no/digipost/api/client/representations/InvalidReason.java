@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum InvalidReason {
 
-	INVALID_BIRTH_NUMBER,
+	INVALID_PERSONAL_IDENTIFICATION_NUMBER,
 	UNKNOWN;
 
 	public String value() {
