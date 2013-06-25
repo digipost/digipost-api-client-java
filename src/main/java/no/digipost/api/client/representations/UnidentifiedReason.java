@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlType;
 public enum UnidentifiedReason {
 
 	MULTIPLE_MATCHES,
-	UNKNOWN_ADDRESS;
+	NOT_FOUND;
 
 	public String value() {
 		return name();
