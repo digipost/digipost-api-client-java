@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.DeliveryMethod;
+import no.digipost.api.client.representations.FileType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.MessageStatus;
@@ -114,7 +115,7 @@ public class MessageSenderTest {
 
 	private Message lagEnkeltForsendelse(final String subject, final String messageId, final String fnr) {
 		return new Message(messageId, subject, new PersonalIdentificationNumber(fnr), new SmsNotification(0), AuthenticationLevel.PASSWORD,
-				SensitivityLevel.NORMAL);
+				SensitivityLevel.NORMAL, FileType.PDF);
 	}
 
 	private class MockClientResponse extends ClientResponse {

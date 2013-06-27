@@ -16,6 +16,7 @@
 package no.digipost.api.client.representations;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -27,9 +28,9 @@ public class ForsendelseRepresentasjonTest {
 	@Test
 	public void skalHanteraDuplikatForsendelse() {
 		DigipostAddress digipostAddress = new DigipostAddress("peter.pan#0000");
-		Message adresseForsendelse1 = new Message("id", "emne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL);
-		Message adresseForsendelse2 = new Message("id", "emne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL);
-		Message adresseForsendelse3 = new Message("id2", "annetemne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL);
+		Message adresseForsendelse1 = new Message("id", "emne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL, PDF);
+		Message adresseForsendelse2 = new Message("id", "emne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL, PDF);
+		Message adresseForsendelse3 = new Message("id2", "annetemne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL, PDF);
 
 		assertTrue(adresseForsendelse1.isSameMessageAs(adresseForsendelse2));
 		assertTrue(adresseForsendelse2.isSameMessageAs(adresseForsendelse1));

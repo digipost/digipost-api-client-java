@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.representations;
 
+import java.math.BigDecimal;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -22,7 +24,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.math.BigDecimal;
 
 import no.digipost.api.client.representations.xml.DateXmlAdapter;
 import org.joda.time.LocalDate;
@@ -55,9 +56,9 @@ public class Invoice
 	}
 
 	public Invoice(final String messageId, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
-				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final String kid, final BigDecimal amount,
+				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType, final String kid, final BigDecimal amount,
 				   final String account, final LocalDate dueDate) {
-		super(messageId, subject, id, smsVarsling, authenticationLevel, sensitivityLevel);
+		super(messageId, subject, id, smsVarsling, authenticationLevel, sensitivityLevel, fileType);
 		this.kid = kid;
 		this.amount = amount;
 		this.account = account;
@@ -75,9 +76,9 @@ public class Invoice
 //	}
 
 	public Invoice(final String messageId, final String subject, final RecipientIdentification recipient, final SmsNotification smsVarsling,
-				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final String kid, final BigDecimal amount,
+				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, FileType fileType, final String kid, final BigDecimal amount,
 				   final String account, final LocalDate dueDate) {
-		super(messageId, subject, recipient, smsVarsling, authenticationLevel, sensitivityLevel);
+		super(messageId, subject, recipient, smsVarsling, authenticationLevel, sensitivityLevel, fileType);
 		this.kid = kid;
 		this.amount = amount;
 		this.account = account;

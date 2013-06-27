@@ -15,17 +15,18 @@
  */
 package no.digipost.api.client.eksempelkode;
 
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.NameAndAddress;
-import no.digipost.api.client.representations.SensitivityLevel;
 import no.digipost.api.client.representations.SmsNotification;
-
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -52,8 +53,7 @@ public class ForsendelseEksempelNavnogAdresse {
 		NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1", "Oppgang B", "0001", "Oslo");
 
 		// 4. Vi oppretter en forsendelse
-		Message message = new Message("dinForsendelseId", "Brevets emne", nameAndAddress, new SmsNotification(),
-				AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
+		Message message = new Message("dinForsendelseId", "Brevets emne", nameAndAddress, new SmsNotification(), PASSWORD, NORMAL, PDF);
 
 		// 5. Vi henter inputstreamen til PDF-filen vi ønsker å sende
 		InputStream messageContent = getMessageContent();

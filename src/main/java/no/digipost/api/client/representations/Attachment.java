@@ -24,18 +24,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "attachment", propOrder = { "subject", "links" })
+@XmlType(name = "attachment", propOrder = { "subject", "fileType", "links" })
 @XmlRootElement(name = "attachment")
 public class Attachment extends Representation {
 
 	@XmlElement(name = "subject", required = true)
 	protected String subject;
+	@XmlElement(name = "file-type", required = true)
+	protected String fileType;
+
 
 	public Attachment() {
 	}
 
-	public Attachment(final String subject) {
+	public Attachment(final String subject, final FileType fileType) {
 		this.subject = subject;
+		this.fileType = fileType.toString();
 	}
 
 	@XmlElement(name = "link")
@@ -61,6 +65,10 @@ public class Attachment extends Representation {
 
 	public boolean isSameAttachmentAs(final Attachment attachment) {
 		return subject.equals(attachment.getSubject());
+	}
+
+	public FileType getFileType() {
+		return new FileType(fileType);
 	}
 
 }

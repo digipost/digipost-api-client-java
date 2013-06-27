@@ -17,6 +17,9 @@ package no.digipost.api.client.representations;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 import org.junit.Test;
 
@@ -31,19 +34,17 @@ public class MessageTest {
 
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsDigipostAddress() {
-		Message message = new Message("id", "subject", new DigipostAddress("test.testson#1234"), null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
+		Message message = new Message("id", "subject", new DigipostAddress("test.testson#1234"), null, PASSWORD, NORMAL, PDF);
 		assertFalse(message.isDirectPrint());
 	}
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsNameAndAddress() {
-		Message message = new Message("id", "subject", new RecipientIdentification(new NameAndAddress()), null, AuthenticationLevel.PASSWORD,
-				SensitivityLevel.NORMAL);
+		Message message = new Message("id", "subject", new RecipientIdentification(new NameAndAddress()), null, PASSWORD, NORMAL, PDF);
 		assertFalse(message.isDirectPrint());
 	}
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsPersonalIdendificationNumber() {
-		Message message = new Message("id", "subject", new PersonalIdentificationNumber("12125412435"), null, AuthenticationLevel.PASSWORD,
-				SensitivityLevel.NORMAL);
+		Message message = new Message("id", "subject", new PersonalIdentificationNumber("12125412435"), null, PASSWORD, NORMAL, PDF);
 		assertFalse(message.isDirectPrint());
 	}
 }

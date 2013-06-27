@@ -58,6 +58,7 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.DigipostAddress;
+import no.digipost.api.client.representations.FileType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.NameAndAddress;
@@ -397,7 +398,8 @@ public class DigipostSwingClient {
 				}
 				try {
 					String subject = attachmentSubjectField.getText();
-					Attachment attachment = new Attachment(subject);
+					FileType fileType = FileType.fromFilename(attachmentContentField.getText());
+					Attachment attachment = new Attachment(subject, fileType);
 					client.createAttachment(messageDelivery, attachment,
 							FileUtils.openInputStream(new File(attachmentContentField.getText())));
 				} catch (IOException ex) {
@@ -422,14 +424,15 @@ public class DigipostSwingClient {
 				try {
 					Message message;
 					String subject = subjectField.getText();
+					FileType fileType = FileType.fromFilename(contentField.getText());
 					if (identifyOnDigipostAddress.isSelected()) {
 						String digipostAddress = recipientDigipostAddressField.getText();
 						message = new Message(String.valueOf(System.currentTimeMillis()), subject, new DigipostAddress(digipostAddress),
-								new SmsNotification(), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
+								new SmsNotification(), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, fileType);
 					} else if (identifyOnPersonalIdentificationNumber.isSelected()) {
 						String personalIdentificationNumber = recipientPersonalIdentificationNumberField.getText();
 						message = new Message(String.valueOf(System.currentTimeMillis()), subject, new PersonalIdentificationNumber(
-								personalIdentificationNumber), new SmsNotification(), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
+								personalIdentificationNumber), new SmsNotification(), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, fileType);
 					} else {
 						String name = recipientNameField.getText();
 						String addressline1 = recipientAddress1Field.getText();
@@ -463,7 +466,7 @@ public class DigipostSwingClient {
 						}
 
 						message = new Message(String.valueOf(System.currentTimeMillis()), subject, recipient, new SmsNotification(),
-								AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
+								AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, fileType);
 					}
 					messageDelivery = client.createMessage(message, FileUtils.openInputStream(new File(contentField.getText())));
 					enableAttachmentFields(true);

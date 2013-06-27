@@ -17,14 +17,15 @@ package no.digipost.api.client.representations;
 
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,11 +40,11 @@ public class XsdValidationTest {
 	@Before
 	public void setUp() throws SAXException, JAXBException {
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api_v3.xsd"));
+		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api_v4.xsd"));
 		marshaller = JAXBContext.newInstance("no.digipost.api.client.representations").createMarshaller();
 		marshaller.setSchema(schema);
 
-		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V3);
+		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V4);
 	}
 
 	@Test
@@ -77,12 +78,12 @@ public class XsdValidationTest {
 	@Test
 	public void validateMessage() throws JAXBException {
 		Message messageWithDigipostAddress = new Message("messageId", "subject", new DigipostAddress("even.beinlaus#1234"), new SmsNotification(0),
-				AuthenticationLevel.TWO_FACTOR, SensitivityLevel.NORMAL);
+				AuthenticationLevel.TWO_FACTOR, SensitivityLevel.NORMAL, FileType.PDF);
 		Message messageWithPersonalIdentificationNumber = new Message("messageId", "subject", new PersonalIdentificationNumber(
-				"12345678901"), new SmsNotification(0), AuthenticationLevel.TWO_FACTOR, SensitivityLevel.NORMAL);
+				"12345678901"), new SmsNotification(0), AuthenticationLevel.TWO_FACTOR, SensitivityLevel.NORMAL, FileType.PDF);
 		marshallAndValidate(messageWithDigipostAddress);
 		Message messageWithPreEncryptAndSenderId = new Message("messageId", "subject", new PersonalIdentificationNumber("12345678901"),
-				new SmsNotification(0), AuthenticationLevel.TWO_FACTOR, SensitivityLevel.NORMAL);
+				new SmsNotification(0), AuthenticationLevel.TWO_FACTOR, SensitivityLevel.NORMAL, FileType.PDF);
 		messageWithPreEncryptAndSenderId.setSenderId(10L);
 		messageWithPreEncryptAndSenderId.setPreEncrypt();
 

@@ -25,7 +25,7 @@ import org.apache.commons.lang.StringUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message", propOrder = { "messageId", "senderId", "preEncrypt", "subject", "recipient", "smsNotification",
-		"authenticationLevel", "sensitivityLevel" })
+		"authenticationLevel", "sensitivityLevel", "fileType" })
 @XmlRootElement(name = "message")
 public class Message {
 	@XmlElement(name = "message-id", required = true)
@@ -44,37 +44,40 @@ public class Message {
 	protected AuthenticationLevel authenticationLevel;
 	@XmlElement(name = "sensitivity-level")
 	protected SensitivityLevel sensitivityLevel;
+	@XmlElement(name = "file-type", required = true)
+	protected String fileType;
 
 	Message() {
 	}
 
 	public Message(final String messageId, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
-		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel);
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
+		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, fileType);
 	}
 
 	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
-		this(messageId, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel);
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
+		this(messageId, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel, fileType);
 	}
 
 	public Message(final String messageId, final String subject, final NameAndAddress nameAndAddress, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
-		this(messageId, subject, new RecipientIdentification(nameAndAddress), smsVarsling, authenticationLevel, sensitivityLevel);
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
+		this(messageId, subject, new RecipientIdentification(nameAndAddress), smsVarsling, authenticationLevel, sensitivityLevel, fileType);
 	}
 
 	public Message(final String messageId, final String subject, final RecipientIdentification recipient,
-			final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel) {
+			final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
 		this.messageId = messageId;
 		this.subject = subject;
 		this.recipient = recipient;
 		smsNotification = smsVarsling;
 		this.authenticationLevel = authenticationLevel;
 		this.sensitivityLevel = sensitivityLevel;
+		this.fileType = fileType.toString();
 	}
 
 	public Message(final String messageId, final PrintDetails printDetails) {
-		this(messageId, null, new RecipientIdentification(printDetails), null, null, null);
+		this(messageId, null, new RecipientIdentification(printDetails), null, null, null, FileType.PDF);
 	}
 
 	public String getSubject() {
@@ -132,5 +135,13 @@ public class Message {
 
 	public boolean isDirectPrint() {
 		return recipient.isDirectPrint();
+	}
+
+	public FileType getFileType() {
+		return new FileType(fileType);
+	}
+
+	public void setFileType(FileType fileType) {
+		this.fileType = fileType.toString();
 	}
 }

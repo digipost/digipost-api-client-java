@@ -16,6 +16,7 @@
 package no.digipost.api.client.eksempelkode;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
@@ -33,7 +34,6 @@ import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.RecipientIdentification;
 import no.digipost.api.client.representations.SmsNotification;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -68,10 +68,9 @@ public class FallbackTilPrintEksempel {
 
 		// 5. Vi oppretter en forsendelse for sending av brevet i Digipost og med adresseinformasjon som vil
 		// benyttes dersom mottaker ikke er Digipostbruker
-		PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer",
-				"Mottakers poststed")), new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B);
-		Message message = new Message("dinForsendelseId", "Brevets emne", new RecipientIdentification(pin, printDetails), new SmsNotification(), PASSWORD,
-				NORMAL);
+		PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer","Mottakers poststed")),
+				new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B);
+		Message message = new Message("dinForsendelseId", "Brevets emne", new RecipientIdentification(pin, printDetails), new SmsNotification(), PASSWORD, NORMAL, PDF);
 
 		// 7. Foreløpig støtter Digipost kun å sende krypterte brev til print. Å
 		// spesifisere PreEncrypt gjør at klientbiblioteket krypterer filen for

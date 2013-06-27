@@ -19,6 +19,7 @@ import java.io.InputStream;
 
 import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.ContentType;
+import no.digipost.api.client.representations.FileType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.MessageStatus;
@@ -56,6 +57,7 @@ public class MessageSender extends Communicator {
 		} else {
 			unencryptetContent = printContent;
 			finalContentType = ContentType.PDF;
+			message.setFileType(FileType.PDF);
 		}
 
 		MessageDelivery delivery;
