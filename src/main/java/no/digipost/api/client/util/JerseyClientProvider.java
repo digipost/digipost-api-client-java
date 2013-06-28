@@ -29,7 +29,6 @@ import com.sun.jersey.client.apache.config.ApacheHttpClientConfig;
 import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 
 public class JerseyClientProvider {
-	private static ApacheHttpClient client;
 
 	private static final int MAX_HTTP_CONNECTIONS = 100;
 
@@ -37,13 +36,16 @@ public class JerseyClientProvider {
 	private static final Integer CONNECTION_TIMEOUT = 60000;
 	private static final Integer READ_TIMEOUT = 60000;
 
-	static {
-		ApacheHttpClientHandler clientHandler = new ApacheHttpClientHandler(opprettMultiThreadedHttpClient(), opprettClientConfig());
-		client = new ApacheHttpClient(clientHandler);
+	public static Client newClient() {
+		ApacheHttpClientHandler clientHandler = new ApacheHttpClientHandler(opprettMultiThreadedHttpClient(), opprettClientConfig(CONNECTION_TIMEOUT,
+				READ_TIMEOUT));
+		return new ApacheHttpClient(clientHandler);
 	}
 
-	public static Client getClient() {
-		return client;
+	public static Client newClient(final int connectionTimeout, final int readTimout) {
+		ApacheHttpClientHandler clientHandler = new ApacheHttpClientHandler(opprettMultiThreadedHttpClient(), opprettClientConfig(connectionTimeout,
+				readTimout));
+		return new ApacheHttpClient(clientHandler);
 	}
 
 	private static HttpClient opprettMultiThreadedHttpClient() {
@@ -55,11 +57,11 @@ public class JerseyClientProvider {
 		return new HttpClient(httpConnectionManager);
 	}
 
-	private static ClientConfig opprettClientConfig() {
+	private static ClientConfig opprettClientConfig(final Integer connectionTimeout, final Integer readTimeout) {
 		DefaultApacheHttpClientConfig config = new DefaultApacheHttpClientConfig();
 		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_THREADPOOL_SIZE, THREADPOOL_SIZE);
-		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_CONNECT_TIMEOUT, CONNECTION_TIMEOUT);
-		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_READ_TIMEOUT, READ_TIMEOUT);
+		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_CONNECT_TIMEOUT, connectionTimeout);
+		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_READ_TIMEOUT, readTimeout);
 		return config;
 	}
 }

@@ -70,10 +70,18 @@ public class DigipostClient {
 		this(digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER);
 	}
 
+	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, Client jerseyClient) {
+		this(digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, jerseyClient);
+	}
+
 	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger) {
+		this(digipostUrl, senderAccountId, signer, eventLogger, null);
+	}
+
+	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final Client jerseyClient) {
 		this.eventLogger = eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER;
 
-		Client client = JerseyClientProvider.getClient();
+		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
 		WebResource webResource = client.resource(digipostUrl);
 		webResource.addFilter(new ContentMD5Filter(eventLogger));
 		webResource.addFilter(new SignatureFilter(signer, eventLogger));
