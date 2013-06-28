@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.security.Security;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.NorwegianAddress;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
@@ -84,7 +83,7 @@ public class FallbackTilPrintEksempel {
 		InputStream printContent = getPrintContent();
 
 		// 10. Vi lar klientbiblioteket håndtere utsendelsen
-		client.createAndSendMessage(message, ContentType.PDF, messageContent, printContent);
+		client.createAndSendMessage(message, messageContent, printContent);
 
 		IOUtils.closeQuietly(messageContent);
 	}

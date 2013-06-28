@@ -18,7 +18,6 @@ package no.digipost.api.client;
 import java.io.InputStream;
 
 import no.digipost.api.client.representations.Attachment;
-import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.FileType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
@@ -40,23 +39,19 @@ public class MessageSender extends Communicator {
 	 * klienten vil det gjøres et kall for å hente mottakers offentlige nøkkel
 	 * (public key), for så å kryptere innholdet før det sendes over.
 	 */
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent, final ContentType contentType) {
-		return createAndSendMessage(message, letterContent, contentType, letterContent);
+	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent) {
+		return createAndSendMessage(message, letterContent, letterContent);
 	}
 
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent, final ContentType contentType,
-			final InputStream printContent) {
+	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent, final InputStream printContent) {
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
 		MessageDelivery createdMessage = createOrFetchMessage(message);
 
 		final InputStream unencryptetContent;
-		final ContentType finalContentType;
 		if (createdMessage.willBeDeliveredInDigipost()) {
 			unencryptetContent = letterContent;
-			finalContentType = contentType;
 		} else {
 			unencryptetContent = printContent;
-			finalContentType = ContentType.PDF;
 			message.setFileType(FileType.PDF);
 		}
 
@@ -64,37 +59,34 @@ public class MessageSender extends Communicator {
 		if (message.isPreEncrypt()) {
 			log("\n\n---FORSENDELSE SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
 			final InputStream encryptetContent = fetchKeyAndEncrypt(createdMessage, unencryptetContent);
-			delivery = uploadContentAndSend(finalContentType, createdMessage, encryptetContent);
+			delivery = uploadContentAndSend(createdMessage, encryptetContent);
 		} else {
-			delivery = uploadContentAndSend(finalContentType, createdMessage, unencryptetContent);
+			delivery = uploadContentAndSend(createdMessage, unencryptetContent);
 		}
 
 		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
 		return delivery;
 	}
 
-	public MessageDelivery createMessageAndAddContent(final Message message, final InputStream letterContent,
-			final ContentType contentType, final InputStream printContent) {
+	public MessageDelivery createMessageAndAddContent(final Message message, final InputStream letterContent, final InputStream printContent) {
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
 		MessageDelivery createdMessage = createOrFetchMessage(message);
 
 		final InputStream unencryptetContent;
-		final ContentType finalContentType;
 		if (createdMessage.willBeDeliveredInDigipost()) {
 			unencryptetContent = letterContent;
-			finalContentType = contentType;
 		} else {
 			unencryptetContent = printContent;
-			finalContentType = ContentType.PDF;
+			message.setFileType(FileType.PDF);
 		}
 
 		MessageDelivery delivery;
 		if (message.isPreEncrypt()) {
 			log("\n\n---FORSENDELSE SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
 			final InputStream encryptetContent = fetchKeyAndEncrypt(createdMessage, unencryptetContent);
-			delivery = uploadContent(finalContentType, createdMessage, encryptetContent);
+			delivery = uploadContent(createdMessage, encryptetContent);
 		} else {
-			delivery = uploadContent(finalContentType, createdMessage, unencryptetContent);
+			delivery = uploadContent(createdMessage, unencryptetContent);
 		}
 
 		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED OPPRETTET)---");
@@ -102,27 +94,25 @@ public class MessageSender extends Communicator {
 	}
 
 	public MessageDelivery createAttachmentAndAddContent(final MessageDelivery delivery, final Attachment attachment,
-			final InputStream attachmentContent, final ContentType contentType, final InputStream printContent) {
+			final InputStream attachmentContent, final InputStream printContent) {
 		log("\n\n---OPPRETTER VEDLEGG---");
 		Attachment createdAttachment = createAttachment(delivery, attachment);
 
 		final InputStream unencryptetContent;
-		final ContentType finalContentType;
 		if (delivery.willBeDeliveredInDigipost()) {
 			unencryptetContent = attachmentContent;
-			finalContentType = contentType;
 		} else {
 			unencryptetContent = printContent;
-			finalContentType = ContentType.PDF;
+			attachment.setFileType(FileType.PDF);
 		}
 
 		MessageDelivery messageWithAttachment;
 		if (delivery.getEncryptionKeyLink() != null) {
 			log("\n\n---VEDLEGG SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
 			final InputStream encryptetContent = fetchKeyAndEncrypt(delivery, unencryptetContent);
-			messageWithAttachment = uploadContentToAttachment(finalContentType, createdAttachment, delivery, encryptetContent);
+			messageWithAttachment = uploadContentToAttachment(createdAttachment, delivery, encryptetContent);
 		} else {
-			messageWithAttachment = uploadContentToAttachment(finalContentType, createdAttachment, delivery, unencryptetContent);
+			messageWithAttachment = uploadContentToAttachment(createdAttachment, delivery, unencryptetContent);
 		}
 
 		log("\n\n---FERDIG MED Å LASTE OPP INNHOLD TIL VEDLEGG---");
@@ -142,22 +132,22 @@ public class MessageSender extends Communicator {
 		return deliveredMessage;
 	}
 
-	private MessageDelivery uploadContentAndSend(final ContentType contentType, final MessageDelivery createdMessage,
+	private MessageDelivery uploadContentAndSend(final MessageDelivery createdMessage,
 			final InputStream unencryptetContent) {
 		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
-		return addContentAndSendMessage(createdMessage, unencryptetContent, contentType);
+		return addContentAndSendMessage(createdMessage, unencryptetContent);
 	}
 
-	private MessageDelivery uploadContent(final ContentType contentType, final MessageDelivery createdMessage,
+	private MessageDelivery uploadContent(final MessageDelivery createdMessage,
 			final InputStream unencryptetContent) {
 		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
-		return addContent(createdMessage, unencryptetContent, contentType);
+		return addContent(createdMessage, unencryptetContent);
 	}
 
-	private MessageDelivery uploadContentToAttachment(final ContentType contentType, final Attachment attachment,
+	private MessageDelivery uploadContentToAttachment(final Attachment attachment,
 			final MessageDelivery createdMessage, final InputStream unencryptetContent) {
 		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
-		return addContentToAttachment(createdMessage, attachment, unencryptetContent, contentType);
+		return addContentToAttachment(createdMessage, attachment, unencryptetContent);
 	}
 
 	/**
@@ -218,14 +208,10 @@ public class MessageSender extends Communicator {
 	 * denne metoden skal kunne kalles, må man først ha opprettet
 	 * forsendelsesressursen på serveren ved metoden
 	 * {@code createOrFetchMesssage}.
-	 * 
-	 * @param contentType
-	 * 
 	 */
-	public MessageDelivery addContentAndSendMessage(final MessageDelivery delivery, final InputStream letterContent,
-			final ContentType contentType) {
+	public MessageDelivery addContentAndSendMessage(final MessageDelivery delivery, final InputStream letterContent) {
 		verifyCorrectStatus(delivery, MessageStatus.NOT_COMPLETE);
-		ClientResponse response = apiService.addContentAndSend(delivery, letterContent, contentType);
+		ClientResponse response = apiService.addContentAndSend(delivery, letterContent);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);
@@ -238,13 +224,10 @@ public class MessageSender extends Communicator {
 	 * Legger til innhold (PDF) til en forsendelse. For at denne metoden skal
 	 * kunne kalles, må man først ha opprettet forsendelsesressursen på serveren
 	 * ved metoden {@code createOrFetchMesssage}.
-	 * 
-	 * @param contentType
-	 * 
 	 */
-	public MessageDelivery addContent(final MessageDelivery delivery, final InputStream letterContent, final ContentType contentType) {
+	public MessageDelivery addContent(final MessageDelivery delivery, final InputStream letterContent) {
 		verifyCorrectStatus(delivery, MessageStatus.NOT_COMPLETE);
-		ClientResponse response = apiService.addContent(delivery, letterContent, contentType);
+		ClientResponse response = apiService.addContent(delivery, letterContent);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);
@@ -257,16 +240,10 @@ public class MessageSender extends Communicator {
 	 * Legger til innhold (PDF) til et vedlegg. For at denne metoden skal kunne
 	 * kalles, må man først ha opprettet vedleggsressursen på serveren ved
 	 * metoden {@code createOrFetchAttachment}.
-	 * 
-	 * @param delivery
-	 * @param attachment
-	 * @param attachmentContent
-	 * @param contentType
 	 */
-	public MessageDelivery addContentToAttachment(final MessageDelivery delivery, final Attachment attachment,
-			final InputStream attachmentContent, final ContentType contentType) {
+	public MessageDelivery addContentToAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream attachmentContent) {
 		verifyCorrectStatus(delivery, MessageStatus.COMPLETE);
-		ClientResponse response = apiService.addContentToAttachment(attachment, attachmentContent, contentType);
+		ClientResponse response = apiService.addContentToAttachment(attachment, attachmentContent);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);
@@ -278,9 +255,6 @@ public class MessageSender extends Communicator {
 	/**
 	 * Sender en forsendelse. For at denne metoden skal kunne kalles, må man
 	 * først ha lagt innhold til forsendelsen med {@code addContent}.
-	 * 
-	 * @param contentType
-	 * 
 	 */
 	private MessageDelivery send(final MessageDelivery delivery) {
 		verifyCorrectStatus(delivery, MessageStatus.COMPLETE);

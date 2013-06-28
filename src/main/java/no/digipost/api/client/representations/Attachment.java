@@ -71,4 +71,8 @@ public class Attachment extends Representation {
 		return new FileType(fileType);
 	}
 
+	public void setFileType(FileType fileType) {
+		this.fileType = fileType.toString();
+	}
+
 }

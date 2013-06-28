@@ -26,7 +26,6 @@ import no.digipost.api.client.filters.SignatureFilter;
 import no.digipost.api.client.filters.UserAgentFilter;
 import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.DeliveryMethod;
 import no.digipost.api.client.representations.Identification;
 import no.digipost.api.client.representations.IdentificationResult;
@@ -87,35 +86,22 @@ public class DigipostClient {
 
 	/**
 	 * Sender et brev gjennom Digipost i et steg.
-	 * Filtype må være PDF.
-	 */
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent) {
-		return createAndSendMessage(message, ContentType.PDF, letterContent);
-	}
-
-	/**
-	 * Sender et brev gjennom Digipost i et steg.
-	 * Må definere filtype. Støttede filtyper er PDF og HTML.
 	 * Dersom mottaker ikke er digipostbruker og det
 	 * ligger printdetaljer på forsendelsen bestiller vi print av brevet til vanlig postgang.
 	 * (Krever at avsender har fått tilgang til print.)
 	 */
-	public MessageDelivery createAndSendMessage(final Message message, final ContentType contentType,
-			final InputStream letterContent) {
-		return createAndSendMessage(message, contentType, letterContent, letterContent);
+	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent) {
+		return createAndSendMessage(message, letterContent, letterContent);
 	}
 
 	/**
 	 * Sender et brev gjennom Digipost i et steg med alternativt innhold for print (må være PDF).
-	 * Må definere filtype for innhold til Digipost. Støttede filtyper er PDF og HTML.
 	 * Dersom mottaker ikke er digipostbruker og det
 	 * ligger printdetaljer på forsendelsen bestiller vi print av brevet til vanlig postgang.
 	 * (Krever at avsender har fått tilgang til print.)
 	 */
-	public MessageDelivery createAndSendMessage(final Message message, final ContentType contentType,
-			final InputStream letterContent, final InputStream printContent) {
-		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, letterContent,
-				contentType, printContent);
+	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent, final InputStream printContent) {
+		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, letterContent, printContent);
 	}
 
 	/**
@@ -130,63 +116,36 @@ public class DigipostClient {
 			throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
 					+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
 		}
-		return new MessageSender(apiService, eventLogger).createAndSendMessage(printMessage, null,
-				null, printMessageContent);
+		return new MessageSender(apiService, eventLogger).createAndSendMessage(printMessage, null, printMessageContent);
 	}
 
 
 	/**
 	 * Oppretter et brev med innhold for sending i to steg.
-	 * Filtype må være PDF.
 	 */
 	public MessageDelivery createMessage(final Message message, final InputStream letterContent) {
-		return createMessage(message, ContentType.PDF, letterContent, letterContent);
-	}
-
-	/**
-	 * Oppretter et brev med innhold for sending i to steg.
-	 * Må definere filtype. Støttede filtyper er PDF og HTML.
-	 */
-	public MessageDelivery createMessage(final Message message, final ContentType contentType, final InputStream letterContent) {
-		return createMessage(message, contentType, letterContent, letterContent);
+		return createMessage(message, letterContent, letterContent);
 	}
 
 	/**
 	 * Oppretter et brev med innhold for sending i to steg med alternativt innhold for print (må være PDF).
-	 * Må definere filtype for innhold til Digipost. Støttede filtyper er PDF og HTML.
 	 */
-	public MessageDelivery createMessage(final Message message, final ContentType contentType, final InputStream letterContent,
-			final InputStream printContent) {
-		return new MessageSender(apiService, eventLogger)
-		.createMessageAndAddContent(message, letterContent, contentType, printContent);
+	public MessageDelivery createMessage(final Message message, final InputStream letterContent, final InputStream printContent) {
+		return new MessageSender(apiService, eventLogger).createMessageAndAddContent(message, letterContent, printContent);
 	}
 
 	/**
 	 * Oppretter et vedlegg i Digipost.
-	 * Filtype må være PDF.
 	 */
-	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment,
-			final InputStream digipostContent) {
-		return createAttachment(delivery, attachment, ContentType.PDF, digipostContent, digipostContent);
-	}
-
-	/**
-	 * Oppretter et vedlegg i Digipost.
-	 * Må definere filtype. Støttede filtyper er PDF og HTML.
-	 */
-	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment,
-			final ContentType contentType, final InputStream digipostContent) {
-		return createAttachment(delivery, attachment, contentType, digipostContent, digipostContent);
+	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream digipostContent) {
+		return createAttachment(delivery, attachment, digipostContent, digipostContent);
 	}
 
 	/**
 	 * Oppretter et vedlegg i Digipost med alternativt innhold for print (må være PDF).
-	 * Må definere filtype for innhold til Digipost. Støttede filtyper er PDF og HTML.
 	 */
-	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment,
-			final ContentType contentType, final InputStream digipostContent, final InputStream printContent) {
-		return new MessageSender(apiService, eventLogger).createAttachmentAndAddContent(delivery, attachment, digipostContent,
-				contentType, printContent);
+	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream digipostContent, final InputStream printContent) {
+		return new MessageSender(apiService, eventLogger).createAttachmentAndAddContent(delivery, attachment, digipostContent, printContent);
 	}
 
 	/**

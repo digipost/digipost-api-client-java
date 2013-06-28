@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.ClientFilter;
 import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.ContentType;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Identification;
@@ -34,12 +36,7 @@ import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
-
 import org.apache.commons.io.IOUtils;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
 
 /**
  * Denne klassen tar seg av de enkelte HTTP-forespørslene man kan gjøre mot
@@ -177,8 +174,7 @@ public class ApiService {
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
 	 * 
 	 */
-	public ClientResponse addContentAndSend(final MessageDelivery createdMessage, final InputStream letterContent,
-			final ContentType contentType) {
+	public ClientResponse addContentAndSend(final MessageDelivery createdMessage, final InputStream letterContent) {
 		Link addContentAndSendLink = fetchAddContentAndSendLink(createdMessage);
 
 		byte[] content = readLetterContent(letterContent);
@@ -187,7 +183,6 @@ public class ApiService {
 				.path(addContentAndSendLink.getUri().getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V4)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(contentType.getRequestMediaType())
 				.post(ClientResponse.class, content);
 
 	}
@@ -199,7 +194,7 @@ public class ApiService {
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
 	 * 
 	 */
-	public ClientResponse addContent(final MessageDelivery createdMessage, final InputStream letterContent, final ContentType contentType) {
+	public ClientResponse addContent(final MessageDelivery createdMessage, final InputStream letterContent) {
 		Link addContentLink = fetchAddContentLink(createdMessage);
 
 		byte[] content = readLetterContent(letterContent);
@@ -208,7 +203,6 @@ public class ApiService {
 				.path(addContentLink.getUri().getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V4)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(contentType.getRequestMediaType())
 				.post(ClientResponse.class, content);
 	}
 
@@ -239,8 +233,7 @@ public class ApiService {
 	 * vedleggsressurs på serveren ved metoden {@code createAttachment}.
 	 * 
 	 */
-	public ClientResponse addContentToAttachment(final Attachment attachment, final InputStream attachmentContent,
-			final ContentType contentType) {
+	public ClientResponse addContentToAttachment(final Attachment attachment, final InputStream attachmentContent) {
 		Link addContentLink = fetchAddContentLink(attachment);
 
 		byte[] content = readLetterContent(attachmentContent);
@@ -249,7 +242,6 @@ public class ApiService {
 				.path(addContentLink.getUri().getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V4)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(contentType.getRequestMediaType())
 				.post(ClientResponse.class, content);
 	}
 
