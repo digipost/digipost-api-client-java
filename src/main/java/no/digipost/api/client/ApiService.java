@@ -47,7 +47,7 @@ import org.apache.commons.io.IOUtils;
  * <li>Søke etter mottakere</li>
  * <li>Opprette en forsendelsesressurs på serveren
  * <li>Hente en allerede opprettet forsendelsesressurs fra serveren
- * <li>Sende innholdet (PDF) for en allerede opprettet forsendelsesressurs til
+ * <li>Sende innholdet for en allerede opprettet forsendelsesressurs til
  * serveren, og dermed sende brevet til mottakeren
  * <li>Opprette en printforsendelsesressurs på serveren
  * <li>Hente en allerede opprettet printforsendelsesressurs fra serveren

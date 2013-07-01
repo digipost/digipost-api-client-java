@@ -204,7 +204,7 @@ public class MessageSender extends Communicator {
 	}
 
 	/**
-	 * Legger til innhold (PDF) til en forsendelse og sender brevet. For at
+	 * Legger til innhold til en forsendelse og sender brevet. For at
 	 * denne metoden skal kunne kalles, må man først ha opprettet
 	 * forsendelsesressursen på serveren ved metoden
 	 * {@code createOrFetchMesssage}.
@@ -221,7 +221,7 @@ public class MessageSender extends Communicator {
 	}
 
 	/**
-	 * Legger til innhold (PDF) til en forsendelse. For at denne metoden skal
+	 * Legger til innhold til en forsendelse. For at denne metoden skal
 	 * kunne kalles, må man først ha opprettet forsendelsesressursen på serveren
 	 * ved metoden {@code createOrFetchMesssage}.
 	 */
@@ -237,7 +237,7 @@ public class MessageSender extends Communicator {
 	}
 
 	/**
-	 * Legger til innhold (PDF) til et vedlegg. For at denne metoden skal kunne
+	 * Legger til innhold til et vedlegg. For at denne metoden skal kunne
 	 * kalles, må man først ha opprettet vedleggsressursen på serveren ved
 	 * metoden {@code createOrFetchAttachment}.
 	 */

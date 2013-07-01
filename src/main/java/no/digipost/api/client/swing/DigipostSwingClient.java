@@ -318,7 +318,7 @@ public class DigipostSwingClient {
 		directToPrintCheckBox.setEnabled(false);
 		brevMainPanel.add(directToPrintCheckBox, createGridBagConstraintsForField(3, 9, 1));
 
-		JLabel innholdLabel = new JLabel("Brevets innhold (pdf)");
+		JLabel innholdLabel = new JLabel("Brevets innhold");
 		brevMainPanel.add(innholdLabel, createGridBagConstraintsForLabel(0, 10));
 
 		contentField = new JTextField();
