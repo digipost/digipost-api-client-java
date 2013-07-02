@@ -27,7 +27,6 @@ public class FileType {
 	private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[a-zA-Z0-9\\-_]+$");
 
 	public static final FileType PDF = new FileType("pdf");
-	public static final FileType TXT = new FileType("txt");
 	public static final FileType HTM = new FileType("htm");
 	public static final FileType HTML = new FileType("html");
 	public static final FileType XHTML = new FileType("xhtml");
@@ -36,8 +35,6 @@ public class FileType {
 	public static final FileType JPG = new FileType("jpg");
 	public static final FileType JPEG = new FileType("jpeg");
 	public static final FileType GIF = new FileType("gif");
-	public static final FileType DOC = new FileType("doc");
-	public static final FileType PPT = new FileType("ppt");
 
 	private final String fileType;
 
