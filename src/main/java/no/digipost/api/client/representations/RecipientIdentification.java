@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlType;
     "nameAndAddress",
     "digipostAddress",
     "personalIdentificationNumber",
+    "organisationNumber",
     "printDetails"
 })
 public class RecipientIdentification {
@@ -35,6 +36,8 @@ public class RecipientIdentification {
     protected String digipostAddress;
     @XmlElement(name = "personal-identification-number", nillable = false)
     protected String personalIdentificationNumber;
+    @XmlElement(name = "organisation-number", nillable = false)
+    protected String organisationNumber;
     @XmlElement(name = "print-details", nillable = false)
     protected PrintDetails printDetails;
 
@@ -46,6 +49,10 @@ public class RecipientIdentification {
 
 	public RecipientIdentification(final DigipostAddress digipostAddress) {
 		this.digipostAddress = digipostAddress.asString();
+	}
+
+	public RecipientIdentification(final OrganisationNumber organisationNumber) {
+		this.organisationNumber = organisationNumber.asString();
 	}
 
 	public RecipientIdentification(final NameAndAddress nameAndAddress) {

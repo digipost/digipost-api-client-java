@@ -55,6 +55,11 @@ public class Message {
 		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, fileType);
 	}
 
+	public Message(final String messageId, final String subject, final OrganisationNumber id, final SmsNotification smsVarsling,
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
+		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, fileType);
+	}
+
 	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
 			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
 		this(messageId, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel, fileType);
