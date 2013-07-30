@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "identification", propOrder = {
 		"nameAndAddress",
 		"digipostAddress",
+		"organisationNumber",
 		"personalIdentificationNumber"
 })
 @XmlRootElement(name = "identification")
@@ -37,6 +38,8 @@ public class Identification {
 	protected String digipostAddress;
 	@XmlElement(name = "personal-identification-number", nillable = false)
 	protected String personalIdentificationNumber;
+	@XmlElement(name = "organisation-number", nillable = false)
+	protected String organisationNumber;
 
 	public Identification(final NameAndAddress nameAndAddress) {
 		this.nameAndAddress = nameAndAddress;
@@ -48,6 +51,10 @@ public class Identification {
 
 	public Identification(final PersonalIdentificationNumber personalIdentificationNumber) {
 		this.personalIdentificationNumber = personalIdentificationNumber.asString();
+	}
+
+	public Identification(final OrganisationNumber organisationNumber) {
+		this.organisationNumber = organisationNumber.asString();
 	}
 
 	//JAXB
