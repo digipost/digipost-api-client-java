@@ -70,9 +70,14 @@ public class RecipientIdentification {
 	}
 
 	public RecipientIdentification(final NameAndAddress nameAndAddress, final PrintDetails printDetails) {
-		this.nameAndAddress = nameAndAddress;
+		this(nameAndAddress);
 		this.printDetails = printDetails;
 	}
+
+    public RecipientIdentification(final OrganisationNumber organisationNumber, final PrintDetails printDetails) {
+        this(organisationNumber);
+        this.printDetails = printDetails;
+    }
 
 	public RecipientIdentification(final PrintDetails printDetails) {
 		this.printDetails = printDetails;
