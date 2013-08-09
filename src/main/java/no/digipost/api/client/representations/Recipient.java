@@ -32,6 +32,10 @@ public class Recipient extends Representation {
 	private String digipostAddress;
 	@XmlElement(name = "mobile-number")
 	protected String mobileNumber;
+	@XmlElement(name = "organisation-number")
+	private String organisationNumber;
+	@XmlElement(name = "organisation-name")
+	private String organisationName;
 	@XmlElement(name = "address")
 	private final List<Address> addresses;
 
@@ -63,6 +67,14 @@ public class Recipient extends Representation {
 
 	public String getDigipostAddress() {
 		return digipostAddress;
+	}
+
+	public String getOrganisationName() {
+		return organisationName;
+	}
+
+	public String getOrganisationNumber() {
+		return organisationNumber;
 	}
 
 	public List<Address> getAddresses() {
