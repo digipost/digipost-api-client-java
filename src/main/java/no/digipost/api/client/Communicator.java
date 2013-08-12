@@ -44,7 +44,7 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.operator.OutputEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,9 +75,9 @@ public class Communicator {
 	}
 
 	private byte[] preencrypt(final byte[] data, final String keyId, final String keyContent) throws Exception {
-		PEMReader reader = new PEMReader(new StringReader(keyContent));
-		X509EncodedKeySpec spec = new X509EncodedKeySpec(((BCRSAPublicKey) reader.readObject()).getEncoded());
-		IOUtils.closeQuietly(reader);
+		PEMParser pemParser = new PEMParser(new StringReader(keyContent));
+		X509EncodedKeySpec spec = new X509EncodedKeySpec(((BCRSAPublicKey) pemParser.readObject()).getEncoded());
+		IOUtils.closeQuietly(pemParser);
 		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
 
 		CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
