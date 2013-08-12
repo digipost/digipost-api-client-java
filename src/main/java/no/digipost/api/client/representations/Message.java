@@ -25,7 +25,7 @@ import org.apache.commons.lang.StringUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message", propOrder = { "messageId", "senderId", "preEncrypt", "subject", "recipient", "smsNotification",
-		"authenticationLevel", "sensitivityLevel", "fileType" })
+		"authenticationLevel", "sensitivityLevel", "digipostFileType" })
 @XmlRootElement(name = "message")
 public class Message {
 	@XmlElement(name = "message-id", required = true)
