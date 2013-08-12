@@ -45,40 +45,41 @@ public class Message {
 	@XmlElement(name = "sensitivity-level")
 	protected SensitivityLevel sensitivityLevel;
 	@XmlElement(name = "file-type", required = true)
-	protected String fileType;
+	protected String digipostFileType;
 
 	Message() {
 	}
 
 	public Message(final String messageId, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
-		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, fileType);
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
+		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
 	}
 
 	public Message(final String messageId, final String subject, final OrganisationNumber id, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
-		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, fileType);
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
+		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
 	}
 
 	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
-		this(messageId, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel, fileType);
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
+		this(messageId, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
 	}
 
 	public Message(final String messageId, final String subject, final NameAndAddress nameAndAddress, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
-		this(messageId, subject, new RecipientIdentification(nameAndAddress), smsVarsling, authenticationLevel, sensitivityLevel, fileType);
+			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
+		this(messageId, subject, new RecipientIdentification(nameAndAddress), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
 	}
 
 	public Message(final String messageId, final String subject, final RecipientIdentification recipient,
-			final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType) {
+			final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, 
+			final FileType digipostFileType) {
 		this.messageId = messageId;
 		this.subject = subject;
 		this.recipient = recipient;
 		smsNotification = smsVarsling;
 		this.authenticationLevel = authenticationLevel;
 		this.sensitivityLevel = sensitivityLevel;
-		this.fileType = fileType.toString();
+		this.digipostFileType = digipostFileType.toString();
 	}
 
 	public Message(final String messageId, final PrintDetails printDetails) {
@@ -142,11 +143,11 @@ public class Message {
 		return recipient.isDirectPrint();
 	}
 
-	public FileType getFileType() {
-		return new FileType(fileType);
+	public FileType getDigipostFileType() {
+		return new FileType(digipostFileType);
 	}
 
-	public void setFileType(FileType fileType) {
-		this.fileType = fileType.toString();
+	public void setDigipostFileType(FileType fileType) {
+		this.digipostFileType = fileType.toString();
 	}
 }

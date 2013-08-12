@@ -52,7 +52,7 @@ public class MessageSender extends Communicator {
 			unencryptetContent = letterContent;
 		} else {
 			unencryptetContent = printContent;
-			message.setFileType(FileType.PDF);
+			message.setDigipostFileType(FileType.PDF);
 		}
 
 		MessageDelivery delivery;
@@ -77,7 +77,7 @@ public class MessageSender extends Communicator {
 			unencryptetContent = letterContent;
 		} else {
 			unencryptetContent = printContent;
-			message.setFileType(FileType.PDF);
+			message.setDigipostFileType(FileType.PDF);
 		}
 
 		MessageDelivery delivery;
