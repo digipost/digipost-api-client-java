@@ -35,6 +35,7 @@ import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
@@ -42,7 +43,6 @@ import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.operator.OutputEncryptor;
@@ -76,7 +76,8 @@ public class Communicator {
 
 	private byte[] preencrypt(final byte[] data, final String keyId, final String keyContent) throws Exception {
 		PEMParser pemParser = new PEMParser(new StringReader(keyContent));
-		X509EncodedKeySpec spec = new X509EncodedKeySpec(((BCRSAPublicKey) pemParser.readObject()).getEncoded());
+		SubjectPublicKeyInfo subjectPublicKeyInfo = (SubjectPublicKeyInfo) pemParser.readObject();
+		X509EncodedKeySpec spec = new X509EncodedKeySpec(subjectPublicKeyInfo.getEncoded());
 		IOUtils.closeQuietly(pemParser);
 		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
 
