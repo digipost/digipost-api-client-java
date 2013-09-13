@@ -23,7 +23,7 @@ import java.util.Date;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.Headers;
 
-import org.apache.commons.httpclient.util.DateUtil;
+import org.apache.http.client.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class DateFilter extends ClientFilter {
 	}
 
 	private ClientRequest modifyRequest(final ClientRequest cr) {
-		String dateOnRFC1123Format = DateUtil.formatDate(new Date());
+		String dateOnRFC1123Format = DateUtils.formatDate(new Date());
 		cr.getHeaders().add(Date, dateOnRFC1123Format);
 		log(getClass().getSimpleName() + " satt headeren " + Headers.Date + "=" + dateOnRFC1123Format);
 		return cr;

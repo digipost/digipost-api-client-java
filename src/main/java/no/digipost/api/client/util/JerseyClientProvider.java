@@ -15,53 +15,23 @@
  */
 package no.digipost.api.client.util;
 
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpConnectionManager;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.client.apache.ApacheHttpClient;
-import com.sun.jersey.client.apache.ApacheHttpClientHandler;
-import com.sun.jersey.client.apache.config.ApacheHttpClientConfig;
-import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 public class JerseyClientProvider {
-
-	private static final int MAX_HTTP_CONNECTIONS = 100;
 
 	private static final Integer THREADPOOL_SIZE = 100;
 	private static final Integer CONNECTION_TIMEOUT = 60000;
 	private static final Integer READ_TIMEOUT = 60000;
 
 	public static Client newClient() {
-		ApacheHttpClientHandler clientHandler = new ApacheHttpClientHandler(opprettMultiThreadedHttpClient(), opprettClientConfig(CONNECTION_TIMEOUT,
-				READ_TIMEOUT));
-		return new ApacheHttpClient(clientHandler);
+		ClientConfig config = new DefaultClientConfig();
+		Client client = Client.create(config);
+		client.setReadTimeout(READ_TIMEOUT);
+		client.setConnectTimeout(CONNECTION_TIMEOUT);
+		client.getProperties().put(ClientConfig.PROPERTY_THREADPOOL_SIZE, THREADPOOL_SIZE);
+		return client;
 	}
+}	
 
-	public static Client newClient(final int connectionTimeout, final int readTimout) {
-		ApacheHttpClientHandler clientHandler = new ApacheHttpClientHandler(opprettMultiThreadedHttpClient(), opprettClientConfig(connectionTimeout,
-				readTimout));
-		return new ApacheHttpClient(clientHandler);
-	}
-
-	private static HttpClient opprettMultiThreadedHttpClient() {
-		HttpConnectionManager httpConnectionManager = new MultiThreadedHttpConnectionManager();
-		HttpConnectionManagerParams params = new HttpConnectionManagerParams();
-		params.setMaxTotalConnections(MAX_HTTP_CONNECTIONS);
-		params.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, MAX_HTTP_CONNECTIONS);
-		httpConnectionManager.setParams(params);
-		return new HttpClient(httpConnectionManager);
-	}
-
-	private static ClientConfig opprettClientConfig(final Integer connectionTimeout, final Integer readTimeout) {
-		DefaultApacheHttpClientConfig config = new DefaultApacheHttpClientConfig();
-		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_THREADPOOL_SIZE, THREADPOOL_SIZE);
-		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_CONNECT_TIMEOUT, connectionTimeout);
-		config.getProperties().put(ApacheHttpClientConfig.PROPERTY_READ_TIMEOUT, readTimeout);
-		return config;
-	}
-}

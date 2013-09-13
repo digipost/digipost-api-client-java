@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations.print;
 
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 import static no.digipost.api.client.representations.ObjectBuilder.newForeignAddress;
 import static no.digipost.api.client.representations.ObjectBuilder.newNorwegianRecipient;
 import static org.junit.Assert.assertFalse;
