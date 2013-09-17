@@ -26,10 +26,14 @@ public class JerseyClientProvider {
 	private static final Integer READ_TIMEOUT = 60000;
 
 	public static Client newClient() {
+		return newClient(CONNECTION_TIMEOUT, READ_TIMEOUT);
+	}
+
+	public static Client newClient(final int connectionTimeout, final int readTimout) {
 		ClientConfig config = new DefaultClientConfig();
 		Client client = Client.create(config);
-		client.setReadTimeout(READ_TIMEOUT);
-		client.setConnectTimeout(CONNECTION_TIMEOUT);
+		client.setConnectTimeout(connectionTimeout);
+		client.setReadTimeout(readTimout);
 		client.getProperties().put(ClientConfig.PROPERTY_THREADPOOL_SIZE, THREADPOOL_SIZE);
 		return client;
 	}
