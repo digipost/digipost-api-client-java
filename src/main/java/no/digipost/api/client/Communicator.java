@@ -56,7 +56,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 /**
  * Superklasse for MessageSender som har funksjonalitet for å snakke med
  * ApiService.
- * 
+ *
  */
 public class Communicator {
 
@@ -150,7 +150,7 @@ public class Communicator {
 
 	protected void checkThatExistingMessageIsIdenticalToNewMessage(final MessageDelivery exisitingMessage, final Message message) {
 		if (!exisitingMessage.isSameMessageAs(message)) {
-			String errorMessage = "Forsendelse med id [" + message.getMessageId() + "] finnes fra før med annen spesifikasjon.";
+			String errorMessage = "Forsendelse med id [" + message.getUuid() + "] finnes fra før med annen spesifikasjon.";
 			log(errorMessage);
 			throw new DigipostClientException(ErrorType.DUPLICATE_MESSAGE_ID, errorMessage);
 		}

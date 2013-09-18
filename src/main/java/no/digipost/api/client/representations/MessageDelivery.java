@@ -76,7 +76,7 @@ public class MessageDelivery extends Representation {
 	}
 
 	public boolean isSameMessageAs(final Message message) {
-		return messageId.equals(message.getMessageId());
+		return messageId.equals(message.getUuid());
 	}
 
 	public MessageStatus getStatus() {
@@ -108,7 +108,7 @@ public class MessageDelivery extends Representation {
 	}
 
 	public boolean isAlreadyDeliveredToDigipost() {
-		return DeliveryMethod.DIGIPOST.equals(deliveryMethod) && (deliveredDate != null);
+		return DeliveryMethod.DIGIPOST.equals(deliveryMethod) && deliveredDate != null;
 	}
 
 	public Link getSelfLink() {

@@ -24,12 +24,12 @@ import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang.StringUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "messageId", "senderId", "preEncrypt", "subject", "recipient", "smsNotification",
+@XmlType(name = "message", propOrder = { "uuid", "senderId", "preEncrypt", "subject", "recipient", "smsNotification",
 		"authenticationLevel", "sensitivityLevel", "digipostFileType" })
 @XmlRootElement(name = "message")
 public class Message {
-	@XmlElement(name = "message-id", required = true)
-	protected String messageId;
+	@XmlElement(name = "uuid", required = true)
+	protected String uuid;
 	@XmlElement(name = "sender-id")
 	protected Long senderId;
 	@XmlElement(name = "pre-encrypt")
@@ -65,15 +65,15 @@ public class Message {
 		this(messageId, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
 	}
 
-	public Message(final String messageId, final String subject, final NameAndAddress nameAndAddress, final SmsNotification smsVarsling,
+	public Message(final String uuid, final String subject, final NameAndAddress nameAndAddress, final SmsNotification smsVarsling,
 			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
-		this(messageId, subject, new RecipientIdentification(nameAndAddress), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
+		this(uuid, subject, new RecipientIdentification(nameAndAddress), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
 	}
 
-	public Message(final String messageId, final String subject, final RecipientIdentification recipient,
-			final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, 
+	public Message(final String uuid, final String subject, final RecipientIdentification recipient,
+			final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel,
 			final FileType digipostFileType) {
-		this.messageId = messageId;
+		this.uuid = uuid;
 		this.subject = subject;
 		this.recipient = recipient;
 		smsNotification = smsVarsling;
@@ -82,8 +82,8 @@ public class Message {
 		this.digipostFileType = digipostFileType.toString();
 	}
 
-	public Message(final String messageId, final PrintDetails printDetails) {
-		this(messageId, null, new RecipientIdentification(printDetails), null, null, null, FileType.PDF);
+	public Message(final String uuid, final PrintDetails printDetails) {
+		this(uuid, null, new RecipientIdentification(printDetails), null, null, null, FileType.PDF);
 	}
 
 	public String getSubject() {
@@ -110,8 +110,8 @@ public class Message {
 		return recipient;
 	}
 
-	public String getMessageId() {
-		return messageId;
+	public String getUuid() {
+		return uuid;
 	}
 
 	public boolean isPreEncrypt() {
@@ -119,7 +119,7 @@ public class Message {
 	}
 
 	public boolean isSameMessageAs(final Message message) {
-		return messageId.equals(message.getMessageId());
+		return uuid.equals(message.getUuid());
 	}
 
 	public void setPreEncrypt() {
@@ -147,7 +147,7 @@ public class Message {
 		return new FileType(digipostFileType);
 	}
 
-	public void setDigipostFileType(FileType fileType) {
-		this.digipostFileType = fileType.toString();
+	public void setDigipostFileType(final FileType fileType) {
+		digipostFileType = fileType.toString();
 	}
 }

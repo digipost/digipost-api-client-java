@@ -19,6 +19,7 @@ import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -77,12 +78,12 @@ public class XsdValidationTest {
 
 	@Test
 	public void validateMessage() throws JAXBException {
-		Message messageWithDigipostAddress = new Message("messageId", "subject", new DigipostAddress("even.beinlaus#1234"), new SmsNotification(0),
+		Message messageWithDigipostAddress = new Message(UUID.randomUUID().toString(), "subject", new DigipostAddress("even.beinlaus#1234"), new SmsNotification(0),
 				AuthenticationLevel.TWO_FACTOR, SensitivityLevel.NORMAL, FileType.PDF);
-		Message messageWithPersonalIdentificationNumber = new Message("messageId", "subject", new PersonalIdentificationNumber(
+		Message messageWithPersonalIdentificationNumber = new Message(UUID.randomUUID().toString(), "subject", new PersonalIdentificationNumber(
 				"12345678901"), new SmsNotification(0), AuthenticationLevel.TWO_FACTOR, SensitivityLevel.NORMAL, FileType.PDF);
 		marshallAndValidate(messageWithDigipostAddress);
-		Message messageWithPreEncryptAndSenderId = new Message("messageId", "subject", new PersonalIdentificationNumber("12345678901"),
+		Message messageWithPreEncryptAndSenderId = new Message(UUID.randomUUID().toString(), "subject", new PersonalIdentificationNumber("12345678901"),
 				new SmsNotification(0), AuthenticationLevel.TWO_FACTOR, SensitivityLevel.NORMAL, FileType.PDF);
 		messageWithPreEncryptAndSenderId.setSenderId(10L);
 		messageWithPreEncryptAndSenderId.setPreEncrypt();
@@ -95,21 +96,21 @@ public class XsdValidationTest {
 	@Test
 	public void validatePrintMessage() throws JAXBException {
 		PrintRecipient address = new PrintRecipient("name", new NorwegianAddress("1234", "Oslo"));
-		Message message = new Message("messageId", new PrintDetails(address, address, B));
+		Message message = new Message(UUID.randomUUID().toString(), new PrintDetails(address, address, B));
 		marshallAndValidate(message);
 	}
 
 	@Test
 	public void validatePrintMessageWithForeignRecipiantWihtCountry() throws JAXBException {
 		PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", "Sverige", null));
-		Message message = new Message("messageId", new PrintDetails(address, address, B));
+		Message message = new Message(UUID.randomUUID().toString(), new PrintDetails(address, address, B));
 		marshallAndValidate(message);
 	}
 
 	@Test
 	public void validatePrintMessageWithForeignRecipiantWihtCountryCode() throws JAXBException {
 		PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", null, "SE"));
-		Message message = new Message("messageId", new PrintDetails(address, address, B));
+		Message message = new Message(UUID.randomUUID().toString(), new PrintDetails(address, address, B));
 		marshallAndValidate(message);
 	}
 
