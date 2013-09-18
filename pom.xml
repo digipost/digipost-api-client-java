@@ -228,6 +228,7 @@
 										<include>com.sun.xml.bind:jaxb-core:${jaxb.version}:jar:compile</include>
 										<include>com.sun.xml.bind:jaxb-impl:${jaxb.version}:jar:compile</include>
 										<include>com.sun.jersey.contribs:jersey-apache-client:${jersey.version}:jar:compile</include>
+										<include>com.sun.jersey:jersey-client:${jersey.version}:jar:compile</include>
 										<include>com.sun.jersey:jersey-core:${jersey.version}:jar:compile</include>
 										<include>org.joda:joda-convert:${joda-convert.version}:jar:compile</include>
 										<include>joda-time:joda-time:${joda-time.version}:jar:compile</include>
