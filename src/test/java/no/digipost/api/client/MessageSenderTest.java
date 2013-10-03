@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.UUID;
 
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.DeliveryMethod;
@@ -57,7 +58,7 @@ public class MessageSenderTest {
 		Message forsendelseIn = lagDefaultForsendelse();
 		when(api.createMessage(forsendelseIn)).thenReturn(new MockClientResponse(Status.CONFLICT));
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", DeliveryMethod.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.getUuid(), DeliveryMethod.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
 		when(api.fetchExistingMessage((URI) any())).thenReturn(new MockClientResponse(Status.OK, eksisterendeForsendelse));
 
 		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);
@@ -73,7 +74,7 @@ public class MessageSenderTest {
 		Message forsendelseIn = lagDefaultForsendelse();
 		when(api.createMessage(forsendelseIn)).thenReturn(new MockClientResponse(Status.CONFLICT));
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED,
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.getUuid(), DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED,
 				DateTime.now());
 		when(api.fetchExistingMessage((URI) any())).thenReturn(new MockClientResponse(Status.OK, eksisterendeForsendelse));
 
@@ -94,7 +95,7 @@ public class MessageSenderTest {
 		Message forsendelseIn = lagDefaultForsendelse();
 		when(api.createMessage(forsendelseIn)).thenReturn(new MockClientResponse(Status.CONFLICT));
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery("id", DeliveryMethod.PRINT, MessageStatus.DELIVERED_TO_PRINT,
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.getUuid(), DeliveryMethod.PRINT, MessageStatus.DELIVERED_TO_PRINT,
 				DateTime.now());
 		when(api.fetchExistingMessage((URI) any())).thenReturn(new MockClientResponse(Status.OK, eksisterendeForsendelse));
 
@@ -110,11 +111,11 @@ public class MessageSenderTest {
 	}
 
 	private Message lagDefaultForsendelse() {
-		return lagEnkeltForsendelse("emne", "id", "12345678900");
+		return lagEnkeltForsendelse("emne", UUID.randomUUID().toString(), "12345678900");
 	}
 
-	private Message lagEnkeltForsendelse(final String subject, final String messageId, final String fnr) {
-		return new Message(messageId, subject, new PersonalIdentificationNumber(fnr), new SmsNotification(0), AuthenticationLevel.PASSWORD,
+	private Message lagEnkeltForsendelse(final String subject, final String uuid, final String fnr) {
+		return new Message(uuid, subject, new PersonalIdentificationNumber(fnr), new SmsNotification(0), AuthenticationLevel.PASSWORD,
 				SensitivityLevel.NORMAL, FileType.PDF);
 	}
 

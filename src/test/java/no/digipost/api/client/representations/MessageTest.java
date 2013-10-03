@@ -21,6 +21,8 @@ import static no.digipost.api.client.representations.AuthenticationLevel.PASSWOR
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
+import java.util.UUID;
+
 import org.junit.Test;
 
 
@@ -28,23 +30,23 @@ public class MessageTest {
 
 	@Test
 	public void shouldBeDirectPrintWhenMessageContainsOnlyPrintDetails() {
-		Message message = new Message("id", new PrintDetails());
+		Message message = new Message(UUID.randomUUID().toString(), new PrintDetails());
 		assertTrue(message.isDirectPrint());
 	}
 
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsDigipostAddress() {
-		Message message = new Message("id", "subject", new DigipostAddress("test.testson#1234"), null, PASSWORD, NORMAL, PDF);
+		Message message = new Message(UUID.randomUUID().toString(), "subject", new DigipostAddress("test.testson#1234"), null, PASSWORD, NORMAL, PDF);
 		assertFalse(message.isDirectPrint());
 	}
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsNameAndAddress() {
-		Message message = new Message("id", "subject", new RecipientIdentification(new NameAndAddress()), null, PASSWORD, NORMAL, PDF);
+		Message message = new Message(UUID.randomUUID().toString(), "subject", new RecipientIdentification(new NameAndAddress()), null, PASSWORD, NORMAL, PDF);
 		assertFalse(message.isDirectPrint());
 	}
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsPersonalIdendificationNumber() {
-		Message message = new Message("id", "subject", new PersonalIdentificationNumber("12125412435"), null, PASSWORD, NORMAL, PDF);
+		Message message = new Message(UUID.randomUUID().toString(), "subject", new PersonalIdentificationNumber("12125412435"), null, PASSWORD, NORMAL, PDF);
 		assertFalse(message.isDirectPrint());
 	}
 }

@@ -19,6 +19,9 @@ import static no.digipost.api.client.representations.ObjectBuilder.newNorwegianR
 import static no.digipost.api.client.representations.ObjectBuilder.newPrintMessage;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.util.UUID;
+
 import no.digipost.api.client.representations.PrintRecipient;
 
 import org.junit.Test;
@@ -31,14 +34,17 @@ public class PrintMessageTest {
 		PrintRecipient recipient2 = newNorwegianRecipient("Name2", "Zip2", "City2");
 		PrintRecipient returnAddress = newNorwegianRecipient("SenderName", "SenderZip", "SenderCity");
 
-		assertTrue(newPrintMessage("unique-id", recipient1, returnAddress).isSameMessageAs(
-				newPrintMessage("unique-id", recipient1, returnAddress)));
+		String uniqueId = UUID.randomUUID().toString();
+		String otherId = UUID.randomUUID().toString();
 
-		assertTrue(newPrintMessage("unique-id", recipient1, returnAddress).isSameMessageAs(
-				newPrintMessage("unique-id", recipient1, recipient2)));
+		assertTrue(newPrintMessage(uniqueId, recipient1, returnAddress).isSameMessageAs(
+				newPrintMessage(uniqueId, recipient1, returnAddress)));
 
-		assertFalse(newPrintMessage("unique-id", recipient1, returnAddress).isSameMessageAs(
-				newPrintMessage("other-id", recipient1, returnAddress)));
+		assertTrue(newPrintMessage(uniqueId, recipient1, returnAddress).isSameMessageAs(
+				newPrintMessage(uniqueId, recipient1, recipient2)));
+
+		assertFalse(newPrintMessage(uniqueId, recipient1, returnAddress).isSameMessageAs(
+				newPrintMessage(otherId, recipient1, returnAddress)));
 	}
 
 }

@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Security;
+import java.util.UUID;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.representations.Message;
@@ -69,7 +70,8 @@ public class FallbackTilPrintEksempel {
 		// benyttes dersom mottaker ikke er Digipostbruker
 		PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer","Mottakers poststed")),
 				new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B);
-		Message message = new Message("dinForsendelseId", "Brevets emne", new RecipientIdentification(pin, printDetails), new SmsNotification(), PASSWORD, NORMAL, PDF);
+		String dinForsendelseId = UUID.randomUUID().toString();
+		Message message = new Message(dinForsendelseId, "Brevets emne", new RecipientIdentification(pin, printDetails), new SmsNotification(), PASSWORD, NORMAL, PDF);
 
 		// 7. Foreløpig støtter Digipost kun å sende krypterte brev til print. Å
 		// spesifisere PreEncrypt gjør at klientbiblioteket krypterer filen for

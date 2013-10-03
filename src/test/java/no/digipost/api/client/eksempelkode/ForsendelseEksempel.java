@@ -22,6 +22,7 @@ import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.representations.Message;
@@ -53,7 +54,7 @@ public class ForsendelseEksempel {
 		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 		// 4. Vi oppretter en forsendelse
-		Message message = new Message("dinForsendelseId", "Brevets emne", pin, new SmsNotification(), PASSWORD, NORMAL, PDF);
+		Message message = new Message(UUID.randomUUID().toString(), "Brevets emne", pin, new SmsNotification(), PASSWORD, NORMAL, PDF);
 
 		// 5. Vi henter inputstreamen til PDF-filen vi ønsker å sende
 		InputStream messageContent = getMessageContent();

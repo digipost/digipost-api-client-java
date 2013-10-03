@@ -55,30 +55,20 @@ public class Invoice
 	public Invoice() {
 	}
 
-	public Invoice(final String messageId, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
+	public Invoice(final String uuid, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
 				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType, final String kid, final BigDecimal amount,
 				   final String account, final LocalDate dueDate) {
-		super(messageId, subject, id, smsVarsling, authenticationLevel, sensitivityLevel, fileType);
+		super(uuid, subject, id, smsVarsling, authenticationLevel, sensitivityLevel, fileType);
 		this.kid = kid;
 		this.amount = amount;
 		this.account = account;
 		this.dueDate = dueDate;
 	}
 
-//	public Invoice(final String messageId, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
-//				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final String kid, final BigDecimal amount,
-//				   final String account, final LocalDate dueDate) {
-//		super(messageId, subject, digipostAdress, smsVarsling, authenticationLevel, sensitivityLevel);
-//		this.kid = kid;
-//		this.amount = amount;
-//		this.account = account;
-//		this.dueDate = dueDate;
-//	}
-
-	public Invoice(final String messageId, final String subject, final RecipientIdentification recipient, final SmsNotification smsVarsling,
-				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, FileType fileType, final String kid, final BigDecimal amount,
+	public Invoice(final String uuid, final String subject, final RecipientIdentification recipient, final SmsNotification smsVarsling,
+				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType, final String kid, final BigDecimal amount,
 				   final String account, final LocalDate dueDate) {
-		super(messageId, subject, recipient, smsVarsling, authenticationLevel, sensitivityLevel, fileType);
+		super(uuid, subject, recipient, smsVarsling, authenticationLevel, sensitivityLevel, fileType);
 		this.kid = kid;
 		this.amount = amount;
 		this.account = account;

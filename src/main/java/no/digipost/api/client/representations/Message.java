@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.representations;
 
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -28,6 +30,8 @@ import org.apache.commons.lang.StringUtils;
 		"authenticationLevel", "sensitivityLevel", "digipostFileType" })
 @XmlRootElement(name = "message")
 public class Message {
+	private final static Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+
 	@XmlElement(name = "uuid", required = true)
 	protected String uuid;
 	@XmlElement(name = "sender-id")
@@ -50,19 +54,19 @@ public class Message {
 	Message() {
 	}
 
-	public Message(final String messageId, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
+	public Message(final String uuid, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
 			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
-		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
+		this(uuid, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
 	}
 
-	public Message(final String messageId, final String subject, final OrganisationNumber id, final SmsNotification smsVarsling,
+	public Message(final String uuid, final String subject, final OrganisationNumber id, final SmsNotification smsVarsling,
 			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
-		this(messageId, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
+		this(uuid, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
 	}
 
-	public Message(final String messageId, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
+	public Message(final String uuid, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
 			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
-		this(messageId, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
+		this(uuid, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
 	}
 
 	public Message(final String uuid, final String subject, final NameAndAddress nameAndAddress, final SmsNotification smsVarsling,
@@ -73,7 +77,10 @@ public class Message {
 	public Message(final String uuid, final String subject, final RecipientIdentification recipient,
 			final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel,
 			final FileType digipostFileType) {
-		this.uuid = uuid;
+		this.uuid = uuid.toLowerCase();
+		if (!UUID_PATTERN.matcher(this.uuid).matches()) {
+			throw new IllegalArgumentException("Not a UUID: " + uuid);
+		}
 		this.subject = subject;
 		this.recipient = recipient;
 		smsNotification = smsVarsling;

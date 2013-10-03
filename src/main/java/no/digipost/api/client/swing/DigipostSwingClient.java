@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.UUID;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -427,11 +428,11 @@ public class DigipostSwingClient {
 					FileType fileType = FileType.fromFilename(contentField.getText());
 					if (identifyOnDigipostAddress.isSelected()) {
 						String digipostAddress = recipientDigipostAddressField.getText();
-						message = new Message(String.valueOf(System.currentTimeMillis()), subject, new DigipostAddress(digipostAddress),
+						message = new Message(UUID.randomUUID().toString(), subject, new DigipostAddress(digipostAddress),
 								new SmsNotification(), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, fileType);
 					} else if (identifyOnPersonalIdentificationNumber.isSelected()) {
 						String personalIdentificationNumber = recipientPersonalIdentificationNumberField.getText();
-						message = new Message(String.valueOf(System.currentTimeMillis()), subject, new PersonalIdentificationNumber(
+						message = new Message(UUID.randomUUID().toString(), subject, new PersonalIdentificationNumber(
 								personalIdentificationNumber), new SmsNotification(), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, fileType);
 					} else {
 						String name = recipientNameField.getText();
@@ -465,7 +466,7 @@ public class DigipostSwingClient {
 							recipient = new RecipientIdentification(nameAndAddress);
 						}
 
-						message = new Message(String.valueOf(System.currentTimeMillis()), subject, recipient, new SmsNotification(),
+						message = new Message(UUID.randomUUID().toString(), subject, recipient, new SmsNotification(),
 								AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, fileType);
 					}
 					messageDelivery = client.createMessage(message, FileUtils.openInputStream(new File(contentField.getText())));
