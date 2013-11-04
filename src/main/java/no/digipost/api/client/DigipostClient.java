@@ -17,10 +17,7 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import no.digipost.api.client.filters.ContentMD5Filter;
+import no.digipost.api.client.filters.ContentSHA256Filter;
 import no.digipost.api.client.filters.DateFilter;
 import no.digipost.api.client.filters.SignatureFilter;
 import no.digipost.api.client.filters.UserAgentFilter;
@@ -35,8 +32,13 @@ import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.ClientFilter;
 
 /**
  * En klient for å sende brev gjennom Digipost. Hvis et objekt av denne klassen
@@ -70,7 +72,7 @@ public class DigipostClient {
 		this(digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER);
 	}
 
-	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, Client jerseyClient) {
+	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, final Client jerseyClient) {
 		this(digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, jerseyClient);
 	}
 
@@ -83,7 +85,7 @@ public class DigipostClient {
 
 		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
 		WebResource webResource = client.resource(digipostUrl);
-		webResource.addFilter(new ContentMD5Filter(eventLogger));
+		webResource.addFilter(new ContentSHA256Filter(eventLogger));
 		webResource.addFilter(new SignatureFilter(signer, eventLogger));
 		webResource.addFilter(new DateFilter(eventLogger));
 		webResource.addFilter(new UserAgentFilter());
@@ -177,7 +179,7 @@ public class DigipostClient {
 		return new MessageSender(apiService, eventLogger).sendMessage(printMessage);
 	}
 
-	public IdentificationResult identifyRecipient(Identification identification) {
+	public IdentificationResult identifyRecipient(final Identification identification) {
 		return apiService.identifyRecipient(identification);
 	}
 
