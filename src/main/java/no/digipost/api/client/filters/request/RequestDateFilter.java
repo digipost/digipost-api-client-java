@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters;
+package no.digipost.api.client.filters.request;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 import static no.digipost.api.client.Headers.Date;
@@ -31,15 +31,15 @@ import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
 
-public class DateFilter extends ClientFilter {
-	private static final Logger LOG = LoggerFactory.getLogger(DateFilter.class);
+public class RequestDateFilter extends ClientFilter {
+	private static final Logger LOG = LoggerFactory.getLogger(RequestDateFilter.class);
 	private final EventLogger eventLogger;
 
-	public DateFilter() {
+	public RequestDateFilter() {
 		this(NOOP_EVENT_LOGGER);
 	}
 
-	public DateFilter(final EventLogger eventListener) {
+	public RequestDateFilter(final EventLogger eventListener) {
 		this.eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
 	}
 

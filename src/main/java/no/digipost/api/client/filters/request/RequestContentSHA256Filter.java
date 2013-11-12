@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters;
+package no.digipost.api.client.filters.request;
 
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.Headers;
 
-import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 
-
-public class ContentMD5Filter extends ContentHashFilter {
-
-	public ContentMD5Filter(final EventLogger eventListener) {
-		super(eventListener, MD5Digest.class, Headers.Content_MD5);
+public class RequestContentSHA256Filter extends RequestContentHashFilter {
+	public RequestContentSHA256Filter(final EventLogger eventListener) {
+		super(eventListener, SHA256Digest.class, Headers.X_Content_SHA256);
 	}
 
-	public ContentMD5Filter() {
-		super(MD5Digest.class, Headers.Content_MD5);
+	public RequestContentSHA256Filter() {
+		super(SHA256Digest.class, Headers.X_Content_SHA256);
 	}
-
 }

@@ -17,10 +17,11 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
-import no.digipost.api.client.filters.ContentSHA256Filter;
-import no.digipost.api.client.filters.DateFilter;
-import no.digipost.api.client.filters.SignatureFilter;
-import no.digipost.api.client.filters.UserAgentFilter;
+import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
+import no.digipost.api.client.filters.request.RequestDateFilter;
+import no.digipost.api.client.filters.request.RequestSignatureFilter;
+import no.digipost.api.client.filters.request.RequestUserAgentFilter;
+import no.digipost.api.client.filters.response.ResponseDateFilter;
 import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.DeliveryMethod;
@@ -80,46 +81,48 @@ public class DigipostClient {
 		this(digipostUrl, senderAccountId, signer, eventLogger, null);
 	}
 
-	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final Client jerseyClient) {
+	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger,
+			final Client jerseyClient) {
 		this.eventLogger = eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER;
 
 		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
 		WebResource webResource = client.resource(digipostUrl);
-		webResource.addFilter(new ContentSHA256Filter(eventLogger));
-		webResource.addFilter(new SignatureFilter(signer, eventLogger));
-		webResource.addFilter(new DateFilter(eventLogger));
-		webResource.addFilter(new UserAgentFilter());
+		webResource.addFilter(new RequestContentSHA256Filter(eventLogger));
+		webResource.addFilter(new RequestSignatureFilter(signer, eventLogger));
+		webResource.addFilter(new RequestDateFilter(eventLogger));
+		webResource.addFilter(new RequestUserAgentFilter());
+		webResource.addFilter(new ResponseDateFilter());
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
 
 		apiService = new ApiService(webResource, senderAccountId);
 	}
 
 	/**
-	 * Sender et brev gjennom Digipost i et steg.
-	 * Dersom mottaker ikke er digipostbruker og det
-	 * ligger printdetaljer på forsendelsen bestiller vi print av brevet til vanlig postgang.
-	 * (Krever at avsender har fått tilgang til print.)
+	 * Sender et brev gjennom Digipost i et steg. Dersom mottaker ikke er
+	 * digipostbruker og det ligger printdetaljer på forsendelsen bestiller vi
+	 * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
+	 * til print.)
 	 */
 	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent) {
 		return createAndSendMessage(message, letterContent, letterContent);
 	}
 
 	/**
-	 * Sender et brev gjennom Digipost i et steg med alternativt innhold for print (må være PDF).
-	 * Dersom mottaker ikke er digipostbruker og det
-	 * ligger printdetaljer på forsendelsen bestiller vi print av brevet til vanlig postgang.
-	 * (Krever at avsender har fått tilgang til print.)
+	 * Sender et brev gjennom Digipost i et steg med alternativt innhold for
+	 * print (må være PDF). Dersom mottaker ikke er digipostbruker og det ligger
+	 * printdetaljer på forsendelsen bestiller vi print av brevet til vanlig
+	 * postgang. (Krever at avsender har fått tilgang til print.)
 	 */
 	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent, final InputStream printContent) {
 		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, letterContent, printContent);
 	}
 
 	/**
-	 * Bestiller print av brevet til utsending gjennom vanlig postgang.
-	 * Krever at avsender har tilgang til å sende direkte til print.
-	 * Dersom mottaker ikke er digipostbruker og det
-	 * ligger printdetaljer på forsendelsen bestiller vi print av brevet til vanlig postgang.
-	 * (Krever at avsender har fått tilgang til print.)
+	 * Bestiller print av brevet til utsending gjennom vanlig postgang. Krever
+	 * at avsender har tilgang til å sende direkte til print. Dersom mottaker
+	 * ikke er digipostbruker og det ligger printdetaljer på forsendelsen
+	 * bestiller vi print av brevet til vanlig postgang. (Krever at avsender har
+	 * fått tilgang til print.)
 	 */
 	public MessageDelivery createMessageAndDeliverToPrint(final Message printMessage, final InputStream printMessageContent) {
 		if (!printMessage.isDirectPrint()) {
@@ -129,7 +132,6 @@ public class DigipostClient {
 		return new MessageSender(apiService, eventLogger).createAndSendMessage(printMessage, null, printMessageContent);
 	}
 
-
 	/**
 	 * Oppretter et brev med innhold for sending i to steg.
 	 */
@@ -138,7 +140,8 @@ public class DigipostClient {
 	}
 
 	/**
-	 * Oppretter et brev med innhold for sending i to steg med alternativt innhold for print (må være PDF).
+	 * Oppretter et brev med innhold for sending i to steg med alternativt
+	 * innhold for print (må være PDF).
 	 */
 	public MessageDelivery createMessage(final Message message, final InputStream letterContent, final InputStream printContent) {
 		return new MessageSender(apiService, eventLogger).createMessageAndAddContent(message, letterContent, printContent);
@@ -152,24 +155,27 @@ public class DigipostClient {
 	}
 
 	/**
-	 * Oppretter et vedlegg i Digipost med alternativt innhold for print (må være PDF).
+	 * Oppretter et vedlegg i Digipost med alternativt innhold for print (må
+	 * være PDF).
 	 */
-	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream digipostContent, final InputStream printContent) {
-		return new MessageSender(apiService, eventLogger).createAttachmentAndAddContent(delivery, attachment, digipostContent, printContent);
+	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream digipostContent,
+			final InputStream printContent) {
+		return new MessageSender(apiService, eventLogger)
+				.createAttachmentAndAddContent(delivery, attachment, digipostContent, printContent);
 	}
 
 	/**
-	 * Sender et brev gjennom Digipost. Dersom mottaker ikke er digipostbruker og det
-	 * ligger printdetaljer på forsendelsen bestiller vi print av brevet til vanlig postgang.
-	 * (Krever at avsender har fått tilgang til print.)
+	 * Sender et brev gjennom Digipost. Dersom mottaker ikke er digipostbruker
+	 * og det ligger printdetaljer på forsendelsen bestiller vi print av brevet
+	 * til vanlig postgang. (Krever at avsender har fått tilgang til print.)
 	 */
 	public MessageDelivery sendMessage(final MessageDelivery message) {
 		return new MessageSender(apiService, eventLogger).sendMessage(message);
 	}
 
 	/**
-	 * Sender et brev direkte til print.
-	 * Krever at avsender tilgang til å sende direkte til print.
+	 * Sender et brev direkte til print. Krever at avsender tilgang til å sende
+	 * direkte til print.
 	 */
 	public MessageDelivery deliverToPrint(final MessageDelivery printMessage) {
 		if (printMessage.getDeliveryMethod() != DeliveryMethod.PRINT) {

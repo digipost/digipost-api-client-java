@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters;
+package no.digipost.api.client.filters.request;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
@@ -36,20 +36,20 @@ import com.sun.jersey.api.client.ClientRequestAdapter;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
 
-public abstract class ContentHashFilter extends ClientFilter {
+public abstract class RequestContentHashFilter extends ClientFilter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ContentHashFilter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RequestContentHashFilter.class);
 	private final EventLogger eventLogger;
 	private final Class<? extends ExtendedDigest> digestClass;
 	private final String header;
 
-	public ContentHashFilter(final EventLogger eventListener, final Class<? extends ExtendedDigest> digestClass, final String header) {
+	public RequestContentHashFilter(final EventLogger eventListener, final Class<? extends ExtendedDigest> digestClass, final String header) {
 		eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
 		this.digestClass = digestClass;
 		this.header = header;
 	}
 
-	public ContentHashFilter(final Class<? extends ExtendedDigest> digestClass, final String header) {
+	public RequestContentHashFilter(final Class<? extends ExtendedDigest> digestClass, final String header) {
 		this(NOOP_EVENT_LOGGER, digestClass, header);
 	}
 
@@ -110,7 +110,7 @@ public abstract class ContentHashFilter extends ClientFilter {
 				instance.doFinal(result, 0);
 				String hash = new String(Base64.encodeBase64(result));
 				request.getHeaders().add(header, hash);
-				log(ContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
+				log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
 			} catch (InstantiationException e) {
 				log("Feil ved generering av " + header + " : " + e.getMessage());
 			} catch (IllegalAccessException e) {

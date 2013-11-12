@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters;
+package no.digipost.api.client.filters.request;
 
 import no.digipost.api.client.Headers;
 
@@ -22,7 +22,7 @@ import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
 
-public class UserAgentFilter extends ClientFilter {
+public class RequestUserAgentFilter extends ClientFilter {
 
 	@Override
 	public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {

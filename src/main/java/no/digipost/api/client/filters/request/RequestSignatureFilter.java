@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters;
+package no.digipost.api.client.filters.request;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
@@ -39,19 +39,19 @@ import com.sun.jersey.api.client.ClientRequestAdapter;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
 
-public class SignatureFilter extends ClientFilter {
+public class RequestSignatureFilter extends ClientFilter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SignatureFilter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RequestSignatureFilter.class);
 
 	private final Signer signer;
 
 	private final EventLogger eventLogger;
 
-	public SignatureFilter(final Signer signer) {
+	public RequestSignatureFilter(final Signer signer) {
 		this(signer, NOOP_EVENT_LOGGER);
 	}
 
-	public SignatureFilter(final Signer signer, final EventLogger eventListener) {
+	public RequestSignatureFilter(final Signer signer, final EventLogger eventListener) {
 		this.signer = signer;
 		eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
 	}
