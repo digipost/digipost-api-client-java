@@ -21,6 +21,7 @@ import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
 import no.digipost.api.client.filters.request.RequestDateFilter;
 import no.digipost.api.client.filters.request.RequestSignatureFilter;
 import no.digipost.api.client.filters.request.RequestUserAgentFilter;
+import no.digipost.api.client.filters.response.ResponseContentSHA256Filter;
 import no.digipost.api.client.filters.response.ResponseDateFilter;
 import no.digipost.api.client.representations.Attachment;
 import no.digipost.api.client.representations.Autocomplete;
@@ -92,6 +93,7 @@ public class DigipostClient {
 		webResource.addFilter(new RequestDateFilter(eventLogger));
 		webResource.addFilter(new RequestUserAgentFilter());
 		webResource.addFilter(new ResponseDateFilter());
+		webResource.addFilter(new ResponseContentSHA256Filter());
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
 
 		apiService = new ApiService(webResource, senderAccountId);
