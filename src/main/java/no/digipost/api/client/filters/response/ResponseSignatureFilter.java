@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.filters.response;
 
+import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
+
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
@@ -23,6 +25,7 @@ import java.security.cert.X509Certificate;
 
 import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.ErrorType;
+import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.Headers;
 import no.digipost.api.client.security.ClientResponseToVerify;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil;
@@ -38,23 +41,35 @@ import com.sun.jersey.api.client.filter.ClientFilter;
 
 public class ResponseSignatureFilter extends ClientFilter {
 
+	private final EventLogger eventLogger;
+
+	public ResponseSignatureFilter() {
+		this(NOOP_EVENT_LOGGER);
+	}
+
+	public ResponseSignatureFilter(final EventLogger eventLogger) {
+		this.eventLogger = eventLogger;
+	}
+
 	@Override
 	public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
 		ClientResponse response = getNext().handle(cr);
 
-		byte[] serverSignatur = getServerSignaturFromResponse(response);
+		String serverSignaturBase64 = getServerSignaturFromResponse(response);
+		byte[] serverSignaturBytes = Base64.decodeBase64(serverSignaturBase64.getBytes());
 
 		String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ClientResponseToVerify(cr, response));
-
-		System.err.println("\nString to verify generated locally:\n===START===\n" + signatureString + "===SLUTT===");
 
 		try {
 			Signature instance = Signature.getInstance("SHA256WithRSAEncryption");
 			instance.initVerify(lastSertifikat());
 			instance.update(signatureString.getBytes());
-			boolean verified = instance.verify(serverSignatur);
+			boolean verified = instance.verify(serverSignaturBytes);
 			if (!verified) {
 				throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR, "Melding fra server matcher ikke signatur.");
+			} else {
+				eventLogger.log("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren " + Headers.X_Digipost_Signature
+						+ " var OK: " + new String(serverSignaturBase64));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -64,13 +79,13 @@ public class ResponseSignatureFilter extends ClientFilter {
 		return response;
 	}
 
-	private byte[] getServerSignaturFromResponse(final ClientResponse response) {
+	private String getServerSignaturFromResponse(final ClientResponse response) {
 		String serverSignaturString = response.getHeaders().getFirst(Headers.X_Digipost_Signature);
 		if (StringUtils.isBlank(serverSignaturString)) {
 			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
 					"Mangler signatur-header, så server-signatur kunne ikke sjekkes");
 		}
-		return Base64.decodeBase64(serverSignaturString.getBytes());
+		return serverSignaturString;
 	}
 
 	public X509Certificate lastSertifikat() {
