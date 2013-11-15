@@ -25,30 +25,29 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 
-public class MessageSignatureUtil {
+public class ResponseMessageSignatureUtil {
 
 	private static final List<String> HEADERS_FOR_SIGNATURE = Arrays.asList(Content_MD5.toLowerCase(), Date.toLowerCase(),
 			X_Digipost_UserId.toLowerCase(), X_Content_SHA256.toLowerCase());
 
-	public static String getCanonicalRequestRepresentation(final RequestToSign request) {
+	public static String getCanonicalResponseRepresentation(final ClientResponseToVerify clientResponseToVerify) {
 		StringBuilder s = new StringBuilder();
-		s.append(getCanonicalMethodRepresentation(request));
-		s.append(getCanonicalUrlRepresentation(request));
-		s.append(getCanonicalHeaderRepresentation(request));
-		s.append(getCanonicalParameterRepresentation(request));
+		s.append(getCanonicalResponseCodeRepresentation(clientResponseToVerify));
+		s.append(getCanonicalUrlRepresentation(clientResponseToVerify));
+		s.append(getCanonicalHeaderRepresentation(clientResponseToVerify));
 		return s.toString();
 	}
 
-	private static String getCanonicalMethodRepresentation(final RequestToSign request) {
-		return request.getMethod().toUpperCase() + "\n";
+	private static String getCanonicalResponseCodeRepresentation(final ClientResponseToVerify clientResponseToVerify) {
+		return clientResponseToVerify.getStatus() + "\n";
 	}
 
-	private static String getCanonicalUrlRepresentation(final RequestToSign request) {
-		return request.getPath().toLowerCase() + "\n";
+	private static String getCanonicalUrlRepresentation(final ClientResponseToVerify clientResponseToVerify) {
+		return clientResponseToVerify.getPath().toLowerCase() + "\n";
 	}
 
-	private static String getCanonicalHeaderRepresentation(final RequestToSign request) {
-		SortedMap<String, String> headers = request.getHeaders();
+	private static String getCanonicalHeaderRepresentation(final ClientResponseToVerify clientResponseToVerify) {
+		SortedMap<String, String> headers = clientResponseToVerify.getHeaders();
 		StringBuilder headersString = new StringBuilder();
 		for (Entry<String, String> entry : headers.entrySet()) {
 			String key = entry.getKey();
@@ -57,10 +56,6 @@ public class MessageSignatureUtil {
 			}
 		}
 		return headersString.toString();
-	}
-
-	private static String getCanonicalParameterRepresentation(final RequestToSign request) {
-		return request.getParameters().toLowerCase() + "\n";
 	}
 
 	private static boolean isHeaderForSignature(final String key) {
