@@ -29,11 +29,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "links")
+@XmlRootElement(name = "entrypoint")
 public class EntryPoint extends Representation {
 
-	public EntryPoint(final Link... links) {
+	@XmlElement(name = "certificate", required = false)
+	private String certificate;
+
+	public EntryPoint(final String certificate, final Link... links) {
 		super(links);
+		this.certificate = certificate;
 	}
 
 	public EntryPoint() {
@@ -53,6 +57,10 @@ public class EntryPoint extends Representation {
 
 	public URI getIdentificationUri() {
 		return getLinkByRelationName(IDENTIFY_RECIPIENT).getUri();
+	}
+
+	public String getCertificate() {
+		return certificate;
 	}
 
 	@XmlElement(name = "link")

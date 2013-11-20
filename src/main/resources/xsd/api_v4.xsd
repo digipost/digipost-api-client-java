@@ -70,9 +70,12 @@
         <xsd:attribute name="media-type" type="xsd:string" />
     </xsd:complexType>
 
-    <xsd:element name="links">
+    <xsd:element name="entrypoint">
         <xsd:complexType>
             <xsd:sequence>
+            	<!-- The element certificate contains Digipost's current public key. It can be used to verify 
+            		 each response from Digipost. See the documentation for more information. -->
+           		<xsd:element name="certificate" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
                 <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
             </xsd:sequence>
         </xsd:complexType>
@@ -645,5 +648,41 @@
             <xsd:minInclusive value="0" />
         </xsd:restriction>
     </xsd:simpleType>
+
+    <xsd:element name="letter" type="letter" />
+
+    <xsd:complexType name="letter">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <annox:annotate target="class">
+                    <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="letter"/>
+                </annox:annotate>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="link" type="link"  minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:attribute name="uuid">
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:pattern value="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+        <xsd:attribute name="sender-id" type="xsd:long">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The actual sender of the message. This is used in scenarios where one party, the broker, is creating a message
+                    on behalf of another, the sender. It is only possible if the sender has granted the broker the right to send
+                    on its behalf.
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="status" type="xsd:string" />
+        <xsd:attribute name="created" type="xsd:dateTime" />
+        <xsd:attribute name="delivered" type="xsd:dateTime" />
+        <xsd:attribute name="read" type="xsd:string" />
+        <xsd:attribute name="channel" type="xsd:string" />
+</xsd:complexType>
 
 </xsd:schema>

@@ -73,7 +73,7 @@ public class XsdValidationTest {
 
 	@Test
 	public void validateEntryPoint() throws JAXBException {
-		marshallAndValidate(new EntryPoint(link, link, link));
+		marshallAndValidate(new EntryPoint("dummy certificate-PEM", link, link, link));
 	}
 
 	@Test
