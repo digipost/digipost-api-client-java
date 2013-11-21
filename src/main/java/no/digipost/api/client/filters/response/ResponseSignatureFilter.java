@@ -17,12 +17,14 @@ package no.digipost.api.client.filters.response;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import no.digipost.api.client.ApiService;
 import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.ErrorType;
 import no.digipost.api.client.EventLogger;
@@ -42,18 +44,25 @@ import com.sun.jersey.api.client.filter.ClientFilter;
 public class ResponseSignatureFilter extends ClientFilter {
 
 	private final EventLogger eventLogger;
+	private final ApiService apiService;
 
-	public ResponseSignatureFilter() {
-		this(NOOP_EVENT_LOGGER);
+	public ResponseSignatureFilter(final ApiService apiService) {
+		this(NOOP_EVENT_LOGGER, apiService);
 	}
 
-	public ResponseSignatureFilter(final EventLogger eventLogger) {
+	public ResponseSignatureFilter(final EventLogger eventLogger, final ApiService apiService) {
 		this.eventLogger = eventLogger;
+		this.apiService = apiService;
 	}
 
 	@Override
 	public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
 		ClientResponse response = getNext().handle(cr);
+
+		if ("/".equals(cr.getURI().getPath())) {
+			eventLogger.log("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
+			return response;
+		}
 
 		String serverSignaturBase64 = getServerSignaturFromResponse(response);
 		byte[] serverSignaturBytes = Base64.decodeBase64(serverSignaturBase64.getBytes());
@@ -72,7 +81,6 @@ public class ResponseSignatureFilter extends ClientFilter {
 						+ " var OK: " + new String(serverSignaturBase64));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk.");
 		}
 
@@ -90,7 +98,7 @@ public class ResponseSignatureFilter extends ClientFilter {
 
 	public X509Certificate lastSertifikat() {
 		try {
-			InputStream certStream = getClass().getResourceAsStream("/keys/digipost-utv.pem");
+			InputStream certStream = new ByteArrayInputStream(apiService.getEntryPoint().getCertificate().getBytes());
 
 			CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 			X509Certificate sertifikat = (X509Certificate) cf.generateCertificate(certStream);

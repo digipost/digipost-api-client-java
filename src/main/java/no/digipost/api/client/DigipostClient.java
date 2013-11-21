@@ -89,16 +89,18 @@ public class DigipostClient {
 
 		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
 		WebResource webResource = client.resource(digipostUrl);
+
+		apiService = new ApiService(webResource, senderAccountId);
+
 		webResource.addFilter(new RequestContentSHA256Filter(eventLogger));
 		webResource.addFilter(new RequestSignatureFilter(signer, eventLogger));
 		webResource.addFilter(new RequestDateFilter(eventLogger));
 		webResource.addFilter(new RequestUserAgentFilter());
 		webResource.addFilter(new ResponseDateFilter());
 		webResource.addFilter(new ResponseContentSHA256Filter());
-		webResource.addFilter(new ResponseSignatureFilter());
-		log("Initialiserte Jersey-klient mot " + digipostUrl);
+		webResource.addFilter(new ResponseSignatureFilter(apiService));
 
-		apiService = new ApiService(webResource, senderAccountId);
+		log("Initialiserte Jersey-klient mot " + digipostUrl);
 	}
 
 	/**
