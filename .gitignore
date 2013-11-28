@@ -5,4 +5,5 @@ target
 .scala_dependencies
 .settings
 *.iml
+.idea
 .sonatype
