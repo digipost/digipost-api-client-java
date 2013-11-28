@@ -30,7 +30,8 @@ import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 import org.joda.time.DateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveredDate", "links", "attachments" })
+@XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveredDate", "contentHash", "links",
+		"attachments" })
 @XmlRootElement(name = "message-delivery")
 public class MessageDelivery extends Representation {
 
@@ -44,6 +45,8 @@ public class MessageDelivery extends Representation {
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
 	protected DateTime deliveredDate;
+	@XmlElement(name = "content-hash", nillable = false)
+	protected ContentHash contentHash;
 	@XmlElement(name = "attachment")
 	protected List<Attachment> attachments;
 
@@ -69,6 +72,10 @@ public class MessageDelivery extends Representation {
 
 	public String getMessageId() {
 		return messageId;
+	}
+
+	public ContentHash getContentHash() {
+		return contentHash;
 	}
 
 	public List<Attachment> getAttachments() {

@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "attachment", propOrder = { "subject", "fileType", "links" })
+@XmlType(name = "attachment", propOrder = { "subject", "fileType", "contentHash", "links" })
 @XmlRootElement(name = "attachment")
 public class Attachment extends Representation {
 
@@ -32,7 +32,8 @@ public class Attachment extends Representation {
 	protected String subject;
 	@XmlElement(name = "file-type", required = true)
 	protected String fileType;
-
+	@XmlElement(name = "content-hash", nillable = false)
+	protected ContentHash contentHash;
 
 	public Attachment() {
 	}
@@ -71,8 +72,12 @@ public class Attachment extends Representation {
 		return new FileType(fileType);
 	}
 
-	public void setFileType(FileType fileType) {
+	public void setFileType(final FileType fileType) {
 		this.fileType = fileType.toString();
+	}
+
+	public ContentHash getContentHash() {
+		return contentHash;
 	}
 
 }

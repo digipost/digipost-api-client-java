@@ -472,7 +472,15 @@
             </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
-
+    
+    <xsd:complexType name="content-hash">
+    	<xsd:simpleContent>
+	        <xsd:extension base="xsd:string">
+	            <xsd:attribute name="hash-algorithm" type="xsd:string"></xsd:attribute>
+	        </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+    
     <xsd:element name="message-delivery" type="message-delivery" />
 
     <xsd:complexType name="message-delivery">
@@ -481,6 +489,7 @@
             <xsd:element name="delivery-method" type="delivery-method"  minOccurs="1" maxOccurs="1" />
             <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1" />
             <xsd:element name="delivered-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="content-hash" type="content-hash" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="attachment" type="attachment" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
@@ -492,6 +501,7 @@
         <xsd:sequence>
             <xsd:element name="subject" type="xsd:string" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="file-type" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
+            <xsd:element name="content-hash" type="content-hash" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
