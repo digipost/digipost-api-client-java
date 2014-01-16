@@ -19,9 +19,9 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
 
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class FileType {
 	private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[a-zA-Z0-9\\-_]+$");

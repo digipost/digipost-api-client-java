@@ -33,7 +33,7 @@ import no.digipost.api.client.security.ClientResponseToVerify;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.sun.jersey.api.client.ClientHandlerException;

@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
-import static org.apache.commons.lang.StringUtils.trimToEmpty;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

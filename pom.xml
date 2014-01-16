@@ -20,7 +20,7 @@
 		<jersey.version>1.17.1</jersey.version>
 		<joda-time.version>2.0</joda-time.version>
 		<bouncycastle.version>1.49</bouncycastle.version>
-		<commons-lang.version>2.6</commons-lang.version>
+		<commons-lang.version>3.2.1</commons-lang.version>
 		<httpcomponents.version>4.3</httpcomponents.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.13</logback.version>
@@ -68,8 +68,8 @@
 			<version>${commons-io.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 			<version>${commons-lang.version}</version>
 		</dependency>
 		<dependency>
@@ -217,7 +217,7 @@
 										<include>org.bouncycastle:bcpkix-jdk15on:${bouncycastle.version}:jar:compile</include>
 										<include>commons-codec:commons-codec:${commons-codec.version}:jar:compile</include>
 										<include>commons-io:commons-io:${commons-io.version}:jar:compile</include>
-										<include>commons-lang:commons-lang:${commons-lang.version}:jar:compile</include>
+										<include>org.apache.commons:commons-lang3:${commons-lang.version}:jar:compile</include>
 										<include>commons-logging:commons-logging:${commons-logging.version}:jar:compile</include>
 										<include>com.sun.xml.fastinfoset:FastInfoset:${FastInfoset.version}:jar:compile</include>
 										<include>org.apache.httpcomponents:httpclient:${httpcomponents.version}:jar:compile</include>

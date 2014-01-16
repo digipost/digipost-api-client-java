@@ -22,7 +22,7 @@ import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.ErrorType;
 import no.digipost.api.client.Headers;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 
 import com.sun.jersey.api.client.ClientHandlerException;

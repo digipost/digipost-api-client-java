@@ -24,7 +24,7 @@ import no.digipost.api.client.Headers;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
 import com.sun.jersey.api.client.ClientHandlerException;

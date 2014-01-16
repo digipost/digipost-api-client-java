@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class DigipostAddress extends RecipientIdentifier {
 
