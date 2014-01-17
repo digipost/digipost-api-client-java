@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>digipost-api-client-java</artifactId>
-	<version>4.6</version>
+	<version>4.7-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
@@ -403,7 +403,7 @@
 		<connection>scm:git:git@github.com:digipost/digipost-api-client-java.git</connection>
 		<developerConnection>scm:git:git@github.com:digipost/digipost-api-client-java.git</developerConnection>
 		<url>scm:git:git@github.com:digipost/digipost-api-client-java</url>
-		<tag>digipost-api-client-java-4.6</tag>
+		<tag>digipost-api-client-java-4.3</tag>
 	</scm>
 
 	<repositories>
