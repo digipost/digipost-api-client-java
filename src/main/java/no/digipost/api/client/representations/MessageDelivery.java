@@ -30,7 +30,7 @@ import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 import org.joda.time.DateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveredDate", "primary-document",
+@XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveredDate", "primaryDocument",
 		"attachments", "links" })
 @XmlRootElement(name = "message-delivery")
 public class MessageDelivery extends Representation {
@@ -90,20 +90,8 @@ public class MessageDelivery extends Representation {
 		return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY);
 	}
 
-	public Link getAddContentAndSendLink() {
-		return getLinkByRelationName(Relation.ADD_CONTENT_AND_SEND);
-	}
-
-	public Link getAddContentLink() {
-		return getLinkByRelationName(Relation.ADD_CONTENT);
-	}
-
 	public Link getSendLink() {
 		return getLinkByRelationName(Relation.SEND);
-	}
-
-	public Link getAddAttachmentLink() {
-		return getLinkByRelationName(Relation.ADD_ATTACHMENT);
 	}
 
 	public boolean willBeDeliveredInDigipost() {
@@ -124,5 +112,9 @@ public class MessageDelivery extends Representation {
 
 	public DateTime getDeliveredDate() {
 		return deliveredDate;
+	}
+
+	public Document getPrimaryDocument() {
+		return primaryDocument;
 	}
 }

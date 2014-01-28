@@ -39,7 +39,7 @@ import org.joda.time.LocalDate;
 })
 @XmlRootElement(name = "invoice")
 public class Invoice
-    extends Message
+    extends Document
 {
 
     @XmlElement(required = true)
@@ -56,21 +56,15 @@ public class Invoice
 	public Invoice() {
 	}
 
-	public Invoice(final String messageId, final PersonalIdentificationNumber id, final Document primaryDocument, final List<Document> attachments,
+	public Invoice(String uuid, String subject, FileType fileType, String openingReceipt,
+				   SmsNotification smsNotification, AuthenticationLevel authenticationLevel,
+				   SensitivityLevel sensitivityLevel,
 				   final String kid, final BigDecimal amount, final String account, final LocalDate dueDate) {
-		super(messageId, id, primaryDocument, attachments);
+		super(uuid, subject, fileType, openingReceipt, smsNotification, authenticationLevel, sensitivityLevel);
 		this.kid = kid;
 		this.amount = amount;
 		this.account = account;
 		this.dueDate = dueDate;
 	}
 
-	public Invoice(final String messageId, final MessageRecipient recipient, final Document primaryDocument, final List<Document> attachments,
-				   final String kid, final BigDecimal amount, final String account, final LocalDate dueDate) {
-		super(messageId, recipient, primaryDocument, attachments);
-		this.kid = kid;
-		this.amount = amount;
-		this.account = account;
-		this.dueDate = dueDate;
-	}
 }

@@ -40,10 +40,9 @@ public class MessageSender extends Communicator {
 	}
 
 	public MessageDelivery createAndSendMessage(final Message message, final InputStream primaryDocumentContent, final InputStream printContent) {
-		Document primaryDocument = message.getPrimaryDocument();
-
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
 		MessageDelivery createdMessage = createOrFetchMessage(message);
+		Document primaryDocument = createdMessage.getPrimaryDocument();
 
 		final InputStream unencryptetContent;
 		if (createdMessage.willBeDeliveredInDigipost()) {
@@ -53,17 +52,18 @@ public class MessageSender extends Communicator {
 			primaryDocument.setDigipostFileType(FileType.PDF);
 		}
 
-		MessageDelivery delivery;
+		MessageDelivery deliveryWithContent;
 		if (primaryDocument.isPreEncrypt()) {
 			log("\n\n---DOKUMENTET SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
 			final InputStream encryptetContent = fetchKeyAndEncrypt(createdMessage, unencryptetContent);
-			delivery = uploadContent(createdMessage, primaryDocument, encryptetContent);
+			deliveryWithContent = uploadContent(createdMessage, primaryDocument, encryptetContent);
 		} else {
-			delivery = uploadContent(createdMessage, primaryDocument, unencryptetContent);
+			deliveryWithContent = uploadContent(createdMessage, primaryDocument, unencryptetContent);
 		}
 
+		MessageDelivery sentMessageDelivery = sendMessage(deliveryWithContent);
 		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
-		return delivery;
+		return sentMessageDelivery;
 	}
 
 	public MessageDelivery createMessageAndAddContent(final Message message, final InputStream primaryDocumentContent, final InputStream printContent) {
@@ -88,8 +88,7 @@ public class MessageSender extends Communicator {
 		} else {
 			delivery = uploadContent(createdMessage, primaryDocument, unencryptetContent);
 		}
-
-		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED OPPRETTET)---");
+		
 		return delivery;
 	}
 

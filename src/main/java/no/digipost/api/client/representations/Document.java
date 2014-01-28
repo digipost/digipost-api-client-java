@@ -86,11 +86,11 @@ public class Document extends Representation {
 	}
 
 	public void setPreEncrypt() {
-		this.preEncrypt = preEncrypt;
+		this.preEncrypt = true;
 	}
 
 	public boolean isPreEncrypt() {
-		return preEncrypt;
+		return preEncrypt != null && preEncrypt;
 	}
 
 	public Link getAddContentLink() {
