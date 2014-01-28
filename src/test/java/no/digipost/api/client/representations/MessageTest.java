@@ -21,6 +21,7 @@ import static no.digipost.api.client.representations.AuthenticationLevel.PASSWOR
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -30,23 +31,30 @@ public class MessageTest {
 
 	@Test
 	public void shouldBeDirectPrintWhenMessageContainsOnlyPrintDetails() {
-		Message message = new Message(UUID.randomUUID().toString(), new PrintDetails());
+		Message message = new Message(UUID.randomUUID().toString(), new MessageRecipient(new PrintDetails()),
+				new Document(), new ArrayList<Document>());
 		assertTrue(message.isDirectPrint());
 	}
 
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsDigipostAddress() {
-		Message message = new Message(UUID.randomUUID().toString(), "subject", new DigipostAddress("test.testson#1234"), null, PASSWORD, NORMAL, PDF);
+		Message message = new Message(UUID.randomUUID().toString(), new DigipostAddress("test.testson#1234"),
+				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), PASSWORD, NORMAL),
+				new ArrayList<Document>());
 		assertFalse(message.isDirectPrint());
 	}
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsNameAndAddress() {
-		Message message = new Message(UUID.randomUUID().toString(), "subject", new RecipientIdentification(new NameAndAddress()), null, PASSWORD, NORMAL, PDF);
+		Message message = new Message(UUID.randomUUID().toString(), new MessageRecipient(new NameAndAddress()),
+				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), PASSWORD, NORMAL),
+				new ArrayList<Document>());
 		assertFalse(message.isDirectPrint());
 	}
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsPersonalIdendificationNumber() {
-		Message message = new Message(UUID.randomUUID().toString(), "subject", new PersonalIdentificationNumber("12125412435"), null, PASSWORD, NORMAL, PDF);
+		Message message = new Message(UUID.randomUUID().toString(), new PersonalIdentificationNumber("12125412435"),
+				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), PASSWORD, NORMAL),
+				new ArrayList<Document>());
 		assertFalse(message.isDirectPrint());
 	}
 }

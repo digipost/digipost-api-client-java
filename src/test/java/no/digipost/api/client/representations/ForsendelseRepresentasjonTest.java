@@ -21,6 +21,7 @@ import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -32,9 +33,9 @@ public class ForsendelseRepresentasjonTest {
 		DigipostAddress digipostAddress = new DigipostAddress("peter.pan#0000");
 		String id1 = UUID.randomUUID().toString();
 		String id2 = UUID.randomUUID().toString();
-		Message adresseForsendelse1 = new Message(id1, "emne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL, PDF);
-		Message adresseForsendelse2 = new Message(id1, "emne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL, PDF);
-		Message adresseForsendelse3 = new Message(id2, "annetemne", digipostAddress, new SmsNotification(), PASSWORD, NORMAL, PDF);
+		Message adresseForsendelse1 = new Message(id1, digipostAddress, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL), new ArrayList<Document>());
+		Message adresseForsendelse2 = new Message(id1, digipostAddress, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL), new ArrayList<Document>());
+		Message adresseForsendelse3 = new Message(id2, digipostAddress, new Document(UUID.randomUUID().toString(), "annetemne", PDF, null, new SmsNotification(), PASSWORD, NORMAL), new ArrayList<Document>());
 
 		assertTrue(adresseForsendelse1.isSameMessageAs(adresseForsendelse2));
 		assertTrue(adresseForsendelse2.isSameMessageAs(adresseForsendelse1));

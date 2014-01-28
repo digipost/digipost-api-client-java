@@ -16,6 +16,7 @@
 package no.digipost.api.client.representations;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -55,20 +56,18 @@ public class Invoice
 	public Invoice() {
 	}
 
-	public Invoice(final String uuid, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
-				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType, final String kid, final BigDecimal amount,
-				   final String account, final LocalDate dueDate) {
-		super(uuid, subject, id, smsVarsling, authenticationLevel, sensitivityLevel, fileType);
+	public Invoice(final String messageId, final PersonalIdentificationNumber id, final Document primaryDocument, final List<Document> attachments,
+				   final String kid, final BigDecimal amount, final String account, final LocalDate dueDate) {
+		super(messageId, id, primaryDocument, attachments);
 		this.kid = kid;
 		this.amount = amount;
 		this.account = account;
 		this.dueDate = dueDate;
 	}
 
-	public Invoice(final String uuid, final String subject, final RecipientIdentification recipient, final SmsNotification smsVarsling,
-				   final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType fileType, final String kid, final BigDecimal amount,
-				   final String account, final LocalDate dueDate) {
-		super(uuid, subject, recipient, smsVarsling, authenticationLevel, sensitivityLevel, fileType);
+	public Invoice(final String messageId, final MessageRecipient recipient, final Document primaryDocument, final List<Document> attachments,
+				   final String kid, final BigDecimal amount, final String account, final LocalDate dueDate) {
+		super(messageId, recipient, primaryDocument, attachments);
 		this.kid = kid;
 		this.amount = amount;
 		this.account = account;

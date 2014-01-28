@@ -17,11 +17,7 @@ package no.digipost.api.client;
 
 import java.io.InputStream;
 
-import no.digipost.api.client.representations.Attachment;
-import no.digipost.api.client.representations.FileType;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.MessageStatus;
+import no.digipost.api.client.representations.*;
 
 import com.sun.jersey.api.client.ClientResponse;
 
@@ -39,85 +35,62 @@ public class MessageSender extends Communicator {
 	 * klienten vil det gjøres et kall for å hente mottakers offentlige nøkkel
 	 * (public key), for så å kryptere innholdet før det sendes over.
 	 */
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent) {
-		return createAndSendMessage(message, letterContent, letterContent);
+	public MessageDelivery createAndSendMessage(final Message message, final InputStream primaryDocumentContent) {
+		return createAndSendMessage(message, primaryDocumentContent, primaryDocumentContent);
 	}
 
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent, final InputStream printContent) {
+	public MessageDelivery createAndSendMessage(final Message message, final InputStream primaryDocumentContent, final InputStream printContent) {
+		Document primaryDocument = message.getPrimaryDocument();
+
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
 		MessageDelivery createdMessage = createOrFetchMessage(message);
 
 		final InputStream unencryptetContent;
 		if (createdMessage.willBeDeliveredInDigipost()) {
-			unencryptetContent = letterContent;
+			unencryptetContent = primaryDocumentContent;
 		} else {
 			unencryptetContent = printContent;
-			message.setDigipostFileType(FileType.PDF);
+			primaryDocument.setDigipostFileType(FileType.PDF);
 		}
 
 		MessageDelivery delivery;
-		if (message.isPreEncrypt()) {
-			log("\n\n---FORSENDELSE SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
+		if (primaryDocument.isPreEncrypt()) {
+			log("\n\n---DOKUMENTET SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
 			final InputStream encryptetContent = fetchKeyAndEncrypt(createdMessage, unencryptetContent);
-			delivery = uploadContentAndSend(createdMessage, encryptetContent);
+			delivery = uploadContent(createdMessage, primaryDocument, encryptetContent);
 		} else {
-			delivery = uploadContentAndSend(createdMessage, unencryptetContent);
+			delivery = uploadContent(createdMessage, primaryDocument, unencryptetContent);
 		}
 
 		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
 		return delivery;
 	}
 
-	public MessageDelivery createMessageAndAddContent(final Message message, final InputStream letterContent, final InputStream printContent) {
+	public MessageDelivery createMessageAndAddContent(final Message message, final InputStream primaryDocumentContent, final InputStream printContent) {
+		Document primaryDocument = message.getPrimaryDocument();
+
 		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
 		MessageDelivery createdMessage = createOrFetchMessage(message);
 
 		final InputStream unencryptetContent;
 		if (createdMessage.willBeDeliveredInDigipost()) {
-			unencryptetContent = letterContent;
+			unencryptetContent = primaryDocumentContent;
 		} else {
 			unencryptetContent = printContent;
-			message.setDigipostFileType(FileType.PDF);
+			primaryDocument.setDigipostFileType(FileType.PDF);
 		}
 
 		MessageDelivery delivery;
-		if (message.isPreEncrypt()) {
-			log("\n\n---FORSENDELSE SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
+		if (primaryDocument.isPreEncrypt()) {
+			log("\n\n---DOKUMENTET SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
 			final InputStream encryptetContent = fetchKeyAndEncrypt(createdMessage, unencryptetContent);
-			delivery = uploadContent(createdMessage, encryptetContent);
+			delivery = uploadContent(createdMessage, primaryDocument, encryptetContent);
 		} else {
-			delivery = uploadContent(createdMessage, unencryptetContent);
+			delivery = uploadContent(createdMessage, primaryDocument, unencryptetContent);
 		}
 
 		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED OPPRETTET)---");
 		return delivery;
-	}
-
-	public MessageDelivery createAttachmentAndAddContent(final MessageDelivery delivery, final Attachment attachment,
-			final InputStream attachmentContent, final InputStream printContent) {
-		log("\n\n---OPPRETTER VEDLEGG---");
-		Attachment createdAttachment = createAttachment(delivery, attachment);
-
-		final InputStream unencryptetContent;
-		if (delivery.willBeDeliveredInDigipost()) {
-			unencryptetContent = attachmentContent;
-		} else {
-			unencryptetContent = printContent;
-			attachment.setFileType(FileType.PDF);
-		}
-
-		MessageDelivery messageWithAttachment;
-		if (delivery.getEncryptionKeyLink() != null) {
-			log("\n\n---VEDLEGG SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
-			final InputStream encryptetContent = fetchKeyAndEncrypt(delivery, unencryptetContent);
-			messageWithAttachment = uploadContentToAttachment(createdAttachment, delivery, encryptetContent);
-		} else {
-			messageWithAttachment = uploadContentToAttachment(createdAttachment, delivery, unencryptetContent);
-		}
-
-		log("\n\n---FERDIG MED Å LASTE OPP INNHOLD TIL VEDLEGG---");
-		return messageWithAttachment;
-
 	}
 
 	public MessageDelivery sendMessage(final MessageDelivery message) {
@@ -132,22 +105,17 @@ public class MessageSender extends Communicator {
 		return deliveredMessage;
 	}
 
-	private MessageDelivery uploadContentAndSend(final MessageDelivery createdMessage,
-			final InputStream unencryptetContent) {
+	private MessageDelivery uploadContent(final MessageDelivery createdMessage, final Document document,
+										  final InputStream documentContent) {
 		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
-		return addContentAndSendMessage(createdMessage, unencryptetContent);
-	}
 
-	private MessageDelivery uploadContent(final MessageDelivery createdMessage,
-			final InputStream unencryptetContent) {
-		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
-		return addContent(createdMessage, unencryptetContent);
-	}
+		ClientResponse response = apiService.addContent(document, documentContent);
 
-	private MessageDelivery uploadContentToAttachment(final Attachment attachment,
-			final MessageDelivery createdMessage, final InputStream unencryptetContent) {
-		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
-		return addContentToAttachment(createdMessage, attachment, unencryptetContent);
+		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
+		checkResponse(response);
+
+		log("Innhold ble lagt til. Status: [" + response.toString() + "]");
+		return response.getEntity(createdMessage.getClass());
 	}
 
 	/**
@@ -183,73 +151,34 @@ public class MessageSender extends Communicator {
 		}
 	}
 
-	/**
-	 * Oppretter en vedleggsressurs på serveren og returnerer en representasjon
-	 * av ressursen.
-	 * 
-	 */
-	public Attachment createAttachment(final MessageDelivery delivery, final Attachment attachment) {
-		ClientResponse response = apiService.createAttachment(delivery, attachment);
-
-		if (resourceAlreadyExists(response)) {
-			String errorMessage = fetchErrorMessageString(response);
-			log("En feil oppsto under opprettelse av vedlegg: " + errorMessage);
-			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST, errorMessage);
+	public MessageDelivery addContent(final MessageDelivery message, final Document document, final InputStream documentContent, final InputStream printDocumentContent) {
+		verifyCorrectStatus(message, MessageStatus.NOT_COMPLETE);
+		final InputStream unencryptetContent;
+		if (message.willBeDeliveredInDigipost()) {
+			unencryptetContent = documentContent;
 		} else {
-			check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
-			checkResponse(response);
-			log("Vedlegg opprettet. Status: [" + response.toString() + "]");
-			return response.getEntity(Attachment.class);
+			unencryptetContent = printDocumentContent;
+			document.setDigipostFileType(FileType.PDF);
 		}
+
+		MessageDelivery delivery;
+		if (document.isPreEncrypt()) {
+			log("\n\n---DOKUMENTET SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
+			final InputStream encryptetContent = fetchKeyAndEncrypt(message, unencryptetContent);
+			delivery = uploadContent(message, document, encryptetContent);
+		} else {
+			delivery = uploadContent(message, document, unencryptetContent);
+		}
+		return delivery;
 	}
 
 	/**
-	 * Legger til innhold til en forsendelse og sender brevet. For at
-	 * denne metoden skal kunne kalles, må man først ha opprettet
-	 * forsendelsesressursen på serveren ved metoden
-	 * {@code createOrFetchMesssage}.
-	 */
-	public MessageDelivery addContentAndSendMessage(final MessageDelivery delivery, final InputStream letterContent) {
-		verifyCorrectStatus(delivery, MessageStatus.NOT_COMPLETE);
-		ClientResponse response = apiService.addContentAndSend(delivery, letterContent);
-
-		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
-		checkResponse(response);
-
-		log("Innhold ble lagt til og brevet sendt. Status: [" + response.toString() + "]");
-		return response.getEntity(delivery.getClass());
-	}
-
-	/**
-	 * Legger til innhold til en forsendelse. For at denne metoden skal
+	 * Legger til innhold til et dokument. For at denne metoden skal
 	 * kunne kalles, må man først ha opprettet forsendelsesressursen på serveren
 	 * ved metoden {@code createOrFetchMesssage}.
 	 */
-	public MessageDelivery addContent(final MessageDelivery delivery, final InputStream letterContent) {
-		verifyCorrectStatus(delivery, MessageStatus.NOT_COMPLETE);
-		ClientResponse response = apiService.addContent(delivery, letterContent);
-
-		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
-		checkResponse(response);
-
-		log("Innhold ble lagt til. Status: [" + response.toString() + "]");
-		return response.getEntity(delivery.getClass());
-	}
-
-	/**
-	 * Legger til innhold til et vedlegg. For at denne metoden skal kunne
-	 * kalles, må man først ha opprettet vedleggsressursen på serveren ved
-	 * metoden {@code createOrFetchAttachment}.
-	 */
-	public MessageDelivery addContentToAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream attachmentContent) {
-		verifyCorrectStatus(delivery, MessageStatus.COMPLETE);
-		ClientResponse response = apiService.addContentToAttachment(attachment, attachmentContent);
-
-		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
-		checkResponse(response);
-
-		log("Innhold ble lagt til. Status: [" + response.toString() + "]");
-		return response.getEntity(delivery.getClass());
+	public MessageDelivery addContent(final MessageDelivery delivery, final Document document, final InputStream documentContent) {
+		return addContent(delivery, document, documentContent, documentContent);
 	}
 
 	/**

@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import javax.net.ssl.HostnameVerifier;
@@ -56,24 +57,15 @@ import javax.swing.border.EmptyBorder;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.EventLogger;
-import no.digipost.api.client.representations.Attachment;
-import no.digipost.api.client.representations.AuthenticationLevel;
-import no.digipost.api.client.representations.DigipostAddress;
-import no.digipost.api.client.representations.FileType;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.NameAndAddress;
-import no.digipost.api.client.representations.NorwegianAddress;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.PrintDetails;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.PrintDetails.PostType;
-import no.digipost.api.client.representations.PrintRecipient;
-import no.digipost.api.client.representations.RecipientIdentification;
-import no.digipost.api.client.representations.SensitivityLevel;
-import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.representations.MessageRecipient;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.LocalDate;
+
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 public class DigipostSwingClient {
 	private MessageDelivery messageDelivery = null;
@@ -387,30 +379,31 @@ public class DigipostSwingClient {
 		gbc_btnBack.gridy = 12;
 		brevMainPanel.add(btnBack, gbc_btnBack);
 
-		btnAddAttachment = new JButton("Legg til vedlegg");
-		btnAddAttachment.setEnabled(false);
-		btnAddAttachment.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				if (messageDelivery == null) {
-					eventLogger.log("Du må opprette og laste opp innhold til en forsendelse før du kan legge til vedlegg.");
-					return;
-				}
-				try {
-					String subject = attachmentSubjectField.getText();
-					FileType fileType = FileType.fromFilename(attachmentContentField.getText());
-					Attachment attachment = new Attachment(subject, fileType);
-					client.createAttachment(messageDelivery, attachment,
-							FileUtils.openInputStream(new File(attachmentContentField.getText())));
-				} catch (IOException ex) {
-					eventLogger.log(ex.getMessage() + "\n");
-				} catch (DigipostClientException ex) {
-					eventLogger.log("\nDigipostClient kastet exception. \nFeilkode: " + ex.getErrorType() + "\nFeilmelding: "
-							+ ex.getErrorMessage());
-				}
-			}
-		});
+//		TODO Fix adding attachment
+//		btnAddAttachment = new JButton("Legg til vedlegg");
+//		btnAddAttachment.setEnabled(false);
+//		btnAddAttachment.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(final ActionEvent e) {
+//				if (messageDelivery == null) {
+//					eventLogger.log("Du må opprette og laste opp innhold til en forsendelse før du kan legge til vedlegg.");
+//					return;
+//				}
+//				try {
+//					String subject = attachmentSubjectField.getText();
+//					FileType fileType = FileType.fromFilename(attachmentContentField.getText());
+//					Attachment attachment = new Attachment(subject, fileType);
+//					client.createAttachment(messageDelivery, attachment,
+//							FileUtils.openInputStream(new File(attachmentContentField.getText())));
+//				} catch (IOException ex) {
+//					eventLogger.log(ex.getMessage() + "\n");
+//				} catch (DigipostClientException ex) {
+//					eventLogger.log("\nDigipostClient kastet exception. \nFeilkode: " + ex.getErrorType() + "\nFeilmelding: "
+//							+ ex.getErrorMessage());
+//				}
+//			}
+//		});
 
 		GridBagConstraints gbc_btnAddAttachment = new GridBagConstraints();
 		gbc_btnAddAttachment.gridx = 1;
@@ -423,17 +416,16 @@ public class DigipostSwingClient {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
 				try {
-					Message message;
+					Message message = null;
 					String subject = subjectField.getText();
 					FileType fileType = FileType.fromFilename(contentField.getText());
+					Document primaryDocument = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), PASSWORD, NORMAL);
 					if (identifyOnDigipostAddress.isSelected()) {
 						String digipostAddress = recipientDigipostAddressField.getText();
-						message = new Message(UUID.randomUUID().toString(), subject, new DigipostAddress(digipostAddress),
-								new SmsNotification(), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, fileType);
+						message = new Message(UUID.randomUUID().toString(), new DigipostAddress(digipostAddress), primaryDocument, new ArrayList<Document>());
 					} else if (identifyOnPersonalIdentificationNumber.isSelected()) {
 						String personalIdentificationNumber = recipientPersonalIdentificationNumberField.getText();
-						message = new Message(UUID.randomUUID().toString(), subject, new PersonalIdentificationNumber(
-								personalIdentificationNumber), new SmsNotification(), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, fileType);
+						message = new Message(UUID.randomUUID().toString(), new PersonalIdentificationNumber(personalIdentificationNumber), primaryDocument, new ArrayList<Document>());
 					} else {
 						String name = recipientNameField.getText();
 						String addressline1 = recipientAddress1Field.getText();
@@ -457,19 +449,19 @@ public class DigipostSwingClient {
 						returnAddress = printRecipient = new PrintRecipient(name, norwegianAddress);
 						PrintDetails printDetails = new PrintDetails(printRecipient, returnAddress, PostType.B);
 
-						RecipientIdentification recipient;
+						MessageRecipient recipient;
 						if (fallbackToPrintCheckBox.isSelected()) {
-							recipient = new RecipientIdentification(nameAndAddress, printDetails);
+							recipient = new MessageRecipient(nameAndAddress, printDetails);
 						} else if (directToPrintCheckBox.isSelected()) {
-							recipient = new RecipientIdentification(printDetails);
+							recipient = new MessageRecipient(printDetails);
 						} else {
-							recipient = new RecipientIdentification(nameAndAddress);
+							recipient = new MessageRecipient(nameAndAddress);
 						}
 
-						message = new Message(UUID.randomUUID().toString(), subject, recipient, new SmsNotification(),
-								AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, fileType);
+						new Message(UUID.randomUUID().toString(), recipient, primaryDocument, new ArrayList<Document>());
 					}
-					messageDelivery = client.createMessage(message, FileUtils.openInputStream(new File(contentField.getText())));
+					messageDelivery = client.createMessage(message);
+					messageDelivery = client.addContent(messageDelivery, primaryDocument, FileUtils.openInputStream(new File(contentField.getText())));
 					enableAttachmentFields(true);
 					sendButton.setEnabled(true);
 				} catch (IOException ex) {

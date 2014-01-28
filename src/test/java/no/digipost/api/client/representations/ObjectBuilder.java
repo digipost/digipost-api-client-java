@@ -16,7 +16,13 @@
 package no.digipost.api.client.representations;
 
 
+import java.util.ArrayList;
+import java.util.UUID;
+
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 public class ObjectBuilder {
 
@@ -35,12 +41,13 @@ public class ObjectBuilder {
 
 	public static PrintRecipient newForeignAddress(final String name, final String addressline1, final String country, final String countryCode) {
 		ForeignAddress foreignAddress = new ForeignAddress(addressline1, country, countryCode);
-		PrintRecipient printRecipient = new PrintRecipient(name, foreignAddress);
-		return printRecipient;
+		return new PrintRecipient(name, foreignAddress);
 	}
 
-	public static Message newPrintMessage(final String string, final PrintRecipient recipient, final PrintRecipient returnAddress) {
-		return new Message(string, new PrintDetails(recipient, returnAddress, B));
+	public static Message newPrintMessage(final String messageId, final PrintRecipient recipient, final PrintRecipient returnAddress) {
+		return new Message(messageId, new MessageRecipient(new PrintDetails(recipient, returnAddress, B)),
+				new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL),
+				new ArrayList<Document>());
 	}
 
 }

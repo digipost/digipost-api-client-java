@@ -15,122 +15,57 @@
  */
 package no.digipost.api.client.representations;
 
-import java.util.regex.Pattern;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "uuid", "senderId", "preEncrypt", "subject", "recipient", "smsNotification",
-		"authenticationLevel", "sensitivityLevel", "digipostFileType" })
+@XmlType(name = "message", propOrder = { "messageId", "senderId", "recipient", "primaryDocument", "attachments" })
 @XmlRootElement(name = "message")
 public class Message {
-	private final static Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
-	@XmlElement(name = "uuid", required = true)
-	protected String uuid;
+	@XmlElement(name = "message-id")
+	protected String messageId;
 	@XmlElement(name = "sender-id")
 	protected Long senderId;
-	@XmlElement(name = "pre-encrypt")
-	protected Boolean preEncrypt;
-	@XmlElement(required = true)
-	protected String subject;
 	@XmlElement(name = "recipient")
-	protected RecipientIdentification recipient;
-	@XmlElement(name = "sms-notification")
-	protected SmsNotification smsNotification;
-	@XmlElement(name = "authentication-level")
-	protected AuthenticationLevel authenticationLevel;
-	@XmlElement(name = "sensitivity-level")
-	protected SensitivityLevel sensitivityLevel;
-	@XmlElement(name = "file-type", required = true)
-	protected String digipostFileType;
+	protected MessageRecipient recipient;
+	@XmlElement(name = "primary-document", required = true)
+	protected Document primaryDocument;
+	@XmlElement(name = "document")
+	protected List<Document> attachments;
 
 	Message() {
 	}
 
-	public Message(final String uuid, final String subject, final PersonalIdentificationNumber id, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
-		this(uuid, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
+	public Message(final String messageId, final PersonalIdentificationNumber id, final Document primaryDocument, final List<Document> attachments) {
+		this(messageId, new MessageRecipient(id), primaryDocument, attachments);
 	}
 
-	public Message(final String uuid, final String subject, final OrganisationNumber id, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
-		this(uuid, subject, new RecipientIdentification(id), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
+	public Message(final String messageId, final OrganisationNumber id, final Document primaryDocument, final List<Document> attachments) {
+		this(messageId, new MessageRecipient(id), primaryDocument, attachments);
 	}
 
-	public Message(final String uuid, final String subject, final DigipostAddress digipostAdress, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
-		this(uuid, subject, new RecipientIdentification(digipostAdress), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
+	public Message(final String messageId, final DigipostAddress digipostAdress, final Document primaryDocument, final List<Document> attachments) {
+		this(messageId, new MessageRecipient(digipostAdress), primaryDocument, attachments);
 	}
 
-	public Message(final String uuid, final String subject, final NameAndAddress nameAndAddress, final SmsNotification smsVarsling,
-			final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel, final FileType digipostFileType) {
-		this(uuid, subject, new RecipientIdentification(nameAndAddress), smsVarsling, authenticationLevel, sensitivityLevel, digipostFileType);
+	public Message(final String messageId, final NameAndAddress nameAndAddress, final Document primaryDocument, final List<Document> attachments) {
+		this(messageId, new MessageRecipient(nameAndAddress), primaryDocument, attachments);
 	}
 
-	public Message(final String uuid, final String subject, final RecipientIdentification recipient,
-			final SmsNotification smsVarsling, final AuthenticationLevel authenticationLevel, final SensitivityLevel sensitivityLevel,
-			final FileType digipostFileType) {
-		this.uuid = uuid.toLowerCase();
-		if (!UUID_PATTERN.matcher(this.uuid).matches()) {
-			throw new IllegalArgumentException("Not a UUID: " + uuid);
-		}
-		this.subject = subject;
+	public Message(final String messageId, final MessageRecipient recipient, final Document primaryDocument, final List<Document> attachments) {
+		this.messageId = messageId;
 		this.recipient = recipient;
-		smsNotification = smsVarsling;
-		this.authenticationLevel = authenticationLevel;
-		this.sensitivityLevel = sensitivityLevel;
-		this.digipostFileType = digipostFileType.toString();
+		this.primaryDocument = primaryDocument;
+		this.attachments = attachments;
 	}
 
-	public Message(final String uuid, final PrintDetails printDetails) {
-		this(uuid, null, new RecipientIdentification(printDetails), null, null, null, FileType.PDF);
-	}
-
-	public String getSubject() {
-		return subject;
-	}
-
-	public boolean hasSubject() {
-		return !StringUtils.isBlank(subject);
-	}
-
-	public SmsNotification getSmsNotification() {
-		return smsNotification;
-	}
-
-	public AuthenticationLevel getAuthenticationLevel() {
-		return authenticationLevel;
-	}
-
-	public SensitivityLevel getSensitivityLevel() {
-		return sensitivityLevel;
-	}
-
-	public RecipientIdentification getRecipient() {
+	public MessageRecipient getRecipient() {
 		return recipient;
-	}
-
-	public String getUuid() {
-		return uuid;
-	}
-
-	public boolean isPreEncrypt() {
-		return preEncrypt != null && preEncrypt;
-	}
-
-	public boolean isSameMessageAs(final Message message) {
-		return uuid.equals(message.getUuid());
-	}
-
-	public void setPreEncrypt() {
-		preEncrypt = true;
 	}
 
 	/**
@@ -142,19 +77,27 @@ public class Message {
 		this.senderId = senderId;
 	}
 
-	public void setPreEncrypt(final boolean preEncrypt) {
-		this.preEncrypt = preEncrypt;
-	}
-
 	public boolean isDirectPrint() {
 		return recipient.isDirectPrint();
 	}
 
-	public FileType getDigipostFileType() {
-		return new FileType(digipostFileType);
+	public String getMessageId() {
+		return messageId;
 	}
 
-	public void setDigipostFileType(final FileType fileType) {
-		digipostFileType = fileType.toString();
+	public Long getSenderId() {
+		return senderId;
+	}
+
+	public Document getPrimaryDocument() {
+		return primaryDocument;
+	}
+
+	public List<Document> getAttachments() {
+		return attachments;
+	}
+
+	public boolean isSameMessageAs(final Message message) {
+		return this.messageId != null && this.messageId.equals(message.messageId);
 	}
 }

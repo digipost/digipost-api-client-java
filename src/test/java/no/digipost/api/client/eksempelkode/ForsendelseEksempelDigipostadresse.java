@@ -22,10 +22,12 @@ import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.representations.DigipostAddress;
+import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.SmsNotification;
 import org.apache.commons.io.FileUtils;
@@ -53,13 +55,16 @@ public class ForsendelseEksempelDigipostadresse {
 		// 3. Vi oppretter et digipostadresseobjekt
 		DigipostAddress address = new DigipostAddress("fornavn.etternavn#6789");
 
-		// 4. Vi oppretter en forsendelse
-		Message message = new Message(UUID.randomUUID().toString(), "Brevets emne", address, new SmsNotification(), PASSWORD, NORMAL, PDF);
+		// 4. Vi oppretter hoveddokumentet
+		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL);
 
-		// 5. Vi henter inputstreamen til PDF-filen vi ønsker å sende
+		// 5. Vi oppretter en forsendelse
+		Message message = new Message(UUID.randomUUID().toString(), address, primaryDocument, new ArrayList<Document>());
+
+		// 6. Vi henter inputstreamen til PDF-filen vi ønsker å sende
 		InputStream messageContent = getMessageContent();
 
-		// 6. Vi lar klientbiblioteket håndtere utsendelsen
+		// 7. Vi lar klientbiblioteket håndtere utsendelsen
 		client.createAndSendMessage(message, messageContent);
 	}
 

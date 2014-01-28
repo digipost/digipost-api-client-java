@@ -24,14 +24,7 @@ import no.digipost.api.client.filters.request.RequestUserAgentFilter;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Filter;
 import no.digipost.api.client.filters.response.ResponseDateFilter;
 import no.digipost.api.client.filters.response.ResponseSignatureFilter;
-import no.digipost.api.client.representations.Attachment;
-import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.DeliveryMethod;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.IdentificationResult;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
@@ -109,8 +102,8 @@ public class DigipostClient {
 	 * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
 	 * til print.)
 	 */
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent) {
-		return createAndSendMessage(message, letterContent, letterContent);
+	public MessageDelivery createAndSendMessage(final Message message, final InputStream primaryDocumenteContent) {
+		return createAndSendMessage(message, primaryDocumenteContent, primaryDocumenteContent);
 	}
 
 	/**
@@ -119,8 +112,8 @@ public class DigipostClient {
 	 * printdetaljer på forsendelsen bestiller vi print av brevet til vanlig
 	 * postgang. (Krever at avsender har fått tilgang til print.)
 	 */
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream letterContent, final InputStream printContent) {
-		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, letterContent, printContent);
+	public MessageDelivery createAndSendMessage(final Message message, final InputStream primaryDocumentContent, final InputStream printContent) {
+		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, primaryDocumentContent, printContent);
 	}
 
 	/**
@@ -139,35 +132,26 @@ public class DigipostClient {
 	}
 
 	/**
-	 * Oppretter et brev med innhold for sending i to steg.
+	 * Oppretter et brev med innhold for sending i tre steg.
 	 */
-	public MessageDelivery createMessage(final Message message, final InputStream letterContent) {
-		return createMessage(message, letterContent, letterContent);
+	public MessageDelivery createMessage(final Message message) {
+		return new MessageSender(apiService, eventLogger).createOrFetchMessage(message);
 	}
 
 	/**
-	 * Oppretter et brev med innhold for sending i to steg med alternativt
-	 * innhold for print (må være PDF).
+	 * Laster opp innhold til et dokument
 	 */
-	public MessageDelivery createMessage(final Message message, final InputStream letterContent, final InputStream printContent) {
-		return new MessageSender(apiService, eventLogger).createMessageAndAddContent(message, letterContent, printContent);
+	public MessageDelivery addContent(final MessageDelivery message, final Document document, final InputStream documentContent) {
+		return new MessageSender(apiService, eventLogger).addContent(message, document, documentContent);
 	}
 
 	/**
-	 * Oppretter et vedlegg i Digipost.
+	 * Laster opp innhold til et dokument med alternativt innhold for print
+	 * (må være PDF).
 	 */
-	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream digipostContent) {
-		return createAttachment(delivery, attachment, digipostContent, digipostContent);
-	}
-
-	/**
-	 * Oppretter et vedlegg i Digipost med alternativt innhold for print (må
-	 * være PDF).
-	 */
-	public MessageDelivery createAttachment(final MessageDelivery delivery, final Attachment attachment, final InputStream digipostContent,
-			final InputStream printContent) {
-		return new MessageSender(apiService, eventLogger)
-				.createAttachmentAndAddContent(delivery, attachment, digipostContent, printContent);
+	public MessageDelivery addContent(final MessageDelivery message, final Document document, final InputStream documentContent,
+									  final InputStream printDocumentContent) {
+		return new MessageSender(apiService, eventLogger).addContent(message, document, documentContent, printDocumentContent);
 	}
 
 	/**

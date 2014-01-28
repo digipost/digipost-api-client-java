@@ -24,16 +24,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.NorwegianAddress;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.PrintDetails;
-import no.digipost.api.client.representations.PrintRecipient;
-import no.digipost.api.client.representations.RecipientIdentification;
-import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.MessageRecipient;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -68,15 +64,17 @@ public class FallbackTilPrintEksempel {
 
 		// 5. Vi oppretter en forsendelse for sending av brevet i Digipost og med adresseinformasjon som vil
 		// benyttes dersom mottaker ikke er Digipostbruker
+		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL);
+
 		PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer","Mottakers poststed")),
 				new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B);
 		String dinForsendelseId = UUID.randomUUID().toString();
-		Message message = new Message(dinForsendelseId, "Brevets emne", new RecipientIdentification(pin, printDetails), new SmsNotification(), PASSWORD, NORMAL, PDF);
+		Message message = new Message(dinForsendelseId, new MessageRecipient(pin, printDetails), primaryDocument, new ArrayList<Document>());
 
 		// 7. Foreløpig støtter Digipost kun å sende krypterte brev til print. Å
 		// spesifisere PreEncrypt gjør at klientbiblioteket krypterer filen for
 		// deg før den oversendes Digipost.
-		message.setPreEncrypt();
+		primaryDocument.setPreEncrypt();
 
 		// 8. Vi henter inputstreamen til PDF-filen vi ønsker å sende
 		InputStream messageContent = getMessageContent();

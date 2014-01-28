@@ -21,14 +21,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "recipient-identification", propOrder = {
+@XmlType(name = "message-recipient", propOrder = {
     "nameAndAddress",
     "digipostAddress",
     "personalIdentificationNumber",
     "organisationNumber",
-    "printDetails"
+    "printDetails",
+	"notifications"
 })
-public class RecipientIdentification {
+public class MessageRecipient {
 
     @XmlElement(name = "name-and-address", nillable = false)
     protected NameAndAddress nameAndAddress;
@@ -40,46 +41,48 @@ public class RecipientIdentification {
     protected String organisationNumber;
     @XmlElement(name = "print-details", nillable = false)
     protected PrintDetails printDetails;
+	@XmlElement(name = "notifications")
+	protected Notifications notifications;
 
-	public RecipientIdentification() {}
+	public MessageRecipient() {}
 
-	public RecipientIdentification(final PersonalIdentificationNumber id) {
+	public MessageRecipient(final PersonalIdentificationNumber id) {
 		this.personalIdentificationNumber = id.asString();
 	}
 
-	public RecipientIdentification(final DigipostAddress digipostAddress) {
+	public MessageRecipient(final DigipostAddress digipostAddress) {
 		this.digipostAddress = digipostAddress.asString();
 	}
 
-	public RecipientIdentification(final OrganisationNumber organisationNumber) {
+	public MessageRecipient(final OrganisationNumber organisationNumber) {
 		this.organisationNumber = organisationNumber.asString();
 	}
 
-	public RecipientIdentification(final NameAndAddress nameAndAddress) {
+	public MessageRecipient(final NameAndAddress nameAndAddress) {
 		this.nameAndAddress = nameAndAddress;
 	}
 
-	public RecipientIdentification(final PersonalIdentificationNumber id, final PrintDetails printDetails) {
+	public MessageRecipient(final PersonalIdentificationNumber id, final PrintDetails printDetails) {
 		this(id);
 		this.printDetails = printDetails;
 	}
 
-	public RecipientIdentification(final DigipostAddress digipostAddress, final PrintDetails printDetails) {
+	public MessageRecipient(final DigipostAddress digipostAddress, final PrintDetails printDetails) {
 		this(digipostAddress);
 		this.printDetails = printDetails;
 	}
 
-	public RecipientIdentification(final NameAndAddress nameAndAddress, final PrintDetails printDetails) {
+	public MessageRecipient(final NameAndAddress nameAndAddress, final PrintDetails printDetails) {
 		this(nameAndAddress);
 		this.printDetails = printDetails;
 	}
 
-    public RecipientIdentification(final OrganisationNumber organisationNumber, final PrintDetails printDetails) {
+    public MessageRecipient(final OrganisationNumber organisationNumber, final PrintDetails printDetails) {
         this(organisationNumber);
         this.printDetails = printDetails;
     }
 
-	public RecipientIdentification(final PrintDetails printDetails) {
+	public MessageRecipient(final PrintDetails printDetails) {
 		this.printDetails = printDetails;
 	}
 

@@ -22,12 +22,11 @@ import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.representations.*;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -53,17 +52,21 @@ public class ForsendelseEksempel {
 		// 3. Vi oppretter et fødselsnummerobjekt
 		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
-		// 4. Vi oppretter en forsendelse
-		Message message = new Message(UUID.randomUUID().toString(), "Brevets emne", pin, new SmsNotification(), PASSWORD, NORMAL, PDF);
+		// 4. Vi oppretter hoveddokumentet
+		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(),
+				PASSWORD, NORMAL);
 
-		// 5. Vi henter inputstreamen til PDF-filen vi ønsker å sende
-		InputStream messageContent = getMessageContent();
+		// 5. Vi opprettet en forsendelse
+		Message message = new Message(null, pin, primaryDocument, new ArrayList<Document>());
 
-		// 6. Vi lar klientbiblioteket håndtere utsendelsen
-		client.createAndSendMessage(message, messageContent);
+		// 6. Vi henter inputstreamen til PDF-filen vi ønsker å sende
+		InputStream primaryDocumentContent = getPrimaryDocumentContent();
+
+		// 7. Vi lar klientbiblioteket håndtere utsendelsen
+		client.createAndSendMessage(message, primaryDocumentContent);
 	}
 
-	private static InputStream getMessageContent() {
+	private static InputStream getPrimaryDocumentContent() {
 		// Her må du returnere brevinnholdet du ønsker å sende istedenfor null
 		return null;
 	}

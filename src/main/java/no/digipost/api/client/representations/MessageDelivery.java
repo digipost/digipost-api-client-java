@@ -30,12 +30,12 @@ import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 import org.joda.time.DateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveredDate", "contentHash", "links",
-		"attachments" })
+@XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveredDate", "primary-document",
+		"attachments", "links" })
 @XmlRootElement(name = "message-delivery")
 public class MessageDelivery extends Representation {
 
-	@XmlElement(name = "message-id", required = true)
+	@XmlElement(name = "message-id")
 	protected String messageId;
 	@XmlElement(name = "delivery-method", required = true)
 	protected DeliveryMethod deliveryMethod;
@@ -45,10 +45,10 @@ public class MessageDelivery extends Representation {
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
 	protected DateTime deliveredDate;
-	@XmlElement(name = "content-hash", nillable = false)
-	protected ContentHash contentHash;
-	@XmlElement(name = "attachment")
-	protected List<Attachment> attachments;
+	@XmlElement(name = "primary-document", required = true)
+	protected Document primaryDocument;
+	@XmlElement(name = "document")
+	protected List<Document> attachments;
 
 	public MessageDelivery() {
 	}
@@ -74,16 +74,12 @@ public class MessageDelivery extends Representation {
 		return messageId;
 	}
 
-	public ContentHash getContentHash() {
-		return contentHash;
-	}
-
-	public List<Attachment> getAttachments() {
+	public List<Document> getAttachments() {
 		return attachments;
 	}
 
 	public boolean isSameMessageAs(final Message message) {
-		return messageId.equals(message.getUuid());
+		return messageId.equals(message.getMessageId());
 	}
 
 	public MessageStatus getStatus() {
