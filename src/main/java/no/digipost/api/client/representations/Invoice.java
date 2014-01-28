@@ -37,7 +37,6 @@ import org.joda.time.LocalDate;
     "account",
     "dueDate"
 })
-@XmlRootElement(name = "invoice")
 public class Invoice
     extends Document
 {

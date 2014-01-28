@@ -16,10 +16,7 @@
 
 package no.digipost.api.client.representations;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -36,6 +33,7 @@ import java.util.regex.Pattern;
 		"contentHash",
 		"links"
 })
+@XmlSeeAlso({ Invoice.class })
 public class Document extends Representation {
 	private final static Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
