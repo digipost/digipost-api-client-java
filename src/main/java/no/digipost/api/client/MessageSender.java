@@ -185,7 +185,6 @@ public class MessageSender extends Communicator {
 	 * først ha lagt innhold til forsendelsen med {@code addContent}.
 	 */
 	private MessageDelivery send(final MessageDelivery delivery) {
-		verifyCorrectStatus(delivery, MessageStatus.COMPLETE);
 		ClientResponse response = apiService.send(delivery);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
