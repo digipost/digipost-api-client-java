@@ -45,7 +45,7 @@ public class XsdValidationTest {
 		marshaller = JAXBContext.newInstance("no.digipost.api.client.representations").createMarshaller();
 		marshaller.setSchema(schema);
 
-		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V4);
+		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V5);
 	}
 
 	@Test

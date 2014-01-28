@@ -16,7 +16,7 @@
 package no.digipost.api.client;
 
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
-import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V4;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V5;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,7 +97,7 @@ public class ApiService {
 	private ClientResponse getEntryPointFromServer() {
 		return webResource
 				.path(ENTRY_POINT)
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(ClientResponse.class);
 	}
@@ -110,9 +110,9 @@ public class ApiService {
 		EntryPoint entryPoint = getEntryPoint();
 		return webResource
 				.path(entryPoint.getCreateMessageUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(DIGIPOST_MEDIA_TYPE_V4)
+				.type(DIGIPOST_MEDIA_TYPE_V5)
 				.post(ClientResponse.class, message);
 	}
 
@@ -125,9 +125,9 @@ public class ApiService {
 	public ClientResponse createPrintMessage(final Message message, final URI createPrintMessageUri) {
 		return webResource
 				.path(createPrintMessageUri.getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(DIGIPOST_MEDIA_TYPE_V4)
+				.type(DIGIPOST_MEDIA_TYPE_V5)
 				.post(ClientResponse.class, message);
 	}
 
@@ -139,9 +139,9 @@ public class ApiService {
 	public ClientResponse createAttachment(final MessageDelivery message, final Attachment attachment) {
 		return webResource
 				.path(fetchAddAttachmentLink(message).getUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(DIGIPOST_MEDIA_TYPE_V4)
+				.type(DIGIPOST_MEDIA_TYPE_V5)
 				.post(ClientResponse.class, attachment);
 	}
 
@@ -151,7 +151,7 @@ public class ApiService {
 	public ClientResponse fetchExistingMessage(final URI location) {
 		return webResource
 				.path(location.getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(ClientResponse.class);
 	}
@@ -159,7 +159,7 @@ public class ApiService {
 	public ClientResponse getEncryptionKey(final URI location) {
 		return webResource
 				.path(location.getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(ClientResponse.class);
 	}
@@ -181,7 +181,7 @@ public class ApiService {
 
 		return webResource
 				.path(addContentAndSendLink.getUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.post(ClientResponse.class, content);
 
@@ -201,7 +201,7 @@ public class ApiService {
 
 		return webResource
 				.path(addContentLink.getUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.post(ClientResponse.class, content);
 	}
@@ -220,9 +220,9 @@ public class ApiService {
 
 		return webResource
 				.path(sendLink.getUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(DIGIPOST_MEDIA_TYPE_V4)
+				.type(DIGIPOST_MEDIA_TYPE_V5)
 				.post(ClientResponse.class);
 	}
 
@@ -240,7 +240,7 @@ public class ApiService {
 
 		return webResource
 				.path(addContentLink.getUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.post(ClientResponse.class, content);
 	}
@@ -301,7 +301,7 @@ public class ApiService {
 	public Recipients search(final String searchString) {
 		return webResource
 				.path(getEntryPoint().getSearchUri().getPath() + "/" + searchString)
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(Recipients.class);
 	}
@@ -309,7 +309,7 @@ public class ApiService {
 	public Autocomplete searchSuggest(final String searchString) {
 		return webResource
 				.path(getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString)
-				.accept(MediaTypes.DIGIPOST_MEDIA_TYPE_V4)
+				.accept(MediaTypes.DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(Autocomplete.class);
 	}
@@ -325,9 +325,9 @@ public class ApiService {
 
 	public IdentificationResult identifyRecipient(final Identification identification) {
 		return webResource.path(getEntryPoint().getIdentificationUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V4)
+				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(DIGIPOST_MEDIA_TYPE_V4)
+				.type(DIGIPOST_MEDIA_TYPE_V5)
 				.post(IdentificationResult.class, identification);
 	}
 }
