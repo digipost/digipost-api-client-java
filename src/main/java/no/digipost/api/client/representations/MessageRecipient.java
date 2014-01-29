@@ -26,8 +26,7 @@ import javax.xml.bind.annotation.XmlType;
     "digipostAddress",
     "personalIdentificationNumber",
     "organisationNumber",
-    "printDetails",
-	"notifications"
+    "printDetails"
 })
 public class MessageRecipient {
 
@@ -41,8 +40,6 @@ public class MessageRecipient {
     protected String organisationNumber;
     @XmlElement(name = "print-details", nillable = false)
     protected PrintDetails printDetails;
-	@XmlElement(name = "notifications")
-	protected Notifications notifications;
 
 	public MessageRecipient() {}
 
