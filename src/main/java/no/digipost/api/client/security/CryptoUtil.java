@@ -18,8 +18,14 @@ package no.digipost.api.client.security;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateCrtKey;
+
+import org.bouncycastle.cms.CMSAlgorithm;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class CryptoUtil {
 	public static PrivateKey loadKeyFromP12(final InputStream certificateStream, final String passord) {
@@ -49,4 +55,16 @@ public class CryptoUtil {
 			throw new RuntimeException("Det skjedde en feil ved signeringen", e);
 		}
 	}
+
+	public static void verifyJCE() {
+		try {
+			if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+				Security.addProvider(new BouncyCastleProvider());
+			}
+			new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+		} catch (CMSException e) {
+			throw new RuntimeException("Feil under initialisering av algoritmer. Er Java Cryptographic Excetsions (JCE) installert?", e);
+		}
+	}
+
 }
