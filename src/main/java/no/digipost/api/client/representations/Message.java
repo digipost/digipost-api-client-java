@@ -35,7 +35,7 @@ public class Message {
 	protected MessageRecipient recipient;
 	@XmlElement(name = "primary-document", required = true)
 	protected Document primaryDocument;
-	@XmlElement(name = "document")
+	@XmlElement(name = "attachment")
 	protected List<Document> attachments;
 
 	Message() {
