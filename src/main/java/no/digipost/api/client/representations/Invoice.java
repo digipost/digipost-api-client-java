@@ -16,17 +16,16 @@
 package no.digipost.api.client.representations;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import no.digipost.api.client.representations.xml.DateXmlAdapter;
+
 import org.joda.time.LocalDate;
 
 
