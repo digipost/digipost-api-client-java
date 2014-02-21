@@ -16,9 +16,14 @@
 
 package no.digipost.api.client.representations;
 
-import javax.xml.bind.annotation.*;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "document", propOrder = {
@@ -93,5 +98,9 @@ public class Document extends Representation {
 
 	public Link getAddContentLink() {
 		return getLinkByRelationName(Relation.ADD_CONTENT);
+	}
+
+	public String getUuid() {
+		return uuid;
 	}
 }
