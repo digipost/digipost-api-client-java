@@ -17,17 +17,18 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jersey.version>1.17.1</jersey.version>
+		<jersey.version>1.18.1</jersey.version>
 		<joda-time.version>2.0</joda-time.version>
-		<bouncycastle.version>1.49</bouncycastle.version>
+		<bouncycastle.version>1.50</bouncycastle.version>
 		<commons-lang.version>3.2.1</commons-lang.version>
-		<httpcomponents.version>4.3</httpcomponents.version>
-		<slf4j.version>1.7.5</slf4j.version>
-		<logback.version>1.0.13</logback.version>
+		<httpclient.version>4.3.2</httpclient.version>
+		<httpcomponents.version>4.3.1</httpcomponents.version>
+		<slf4j.version>1.7.6</slf4j.version>
+		<logback.version>1.1.1</logback.version>
 		<commons-io.version>2.4</commons-io.version>
 		<jaxb.version>2.2.7</jaxb.version>
 		<FastInfoset.version>1.2.12</FastInfoset.version>
-		<joda-convert.version>1.4</joda-convert.version>
+		<joda-convert.version>1.6</joda-convert.version>
 		<istack-commons.version>2.16</istack-commons.version>
 		<joda-time.version>2.3</joda-time.version>
 		<jsr173_api.version>1.0</jsr173_api.version>
@@ -61,7 +62,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>${httpcomponents.version}</version>
+			<version>${httpclient.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -229,7 +230,7 @@
 										<include>org.apache.commons:commons-lang3:${commons-lang.version}:jar:compile</include>
 										<include>commons-logging:commons-logging:${commons-logging.version}:jar:compile</include>
 										<include>com.sun.xml.fastinfoset:FastInfoset:${FastInfoset.version}:jar:compile</include>
-										<include>org.apache.httpcomponents:httpclient:${httpcomponents.version}:jar:compile</include>
+										<include>org.apache.httpcomponents:httpclient:${httpclient.version}:jar:compile</include>
 										<include>org.apache.httpcomponents:httpcore:${httpcomponents.version}:jar:compile</include>
 										<include>com.sun.istack:istack-commons-runtime:${istack-commons.version}:jar:compile</include>
 										<include>javax.xml.bind:jaxb-api:${jaxb.version}:jar:compile</include>
