@@ -20,7 +20,8 @@ import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -31,11 +32,8 @@ import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.SmsNotification;
 
-import org.apache.commons.io.FileUtils;
-
 /**
  * Kode som brukes i dokumentasjonen for klientbiblioteket.
- *
  */
 public class ForsendelseEksempel {
 	// Din virksomhets Digipost-kontoid
@@ -65,8 +63,9 @@ public class ForsendelseEksempel {
 
 		// 6. Vi lar klientbiblioteket håndtere opprettelse av forsendelse, legge til innhold,
 		// og til slutt å sende forsendelsen
-		client.createMessage(message).addContent(primaryDocument, getPrimaryDocumentContent()).send();
-
+		client.createMessage(message)
+			  .addContent(primaryDocument, getPrimaryDocumentContent())
+			  .send();
 	}
 
 	private static InputStream getPrimaryDocumentContent() {
@@ -76,11 +75,11 @@ public class ForsendelseEksempel {
 
 	private static InputStream lesInnSertifikat() {
 		try {
-			// Leser inn sertifikatet selv med Apache Commons FileUtils.
-			return FileUtils.openInputStream(new File("/path/til/sertifikatfil.p12"));
-		} catch (IOException e) {
+			// Leser inn sertifikatet
+			return new FileInputStream(new File("/path/til/sertifikatfil.p12"));
+		} catch (FileNotFoundException e) {
 			// Håndter at sertifikatet ikke kunne leses!
-			throw new RuntimeException("Kunne ikke lese sertifikatfil");
+			throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);
 		}
 	}
 }

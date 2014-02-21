@@ -16,18 +16,17 @@
 package no.digipost.api.client.eksempelkode;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.representations.Recipient;
 
-import org.apache.commons.io.FileUtils;
-
 /**
  * Kode som brukes i dokumentasjonen for klientbiblioteket.
- * 
+ *
  */
 @SuppressWarnings("unused")
 public class SokEksempel {
@@ -51,18 +50,13 @@ public class SokEksempel {
 
 	}
 
-	private static InputStream getMessageContent() {
-		// Her må du returnere brevinnholdet du ønsker å sende istedenfor null
-		return null;
-	}
-
 	private static InputStream lesInnSertifikat() {
 		try {
-			// Leser inn sertifikatet selv med Apache Commons FileUtils.
-			return FileUtils.openInputStream(new File("/path/til/sertifikatfil.p12"));
-		} catch (IOException e) {
+			// Leser inn sertifikatet
+			return new FileInputStream(new File("/path/til/sertifikatfil.p12"));
+		} catch (FileNotFoundException e) {
 			// Håndter at sertifikatet ikke kunne leses!
-			throw new RuntimeException("Kunne ikke lese sertifikatfil");
+			throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);
 		}
 	}
 }

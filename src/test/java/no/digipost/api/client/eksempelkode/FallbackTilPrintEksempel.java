@@ -86,8 +86,8 @@ public class FallbackTilPrintEksempel {
 		// innhold for print, og til slutt sender forsendelsen. Alt håndteres
 		// av klientbiblioteket.
 		client.createMessage(message)
-			.addContent(primaryDocument, getMessageContent(), getPrintContent())
-			.send();
+			  .addContent(primaryDocument, getMessageContent(), getPrintContent())
+			  .send();
 
 	}
 
