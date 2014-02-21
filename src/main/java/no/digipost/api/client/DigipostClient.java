@@ -24,7 +24,14 @@ import no.digipost.api.client.filters.request.RequestUserAgentFilter;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Filter;
 import no.digipost.api.client.filters.response.ResponseDateFilter;
 import no.digipost.api.client.filters.response.ResponseSignatureFilter;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.DeliveryMethod;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
@@ -42,6 +49,7 @@ import com.sun.jersey.api.client.filter.ClientFilter;
  * gjøre søk og sende brev gjennom Digipost.
  */
 public class DigipostClient {
+
 	public static final EventLogger NOOP_EVENT_LOGGER = new EventLogger() {
 		@Override
 		public void log(final String eventText) {
@@ -96,84 +104,102 @@ public class DigipostClient {
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
 	}
 
+
+
+
+
 	/**
-	 * Sender et brev gjennom Digipost i et steg. Dersom mottaker ikke er
+	 * Oppretter en forsendelse for sending gjennom Digipost. Dersom mottaker ikke er
 	 * digipostbruker og det ligger printdetaljer på forsendelsen bestiller vi
 	 * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
 	 * til print.)
 	 */
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream primaryDocumenteContent) {
-		return createAndSendMessage(message, primaryDocumenteContent, primaryDocumenteContent);
+	public OngoingDelivery.WithPrintFallback createMessage(final Message message) {
+		return new OngoingDelivery.SendableWithPrintFallback() {
+
+			private final MessageSender sender = new MessageSender(apiService, eventLogger);
+			private MessageDelivery delivery = sender.createOrFetchMessage(message);
+
+			/**
+			 * Laster opp innhold til et dokument.
+			 *
+			 * @return videre operasjoner for å fullføre leveransen.
+			 */
+			@Override
+            public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
+				return addContent(document, content, content);
+            }
+
+
+			@Override
+            public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
+				delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.getUuid()), content, printContent);
+				return this;
+            }
+
+			/**
+			 * Sender forsendelsen gjennom Digipost. Dersom mottaker ikke er Digipostbruker
+			 * og det ligger printdetaljer på forsendelsen bestiller vi print av brevet
+			 * til vanlig postgang. (Krever at avsender har fått tilgang til print.)
+			 */
+			@Override
+            public MessageDelivery send() {
+				delivery = sender.sendMessage(delivery);
+				return delivery;
+            }
+
+		};
 	}
 
-	/**
-	 * Sender et brev gjennom Digipost i et steg med alternativt innhold for
-	 * print (må være PDF). Dersom mottaker ikke er digipostbruker og det ligger
-	 * printdetaljer på forsendelsen bestiller vi print av brevet til vanlig
-	 * postgang. (Krever at avsender har fått tilgang til print.)
-	 */
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream primaryDocumentContent, final InputStream printContent) {
-		return new MessageSender(apiService, eventLogger).createAndSendMessage(message, primaryDocumentContent, printContent);
-	}
+
+
+
+
 
 	/**
-	 * Bestiller print av brevet til utsending gjennom vanlig postgang. Krever
-	 * at avsender har tilgang til å sende direkte til print. Dersom mottaker
-	 * ikke er digipostbruker og det ligger printdetaljer på forsendelsen
-	 * bestiller vi print av brevet til vanlig postgang. (Krever at avsender har
-	 * fått tilgang til print.)
+	 * Opprette forsendelse som skal gå direkte til print og videre til utsending
+	 * gjennom vanlig postgang. Krever at avsender har tilgang til å sende direkte
+	 * til print.
 	 */
-	public MessageDelivery createMessageAndDeliverToPrint(final Message printMessage, final InputStream printMessageContent) {
-		if (!printMessage.isDirectPrint()) {
-			throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
-					+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
-		}
-		return new MessageSender(apiService, eventLogger).createAndSendMessage(printMessage, null, printMessageContent);
+	public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
+		return new OngoingDelivery.SendableForPrintOnly() {
+
+			private final MessageSender sender;
+			private MessageDelivery delivery;
+
+			{
+				if (!printMessage.isDirectPrint()) {
+					throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
+							+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
+				}
+				sender = new MessageSender(apiService, eventLogger);
+				delivery = sender.createOrFetchMessage(printMessage);
+			}
+
+
+			/**
+			 * Laster opp innhold til et dokument. Merk: må være PDF-format.
+			 *
+			 * @return videre operasjoner for å fullføre leveransen.
+			 */
+			@Override
+			public OngoingDelivery.SendableForPrintOnly addContent(Document document, InputStream printContent) {
+				delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.getUuid()), null, printContent);
+				return this;
+			}
+
+			@Override
+			public MessageDelivery send() {
+				if (delivery.getDeliveryMethod() != DeliveryMethod.PRINT) {
+					throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
+							+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
+				}
+				delivery = sender.sendMessage(delivery);
+				return delivery;
+			}
+		};
 	}
 
-	/**
-	 * Oppretter et brev med innhold for sending i tre steg.
-	 */
-	public MessageDelivery createMessage(final Message message) {
-		return new MessageSender(apiService, eventLogger).createOrFetchMessage(message);
-	}
-
-	/**
-	 * Laster opp innhold til et dokument
-	 */
-	public MessageDelivery addContent(final MessageDelivery message, final Document document, final InputStream documentContent) {
-		return new MessageSender(apiService, eventLogger).addContent(message, document, documentContent);
-	}
-
-	/**
-	 * Laster opp innhold til et dokument med alternativt innhold for print
-	 * (må være PDF).
-	 */
-	public MessageDelivery addContent(final MessageDelivery message, final Document document, final InputStream documentContent,
-									  final InputStream printDocumentContent) {
-		return new MessageSender(apiService, eventLogger).addContent(message, document, documentContent, printDocumentContent);
-	}
-
-	/**
-	 * Sender et brev gjennom Digipost. Dersom mottaker ikke er digipostbruker
-	 * og det ligger printdetaljer på forsendelsen bestiller vi print av brevet
-	 * til vanlig postgang. (Krever at avsender har fått tilgang til print.)
-	 */
-	public MessageDelivery sendMessage(final MessageDelivery message) {
-		return new MessageSender(apiService, eventLogger).sendMessage(message);
-	}
-
-	/**
-	 * Sender et brev direkte til print. Krever at avsender tilgang til å sende
-	 * direkte til print.
-	 */
-	public MessageDelivery deliverToPrint(final MessageDelivery printMessage) {
-		if (printMessage.getDeliveryMethod() != DeliveryMethod.PRINT) {
-			throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
-					+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
-		}
-		return new MessageSender(apiService, eventLogger).sendMessage(printMessage);
-	}
 
 	public IdentificationResult identifyRecipient(final Identification identification) {
 		return apiService.identifyRecipient(identification);

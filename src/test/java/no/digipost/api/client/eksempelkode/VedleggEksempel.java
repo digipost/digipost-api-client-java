@@ -26,7 +26,11 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.SmsNotification;
+
 import org.apache.commons.io.FileUtils;
 
 public class VedleggEksempel {
@@ -57,23 +61,11 @@ public class VedleggEksempel {
 		// 6. Vi oppretter en forsendelse
 		Message message = new Message(UUID.randomUUID().toString(), pin, primaryDocument, asList(attachment));
 
-		// 7. Vi lar klientbiblioteket opprette forsendelsen
-		MessageDelivery createdMessage = client.createMessage(message);
-
-		// 8. Vi henter inputstreamen til filen vi vil ha som hoveddokument
-		InputStream primaryDocumentContent = getPrimaryDocumentContent();
-
-		// 9. Vi lar klientbiblioteke håndtere å legge til innhold i hoveddokumentet
-		client.addContent(createdMessage, primaryDocument, primaryDocumentContent);
-
-		// 10. Vi henter inputstreamen til filen vi vil ha som vedlegg
-		InputStream attachmentContent = getAttachmentContent();
-
-		// 11. Vi lar klientbiblioteket håndtere å legge til innhold i vedlegget
-		client.addContent(createdMessage, attachment, attachmentContent);
-
-		// 12. Vi lar klientbiblioteket håndtere sending av forsendelsen
-		client.sendMessage(createdMessage);
+		// 7. Vi lar klientbiblioteket opprette forsendelsen, legge til innhold, og til slutt sende
+		client.createMessage(message)
+			.addContent(primaryDocument, getPrimaryDocumentContent())
+			.addContent(attachment, getAttachmentContent())
+			.send();
 	}
 
 	private static InputStream getPrimaryDocumentContent() {

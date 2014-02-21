@@ -15,6 +15,9 @@
  */
 package no.digipost.api.client.swing;
 
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
@@ -57,18 +60,25 @@ import javax.swing.border.EmptyBorder;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.EventLogger;
-import no.digipost.api.client.representations.*;
-import no.digipost.api.client.representations.PrintDetails.PostType;
+import no.digipost.api.client.OngoingDelivery;
+import no.digipost.api.client.representations.DigipostAddress;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.FileType;
+import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageRecipient;
+import no.digipost.api.client.representations.NameAndAddress;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.PrintDetails;
+import no.digipost.api.client.representations.PrintDetails.PostType;
+import no.digipost.api.client.representations.PrintRecipient;
+import no.digipost.api.client.representations.SmsNotification;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.LocalDate;
 
-import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-
 public class DigipostSwingClient {
-	private MessageDelivery messageDelivery = null;
+	private OngoingDelivery.SendableWithPrintFallback delivery = null;
 
 	private static final String BREV = "BREV";
 	private static final String CERT = "CERT";
@@ -460,8 +470,7 @@ public class DigipostSwingClient {
 
 						new Message(UUID.randomUUID().toString(), recipient, primaryDocument, new ArrayList<Document>());
 					}
-					messageDelivery = client.createMessage(message);
-					messageDelivery = client.addContent(messageDelivery, primaryDocument, FileUtils.openInputStream(new File(contentField.getText())));
+					delivery = client.createMessage(message).addContent(primaryDocument, FileUtils.openInputStream(new File(contentField.getText())));
 					enableAttachmentFields(true);
 					sendButton.setEnabled(true);
 				} catch (IOException ex) {
@@ -484,14 +493,14 @@ public class DigipostSwingClient {
 		sendButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				if (messageDelivery == null) {
+				if (delivery == null) {
 					eventLogger.log("Du må opprette og laste opp innhold til en forsendelse før den kan sendes.");
 					return;
 				}
-				client.sendMessage(messageDelivery);
+				delivery.send();
 				enableAttachmentFields(false);
 				sendButton.setEnabled(false);
-				messageDelivery = null;
+				delivery = null;
 			}
 		});
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();

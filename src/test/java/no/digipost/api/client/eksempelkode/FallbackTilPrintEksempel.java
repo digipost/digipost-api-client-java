@@ -28,10 +28,16 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageRecipient;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.PrintDetails;
+import no.digipost.api.client.representations.PrintRecipient;
+import no.digipost.api.client.representations.SmsNotification;
+
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
@@ -76,16 +82,13 @@ public class FallbackTilPrintEksempel {
 		// deg før den oversendes Digipost.
 		primaryDocument.setPreEncrypt();
 
-		// 8. Vi henter inputstreamen til PDF-filen vi ønsker å sende
-		InputStream messageContent = getMessageContent();
+		// 8. Vi oppretter forsendelsen, legger til innhold og alternativt
+		// innhold for print, og til slutt sender forsendelsen. Alt håndteres
+		// av klientbiblioteket.
+		client.createMessage(message)
+			.addContent(primaryDocument, getMessageContent(), getPrintContent())
+			.send();
 
-		// 9. Vi kan også legge til alternativt innhold som brukes om forsendelsen går til print
-		InputStream printContent = getPrintContent();
-
-		// 10. Vi lar klientbiblioteket håndtere utsendelsen
-		client.createAndSendMessage(message, messageContent, printContent);
-
-		IOUtils.closeQuietly(messageContent);
 	}
 
 	private static InputStream getMessageContent() {

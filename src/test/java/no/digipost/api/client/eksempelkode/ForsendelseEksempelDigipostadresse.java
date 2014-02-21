@@ -30,6 +30,7 @@ import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.SmsNotification;
+
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -61,11 +62,11 @@ public class ForsendelseEksempelDigipostadresse {
 		// 5. Vi oppretter en forsendelse
 		Message message = new Message(UUID.randomUUID().toString(), address, primaryDocument, new ArrayList<Document>());
 
-		// 6. Vi henter inputstreamen til PDF-filen vi ønsker å sende
-		InputStream messageContent = getMessageContent();
-
-		// 7. Vi lar klientbiblioteket håndtere utsendelsen
-		client.createAndSendMessage(message, messageContent);
+		// 6. Klientbiblioteket håndterer opprettelse av forsendelse,
+		// legge til innhold, og til slutt sending av forsendelsen.
+		client.createMessage(message)
+		      .addContent(primaryDocument, getMessageContent())
+		      .send();
 	}
 
 	private static InputStream getMessageContent() {
