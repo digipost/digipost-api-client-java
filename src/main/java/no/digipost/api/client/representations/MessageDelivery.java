@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -117,4 +118,22 @@ public class MessageDelivery extends Representation {
 	public Document getPrimaryDocument() {
 		return primaryDocument;
 	}
+
+	/**
+	 * @return a list containing every {@link Document} in this delivery.
+	 *         The primary document will be the first element of the list,
+	 *         with the attachments following.
+	 */
+	public List<Document> getAllDocuments() {
+		LinkedList<Document> all = new LinkedList<Document>(attachments);
+		all.addFirst(primaryDocument);
+		return all;
+	}
+
+	public Document getDocumentByUuid(String uuid) {
+		for (Document document : getAllDocuments()) {
+			if (uuid.equals(document.getUuid())) return document;
+		}
+		throw new IllegalArgumentException("No document in this " + getClass().getSimpleName() + " has the UUID '" + uuid + "'");
+    }
 }
