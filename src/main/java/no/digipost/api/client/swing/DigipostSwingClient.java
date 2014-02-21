@@ -389,31 +389,29 @@ public class DigipostSwingClient {
 		gbc_btnBack.gridy = 12;
 		brevMainPanel.add(btnBack, gbc_btnBack);
 
-//		TODO Fix adding attachment
-//		btnAddAttachment = new JButton("Legg til vedlegg");
-//		btnAddAttachment.setEnabled(false);
-//		btnAddAttachment.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(final ActionEvent e) {
-//				if (messageDelivery == null) {
-//					eventLogger.log("Du må opprette og laste opp innhold til en forsendelse før du kan legge til vedlegg.");
-//					return;
-//				}
-//				try {
-//					String subject = attachmentSubjectField.getText();
-//					FileType fileType = FileType.fromFilename(attachmentContentField.getText());
-//					Attachment attachment = new Attachment(subject, fileType);
-//					client.createAttachment(messageDelivery, attachment,
-//							FileUtils.openInputStream(new File(attachmentContentField.getText())));
-//				} catch (IOException ex) {
-//					eventLogger.log(ex.getMessage() + "\n");
-//				} catch (DigipostClientException ex) {
-//					eventLogger.log("\nDigipostClient kastet exception. \nFeilkode: " + ex.getErrorType() + "\nFeilmelding: "
-//							+ ex.getErrorMessage());
-//				}
-//			}
-//		});
+		btnAddAttachment = new JButton("Legg til vedlegg");
+		btnAddAttachment.setEnabled(false);
+		btnAddAttachment.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				if (delivery == null) {
+					eventLogger.log("Du må opprette og laste opp innhold til en forsendelse før du kan legge til vedlegg.");
+					return;
+				}
+				try {
+					String subject = attachmentSubjectField.getText();
+					FileType fileType = FileType.fromFilename(attachmentContentField.getText());
+					Document attachment = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), PASSWORD, NORMAL);
+					delivery.addContent(attachment, FileUtils.openInputStream(new File(attachmentContentField.getText())));
+				} catch (IOException ex) {
+					eventLogger.log(ex.getMessage() + "\n");
+				} catch (DigipostClientException ex) {
+					eventLogger.log("\nDigipostClient kastet exception. \nFeilkode: " + ex.getErrorType() + "\nFeilmelding: "
+							+ ex.getErrorMessage());
+				}
+			}
+		});
 
 		GridBagConstraints gbc_btnAddAttachment = new GridBagConstraints();
 		gbc_btnAddAttachment.gridx = 1;
