@@ -213,12 +213,14 @@ public class DigipostClient {
 		return apiService.searchSuggest(searchString);
 	}
 
+	public DigipostClient addFilter(final ClientFilter filter) {
+		apiService.addFilter(filter);
+		return this;
+	}
+
 	private void log(final String stringToSignMsg) {
 		LOG.debug(stringToSignMsg);
 		eventLogger.log(stringToSignMsg);
 	}
 
-	public void addFilter(final ClientFilter filter) {
-		apiService.addFilter(filter);
-	}
 }
