@@ -69,6 +69,13 @@ public class Document extends Representation {
 	public Document() {
 	}
 
+	/**
+	 * Constructor for just the required fields of a document.
+	 */
+	public Document(String uuid, String subject, FileType fileType) {
+		this(uuid, subject, fileType, null, null, null, null);
+	}
+
 	public Document(String uuid, String subject, FileType fileType, String openingReceipt,
 					SmsNotification smsNotification, AuthenticationLevel authenticationLevel,
 					SensitivityLevel sensitivityLevel) {

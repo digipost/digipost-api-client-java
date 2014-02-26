@@ -54,10 +54,17 @@ public class Invoice
 	public Invoice() {
 	}
 
+	/**
+	 * Constructor for just the required fields of a document. Non-specified
+	 * fields will get their respective standard values when sent to Digipost.
+	 */
+	public Invoice(String uuid, String subject, FileType fileType, String kid, BigDecimal amount, String account, LocalDate dueDate) {
+		this(uuid, subject, fileType, null, null ,null, null, kid, amount, account, dueDate);
+	}
+
 	public Invoice(String uuid, String subject, FileType fileType, String openingReceipt,
-				   SmsNotification smsNotification, AuthenticationLevel authenticationLevel,
-				   SensitivityLevel sensitivityLevel,
-				   final String kid, final BigDecimal amount, final String account, final LocalDate dueDate) {
+				   SmsNotification smsNotification, AuthenticationLevel authenticationLevel, SensitivityLevel sensitivityLevel,
+				   String kid, BigDecimal amount, String account, LocalDate dueDate) {
 		super(uuid, subject, fileType, openingReceipt, smsNotification, authenticationLevel, sensitivityLevel);
 		this.kid = kid;
 		this.amount = amount;

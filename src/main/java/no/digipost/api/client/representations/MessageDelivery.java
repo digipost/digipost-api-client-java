@@ -15,6 +15,9 @@
  */
 package no.digipost.api.client.representations;
 
+import static java.util.Collections.unmodifiableList;
+
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,8 +57,7 @@ public class MessageDelivery extends Representation {
 	public MessageDelivery() {
 	}
 
-	public MessageDelivery(final String messageId, final DeliveryMethod deliveryMethod, final MessageStatus status,
-			final DateTime deliveredDate) {
+	public MessageDelivery(String messageId, DeliveryMethod deliveryMethod, MessageStatus status, DateTime deliveredDate) {
 		this.messageId = messageId;
 		this.deliveryMethod = deliveryMethod;
 		this.status = status;
@@ -76,7 +78,7 @@ public class MessageDelivery extends Representation {
 	}
 
 	public List<Document> getAttachments() {
-		return attachments;
+		return attachments != null ? unmodifiableList(attachments) : Collections.<Document>emptyList();
 	}
 
 	public boolean isSameMessageAs(final Message message) {
@@ -122,18 +124,22 @@ public class MessageDelivery extends Representation {
 	/**
 	 * @return a list containing every {@link Document} in this delivery.
 	 *         The primary document will be the first element of the list,
-	 *         with the attachments following.
+	 *         with the attachments following. The list is immutable and
+	 *         can not be used to change which documents are in this
+	 *         MessageDelivery.
 	 */
 	public List<Document> getAllDocuments() {
-		LinkedList<Document> all = new LinkedList<Document>(attachments);
-		all.addFirst(primaryDocument);
-		return all;
+		LinkedList<Document> all = new LinkedList<Document>(getAttachments());
+		if (primaryDocument != null) {
+			all.addFirst(primaryDocument);
+		}
+		return unmodifiableList(all);
 	}
 
 	public Document getDocumentByUuid(String uuid) {
 		for (Document document : getAllDocuments()) {
 			if (uuid.equals(document.getUuid())) return document;
 		}
-		throw new IllegalArgumentException("No document in this " + getClass().getSimpleName() + " has the UUID '" + uuid + "'");
+		throw new IllegalArgumentException("Document with UUID '" + uuid + "' was not found in this " + getClass().getSimpleName() + ".");
     }
 }

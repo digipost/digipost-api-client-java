@@ -15,13 +15,18 @@
  */
 package no.digipost.api.client.representations;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static java.util.Arrays.asList;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -57,4 +62,20 @@ public class MessageTest {
 				new ArrayList<Document>());
 		assertFalse(message.isDirectPrint());
 	}
+
+	@Test
+    public void possibleToPassNullForNoAttachments() {
+	    Message message = new Message(UUID.randomUUID().toString(), new DigipostAddress("test.testson#1234"), new Document(UUID.randomUUID().toString(), "subject", PDF), null);
+		assertThat(message.attachments, hasSize(0));
+    }
+
+	@Test
+    public void changingThePassedAttachmentListDoesNotChangeTheMessage() {
+		List<Document> attachments = new ArrayList<Document>(asList(new Document(UUID.randomUUID().toString(), "subject", PDF), new Document(UUID.randomUUID().toString(), "subject", PDF)));
+		Message message = new Message(UUID.randomUUID().toString(), new DigipostAddress("test.testson#1234"), new Document(UUID.randomUUID().toString(), "subject", PDF), attachments);
+		attachments.clear();
+
+		assertThat(attachments, empty());
+		assertThat(message.getAttachments(), hasSize(2));
+    }
 }

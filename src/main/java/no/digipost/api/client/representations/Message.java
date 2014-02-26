@@ -15,12 +15,17 @@
  */
 package no.digipost.api.client.representations;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message", propOrder = { "messageId", "senderId", "recipient", "primaryDocument", "attachments" })
@@ -41,27 +46,30 @@ public class Message {
 	Message() {
 	}
 
-	public Message(final String messageId, final PersonalIdentificationNumber id, final Document primaryDocument, final List<Document> attachments) {
+	public Message(String messageId, PersonalIdentificationNumber id, Document primaryDocument, Iterable<Document> attachments) {
 		this(messageId, new MessageRecipient(id), primaryDocument, attachments);
 	}
 
-	public Message(final String messageId, final OrganisationNumber id, final Document primaryDocument, final List<Document> attachments) {
+	public Message(String messageId, OrganisationNumber id, Document primaryDocument, Iterable<Document> attachments) {
 		this(messageId, new MessageRecipient(id), primaryDocument, attachments);
 	}
 
-	public Message(final String messageId, final DigipostAddress digipostAdress, final Document primaryDocument, final List<Document> attachments) {
+	public Message(String messageId, DigipostAddress digipostAdress, Document primaryDocument, Iterable<Document> attachments) {
 		this(messageId, new MessageRecipient(digipostAdress), primaryDocument, attachments);
 	}
 
-	public Message(final String messageId, final NameAndAddress nameAndAddress, final Document primaryDocument, final List<Document> attachments) {
+	public Message(String messageId, NameAndAddress nameAndAddress, Document primaryDocument, Iterable<Document> attachments) {
 		this(messageId, new MessageRecipient(nameAndAddress), primaryDocument, attachments);
 	}
 
-	public Message(final String messageId, final MessageRecipient recipient, final Document primaryDocument, final List<Document> attachments) {
+	public Message(String messageId, MessageRecipient recipient, Document primaryDocument, Iterable<Document> attachments) {
 		this.messageId = messageId;
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
-		this.attachments = attachments;
+		this.attachments = new ArrayList<Document>();
+		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
+	        this.attachments.add(attachment);
+        }
 	}
 
 	public MessageRecipient getRecipient() {
