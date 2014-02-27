@@ -51,7 +51,7 @@ public class MessageDelivery extends Representation {
 	protected DateTime deliveredDate;
 	@XmlElement(name = "primary-document", required = true)
 	protected Document primaryDocument;
-	@XmlElement(name = "document")
+	@XmlElement(name = "attachment")
 	protected List<Document> attachments;
 
 	public MessageDelivery() {
