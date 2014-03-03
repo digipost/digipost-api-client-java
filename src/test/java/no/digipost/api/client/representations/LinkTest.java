@@ -15,18 +15,17 @@
  */
 package no.digipost.api.client.representations;
 
-import static no.digipost.api.client.representations.Relation.ADD_CONTENT_AND_SEND;
+import static no.digipost.api.client.representations.Relation.ADD_CONTENT;
 import static no.digipost.api.client.representations.Relation.SELF;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-
 
 import org.junit.Test;
 
 public class LinkTest {
 
 	private static final String RELATIONS_URI = "https://api.digipost.no/relations";
-	private static final String ADD_CONTENTS_REL_URI = RELATIONS_URI + "/" + ADD_CONTENT_AND_SEND.name().toLowerCase();
+	private static final String ADD_CONTENTS_REL_URI = RELATIONS_URI + "/" + ADD_CONTENT.name().toLowerCase();
 
 	@Test
 	public void shouldParseRelationFromUri() {
@@ -37,14 +36,14 @@ public class LinkTest {
 
 	@Test
 	public void shouldBuildRelationUri() {
-		Link link = new Link(ADD_CONTENT_AND_SEND, new DigipostUri(RELATIONS_URI + "/" + ADD_CONTENT_AND_SEND));
+		Link link = new Link(ADD_CONTENT, new DigipostUri(RELATIONS_URI + "/" + ADD_CONTENT));
 		assertThat(link.getRel(), is(ADD_CONTENTS_REL_URI));
 	}
 
 	@Test
 	public void shouldIndicateLinkRelationEquality() {
-		Link link = new Link(ADD_CONTENT_AND_SEND, new DigipostUri(RELATIONS_URI + "/" + ADD_CONTENT_AND_SEND));
-		assertThat(link.equalsRelation(ADD_CONTENT_AND_SEND), is(true));
+		Link link = new Link(ADD_CONTENT, new DigipostUri(RELATIONS_URI + "/" + ADD_CONTENT));
+		assertThat(link.equalsRelation(ADD_CONTENT), is(true));
 	}
 
 	@Test
