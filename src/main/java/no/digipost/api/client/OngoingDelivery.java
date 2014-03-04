@@ -46,6 +46,8 @@ import no.digipost.api.client.representations.MessageDelivery;
  *
  * @see WithPrintFallback
  * @see ForPrintOnly
+ * @see DigipostClient#createMessage(no.digipost.api.client.representations.Message)
+ * @see DigipostClient#createPrintOnlyMessage(no.digipost.api.client.representations.Message)
  */
 public interface OngoingDelivery<OPERATIONS extends OngoingDelivery<OPERATIONS> & OngoingDelivery.SendableDelivery> {
 
