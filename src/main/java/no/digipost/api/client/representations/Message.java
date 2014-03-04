@@ -46,23 +46,23 @@ public class Message {
 	Message() {
 	}
 
-	public Message(String messageId, PersonalIdentificationNumber id, Document primaryDocument, Iterable<Document> attachments) {
+	public Message(String messageId, PersonalIdentificationNumber id, Document primaryDocument, Iterable<? extends Document> attachments) {
 		this(messageId, new MessageRecipient(id), primaryDocument, attachments);
 	}
 
-	public Message(String messageId, OrganisationNumber id, Document primaryDocument, Iterable<Document> attachments) {
+	public Message(String messageId, OrganisationNumber id, Document primaryDocument, Iterable<? extends Document> attachments) {
 		this(messageId, new MessageRecipient(id), primaryDocument, attachments);
 	}
 
-	public Message(String messageId, DigipostAddress digipostAdress, Document primaryDocument, Iterable<Document> attachments) {
+	public Message(String messageId, DigipostAddress digipostAdress, Document primaryDocument, Iterable<? extends Document> attachments) {
 		this(messageId, new MessageRecipient(digipostAdress), primaryDocument, attachments);
 	}
 
-	public Message(String messageId, NameAndAddress nameAndAddress, Document primaryDocument, Iterable<Document> attachments) {
+	public Message(String messageId, NameAndAddress nameAndAddress, Document primaryDocument, Iterable<? extends Document> attachments) {
 		this(messageId, new MessageRecipient(nameAndAddress), primaryDocument, attachments);
 	}
 
-	public Message(String messageId, MessageRecipient recipient, Document primaryDocument, Iterable<Document> attachments) {
+	public Message(String messageId, MessageRecipient recipient, Document primaryDocument, Iterable<? extends Document> attachments) {
 		this.messageId = messageId;
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
