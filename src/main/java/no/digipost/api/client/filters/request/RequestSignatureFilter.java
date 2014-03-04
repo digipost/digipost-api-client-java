@@ -28,7 +28,6 @@ import no.digipost.api.client.security.ClientRequestToSign;
 import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,7 @@ import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientRequestAdapter;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.core.util.Base64;
 
 public class RequestSignatureFilter extends ClientFilter {
 
@@ -73,7 +73,7 @@ public class RequestSignatureFilter extends ClientFilter {
 				+ "===SLUTT SIGNATURSTRENG===");
 
 		byte[] signatureBytes = signer.sign(stringToSign);
-		String signature = new String(Base64.encodeBase64(signatureBytes));
+		String signature = new String(Base64.encode(signatureBytes));
 		request.getHeaders().add(Headers.X_Digipost_Signature, signature);
 		log(getClass().getSimpleName() + " satt headeren " + Headers.X_Digipost_Signature + "=" + signature);
 	}

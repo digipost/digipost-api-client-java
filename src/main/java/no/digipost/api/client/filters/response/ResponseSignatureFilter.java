@@ -32,7 +32,6 @@ import no.digipost.api.client.Headers;
 import no.digipost.api.client.security.ClientResponseToVerify;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -40,6 +39,7 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.core.util.Base64;
 
 public class ResponseSignatureFilter extends ClientFilter {
 
@@ -65,7 +65,7 @@ public class ResponseSignatureFilter extends ClientFilter {
 		}
 
 		String serverSignaturBase64 = getServerSignaturFromResponse(response);
-		byte[] serverSignaturBytes = Base64.decodeBase64(serverSignaturBase64.getBytes());
+		byte[] serverSignaturBytes = Base64.decode(serverSignaturBase64.getBytes());
 
 		String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ClientResponseToVerify(cr, response));
 

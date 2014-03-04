@@ -23,7 +23,6 @@ import java.io.OutputStream;
 
 import no.digipost.api.client.EventLogger;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.crypto.ExtendedDigest;
 import org.slf4j.Logger;
@@ -35,6 +34,7 @@ import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientRequestAdapter;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.core.util.Base64;
 
 public abstract class RequestContentHashFilter extends ClientFilter {
 
@@ -108,7 +108,7 @@ public abstract class RequestContentHashFilter extends ClientFilter {
 				byte[] result = new byte[instance.getDigestSize()];
 				instance.update(data, 0, data.length);
 				instance.doFinal(result, 0);
-				String hash = new String(Base64.encodeBase64(result));
+				String hash = new String(Base64.encode(result));
 				request.getHeaders().add(header, hash);
 				log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
 			} catch (InstantiationException e) {

@@ -22,7 +22,6 @@ import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.ErrorType;
 import no.digipost.api.client.Headers;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -31,6 +30,7 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.core.util.Base64;
 
 public class ResponseContentSHA256Filter extends ClientFilter {
 
@@ -66,7 +66,7 @@ public class ResponseContentSHA256Filter extends ClientFilter {
 		digest.update(entityBytes, 0, entityBytes.length);
 		byte[] result = new byte[digest.getDigestSize()];
 		digest.doFinal(result, 0);
-		String ourHash = new String(Base64.encodeBase64(result));
+		String ourHash = new String(Base64.encode(result));
 		if (!serverHash.equals(ourHash)) {
 			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
 					"X-Content-SHA256-header matchet ikke innholdet, så server-signatur er feil.");
