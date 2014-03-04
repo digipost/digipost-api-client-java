@@ -141,6 +141,17 @@
 						<goals>deploy</goals>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.jasig.maven</groupId>
+					<artifactId>maven-notice-plugin</artifactId>
+					<version>1.0.6.1</version>
+					<configuration>
+						<noticeTemplate>${project.basedir}/src/main/notice/NOTICE.template</noticeTemplate>
+						<licenseMapping>
+							<param>${project.basedir}/src/main/notice/license-mappings.xml</param>
+						</licenseMapping>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -220,6 +231,19 @@
 						<id>attach-source</id>
 						<goals>
 							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jasig.maven</groupId>
+				<artifactId>maven-notice-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>check-NOTICE-file</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
 						</goals>
 					</execution>
 				</executions>
