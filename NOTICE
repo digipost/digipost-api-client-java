@@ -27,10 +27,10 @@ CDDL 1.1 - LICENSE_CDDL_1.1 - http://glassfish.java.net/public/CDDL+GPL_1_1.html
 **********************************************************************
 jaxb:2.2.7 - http://jaxb.java.net/
 istack-commons-runtime:2.16 - http://istack-commons.java.net/
-jersey:1.17.1 - http://jersey.java.net/
-jersey-core:1.17.1 - http://jersey.java.net/
-jersey-client:1.17.1 - http://jersey.java.net/
-jersey-apache-client:1.17.1 - http://jersey.java.net/
+jersey:1.18.1 - http://jersey.java.net/
+jersey-core:1.18.1 - http://jersey.java.net/
+jersey-client:1.18.1 - http://jersey.java.net/
+jersey-apache-client4:1.18.1 - http://jersey.java.net/
 
 
 **********************************************************************
