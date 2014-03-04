@@ -429,7 +429,6 @@
 		<connection>scm:git:git@github.com:digipost/digipost-api-client-java.git</connection>
 		<developerConnection>scm:git:git@github.com:digipost/digipost-api-client-java.git</developerConnection>
 		<url>scm:git:git@github.com:digipost/digipost-api-client-java</url>
-		<tag>digipost-api-client-java-4.3</tag>
 	</scm>
 
 	<repositories>
