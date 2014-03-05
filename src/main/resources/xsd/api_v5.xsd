@@ -488,7 +488,7 @@
             <xsd:element name="post-type"  minOccurs="1" maxOccurs="1" >
                 <xsd:annotation>
                     <xsd:documentation>
-                        Forsendelse-type: A eller B for hhv. A-Prioritert / A-post og B-Økonomi / B-post
+                        A or B for respectively A-Priority and B-Economy
                     </xsd:documentation>
                 </xsd:annotation>
                 <xsd:simpleType>
