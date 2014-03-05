@@ -488,11 +488,12 @@
             <xsd:element name="post-type"  minOccurs="1" maxOccurs="1" >
                 <xsd:annotation>
                     <xsd:documentation>
-                        Currently, only PostType B is supported.
+                        Forsendelse-type: A eller B for hhv. A-Prioritert / A-post og B-Økonomi / B-post
                     </xsd:documentation>
                 </xsd:annotation>
                 <xsd:simpleType>
                     <xsd:restriction base="xsd:string">
+                        <xsd:enumeration value="A"/>
                         <xsd:enumeration value="B"/>
                     </xsd:restriction>
                 </xsd:simpleType>
@@ -517,7 +518,7 @@
             <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1" />
             <xsd:element name="delivered-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="document" type="document" minOccurs="0" maxOccurs="99" />
+            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
@@ -538,8 +539,14 @@
 
     <xsd:complexType name="document">
         <xsd:sequence>
-            <xsd:element name="uuid" type="uuid" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="subject" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="uuid" type="uuid" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="subject" minOccurs="0" maxOccurs="1">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:maxLength value="100"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
             <xsd:element name="file-type" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
             <xsd:element name="opening-receipt" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="false" />
             <xsd:element name="sms-notification" type="sms-notification" minOccurs="0" maxOccurs="1">
@@ -587,7 +594,7 @@
             </xsd:element>
             <xsd:element name="recipient" type="message-recipient" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
-            <xsd:element name="document" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
+            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -600,7 +607,7 @@
                     <xsd:element name="kid" minOccurs="1" maxOccurs="1" nillable="false">
                         <xsd:simpleType>
                             <xsd:restriction base="xsd:string">
-                                <xsd:pattern value="[0-9]{2,25}" />
+                                <xsd:pattern value="[0-9]{2,24}[0-9\-]{1}" />
                             </xsd:restriction>
                         </xsd:simpleType>
                     </xsd:element>
