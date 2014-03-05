@@ -28,6 +28,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.security.cert.CertificateException;
@@ -48,6 +49,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
@@ -328,12 +330,14 @@ public class DigipostSwingClient {
 		brevMainPanel.add(contentField, createGridBagConstraintsForField(1, 10));
 		contentField.setColumns(10);
 
+		final JFileChooser filChooser = new JFileChooser();
+		filChooser.setApproveButtonMnemonic(KeyEvent.VK_ENTER);
 		JButton velgInnholdButton = new JButton("Velg...");
 		velgInnholdButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				JFileChooser filChooser = new JFileChooser();
+
 				filChooser.showOpenDialog(brevPanel);
 				File filFile = filChooser.getSelectedFile();
 				if (filFile != null) {
@@ -365,12 +369,12 @@ public class DigipostSwingClient {
 
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				JFileChooser filChooser = new JFileChooser();
-				filChooser.showOpenDialog(brevPanel);
-				File filFile = filChooser.getSelectedFile();
-				if (filFile != null) {
-					attachmentContentField.setText(filFile.toString());
-				}
+				JOptionPane.showMessageDialog(brevPanel, "Opplasting av vedlegg støttes ikke p.t. av Swing-klienten.");
+//				filChooser.showOpenDialog(brevPanel);
+//				File filFile = filChooser.getSelectedFile();
+//				if (filFile != null) {
+//					attachmentContentField.setText(filFile.toString());
+//				}
 			}
 		});
 		brevMainPanel.add(addAttachmentContentButton, createGridBagConstraints(GridBagConstraints.WEST, 5, 11));
@@ -564,7 +568,6 @@ public class DigipostSwingClient {
 		certButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				JFileChooser filChooser = new JFileChooser();
 				filChooser.showOpenDialog(brevPanel);
 				File filFile = filChooser.getSelectedFile();
 				if (filFile != null) {
