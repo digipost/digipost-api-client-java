@@ -94,27 +94,12 @@ public class ApiService {
 
 	/**
 	 * Oppretter en ny forsendelsesressurs på serveren ved å sende en
-	 * POST-forespørsel. Brukes for å sende brev i Digipost.
+	 * POST-forespørsel.
 	 */
 	public ClientResponse createMessage(final Message message) {
 		EntryPoint entryPoint = getEntryPoint();
 		return webResource
 				.path(entryPoint.getCreateMessageUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V5)
-				.header(X_Digipost_UserId, senderAccountId)
-				.type(DIGIPOST_MEDIA_TYPE_V5)
-				.post(ClientResponse.class, message);
-	}
-
-	/**
-	 * Oppretter en ny printforsendelsesressurs på serveren ved å sende en
-	 * POST-forespørsel. Brukes for bestille print av et brev dersom mottaker
-	 * ikke er Digipostbruker.
-	 * 
-	 */
-	public ClientResponse createPrintMessage(final Message message, final URI createPrintMessageUri) {
-		return webResource
-				.path(createPrintMessageUri.getPath())
 				.accept(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.type(DIGIPOST_MEDIA_TYPE_V5)

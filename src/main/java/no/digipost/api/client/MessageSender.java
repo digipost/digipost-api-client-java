@@ -27,71 +27,6 @@ public class MessageSender extends Communicator {
 		super(apiService, eventLogger);
 	}
 
-	/**
-	 * Sender et brev gjennom Digipost. Denne metoden gjør alle HTTP-kallene som
-	 * er nødvendige for å sende brevet. Det vil si at den først gjør et kall
-	 * for å opprette en forsendelsesressurs på serveren og deretter poster
-	 * brevets innhold. Hvis forsendelsen skal sendes ferdigkryptert fra
-	 * klienten vil det gjøres et kall for å hente mottakers offentlige nøkkel
-	 * (public key), for så å kryptere innholdet før det sendes over.
-	 */
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream primaryDocumentContent) {
-		return createAndSendMessage(message, primaryDocumentContent, primaryDocumentContent);
-	}
-
-	public MessageDelivery createAndSendMessage(final Message message, final InputStream primaryDocumentContent, final InputStream printContent) {
-		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
-		MessageDelivery createdMessage = createOrFetchMessage(message);
-		Document primaryDocument = createdMessage.getPrimaryDocument();
-
-		final InputStream unencryptetContent;
-		if (createdMessage.willBeDeliveredInDigipost()) {
-			unencryptetContent = primaryDocumentContent;
-		} else {
-			unencryptetContent = printContent;
-			primaryDocument.setDigipostFileType(FileType.PDF);
-		}
-
-		MessageDelivery deliveryWithContent;
-		if (primaryDocument.isPreEncrypt()) {
-			log("\n\n---DOKUMENTET SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
-			final InputStream encryptetContent = fetchKeyAndEncrypt(createdMessage, unencryptetContent);
-			deliveryWithContent = uploadContent(createdMessage, primaryDocument, encryptetContent);
-		} else {
-			deliveryWithContent = uploadContent(createdMessage, primaryDocument, unencryptetContent);
-		}
-
-		MessageDelivery sentMessageDelivery = sendMessage(deliveryWithContent);
-		log("\n\n---API-INTERAKSJON ER FULLFØRT (OG BREVET ER DERMED SENDT)---");
-		return sentMessageDelivery;
-	}
-
-	public MessageDelivery createMessageAndAddContent(final Message message, final InputStream primaryDocumentContent, final InputStream printContent) {
-		Document primaryDocument = message.getPrimaryDocument();
-
-		log("\n\n---STARTER INTERAKSJON MED API: OPPRETTE FORSENDELSE---");
-		MessageDelivery createdMessage = createOrFetchMessage(message);
-
-		final InputStream unencryptetContent;
-		if (createdMessage.willBeDeliveredInDigipost()) {
-			unencryptetContent = primaryDocumentContent;
-		} else {
-			unencryptetContent = printContent;
-			primaryDocument.setDigipostFileType(FileType.PDF);
-		}
-
-		MessageDelivery delivery;
-		if (primaryDocument.isPreEncrypt()) {
-			log("\n\n---DOKUMENTET SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
-			final InputStream encryptetContent = fetchKeyAndEncrypt(createdMessage, unencryptetContent);
-			delivery = uploadContent(createdMessage, primaryDocument, encryptetContent);
-		} else {
-			delivery = uploadContent(createdMessage, primaryDocument, unencryptetContent);
-		}
-		
-		return delivery;
-	}
-
 	public MessageDelivery sendMessage(final MessageDelivery message) {
 		MessageDelivery deliveredMessage = null;
 		if (message.isAlreadyDeliveredToDigipost()) {
@@ -150,6 +85,11 @@ public class MessageSender extends Communicator {
 		}
 	}
 
+	/**
+	 * Legger til innhold til et dokument. For at denne metoden skal
+	 * kunne kalles, må man først ha opprettet forsendelsesressursen på serveren
+	 * ved metoden {@code createOrFetchMesssage}.
+	 */
 	public MessageDelivery addContent(final MessageDelivery message, final Document document, final InputStream documentContent, final InputStream printDocumentContent) {
 		verifyCorrectStatus(message, MessageStatus.NOT_COMPLETE);
 		final InputStream unencryptetContent;
@@ -169,15 +109,6 @@ public class MessageSender extends Communicator {
 			delivery = uploadContent(message, document, unencryptetContent);
 		}
 		return delivery;
-	}
-
-	/**
-	 * Legger til innhold til et dokument. For at denne metoden skal
-	 * kunne kalles, må man først ha opprettet forsendelsesressursen på serveren
-	 * ved metoden {@code createOrFetchMesssage}.
-	 */
-	public MessageDelivery addContent(final MessageDelivery delivery, final Document document, final InputStream documentContent) {
-		return addContent(delivery, document, documentContent, documentContent);
 	}
 
 	/**
