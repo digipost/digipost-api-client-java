@@ -18,8 +18,9 @@ package no.digipost.api.client;
 import java.io.InputStream;
 
 import no.digipost.api.client.representations.*;
+import org.glassfish.jersey.client.ClientResponse;
 
-import com.sun.jersey.api.client.ClientResponse;
+import javax.ws.rs.core.Response;
 
 public class MessageSender extends Communicator {
 
@@ -43,13 +44,13 @@ public class MessageSender extends Communicator {
 										  final InputStream documentContent) {
 		log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
 
-		ClientResponse response = apiService.addContent(document, documentContent);
+		Response response = apiService.addContent(document, documentContent);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);
 
 		log("Innhold ble lagt til. Status: [" + response.toString() + "]");
-		return response.getEntity(createdMessage.getClass());
+		return response.readEntity(createdMessage.getClass());
 	}
 
 	/**
@@ -67,12 +68,12 @@ public class MessageSender extends Communicator {
 	 * 
 	 */
 	public MessageDelivery createOrFetchMessage(final Message message) {
-		ClientResponse response = apiService.createMessage(message);
+		Response response = apiService.createMessage(message);
 
 		if (resourceAlreadyExists(response)) {
-			ClientResponse existingMessageResponse = apiService.fetchExistingMessage(response.getLocation());
+			Response existingMessageResponse = apiService.fetchExistingMessage(response.getLocation());
 			checkResponse(existingMessageResponse);
-			MessageDelivery delivery = existingMessageResponse.getEntity(MessageDelivery.class);
+			MessageDelivery delivery = existingMessageResponse.readEntity(MessageDelivery.class);
 			checkThatExistingMessageIsIdenticalToNewMessage(delivery, message);
 			checkThatMessageHasNotAlreadyBeenDelivered(delivery);
 			log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
@@ -81,7 +82,7 @@ public class MessageSender extends Communicator {
 			check404Error(response, ErrorType.RECIPIENT_DOES_NOT_EXIST);
 			checkResponse(response);
 			log("Forsendelse opprettet. Status: [" + response.toString() + "]");
-			return response.getEntity(MessageDelivery.class);
+			return response.readEntity(MessageDelivery.class);
 		}
 	}
 
@@ -116,13 +117,13 @@ public class MessageSender extends Communicator {
 	 * først ha lagt innhold til forsendelsen med {@code addContent}.
 	 */
 	private MessageDelivery send(final MessageDelivery delivery) {
-		ClientResponse response = apiService.send(delivery);
+		Response response = apiService.send(delivery);
 
 		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);
 
 		log("Brevet ble sendt. Status: [" + response.toString() + "]");
-		return response.getEntity(delivery.getClass());
+		return response.readEntity(delivery.getClass());
 	}
 
 	private void checkThatMessageHasNotAlreadyBeenDelivered(final MessageDelivery existingMessage) {

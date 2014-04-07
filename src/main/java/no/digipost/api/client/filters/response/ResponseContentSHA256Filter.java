@@ -25,35 +25,33 @@ import no.digipost.api.client.Headers;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.util.encoders.Base64;
 
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.core.util.Base64;
 
-public class ResponseContentSHA256Filter extends ClientFilter {
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
+import javax.ws.rs.client.ClientResponseFilter;
+
+
+public class ResponseContentSHA256Filter implements ClientResponseFilter {
 
 	@Override
-	public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
-		ClientResponse response = getNext().handle(cr);
-
-		if (response.hasEntity()) {
-			validerContentHash(response);
+	public void filter(ClientRequestContext clientRequestContext, ClientResponseContext clientResponseContext) throws IOException {
+		if (clientResponseContext.hasEntity()) {
+			validerContentHash(clientResponseContext);
 		}
-		return response;
 	}
 
-	private void validerContentHash(final ClientResponse response) {
+	private void validerContentHash(final ClientResponseContext response) {
 		try {
 			String hashHeader = response.getHeaders().getFirst(Headers.X_Content_SHA256);
 			if (StringUtils.isBlank(hashHeader)) {
 				throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
 						"Ikke definert X-Content-SHA256-header, så server-signatur kunne ikke sjekkes");
 			}
-			byte[] entityBytes = IOUtils.toByteArray(response.getEntityInputStream());
+			byte[] entityBytes = IOUtils.toByteArray(response.getEntityStream());
 			validerBytesMotHashHeader(hashHeader, entityBytes);
-			response.setEntityInputStream(new ByteArrayInputStream(entityBytes));
+			response.setEntityStream(new ByteArrayInputStream(entityBytes));
 		} catch (IOException e) {
 			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
 					"Det skjedde en feil under uthenting av innhold for validering av X-Content-SHA256-header, så server-signatur kunne ikke sjekkes");
@@ -72,5 +70,4 @@ public class ResponseContentSHA256Filter extends ClientFilter {
 					"X-Content-SHA256-header matchet ikke innholdet, så server-signatur er feil.");
 		}
 	}
-
 }

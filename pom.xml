@@ -21,7 +21,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jersey.version>1.18.1</jersey.version>
+		<jersey.version>2.7</jersey.version>
 		<joda-time.version>2.3</joda-time.version>
 		<bouncycastle.version>1.50</bouncycastle.version>
 		<commons-lang.version>3.2.1</commons-lang.version>
@@ -39,6 +39,8 @@
 		<junit.version>4.11</junit.version>
 		<hamcrest.version>1.3</hamcrest.version>
 		<mockito.version>1.9.5</mockito.version>
+        <wsrs.version>2.0</wsrs.version>
+        <javax-annotation.version>1.2</javax-annotation.version>
 	</properties>
 
 	<dependencies>
@@ -60,12 +62,12 @@
 			<version>${httpclient.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-core</artifactId>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-common</artifactId>
 			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.jersey</groupId>
+			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-client</artifactId>
 			<version>${jersey.version}</version>
 		</dependency>
@@ -84,6 +86,16 @@
 			<artifactId>jaxb-api</artifactId>
 			<version>${jaxb.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>${wsrs.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>${javax-annotation.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-impl</artifactId>
@@ -166,8 +178,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -299,12 +311,16 @@
 										<include>javax.xml.bind:jaxb-api:${jaxb.version}:jar:compile</include>
 										<include>com.sun.xml.bind:jaxb-core:${jaxb.version}:jar:compile</include>
 										<include>com.sun.xml.bind:jaxb-impl:${jaxb.version}:jar:compile</include>
-										<include>com.sun.jersey.contribs:jersey-apache-client4:${jersey.version}:jar:compile</include>
-										<include>com.sun.jersey:jersey-client:${jersey.version}:jar:compile</include>
-										<include>com.sun.jersey:jersey-core:${jersey.version}:jar:compile</include>
+                                        <include>org.glassfish.jersey.core:*:${jersey.version}:jar:compile</include>
+                                        <include>org.glassfish.jersey.bundles.repackaged:jersey-guava:${jersey.version}:jar:compile</include>
+                                        <include>org.glassfish.hk2:*:*:jar:compile</include>
+                                        <include>org.glassfish.hk2.external:*:*:jar:compile</include>
 										<include>org.joda:joda-convert:${joda-convert.version}:jar:compile</include>
 										<include>joda-time:joda-time:${joda-time.version}:jar:compile</include>
 										<include>javax.xml.bind:jsr173_api:${jsr173_api.version}:jar:compile</include>
+                                        <include>javax.ws.rs:javax.ws.rs-api:*:jar:compile</include>
+                                        <include>javax.annotation:javax.annotation-api:*:jar:compile</include>
+                                        <include>org.javassist:javassist:*:jar:compile</include>
 										<include>ch.qos.logback:logback-classic:${logback.version}:jar:compile</include>
 										<include>ch.qos.logback:logback-core:${logback.version}:jar:compile</include>
 										<include>org.slf4j:slf4j-api:${slf4j.version}:jar:compile</include>

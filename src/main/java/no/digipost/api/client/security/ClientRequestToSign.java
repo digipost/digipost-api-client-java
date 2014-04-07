@@ -18,16 +18,14 @@ package no.digipost.api.client.security;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedMap;
-
-
-import com.sun.jersey.api.client.ClientRequest;
 
 public class ClientRequestToSign implements RequestToSign {
 
-	private final ClientRequest clientRequest;
+	private final ClientRequestContext clientRequest;
 
-	public ClientRequestToSign(final ClientRequest clientRequest) {
+	public ClientRequestToSign(final ClientRequestContext clientRequest) {
 		this.clientRequest = clientRequest;
 	}
 
@@ -39,22 +37,22 @@ public class ClientRequestToSign implements RequestToSign {
 	@Override
 	public SortedMap<String, String> getHeaders() {
 		TreeMap<String, String> sortedHeaders = new TreeMap<String, String>();
-		MultivaluedMap<String, Object> headers = clientRequest.getHeaders();
+		MultivaluedMap<String, String> headers = clientRequest.getStringHeaders();
 		for (String key : headers.keySet()) {
-			sortedHeaders.put(key, ClientRequest.getHeaderValue(headers.getFirst(key)));
+			sortedHeaders.put(key, headers.getFirst(key));
 		}
 		return sortedHeaders;
 	}
 
 	@Override
 	public String getPath() {
-		String path = clientRequest.getURI().getRawPath();
+		String path = clientRequest.getUri().getRawPath();
 		return path != null ? path : "";
 	}
 
 	@Override
 	public String getParameters() {
-		String query = clientRequest.getURI().getRawQuery();
+		String query = clientRequest.getUri().getRawQuery();
 		return query != null ? query : "";
 	}
 

@@ -24,7 +24,9 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import no.digipost.api.client.representations.EncryptionKey;
@@ -45,12 +47,9 @@ import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.operator.OutputEncryptor;
+import org.glassfish.jersey.client.ClientResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
 
 /**
  * Superklasse for MessageSender som har funksjonalitet for å snakke med
@@ -86,7 +85,7 @@ public class Communicator {
 		return d.getEncoded();
 	}
 
-	protected void checkResponse(final ClientResponse response) {
+	protected void checkResponse(final Response response) {
 		Status status = Status.fromStatusCode(response.getStatus());
 		if (!responseOk(response)) {
 			String errorMessage = fetchErrorMessageString(response);
@@ -104,19 +103,15 @@ public class Communicator {
 		}
 	}
 
-	protected String fetchErrorMessageString(final ClientResponse response) {
+	protected String fetchErrorMessageString(final Response response) {
 		try {
-			return response.getEntity(ErrorMessage.class).getErrorMessage();
-		} catch (ClientHandlerException e) {
+			return response.readEntity(ErrorMessage.class).getErrorMessage();
+		} catch (ProcessingException | IllegalStateException | WebApplicationException e) {
 			return "Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.";
-		} catch (WebApplicationException spe) {
-			return "Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.";
-		} catch (UniformInterfaceException e) {
-			return "";
 		}
 	}
 
-	private boolean responseOk(final ClientResponse response) {
+	private boolean responseOk(final Response response) {
 		Status status = Status.fromStatusCode(response.getStatus());
 		if (status == null) {
 			return false;
@@ -143,7 +138,7 @@ public class Communicator {
 		eventLogger.log(stacktrace.toString());
 	}
 
-	protected boolean resourceAlreadyExists(final ClientResponse response) {
+	protected boolean resourceAlreadyExists(final Response response) {
 		return Status.CONFLICT.equals(Status.fromStatusCode(response.getStatus()));
 	}
 
@@ -171,10 +166,10 @@ public class Communicator {
 	public InputStream fetchKeyAndEncrypt(final MessageDelivery delivery, final InputStream content) {
 		checkThatMessageCanBePreEncrypted(delivery);
 
-		ClientResponse encryptionKeyResponse = apiService.getEncryptionKey(delivery.getEncryptionKeyLink().getUri());
+		Response encryptionKeyResponse = apiService.getEncryptionKey(delivery.getEncryptionKeyLink().getUri());
 		checkResponse(encryptionKeyResponse);
 
-		EncryptionKey key = encryptionKeyResponse.getEntity(EncryptionKey.class);
+		EncryptionKey key = encryptionKeyResponse.readEntity(EncryptionKey.class);
 
 		try {
 			byte[] encryptedContent = preencrypt(IOUtils.toByteArray(content), key.getKeyId(), key.getValue());
@@ -185,14 +180,14 @@ public class Communicator {
 		}
 	}
 
-	protected void check404Error(final ClientResponse response, final ErrorType errorBy404) {
+	protected void check404Error(final Response response, final ErrorType errorBy404) {
 		if (Status.fromStatusCode(response.getStatus()) == Status.NOT_FOUND) {
 			throw new DigipostClientServerException(errorBy404, fetchErrorMessageEntity(response));
 		}
 	}
 
-	private ErrorMessage fetchErrorMessageEntity(final ClientResponse response) {
-		return response.getEntity(ErrorMessage.class);
+	private ErrorMessage fetchErrorMessageEntity(final Response response) {
+		return response.readEntity(ErrorMessage.class);
 	}
 
 }

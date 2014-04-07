@@ -37,10 +37,10 @@ import no.digipost.api.client.representations.SmsNotification;
  */
 public class ForsendelseEksempel {
 	// Din virksomhets Digipost-kontoid
-	private static final long AVSENDERS_KONTOID = 10987;
+	private static final long AVSENDERS_KONTOID = 1003;
 
 	// Passordet sertifikatfilen er beskyttet med
-	private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
+	private static final String SERTIFIKAT_PASSORD = "Qwer12345";
 
 	public static void main(final String[] args) {
 
@@ -49,10 +49,10 @@ public class ForsendelseEksempel {
 		InputStream sertifikatInputStream = lesInnSertifikat();
 
 		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient("https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+		DigipostClient client = new DigipostClient("http://localhost:8282", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
 		// 3. Vi oppretter et fødselsnummerobjekt
-		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("01013300001");
 
 		// 4. Vi oppretter hoveddokumentet
 		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne",
@@ -69,14 +69,19 @@ public class ForsendelseEksempel {
 	}
 
 	private static InputStream getPrimaryDocumentContent() {
-		// Her må du returnere brevinnholdet du ønsker å sende istedenfor null
-		return null;
+		try {
+			// Leser inn sertifikatet
+			return new FileInputStream(new File("/Users/lars/Downloads/Evry.pdf"));
+		} catch (FileNotFoundException e) {
+			// Håndter at sertifikatet ikke kunne leses!
+			throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);
+		}
 	}
 
 	private static InputStream lesInnSertifikat() {
 		try {
 			// Leser inn sertifikatet
-			return new FileInputStream(new File("/path/til/sertifikatfil.p12"));
+			return new FileInputStream(new File("/Users/lars/Downloads/dnb.p12"));
 		} catch (FileNotFoundException e) {
 			// Håndter at sertifikatet ikke kunne leses!
 			throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);

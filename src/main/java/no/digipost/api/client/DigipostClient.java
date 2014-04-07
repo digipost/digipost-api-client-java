@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
@@ -24,24 +25,22 @@ import no.digipost.api.client.filters.request.RequestUserAgentFilter;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Filter;
 import no.digipost.api.client.filters.response.ResponseDateFilter;
 import no.digipost.api.client.filters.response.ResponseSignatureFilter;
-import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.DeliveryMethod;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.IdentificationResult;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
 
+import org.glassfish.jersey.filter.LoggingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
+
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
+import javax.ws.rs.client.WebTarget;
 
 /**
  * En klient for å sende brev gjennom Digipost. Hvis et objekt av denne klassen
@@ -89,17 +88,26 @@ public class DigipostClient {
 		this.eventLogger = eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER;
 
 		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
-		WebResource webResource = client.resource(digipostUrl);
 
-		apiService = new ApiService(webResource, senderAccountId);
+		WebTarget webTarget = client.target(digipostUrl);
+		//webTarget.register(new LoggingFilter());
+		//WebResource webResource = client.resource(digipostUrl);
+		apiService = new ApiService(webTarget, senderAccountId);
 
-		webResource.addFilter(new RequestContentSHA256Filter(eventLogger));
-		webResource.addFilter(new RequestSignatureFilter(signer, eventLogger));
-		webResource.addFilter(new RequestDateFilter(eventLogger));
-		webResource.addFilter(new RequestUserAgentFilter());
-		webResource.addFilter(new ResponseDateFilter());
-		webResource.addFilter(new ResponseContentSHA256Filter());
-		webResource.addFilter(new ResponseSignatureFilter(apiService));
+		final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(eventLogger.toString());
+
+
+		webTarget.register(new LoggingFilter());
+		webTarget.register(new RequestContentSHA256Filter(eventLogger));
+		webTarget.register(new RequestDateFilter(eventLogger));
+		webTarget.register(new RequestUserAgentFilter());
+		webTarget.register(new RequestSignatureFilter(signer, eventLogger));
+
+		webTarget.register(new ResponseDateFilter());
+		webTarget.register(new ResponseContentSHA256Filter());
+		webTarget.register(new ResponseSignatureFilter(apiService));
+
+
 
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
 	}
@@ -213,10 +221,10 @@ public class DigipostClient {
 		return apiService.searchSuggest(searchString);
 	}
 
-	public DigipostClient addFilter(final ClientFilter filter) {
+	/*public DigipostClient addFilter(final ClientFilter filter) {
 		apiService.addFilter(filter);
 		return this;
-	}
+	} */
 
 	private void log(final String stringToSignMsg) {
 		LOG.debug(stringToSignMsg);

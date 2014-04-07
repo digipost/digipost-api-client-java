@@ -8,6 +8,7 @@ Licensed under Apache 2 - http://www.apache.org/licenses/LICENSE-2.0.html
 
 This software includes third party software subject to the following licenses:
 
+  aopalliance version 1.0 repackaged as a module under CDDL + GPLv2 with classpath exception
   Apache Commons Lang under The Apache Software License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
@@ -20,12 +21,19 @@ This software includes third party software subject to the following licenses:
   fastinfoset under Apache License, Version 2.0
   Hamcrest Core under New BSD License
   Hamcrest library under New BSD License
+  HK2 API module under CDDL + GPLv2 with classpath exception
+  HK2 Implementation Utilities under CDDL + GPLv2 with classpath exception
+  Injection API (JSR 330) version 1 repackaged as OSGi bundle under CDDL + GPLv2 with classpath exception
   istack common utility code runtime under CDDL 1.1 or GPL2 w/ CPE
   Java Architecture for XML Binding under CDDL 1.1 or GPL2 w/ CPE
+  Javassist under MPL 1.1 or LGPL 2.1 or Apache License 2.0
+  javax.annotation API under CDDL + GPLv2 with classpath exception
+  javax.ws.rs-api under CDDL 1.1 or GPL2 w/ CPE
   JAXB CORE under CDDL 1.1 or GPL2 w/ CPE
   JAXB Reference Implementation under CDDL 1.1 or GPL2 w/ CPE
-  jersey-client under CDDL 1.1 or GPL2 w/ CPE
-  jersey-core under CDDL 1.1 or GPL2 w/ CPE
+  jersey-core-client under CDDL+GPL License
+  jersey-core-common under CDDL+GPL License
+  jersey-repackaged-guava under CDDL+GPL License
   Joda-Time under Apache 2
   jsr173_api under Unknown license. (http://google.com/search?q=jsr173_api+license)
   JUnit under Common Public License Version 1.0
@@ -33,5 +41,7 @@ This software includes third party software subject to the following licenses:
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Mockito under The MIT License
   Objenesis under MIT License
+  OSGi resource locator bundle - used by various API providers that rely on META-INF/services mechanism to locate providers. under CDDL + GPLv2 with classpath exception
+  ServiceLocator Default Implementation under CDDL + GPLv2 with classpath exception
   SLF4J API Module under MIT License
 

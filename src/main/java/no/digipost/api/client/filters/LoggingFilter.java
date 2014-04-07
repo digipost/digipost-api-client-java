@@ -28,15 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.sun.jersey.api.client.AbstractClientRequestAdapter;
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientRequestAdapter;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.core.util.ReaderWriter;
+public class LoggingFilter { }
 
-public class LoggingFilter extends ClientFilter {
+/*
 
 	private static final Logger LOGGER = Logger.getLogger(LoggingFilter.class.getName());
 
@@ -234,3 +228,5 @@ public class LoggingFilter extends ClientFilter {
 		}
 	}
 }
+
+*/

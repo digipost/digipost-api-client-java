@@ -18,6 +18,7 @@ package no.digipost.api.client.filters.response;
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
@@ -35,13 +36,13 @@ import no.digipost.api.client.security.ResponseMessageSignatureUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.core.util.Base64;
+import org.glassfish.jersey.internal.util.Base64;
 
-public class ResponseSignatureFilter extends ClientFilter {
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
+import javax.ws.rs.client.ClientResponseFilter;
+
+public class ResponseSignatureFilter implements ClientResponseFilter {
 
 	private final EventLogger eventLogger;
 	private final ApiService apiService;
@@ -56,18 +57,16 @@ public class ResponseSignatureFilter extends ClientFilter {
 	}
 
 	@Override
-	public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
-		ClientResponse response = getNext().handle(cr);
-
-		if ("/".equals(cr.getURI().getPath())) {
+	public void filter(ClientRequestContext clientRequestContext, ClientResponseContext clientResponseContext) throws IOException {
+		if ("/".equals(clientRequestContext.getUri().getPath())) {
 			eventLogger.log("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
-			return response;
+			return;
 		}
 
-		String serverSignaturBase64 = getServerSignaturFromResponse(response);
+		String serverSignaturBase64 = getServerSignaturFromResponse(clientResponseContext);
 		byte[] serverSignaturBytes = Base64.decode(serverSignaturBase64.getBytes());
 
-		String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ClientResponseToVerify(cr, response));
+		String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ClientResponseToVerify(clientRequestContext, clientResponseContext));
 
 		try {
 			Signature instance = Signature.getInstance("SHA256WithRSAEncryption");
@@ -83,11 +82,9 @@ public class ResponseSignatureFilter extends ClientFilter {
 		} catch (Exception e) {
 			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk.");
 		}
-
-		return response;
 	}
 
-	private String getServerSignaturFromResponse(final ClientResponse response) {
+	private String getServerSignaturFromResponse(final ClientResponseContext response) {
 		String serverSignaturString = response.getHeaders().getFirst(Headers.X_Digipost_Signature);
 		if (StringUtils.isBlank(serverSignaturString)) {
 			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
@@ -112,5 +109,4 @@ public class ResponseSignatureFilter extends ClientFilter {
 					"Kunne ikke laste Digipost's public key, så server-signatur kunne ikke sjekkes");
 		}
 	}
-
 }

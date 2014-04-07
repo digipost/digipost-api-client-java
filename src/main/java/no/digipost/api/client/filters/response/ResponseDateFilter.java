@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.filters.response;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -25,30 +26,26 @@ import no.digipost.api.client.Headers;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.filter.ClientFilter;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
+import javax.ws.rs.client.ClientResponseFilter;
 
-public class ResponseDateFilter extends ClientFilter {
+public class ResponseDateFilter implements ClientResponseFilter {
 
 	private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
 
 	@Override
-	public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
-		ClientResponse response = getNext().handle(cr);
+	public void filter(ClientRequestContext clientRequestContext, ClientResponseContext clientResponseContext) throws IOException {
+		String dateHeader = clientResponseContext.getHeaders().getFirst(Headers.Date);
 
-		String dateHeader = response.getHeaders().getFirst(Headers.Date);
-
-		if (!StringUtils.isBlank(dateHeader)) {
+		if(!StringUtils.isBlank(dateHeader)) {
 			sjekkDato(dateHeader);
-			return response;
 		} else {
 			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
 					"Mangler dato-header, så server-signatur kunne ikke sjekkes");
 		}
-
 	}
+
 
 	private void sjekkDato(final String dateOnRFC1123Format) {
 		Date date = DateUtils.parseDate(dateOnRFC1123Format);
@@ -78,5 +75,4 @@ public class ResponseDateFilter extends ClientFilter {
 			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR, "Dato-header fra server er for ny: " + headerDate);
 		}
 	}
-
 }

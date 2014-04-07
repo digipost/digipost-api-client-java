@@ -17,16 +17,18 @@ package no.digipost.api.client.filters.request;
 
 import no.digipost.api.client.Headers;
 
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.filter.ClientFilter;
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
+import java.io.IOException;
 
-public class RequestUserAgentFilter extends ClientFilter {
+@Priority(Priorities.HEADER_DECORATOR)
+public class RequestUserAgentFilter implements ClientRequestFilter {
 
 	@Override
-	public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
-		cr.getHeaders().add(Headers.User_Agent, "Digipost API Client v1.0.0");
-		return getNext().handle(cr);
+	public void filter(ClientRequestContext clientRequestContext) throws IOException {
+		//TODO:Versjon bør vel settes på en mer fancy måte.
+		clientRequestContext.getHeaders().add(Headers.User_Agent, "Digipost API Client v.5.0.1");
 	}
 }

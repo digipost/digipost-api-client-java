@@ -18,17 +18,16 @@ package no.digipost.api.client.security;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.core.MultivaluedMap;
-
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
 
 public class ClientResponseToVerify implements ResponseToVerify {
 
-	private final ClientRequest request;
-	private final ClientResponse response;
+	private final ClientRequestContext request;
+	private final ClientResponseContext response;
 
-	public ClientResponseToVerify(final ClientRequest request, final ClientResponse response) {
+	public ClientResponseToVerify(final ClientRequestContext request, final ClientResponseContext response) {
 		this.request = request;
 		this.response = response;
 	}
@@ -43,14 +42,14 @@ public class ClientResponseToVerify implements ResponseToVerify {
 		TreeMap<String, String> sortedHeaders = new TreeMap<String, String>();
 		MultivaluedMap<String, String> headers = response.getHeaders();
 		for (String key : headers.keySet()) {
-			sortedHeaders.put(key, ClientRequest.getHeaderValue(headers.getFirst(key)));
+			sortedHeaders.put(key, headers.getFirst(key));
 		}
 		return sortedHeaders;
 	}
 
 	@Override
 	public String getPath() {
-		String path = request.getURI().getPath();
+		String path = request.getUri().getPath();
 		return path != null ? path : "";
 	}
 

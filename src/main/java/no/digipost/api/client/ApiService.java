@@ -22,11 +22,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.IOUtils;
+import org.glassfish.jersey.client.ClientResponse;
+
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Denne klassen tar seg av de enkelte HTTP-forespørslene man kan gjøre mot
@@ -60,69 +64,67 @@ import org.apache.commons.io.IOUtils;
 public class ApiService {
 
 	private static final String ENTRY_POINT = "/";
-	private final WebResource webResource;
+	private final WebTarget webResource;
 	private final long senderAccountId;
 
 	private EntryPoint cachedEntryPoint;
 	private long entryPointLastCached;
 
-	public ApiService(final WebResource webResource, final long senderAccountId) {
+	public ApiService(final WebTarget webResource, final long senderAccountId) {
 		this.webResource = webResource;
 		this.senderAccountId = senderAccountId;
 	}
 
 	public EntryPoint getEntryPoint() {
 		if (cachedEntryPoint == null || entryPointCacheExpired()) {
-			ClientResponse response = getEntryPointFromServer();
-			if (response.getStatus() != ClientResponse.Status.OK.getStatusCode()) {
-				throw new DigipostClientException(ErrorType.GENERAL_ERROR, response.getEntity(ErrorMessage.class).getErrorMessage());
+			Response response = getEntryPointFromServer();
+			if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+				throw new DigipostClientException(ErrorType.GENERAL_ERROR, response.readEntity(ErrorMessage.class).getErrorMessage());
 			} else {
-				cachedEntryPoint = response.getEntity(EntryPoint.class);
+				cachedEntryPoint = response.readEntity(EntryPoint.class);
 				entryPointLastCached = System.currentTimeMillis();
 			}
 		}
 		return cachedEntryPoint;
 	}
 
-	private ClientResponse getEntryPointFromServer() {
-		return webResource
-				.path(ENTRY_POINT)
-				.accept(DIGIPOST_MEDIA_TYPE_V5)
+	private Response getEntryPointFromServer() {
+		return webResource.path(ENTRY_POINT)
+				.request(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.get(ClientResponse.class);
+				.get();
 	}
 
 	/**
 	 * Oppretter en ny forsendelsesressurs på serveren ved å sende en
 	 * POST-forespørsel.
 	 */
-	public ClientResponse createMessage(final Message message) {
+	public Response createMessage(final Message message) {
 		EntryPoint entryPoint = getEntryPoint();
 		return webResource
 				.path(entryPoint.getCreateMessageUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(DIGIPOST_MEDIA_TYPE_V5)
-				.post(ClientResponse.class, message);
+				.post(Entity.entity(message, DIGIPOST_MEDIA_TYPE_V5));
 	}
 
 	/**
 	 * Henter en allerede eksisterende forsendelsesressurs fra serveren.
 	 */
-	public ClientResponse fetchExistingMessage(final URI location) {
+	public Response fetchExistingMessage(final URI location) {
 		return webResource
 				.path(location.getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.get(ClientResponse.class);
+				.get();
 	}
 
-	public ClientResponse getEncryptionKey(final URI location) {
+	public Response getEncryptionKey(final URI location) {
 		return webResource
 				.path(location.getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.get(ClientResponse.class);
+				.get();
 	}
 
 	/**
@@ -132,16 +134,16 @@ public class ApiService {
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
 	 * 
 	 */
-	public ClientResponse addContent(final Document document, final InputStream letterContent) {
+	public Response addContent(final Document document, final InputStream letterContent) {
 		Link addContentLink = fetchAddContentLink(document);
 
 		byte[] content = readLetterContent(letterContent);
 
 		return webResource
 				.path(addContentLink.getUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.post(ClientResponse.class, content);
+				.post(Entity.entity(content, MediaType.APPLICATION_OCTET_STREAM_TYPE));
 	}
 
 	/**
@@ -153,15 +155,14 @@ public class ApiService {
 	 * metoden {@code addContent}
 	 * 
 	 */
-	public ClientResponse send(final MessageDelivery createdMessage) {
+	public Response send(final MessageDelivery createdMessage) {
 		Link sendLink = fetchSendLink(createdMessage);
 
 		return webResource
 				.path(sendLink.getUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(DIGIPOST_MEDIA_TYPE_V5)
-				.post(ClientResponse.class);
+				.post(null);
 	}
 
 	private Link fetchAddContentLink(final Document document) {
@@ -193,7 +194,7 @@ public class ApiService {
 	public Recipients search(final String searchString) {
 		return webResource
 				.path(getEntryPoint().getSearchUri().getPath() + "/" + searchString)
-				.accept(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(Recipients.class);
 	}
@@ -201,13 +202,13 @@ public class ApiService {
 	public Autocomplete searchSuggest(final String searchString) {
 		return webResource
 				.path(getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString)
-				.accept(MediaTypes.DIGIPOST_MEDIA_TYPE_V5)
+				.request(MediaTypes.DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(Autocomplete.class);
 	}
 
-	public void addFilter(final ClientFilter filter) {
-		webResource.addFilter(filter);
+	public void addFilter(final ClientRequestFilter filter) {
+		webResource.register(filter);
 	}
 
 	private boolean entryPointCacheExpired() {
@@ -217,9 +218,8 @@ public class ApiService {
 
 	public IdentificationResult identifyRecipient(final Identification identification) {
 		return webResource.path(getEntryPoint().getIdentificationUri().getPath())
-				.accept(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.type(DIGIPOST_MEDIA_TYPE_V5)
-				.post(IdentificationResult.class, identification);
+				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V5), IdentificationResult.class);
 	}
 }

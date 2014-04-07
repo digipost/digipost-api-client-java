@@ -18,6 +18,7 @@ package no.digipost.api.client.filters.request;
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 import static no.digipost.api.client.Headers.Date;
 
+import java.io.IOException;
 import java.util.Date;
 
 import no.digipost.api.client.EventLogger;
@@ -27,26 +28,24 @@ import org.apache.http.client.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.filter.ClientFilter;
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
 
-public class RequestDateFilter extends ClientFilter {
+
+@Priority(Priorities.HEADER_DECORATOR)
+public class RequestDateFilter implements ClientRequestFilter {
 	private static final Logger LOG = LoggerFactory.getLogger(RequestDateFilter.class);
 	private final EventLogger eventLogger;
-
-	public RequestDateFilter() {
-		this(NOOP_EVENT_LOGGER);
-	}
 
 	public RequestDateFilter(final EventLogger eventListener) {
 		this.eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
 	}
 
 	@Override
-	public ClientResponse handle(final ClientRequest cr) {
-		modifyRequest(cr);
-		return getNext().handle(cr);
+	public void filter(ClientRequestContext clientRequestContext) throws IOException {
+		modifyRequest(clientRequestContext);
 	}
 
 	private void log(final String stringToSignMsg) {
@@ -54,11 +53,12 @@ public class RequestDateFilter extends ClientFilter {
 		eventLogger.log(stringToSignMsg);
 	}
 
-	private ClientRequest modifyRequest(final ClientRequest cr) {
+	private ClientRequestContext modifyRequest(final ClientRequestContext cr) {
 		String dateOnRFC1123Format = DateUtils.formatDate(new Date());
 		cr.getHeaders().add(Date, dateOnRFC1123Format);
 		log(getClass().getSimpleName() + " satt headeren " + Headers.Date + "=" + dateOnRFC1123Format);
 		return cr;
 	}
+
 
 }

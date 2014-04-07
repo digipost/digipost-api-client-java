@@ -29,17 +29,18 @@ import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
 
 import org.apache.commons.io.IOUtils;
+
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.client.AbstractClientRequestAdapter;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientRequestAdapter;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.core.util.Base64;
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
 
-public class RequestSignatureFilter extends ClientFilter {
+@Priority(Priorities.USER)
+public class RequestSignatureFilter implements ClientRequestFilter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RequestSignatureFilter.class);
 
@@ -57,16 +58,15 @@ public class RequestSignatureFilter extends ClientFilter {
 	}
 
 	@Override
-	public ClientResponse handle(final ClientRequest cr) {
-		if (cr.getEntity() == null) {
-			setSignatureHeader(cr);
+	public void filter(ClientRequestContext clientRequestContext) throws IOException {
+		if(clientRequestContext.getEntity() == null) {
+			setSignatureHeader(clientRequestContext);
 		} else {
-			cr.setAdapter(new SikkerhetsAdapter(cr.getAdapter()));
+			clientRequestContext.setEntityStream(new SecurityAdapterOutputStream(clientRequestContext, clientRequestContext.getEntityStream()));
 		}
-		return getNext().handle(cr);
 	}
 
-	private void setSignatureHeader(final ClientRequest request) {
+	private void setSignatureHeader(final ClientRequestContext request) {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ClientRequestToSign(request));
 		log(getClass().getSimpleName() + " beregnet streng som skal signeres:\n===START SIGNATURSTRENG===\n" + stringToSign
@@ -83,24 +83,13 @@ public class RequestSignatureFilter extends ClientFilter {
 		eventLogger.log(stringToSignMsg);
 	}
 
-	private final class SikkerhetsAdapter extends AbstractClientRequestAdapter {
-		SikkerhetsAdapter(final ClientRequestAdapter cra) {
-			super(cra);
-		}
-
-		@Override
-		public OutputStream adapt(final ClientRequest request, final OutputStream out) throws IOException {
-			return new SecurityAdapterOutputStream(request, getAdapter().adapt(request, out));
-		}
-	}
-
 	private final class SecurityAdapterOutputStream extends OutputStream {
 
 		private final ByteArrayOutputStream byteArrayOutputStream;
 		private final OutputStream jerseyStream;
-		private final ClientRequest request;
+		private final ClientRequestContext request;
 
-		public SecurityAdapterOutputStream(final ClientRequest request, final OutputStream jerseyStream) {
+		public SecurityAdapterOutputStream(final ClientRequestContext request, final OutputStream jerseyStream) {
 			this.request = request;
 			this.jerseyStream = jerseyStream;
 

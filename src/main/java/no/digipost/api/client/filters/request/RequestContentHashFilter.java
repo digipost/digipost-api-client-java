@@ -25,18 +25,19 @@ import no.digipost.api.client.EventLogger;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.crypto.ExtendedDigest;
+
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.client.AbstractClientRequestAdapter;
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientRequestAdapter;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.core.util.Base64;
 
-public abstract class RequestContentHashFilter extends ClientFilter {
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
+
+@Priority(Priorities.HEADER_DECORATOR)
+public abstract class RequestContentHashFilter implements ClientRequestFilter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RequestContentHashFilter.class);
 	private final EventLogger eventLogger;
@@ -54,9 +55,9 @@ public abstract class RequestContentHashFilter extends ClientFilter {
 	}
 
 	@Override
-	public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
-		cr.setAdapter(new ContentHashAdapter(cr.getAdapter()));
-		return getNext().handle(cr);
+	public void filter(ClientRequestContext clientRequestContext) {
+		clientRequestContext.setEntityStream(new ContentHashOutputStream(clientRequestContext, clientRequestContext.getEntityStream()));
+
 	}
 
 	private void log(final String stringToSignMsg) {
@@ -64,24 +65,13 @@ public abstract class RequestContentHashFilter extends ClientFilter {
 		eventLogger.log(stringToSignMsg);
 	}
 
-	private final class ContentHashAdapter extends AbstractClientRequestAdapter {
-		ContentHashAdapter(final ClientRequestAdapter cra) {
-			super(cra);
-		}
-
-		@Override
-		public OutputStream adapt(final ClientRequest request, final OutputStream out) throws IOException {
-			return new ContentHashOutputStream(request, getAdapter().adapt(request, out));
-		}
-	}
-
 	private final class ContentHashOutputStream extends OutputStream {
 
 		private final ByteArrayOutputStream byteArrayOutputStream;
 		private final OutputStream jerseyStream;
-		private final ClientRequest request;
+		private final ClientRequestContext request;
 
-		public ContentHashOutputStream(final ClientRequest request, final OutputStream jerseyStream) {
+		public ContentHashOutputStream(final ClientRequestContext request, final OutputStream jerseyStream) {
 			this.jerseyStream = jerseyStream;
 			this.request = request;
 
