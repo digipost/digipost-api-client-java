@@ -27,8 +27,8 @@
 		<commons-lang.version>3.2.1</commons-lang.version>
 		<httpclient.version>4.3.3</httpclient.version>
 		<httpcomponents.version>4.3.2</httpcomponents.version>
-		<slf4j.version>1.7.6</slf4j.version>
-		<logback.version>1.1.1</logback.version>
+		<slf4j.version>1.7.7</slf4j.version>
+		<logback.version>1.1.2</logback.version>
 		<commons-io.version>2.4</commons-io.version>
 		<jaxb.version>2.2.7</jaxb.version>
 		<FastInfoset.version>1.2.12</FastInfoset.version>
@@ -55,7 +55,7 @@
 			<version>${logback.version}</version>
 			<scope>runtime</scope>
 			<optional>true</optional>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
@@ -389,7 +389,7 @@
 				</plugins>
 				<pluginManagement>
 					<plugins>
-						<!--This plugin's configuration is used to store Eclipse m2e settings 
+						<!--This plugin's configuration is used to store Eclipse m2e settings
 							only. It has no influence on the Maven build itself. -->
 						<plugin>
 							<groupId>org.eclipse.m2e</groupId>
