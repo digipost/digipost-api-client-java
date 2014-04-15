@@ -15,21 +15,19 @@
  */
 package no.digipost.api.client.representations;
 
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 public class MessageTest {
@@ -37,7 +35,7 @@ public class MessageTest {
 	@Test
 	public void shouldBeDirectPrintWhenMessageContainsOnlyPrintDetails() {
 		Message message = new Message(UUID.randomUUID().toString(), new MessageRecipient(new PrintDetails()),
-				new Document(), new ArrayList<Document>());
+				new Document(UUID.randomUUID().toString(), "subject", PDF), new ArrayList<Document>());
 		assertTrue(message.isDirectPrint());
 	}
 

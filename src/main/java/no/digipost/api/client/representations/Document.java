@@ -16,14 +16,11 @@
 
 package no.digipost.api.client.representations;
 
-import java.util.List;
-import java.util.regex.Pattern;
+import javax.xml.bind.annotation.*;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "document", propOrder = {
@@ -43,19 +40,19 @@ public class Document extends Representation {
 	private final static Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
 	@XmlElement(name = "uuid", required = true)
-	protected String uuid;
+	public final String uuid;
 	@XmlElement(name = "subject", required = true)
-	protected String subject;
+	public final String subject;
 	@XmlElement(name = "file-type", required = true)
 	protected String digipostFileType;
 	@XmlElement(name = "opening-receipt")
-	protected String openingReceipt;
+	public final String openingReceipt;
 	@XmlElement(name = "sms-notification")
-	protected SmsNotification smsNotification;
+	public final SmsNotification smsNotification;
 	@XmlElement(name = "authentication-level")
-	protected AuthenticationLevel authenticationLevel;
+	public final AuthenticationLevel authenticationLevel;
 	@XmlElement(name = "sensitivity-level")
-	protected SensitivityLevel sensitivityLevel;
+	public final SensitivityLevel sensitivityLevel;
 	@XmlElement(name = "pre-encrypt")
 	protected Boolean preEncrypt;
 	@XmlElement(name = "content-hash", nillable = false)
@@ -66,8 +63,7 @@ public class Document extends Representation {
 		return links;
 	}
 
-	public Document() {
-	}
+	Document() { this(null, null, null); }
 
 	/**
 	 * Constructor for just the required fields of a document.
@@ -79,12 +75,12 @@ public class Document extends Representation {
 	public Document(String uuid, String subject, FileType fileType, String openingReceipt,
 					SmsNotification smsNotification, AuthenticationLevel authenticationLevel,
 					SensitivityLevel sensitivityLevel) {
-		this.uuid = uuid.toLowerCase();
-		if (!UUID_PATTERN.matcher(this.uuid).matches()) {
+		this.uuid = org.apache.commons.lang3.StringUtils.lowerCase(uuid);
+		if (uuid != null && !UUID_PATTERN.matcher(this.uuid).matches()) {
 			throw new IllegalArgumentException("Not a UUID: " + uuid);
 		}
 		this.subject = subject;
-		this.digipostFileType = fileType.toString();
+		this.digipostFileType = Objects.toString(fileType, null);
 		this.openingReceipt = openingReceipt;
 		this.smsNotification = smsNotification;
 		this.authenticationLevel = authenticationLevel;

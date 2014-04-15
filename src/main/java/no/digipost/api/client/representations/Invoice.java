@@ -15,18 +15,13 @@
  */
 package no.digipost.api.client.representations;
 
-import java.math.BigDecimal;
+import no.digipost.api.client.representations.xml.DateXmlAdapter;
+import org.joda.time.LocalDate;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import no.digipost.api.client.representations.xml.DateXmlAdapter;
-
-import org.joda.time.LocalDate;
+import java.math.BigDecimal;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -51,7 +46,7 @@ public class Invoice
     @XmlSchemaType(name = "date")
     protected LocalDate dueDate;
 
-	public Invoice() {
+	Invoice() {
 	}
 
 	/**
