@@ -19,6 +19,7 @@ import java.io.InputStream;
 
 import no.digipost.api.client.representations.*;
 import org.glassfish.jersey.client.ClientResponse;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
 import javax.ws.rs.core.Response;
 
@@ -51,6 +52,15 @@ public class MessageSender extends Communicator {
 
 		log("Innhold ble lagt til. Status: [" + response.toString() + "]");
 		return response.readEntity(createdMessage.getClass());
+	}
+
+	public MessageDelivery createMultipartMessage(final FormDataMultiPart multiPart) {
+		Response response = apiService.multipartMessage(multiPart);
+		if(response.getStatus() == Response.Status.OK.getStatusCode()) {
+			return response.readEntity(MessageDelivery.class);
+		} else {
+			return null;
+		}
 	}
 
 	/**

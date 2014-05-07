@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations;
+package no.digipost.api.client;
 
-public class MediaTypes {
+import javax.ws.rs.core.MediaType;
 
-	public static final String DIGIPOST_MEDIA_TYPE_V5 = "application/vnd.digipost-v5+xml";
+public class FileMetadata {
+	public String fileName;
+	public MediaType mediaType;
 
-	public static final String APPLICATION_PDF = "application/pdf";
-
+	public FileMetadata(String fileName, MediaType mediaType){
+		this.fileName = fileName;
+		this.mediaType = mediaType;
+	}
 }

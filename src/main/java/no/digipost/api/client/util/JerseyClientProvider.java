@@ -17,10 +17,15 @@ package no.digipost.api.client.util;
 
 
 import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.spi.Connector;
+import org.glassfish.jersey.client.spi.ConnectorProvider;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Configuration;
 
 public class JerseyClientProvider {
 
@@ -34,11 +39,12 @@ public class JerseyClientProvider {
 
 	public static Client newClient(final int connectionTimeout, final int readTimout) {
 		ClientConfig config = new ClientConfig();
-		Client client = ClientBuilder.newClient(config);
+		config.register(MultiPartFeature.class);
 
-		//client.setConnectTimeout(connectionTimeout);
-		//client.setReadTimeout(readTimout);
-		//client.getProperties().put(ClientConfig.PROPERTY_THREADPOOL_SIZE, THREADPOOL_SIZE);
+		Client client = ClientBuilder.newClient(config);
+		client.property(ClientProperties.ASYNC_THREADPOOL_SIZE, THREADPOOL_SIZE);
+		client.property(ClientProperties.CONNECT_TIMEOUT, connectionTimeout);
+		client.property(ClientProperties.READ_TIMEOUT, readTimout);
 		return client;
 	}
 }	

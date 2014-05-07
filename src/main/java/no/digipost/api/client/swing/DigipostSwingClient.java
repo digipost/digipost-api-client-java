@@ -58,6 +58,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
+import javax.ws.rs.client.Client;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientException;
@@ -76,7 +77,9 @@ import no.digipost.api.client.representations.PrintDetails.PostType;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.SmsNotification;
 
+import no.digipost.api.client.util.JerseyClientProvider;
 import org.apache.commons.io.FileUtils;
+import org.glassfish.jersey.client.JerseyClient;
 import org.joda.time.LocalDate;
 
 public class DigipostSwingClient {
@@ -610,11 +613,12 @@ public class DigipostSwingClient {
 				CardLayout layout = (CardLayout) contentPane.getLayout();
 				layout.show(contentPane, BREV);
 
-				turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(endpointField.getText());
+				Client jerseyClient = turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(endpointField.getText());
 
 				try {
 					client = new DigipostClient(endpointField.getText(), Long.parseLong(senderField.getText()), FileUtils
-							.openInputStream(new File(certField.getText())), new String(passwordField.getPassword()), eventLogger);
+							.openInputStream(new File(certField.getText())), new String(passwordField.getPassword()), eventLogger,
+							jerseyClient);
 				} catch (NumberFormatException e1) {
 					eventLogger.log("FEIL: Avsenders ID må være et tall > 0");
 				} catch (IOException e1) {
@@ -716,38 +720,12 @@ public class DigipostSwingClient {
 	 * Dersom vi tester mot et av Digiposts testmiljøer, vil vi ikke bruke
 	 * SSL-validering.
 	 */
-	private void turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(final String endpoint) {
+	private Client turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(final String endpoint) {
+		Client jerseyClient = JerseyClientProvider.newClient();
 		if (endpoint.contains("camelon")) {
 			eventLogger.log("Detekterte at vi går mot Digipost Testmiljø. Skrur derfor av SSL-sjekk");
-			try {
-				TrustManager[] noopTrustManager = new TrustManager[] { new X509TrustManager() {
-					@Override
-					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-						return null;
-					}
-
-					@Override
-					public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-					}
-
-					@Override
-					public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-					}
-				} };
-				SSLContext sc = SSLContext.getInstance("SSL");
-				sc.init(null, noopTrustManager, new java.security.SecureRandom());
-				HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-				HostnameVerifier noopHostnameVerifier = new HostnameVerifier() {
-					@Override
-					public boolean verify(final String hostname, final SSLSession session) {
-						return true;
-					}
-				};
-				HttpsURLConnection.setDefaultHostnameVerifier(noopHostnameVerifier);
-			} catch (Exception e) {
-				eventLogger.log("Klarte ikke å skru av SSL-sjekk.");
-				throw new RuntimeException(e);
-			}
+			jerseyClient = DigipostClient.createJerseyClientWithoutSSLValidation();
 		}
+		return jerseyClient;
 	}
 }

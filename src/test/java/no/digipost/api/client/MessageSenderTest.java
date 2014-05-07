@@ -15,45 +15,47 @@
  */
 package no.digipost.api.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.UUID;
-
 import no.digipost.api.client.representations.*;
-
-import org.glassfish.jersey.client.ClientRequest;
-import org.glassfish.jersey.client.ClientResponse;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
-import javax.ws.rs.core.*;
-import javax.ws.rs.core.Link;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.UUID;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class MessageSenderTest {
 
+	@Mock
+	Response mockClientResponse;
+
+	@Mock
+	Response mockClientResponse2;
+
 	@Before
 	public void setUp() {
+		initMocks(this);
 	}
 
-	/*@Test
+	@Test
 	public void skalHenteEksisterendeForsendelseHvisDenFinnesFraForr() {
 		ApiService api = mock(ApiService.class);
 		Message forsendelseIn = lagDefaultForsendelse();
-		MockClientResponse mockClientResponse = new MockClientResponse(Response.Status.CONFLICT);
+
+		when(mockClientResponse.getStatus()).thenReturn(Response.Status.CONFLICT.getStatusCode());
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
 		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.getMessageId(), DeliveryMethod.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
-		MockClientResponse mockClientResponse2 = new MockClientResponse(Response.Status.OK, eksisterendeForsendelse);
+
+		when(mockClientResponse2.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
+		when(mockClientResponse2.readEntity(MessageDelivery.class)).thenReturn(eksisterendeForsendelse);
 		when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
 
 		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);
@@ -67,12 +69,15 @@ public class MessageSenderTest {
 	public void skalKasteFeilHvisForsendelseAlleredeLevert() {
 		ApiService api = mock(ApiService.class);
 		Message forsendelseIn = lagDefaultForsendelse();
-		MockClientResponse mockClientResponse = new MockClientResponse(Response.Status.CONFLICT);
+
+		when(mockClientResponse.getStatus()).thenReturn(Response.Status.CONFLICT.getStatusCode());
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
 		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.getMessageId(), DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED,
 				DateTime.now());
-		MockClientResponse mockClientResponse2 = new MockClientResponse(Response.Status.OK, eksisterendeForsendelse);
+
+		when(mockClientResponse2.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
+		when(mockClientResponse2.readEntity(MessageDelivery.class)).thenReturn(eksisterendeForsendelse);
 		when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
 
 		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);
@@ -90,12 +95,15 @@ public class MessageSenderTest {
 	public void skalKasteFeilHvisForsendelseAlleredeLevertTilPrint() {
 		ApiService api = mock(ApiService.class);
 		Message forsendelseIn = lagDefaultForsendelse();
-		MockClientResponse mockClientResponse = new MockClientResponse(Response.Status.CONFLICT, null);
+
+		when(mockClientResponse.getStatus()).thenReturn(Response.Status.CONFLICT.getStatusCode());
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
 		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.getMessageId(), DeliveryMethod.PRINT, MessageStatus.DELIVERED_TO_PRINT,
 				DateTime.now());
-		MockClientResponse mockClientResponse2 = new MockClientResponse(Response.Status.OK, eksisterendeForsendelse);
+
+		when(mockClientResponse2.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
+		when(mockClientResponse2.readEntity(MessageDelivery.class)).thenReturn(eksisterendeForsendelse);
 		when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
 
 		MessageSender brevSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);
@@ -117,47 +125,4 @@ public class MessageSenderTest {
 		return new Message(messageId, new PersonalIdentificationNumber(fnr), new Document(UUID.randomUUID().toString(), subject, FileType.PDF,
 				null, new SmsNotification(0), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL), new ArrayList<Document>());
 	}
-
-	private class MockClientResponse extends Response {
-
-		private final MessageDelivery eksisterendeForsendelse;
-
-		public MockClientResponse(final Response.Status responseStatus) {
-			super(responseStatus, mock(ClientRequest.class));
-			eksisterendeForsendelse = null;
-		}
-
-		public MockClientResponse(final Response.Status responseStatus, final MessageDelivery eksisterendeForsendelse) {
-			super(responseStatus, mock(ClientRequest.class));
-			this.eksisterendeForsendelse = eksisterendeForsendelse;
-		}
-
-		@Override
-		public <T> T readEntity(final Class<T> c) {
-			return (T) eksisterendeForsendelse;
-		}
-
-		@Override
-		public void close() {
-			//To change body of implemented methods use File | Settings | File Templates.
-		}
-
-
-		@Override
-		public URI getLocation() {
-			try {
-				return new URI("http://localhost/forsendelse/2");
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-				return null;
-			}
-		}
-
-		@Override
-		public Link.Builder getLinkBuilder(String s) {
-			return null;  //To change body of implemented methods use File | Settings | File Templates.
-		}
-
-	}  */
-
 }

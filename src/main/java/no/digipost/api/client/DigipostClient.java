@@ -15,9 +15,6 @@
  */
 package no.digipost.api.client;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
 import no.digipost.api.client.filters.request.RequestDateFilter;
 import no.digipost.api.client.filters.request.RequestSignatureFilter;
@@ -29,18 +26,25 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
-
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.filter.LoggingFilter;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
+import javax.net.ssl.*;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import java.io.InputStream;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * En klient for å sende brev gjennom Digipost. Hvis et objekt av denne klassen
@@ -58,17 +62,18 @@ public class DigipostClient {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
 
-	private final EventLogger eventLogger;
-	private final ApiService apiService;
+	private EventLogger eventLogger = null;
+	private ApiService apiService = null;
 
 	public DigipostClient(final String digipostUrl, final long senderAccountId, final InputStream certificateP12File,
-			final String certificatePassword) {
+						  final String certificatePassword) {
 		this(digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER);
 	}
 
 	public DigipostClient(final String digipostUrl, final long senderAccountId, final InputStream certificateP12File,
-			final String sertifikatPassord, final EventLogger eventLogger) {
-		this(digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, sertifikatPassord), eventLogger);
+						  final String sertifikatPassord, final EventLogger eventLogger, final Client jerseyClient) {
+		this(digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, sertifikatPassord), eventLogger,
+				jerseyClient);
 	}
 
 	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer) {
@@ -84,18 +89,13 @@ public class DigipostClient {
 	}
 
 	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger,
-			final Client jerseyClient) {
+						  final Client jerseyClient) {
 		this.eventLogger = eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER;
 
 		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
-
 		WebTarget webTarget = client.target(digipostUrl);
-		//webTarget.register(new LoggingFilter());
-		//WebResource webResource = client.resource(digipostUrl);
+
 		apiService = new ApiService(webTarget, senderAccountId);
-
-		final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(eventLogger.toString());
-
 
 		webTarget.register(new LoggingFilter());
 		webTarget.register(new RequestContentSHA256Filter(eventLogger));
@@ -107,14 +107,31 @@ public class DigipostClient {
 		webTarget.register(new ResponseContentSHA256Filter());
 		webTarget.register(new ResponseSignatureFilter(apiService));
 
-
-
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
 	}
 
+	/**
+	 * Sender en forsendelse gjennom Digipost i ett kall. Dersom mottaker ikke er
+	 * digipostbruker og det ligger printdetaljer på forsendelsen bestiller vi
+	 * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
+	 * til print.)
+	 */
 
+	public MessageDelivery sendMultipartMessage(final Message message, Map<FileMetadata, InputStream> files) {
+		FormDataMultiPart fdmp = new FormDataMultiPart();
+		fdmp.field("message", message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V5));
+		Set<Map.Entry<FileMetadata, InputStream>> entries = files.entrySet();
 
+		for (Map.Entry<FileMetadata, InputStream> e : entries) {
+			String uuid = e.getKey().fileName;
+			MediaType mediaType = e.getKey().mediaType;
+			InputStream stream = e.getValue();
+			fdmp.field(uuid, stream, mediaType);
+		}
 
+		MessageSender sender = new MessageSender(apiService, eventLogger);
+		return sender.createMultipartMessage(fdmp);
+	}
 
 	/**
 	 * Oppretter en forsendelse for sending gjennom Digipost. Dersom mottaker ikke er
@@ -134,16 +151,16 @@ public class DigipostClient {
 			 * @return videre operasjoner for å fullføre leveransen.
 			 */
 			@Override
-            public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
+			public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
 				return addContent(document, content, content);
-            }
+			}
 
 
 			@Override
-            public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
+			public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
 				delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.getUuid()), content, printContent);
 				return this;
-            }
+			}
 
 			/**
 			 * Sender forsendelsen gjennom Digipost. Dersom mottaker ikke er Digipostbruker
@@ -151,18 +168,13 @@ public class DigipostClient {
 			 * til vanlig postgang. (Krever at avsender har fått tilgang til print.)
 			 */
 			@Override
-            public MessageDelivery send() {
+			public MessageDelivery send() {
 				delivery = sender.sendMessage(delivery);
 				return delivery;
-            }
+			}
 
 		};
 	}
-
-
-
-
-
 
 	/**
 	 * Opprette forsendelse som skal gå direkte til print og videre til utsending
@@ -221,14 +233,49 @@ public class DigipostClient {
 		return apiService.searchSuggest(searchString);
 	}
 
-	/*public DigipostClient addFilter(final ClientFilter filter) {
-		apiService.addFilter(filter);
-		return this;
-	} */
-
 	private void log(final String stringToSignMsg) {
 		LOG.debug(stringToSignMsg);
 		eventLogger.log(stringToSignMsg);
 	}
 
+	/**
+	 * Dersom vi tester mot et av Digiposts testmiljøer, vil vi ikke bruke
+	 * SSL-validering.
+	 */
+	public static JerseyClient createJerseyClientWithoutSSLValidation() {
+		TrustManager[] noopTrustManager = new TrustManager[]{new X509TrustManager() {
+			@Override
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
+
+			@Override
+			public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+			}
+
+			@Override
+			public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+			}
+		}};
+
+		HostnameVerifier noopHostnameVerifier = new HostnameVerifier() {
+			@Override
+			public boolean verify(final String hostname, final SSLSession session) {
+				return true;
+			}
+		};
+
+		SSLContext sc;
+		try {
+			sc = SSLContext.getInstance("SSL");
+			sc.init(null, noopTrustManager, new SecureRandom());
+			ClientConfig c = new ClientConfig();
+			c.register(LoggingFilter.class);
+			c.register(MultiPartFeature.class);
+
+			return new JerseyClientBuilder().sslContext(sc).withConfig(c).hostnameVerifier(noopHostnameVerifier).build();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

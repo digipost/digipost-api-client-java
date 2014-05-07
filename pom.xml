@@ -70,6 +70,11 @@
 			<artifactId>jersey-client</artifactId>
 			<version>${jersey.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -305,6 +310,7 @@
 										<include>com.sun.xml.bind:jaxb-impl:${jaxb.version}:jar:compile</include>
                                         <include>org.glassfish.jersey.core:*:${jersey.version}:jar:compile</include>
                                         <include>org.glassfish.jersey.bundles.repackaged:jersey-guava:${jersey.version}:jar:compile</include>
+                                        <include>org.glassfish.jersey.media:*:${jersey.version}:jar:compile</include>
                                         <include>org.glassfish.hk2:*:*:jar:compile</include>
                                         <include>org.glassfish.hk2.external:*:*:jar:compile</include>
 										<include>org.joda:joda-convert:${joda-convert.version}:jar:compile</include>
@@ -312,7 +318,9 @@
 										<include>javax.xml.bind:jsr173_api:${jsr173_api.version}:jar:compile</include>
                                         <include>javax.ws.rs:javax.ws.rs-api:*:jar:compile</include>
                                         <include>javax.annotation:javax.annotation-api:*:jar:compile</include>
+                                        <include>javax.validation:validation-api:*:jar:compile</include>
                                         <include>org.javassist:javassist:*:jar:compile</include>
+                                        <include>org.jvnet.mimepull:mimepull:*:jar:compile</include>
 										<include>ch.qos.logback:logback-classic:${logback.version}:jar:compile</include>
 										<include>ch.qos.logback:logback-core:${logback.version}:jar:compile</include>
 										<include>org.slf4j:slf4j-api:${slf4j.version}:jar:compile</include>
