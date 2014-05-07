@@ -15,10 +15,12 @@
  */
 package no.digipost.api.client.eksempelkode;
 
-import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.PrintDetails.PostType.B;
-import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
+import no.digipost.api.client.delivery.DeliveryMethod;
+
+import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.representations.*;
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,18 +29,10 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageRecipient;
-import no.digipost.api.client.representations.NorwegianAddress;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.PrintDetails;
-import no.digipost.api.client.representations.PrintRecipient;
-import no.digipost.api.client.representations.SmsNotification;
-
-import org.apache.commons.io.FileUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.PrintDetails.PostType.B;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 /**
  * Kode som brukes i dokumentasjonen for klientbiblioteket.
@@ -62,7 +56,7 @@ public class FallbackTilPrintEksempel {
 		InputStream sertifikatInputStream = lesInnSertifikat();
 
 		// 3. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient("https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+		DigipostClient client = new DigipostClient(DeliveryMethod.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
 		// 4. Vi oppretter et fødselsnummerobjekt som skal brukes til å
 		// identifisere mottaker i Digipost

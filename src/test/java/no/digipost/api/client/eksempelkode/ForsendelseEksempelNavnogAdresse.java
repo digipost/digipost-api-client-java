@@ -15,9 +15,13 @@
  */
 package no.digipost.api.client.eksempelkode;
 
-import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
+import no.digipost.api.client.delivery.DeliveryMethod;
+
+import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.NameAndAddress;
+import no.digipost.api.client.representations.SmsNotification;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,11 +30,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.NameAndAddress;
-import no.digipost.api.client.representations.SmsNotification;
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 /**
  * Kode som brukes i dokumentasjonen for klientbiblioteket.
@@ -50,7 +52,7 @@ public class ForsendelseEksempelNavnogAdresse {
 		InputStream sertifikatInputStream = lesInnSertifikat();
 
 		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient("https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+		DigipostClient client = new DigipostClient(DeliveryMethod.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
 		// 3. Vi oppretter et nameandaddress-objekt
 		NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1", "Oppgang B", "0001", "Oslo");

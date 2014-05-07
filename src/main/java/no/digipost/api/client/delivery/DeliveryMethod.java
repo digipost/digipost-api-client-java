@@ -13,14 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations;
+package no.digipost.api.client.delivery;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import no.digipost.api.client.delivery.OngoingDelivery.SendableDelivery;
 
-@XmlType(name = "sensitivity-level")
-@XmlEnum
-public enum SensitivityLevel {
-	NORMAL,
-	SENSITIVE;
+public enum DeliveryMethod {
+	/**
+	 * This will deliver messages using a stepwise
+	 * variant of the REST-API, using several HTTP requests to build the message,
+	 * and ultimately {@link SendableDelivery#send() send} it.
+	 */
+	STEPWISE_REST,
+
+	/**
+	 * This will {@link SendableDelivery#send() send} each message using <em>one</em>
+	 * multipart HTTP-request containing all documents and their metadata.
+	 */
+	ATOMIC_REST
 }

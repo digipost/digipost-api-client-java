@@ -15,72 +15,34 @@
  */
 package no.digipost.api.client.swing;
 
-import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
+import no.digipost.api.client.delivery.DeliveryMethod;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientException;
+import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.delivery.OngoingDelivery;
+import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.PrintDetails.PostType;
+import no.digipost.api.client.util.JerseyClientProvider;
+import org.joda.time.LocalDate;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.ws.rs.client.Client;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
-import javax.ws.rs.client.Client;
-
-import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.DigipostClientException;
-import no.digipost.api.client.EventLogger;
-import no.digipost.api.client.OngoingDelivery;
-import no.digipost.api.client.representations.DigipostAddress;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.FileType;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageRecipient;
-import no.digipost.api.client.representations.NameAndAddress;
-import no.digipost.api.client.representations.NorwegianAddress;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.PrintDetails;
-import no.digipost.api.client.representations.PrintDetails.PostType;
-import no.digipost.api.client.representations.PrintRecipient;
-import no.digipost.api.client.representations.SmsNotification;
-
-import no.digipost.api.client.util.JerseyClientProvider;
-import org.apache.commons.io.FileUtils;
-import org.glassfish.jersey.client.JerseyClient;
-import org.joda.time.LocalDate;
+import static java.nio.file.Files.newInputStream;
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 public class DigipostSwingClient {
 	private OngoingDelivery.SendableWithPrintFallback delivery = null;
@@ -410,7 +372,7 @@ public class DigipostSwingClient {
 					String subject = attachmentSubjectField.getText();
 					FileType fileType = FileType.fromFilename(attachmentContentField.getText());
 					Document attachment = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), PASSWORD, NORMAL);
-					delivery.addContent(attachment, FileUtils.openInputStream(new File(attachmentContentField.getText())));
+					delivery.addContent(attachment, newInputStream(Paths.get(attachmentContentField.getText())));
 				} catch (IOException ex) {
 					eventLogger.log(ex.getMessage() + "\n");
 				} catch (DigipostClientException ex) {
@@ -475,7 +437,7 @@ public class DigipostSwingClient {
 
 						new Message(UUID.randomUUID().toString(), recipient, primaryDocument, new ArrayList<Document>());
 					}
-					delivery = client.createMessage(message).addContent(primaryDocument, FileUtils.openInputStream(new File(contentField.getText())));
+					delivery = client.createMessage(message).addContent(primaryDocument, newInputStream(Paths.get(contentField.getText())));
 					enableAttachmentFields(true);
 					sendButton.setEnabled(true);
 				} catch (IOException ex) {
@@ -616,8 +578,8 @@ public class DigipostSwingClient {
 				Client jerseyClient = turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(endpointField.getText());
 
 				try {
-					client = new DigipostClient(endpointField.getText(), Long.parseLong(senderField.getText()), FileUtils
-							.openInputStream(new File(certField.getText())), new String(passwordField.getPassword()), eventLogger,
+					client = new DigipostClient(DeliveryMethod.ATOMIC_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
+							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger,
 							jerseyClient);
 				} catch (NumberFormatException e1) {
 					eventLogger.log("FEIL: Avsenders ID må være et tall > 0");

@@ -15,6 +15,9 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.delivery.DeliveryMethod;
+import no.digipost.api.client.delivery.MessageDeliverer;
+import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
 import no.digipost.api.client.filters.request.RequestDateFilter;
 import no.digipost.api.client.filters.request.RequestSignatureFilter;
@@ -30,7 +33,6 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.filter.LoggingFilter;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +40,14 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
+
 import java.io.InputStream;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Map;
-import java.util.Set;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 
 /**
  * En klient for å sende brev gjennom Digipost. Hvis et objekt av denne klassen
@@ -62,40 +65,37 @@ public class DigipostClient {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
 
-	private EventLogger eventLogger = null;
-	private ApiService apiService = null;
+	private final EventLogger eventLogger;
+	private final ApiService apiService;
+	private final MessageDeliverer deliverer;
 
-	public DigipostClient(final String digipostUrl, final long senderAccountId, final InputStream certificateP12File,
-						  final String certificatePassword) {
-		this(digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER);
+	public DigipostClient(DeliveryMethod deliveryType, String digipostUrl, long senderAccountId, InputStream certificateP12File, String certificatePassword) {
+		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER);
 	}
 
-	public DigipostClient(final String digipostUrl, final long senderAccountId, final InputStream certificateP12File,
-						  final String sertifikatPassord, final EventLogger eventLogger, final Client jerseyClient) {
-		this(digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, sertifikatPassord), eventLogger,
-				jerseyClient);
+	public DigipostClient(DeliveryMethod deliveryType, String digipostUrl, long senderAccountId, Signer signer) {
+		this(deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER);
 	}
 
-	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer) {
-		this(digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER);
+	public DigipostClient(DeliveryMethod deliveryType, String digipostUrl, long senderAccountId, Signer signer, Client jerseyClient) {
+		this(deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, jerseyClient);
 	}
 
-	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, final Client jerseyClient) {
-		this(digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, jerseyClient);
+	public DigipostClient(DeliveryMethod deliveryType, String digipostUrl, long senderAccountId, Signer signer, EventLogger eventLogger) {
+		this(deliveryType, digipostUrl, senderAccountId, signer, eventLogger, null);
 	}
 
-	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger) {
-		this(digipostUrl, senderAccountId, signer, eventLogger, null);
+	public DigipostClient(DeliveryMethod deliveryType, String digipostUrl, long senderAccountId, InputStream certificateP12File, String sertifikatPassord, EventLogger eventLogger, Client jerseyClient) {
+		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, sertifikatPassord), eventLogger, jerseyClient);
 	}
 
-	public DigipostClient(final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger,
-						  final Client jerseyClient) {
-		this.eventLogger = eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER;
-
+	public DigipostClient(DeliveryMethod deliveryType, String digipostUrl, long senderAccountId, Signer signer, EventLogger eventLogger, Client jerseyClient) {
 		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
 		WebTarget webTarget = client.target(digipostUrl);
+		this.apiService = new ApiService(webTarget, senderAccountId);
+		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
+		this.deliverer = new MessageDeliverer(deliveryType, apiService, eventLogger);
 
-		apiService = new ApiService(webTarget, senderAccountId);
 
 		webTarget.register(new LoggingFilter());
 		webTarget.register(new RequestContentSHA256Filter(eventLogger));
@@ -110,28 +110,6 @@ public class DigipostClient {
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
 	}
 
-	/**
-	 * Sender en forsendelse gjennom Digipost i ett kall. Dersom mottaker ikke er
-	 * digipostbruker og det ligger printdetaljer på forsendelsen bestiller vi
-	 * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
-	 * til print.)
-	 */
-
-	public MessageDelivery sendMultipartMessage(final Message message, Map<FileMetadata, InputStream> files) {
-		FormDataMultiPart fdmp = new FormDataMultiPart();
-		fdmp.field("message", message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V5));
-		Set<Map.Entry<FileMetadata, InputStream>> entries = files.entrySet();
-
-		for (Map.Entry<FileMetadata, InputStream> e : entries) {
-			String uuid = e.getKey().fileName;
-			MediaType mediaType = e.getKey().mediaType;
-			InputStream stream = e.getValue();
-			fdmp.field(uuid, stream, mediaType);
-		}
-
-		MessageSender sender = new MessageSender(apiService, eventLogger);
-		return sender.createMultipartMessage(fdmp);
-	}
 
 	/**
 	 * Oppretter en forsendelse for sending gjennom Digipost. Dersom mottaker ikke er
@@ -140,40 +118,7 @@ public class DigipostClient {
 	 * til print.)
 	 */
 	public OngoingDelivery.WithPrintFallback createMessage(final Message message) {
-		return new OngoingDelivery.SendableWithPrintFallback() {
-
-			private final MessageSender sender = new MessageSender(apiService, eventLogger);
-			private MessageDelivery delivery = sender.createOrFetchMessage(message);
-
-			/**
-			 * Laster opp innhold til et dokument.
-			 *
-			 * @return videre operasjoner for å fullføre leveransen.
-			 */
-			@Override
-			public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
-				return addContent(document, content, content);
-			}
-
-
-			@Override
-			public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
-				delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.getUuid()), content, printContent);
-				return this;
-			}
-
-			/**
-			 * Sender forsendelsen gjennom Digipost. Dersom mottaker ikke er Digipostbruker
-			 * og det ligger printdetaljer på forsendelsen bestiller vi print av brevet
-			 * til vanlig postgang. (Krever at avsender har fått tilgang til print.)
-			 */
-			@Override
-			public MessageDelivery send() {
-				delivery = sender.sendMessage(delivery);
-				return delivery;
-			}
-
-		};
+		return deliverer.createMessage(message);
 	}
 
 	/**
@@ -182,42 +127,7 @@ public class DigipostClient {
 	 * til print.
 	 */
 	public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
-		return new OngoingDelivery.SendableForPrintOnly() {
-
-			private final MessageSender sender;
-			private MessageDelivery delivery;
-
-			{
-				if (!printMessage.isDirectPrint()) {
-					throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
-							+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
-				}
-				sender = new MessageSender(apiService, eventLogger);
-				delivery = sender.createOrFetchMessage(printMessage);
-			}
-
-
-			/**
-			 * Laster opp innhold til et dokument. Merk: må være PDF-format.
-			 *
-			 * @return videre operasjoner for å fullføre leveransen.
-			 */
-			@Override
-			public OngoingDelivery.SendableForPrintOnly addContent(Document document, InputStream printContent) {
-				delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.getUuid()), null, printContent);
-				return this;
-			}
-
-			@Override
-			public MessageDelivery send() {
-				if (delivery.getDeliveryMethod() != DeliveryMethod.PRINT) {
-					throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
-							+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
-				}
-				delivery = sender.sendMessage(delivery);
-				return delivery;
-			}
-		};
+		return deliverer.createPrintOnlyMessage(printMessage);
 	}
 
 

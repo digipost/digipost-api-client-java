@@ -21,35 +21,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "authentication-level")
 @XmlEnum
 public enum AuthenticationLevel {
-	PASSWORD(2),
-	TWO_FACTOR(3);
-
-	private final int level;
-
-	AuthenticationLevel(final int level) {
-		this.level = level;
-	}
-
-	public int level() {
-		return level;
-	}
-
-	public static AuthenticationLevel fromLevel(final int verdi) {
-		switch (verdi) {
-		case 2:
-			return PASSWORD;
-		case 3:
-			return TWO_FACTOR;
-		default:
-			throw new IllegalArgumentException("Unknown authentication level: " + verdi);
-		}
-	}
-
-	public String value() {
-		return name();
-	}
-
-	public static AuthenticationLevel fromValue(final String v) {
-		return valueOf(v);
-	}
+	PASSWORD,
+	TWO_FACTOR,
+	IDPORTEN_3,
+	IDPORTEN_4;
 }

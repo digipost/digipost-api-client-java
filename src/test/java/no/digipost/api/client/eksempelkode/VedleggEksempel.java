@@ -15,10 +15,13 @@
  */
 package no.digipost.api.client.eksempelkode;
 
-import static java.util.Arrays.asList;
-import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
+import no.digipost.api.client.delivery.DeliveryMethod;
+
+import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.SmsNotification;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,11 +29,10 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.UUID;
 
-import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.SmsNotification;
+import static java.util.Arrays.asList;
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 public class VedleggEksempel {
 	// Din virksomhets Digipost-kontoid
@@ -46,7 +48,7 @@ public class VedleggEksempel {
 		InputStream sertifikatInputStream = lesInnSertifikat();
 
 		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient("https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+		DigipostClient client = new DigipostClient(DeliveryMethod.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
 		// 3. Vi oppretter et fødselsnummerobjekt
 		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");

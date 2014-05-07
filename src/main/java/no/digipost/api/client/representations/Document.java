@@ -91,6 +91,10 @@ public class Document extends Representation {
 		this.digipostFileType = fileType.toString();
 	}
 
+	public String getDigipostFileType() {
+		return digipostFileType;
+	}
+
 	public void setPreEncrypt() {
 		this.preEncrypt = true;
 	}
