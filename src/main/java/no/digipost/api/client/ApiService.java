@@ -26,6 +26,7 @@ import no.digipost.api.client.representations.*;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientResponse;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPart;
 
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
@@ -99,11 +100,11 @@ public class ApiService {
 	/**
 	 * Oppretter og sender en multipartforsendelse
 	 */
-	public Response multipartMessage(final FormDataMultiPart multiPart) {
+	public Response multipartMessage(final MultiPart multiPart) {
 		return webResource.path("/messages/atomicsend")
 				.request(DIGIPOST_MEDIA_TYPE_V5)
 				.header(X_Digipost_UserId, senderAccountId)
-				.post(Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
+				.post(Entity.entity(multiPart, "multipart/mixed"));
 	}
 
 	/**

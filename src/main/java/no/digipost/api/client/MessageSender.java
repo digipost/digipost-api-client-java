@@ -20,6 +20,7 @@ import java.io.InputStream;
 import no.digipost.api.client.representations.*;
 import org.glassfish.jersey.client.ClientResponse;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPart;
 
 import javax.ws.rs.core.Response;
 
@@ -54,7 +55,7 @@ public class MessageSender extends Communicator {
 		return response.readEntity(createdMessage.getClass());
 	}
 
-	public MessageDelivery createMultipartMessage(final FormDataMultiPart multiPart) {
+	public MessageDelivery createMultipartMessage(final MultiPart multiPart) {
 		Response response = apiService.multipartMessage(multiPart);
 		if(response.getStatus() == Response.Status.OK.getStatusCode()) {
 			return response.readEntity(MessageDelivery.class);

@@ -23,7 +23,9 @@ import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
+import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPart;
 
 import javax.ws.rs.core.MediaType;
 
@@ -56,13 +58,15 @@ class MultipartSendMessage implements SendableDelivery {
 
     @Override
     public final MessageDelivery send() {
-	    FormDataMultiPart formData = new FormDataMultiPart();
-		formData.field("message", message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V5));
+	    MultiPart formData = new MultiPart();
+		formData.bodyPart(message,MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V5))
+				.contentDisposition(ContentDisposition.type("attachment").fileName("message").build());
 
 		for (Entry<Document, InputStream> doc : documents.entrySet()) {
 			Document metadata = doc.getKey();
 			InputStream content = doc.getValue();
-			formData.field(metadata.uuid, content, new MediaType("application", metadata.getDigipostFileType()));
+			formData.bodyPart(content, new MediaType("application", metadata.getDigipostFileType()))
+					.contentDisposition(ContentDisposition.type("attachment").fileName(metadata.uuid).build());
 		}
 
 		return sender.createMultipartMessage(formData);
