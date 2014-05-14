@@ -14,7 +14,7 @@
 	</parent>
 
 	<artifactId>digipost-api-client-java</artifactId>
-	<version>5.1-jersey27-SNAPSHOT</version>
+	<version>5.1-SNAPSHOT</version>
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
 
