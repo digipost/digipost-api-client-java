@@ -28,6 +28,7 @@ public enum DeliveryMethod {
 	/**
 	 * This will {@link SendableDelivery#send() send} each message using <em>one</em>
 	 * multipart HTTP-request containing all documents and their metadata.
+	 * <em>For now this is an experimental feature, and not supported.</em>
 	 */
 	ATOMIC_REST
 }
