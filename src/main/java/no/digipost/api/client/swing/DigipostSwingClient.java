@@ -15,11 +15,10 @@
  */
 package no.digipost.api.client.swing;
 
-import no.digipost.api.client.delivery.DeliveryMethod;
-
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.delivery.DeliveryMethod;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.PrintDetails.PostType;
@@ -578,7 +577,7 @@ public class DigipostSwingClient {
 				Client jerseyClient = turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(endpointField.getText());
 
 				try {
-					client = new DigipostClient(DeliveryMethod.ATOMIC_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
+					client = new DigipostClient(DeliveryMethod.STEPWISE_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
 							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger,
 							jerseyClient);
 				} catch (NumberFormatException e1) {
