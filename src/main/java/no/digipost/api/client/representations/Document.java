@@ -20,11 +20,12 @@ import javax.xml.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
+
+import static org.apache.commons.lang3.StringUtils.lowerCase;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "document", propOrder = {
-		"uuid",
+		"id",
 		"subject",
 		"digipostFileType",
 		"openingReceipt",
@@ -37,10 +38,9 @@ import java.util.regex.Pattern;
 })
 @XmlSeeAlso({ Invoice.class })
 public class Document extends Representation {
-	private final static Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
-	@XmlElement(name = "uuid", required = true)
-	public final String uuid;
+	@XmlElement(name = "id", required = true)
+	public final String id;
 	@XmlElement(name = "subject", required = true)
 	public final String subject;
 	@XmlElement(name = "file-type", required = true)
@@ -63,22 +63,19 @@ public class Document extends Representation {
 		return links;
 	}
 
-	Document() { this(null, null, null); }
+	public Document() { this(null, null, null); }
 
 	/**
 	 * Constructor for just the required fields of a document.
 	 */
-	public Document(String uuid, String subject, FileType fileType) {
-		this(uuid, subject, fileType, null, null, null, null);
+	public Document(String id, String subject, FileType fileType) {
+		this(id, subject, fileType, null, null, null, null);
 	}
 
-	public Document(String uuid, String subject, FileType fileType, String openingReceipt,
+	public Document(String id, String subject, FileType fileType, String openingReceipt,
 					SmsNotification smsNotification, AuthenticationLevel authenticationLevel,
 					SensitivityLevel sensitivityLevel) {
-		this.uuid = org.apache.commons.lang3.StringUtils.lowerCase(uuid);
-		if (uuid != null && !UUID_PATTERN.matcher(this.uuid).matches()) {
-			throw new IllegalArgumentException("Not a UUID: " + uuid);
-		}
+		this.id = lowerCase(id);
 		this.subject = subject;
 		this.digipostFileType = Objects.toString(fileType, null);
 		this.openingReceipt = openingReceipt;
@@ -108,6 +105,6 @@ public class Document extends Representation {
 	}
 
 	public String getUuid() {
-		return uuid;
+		return id;
 	}
 }

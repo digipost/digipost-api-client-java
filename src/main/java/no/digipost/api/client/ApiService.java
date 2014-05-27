@@ -15,17 +15,8 @@
  */
 package no.digipost.api.client;
 
-import static no.digipost.api.client.Headers.X_Digipost_UserId;
-import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V5;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.IOUtils;
-import org.glassfish.jersey.client.ClientResponse;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 
 import javax.ws.rs.client.ClientRequestFilter;
@@ -33,6 +24,12 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+
+import static no.digipost.api.client.Headers.X_Digipost_UserId;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
 
 /**
  * Denne klassen tar seg av de enkelte HTTP-forespørslene man kan gjøre mot
@@ -92,7 +89,7 @@ public class ApiService {
 
 	private Response getEntryPointFromServer() {
 		return webResource.path(ENTRY_POINT)
-				.request(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get();
 	}
@@ -101,8 +98,8 @@ public class ApiService {
 	 * Oppretter og sender en multipartforsendelse
 	 */
 	public Response multipartMessage(final MultiPart multiPart) {
-		return webResource.path("/messages/atomicsend")
-				.request(DIGIPOST_MEDIA_TYPE_V5)
+		return webResource.path("/messages")
+				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.post(Entity.entity(multiPart, "multipart/mixed"));
 	}
@@ -115,9 +112,9 @@ public class ApiService {
 		EntryPoint entryPoint = getEntryPoint();
 		return webResource
 				.path(entryPoint.getCreateMessageUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
-				.post(Entity.entity(message, DIGIPOST_MEDIA_TYPE_V5));
+				.post(Entity.entity(message, DIGIPOST_MEDIA_TYPE_V6));
 	}
 
 	/**
@@ -126,7 +123,7 @@ public class ApiService {
 	public Response fetchExistingMessage(final URI location) {
 		return webResource
 				.path(location.getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get();
 	}
@@ -134,7 +131,7 @@ public class ApiService {
 	public Response getEncryptionKey(final URI location) {
 		return webResource
 				.path(location.getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get();
 	}
@@ -153,7 +150,7 @@ public class ApiService {
 
 		return webResource
 				.path(addContentLink.getUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.post(Entity.entity(content, MediaType.APPLICATION_OCTET_STREAM_TYPE));
 	}
@@ -172,7 +169,7 @@ public class ApiService {
 
 		return webResource
 				.path(sendLink.getUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.post(null);
 	}
@@ -206,7 +203,7 @@ public class ApiService {
 	public Recipients search(final String searchString) {
 		return webResource
 				.path(getEntryPoint().getSearchUri().getPath() + "/" + searchString)
-				.request(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(Recipients.class);
 	}
@@ -214,7 +211,7 @@ public class ApiService {
 	public Autocomplete searchSuggest(final String searchString) {
 		return webResource
 				.path(getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString)
-				.request(MediaTypes.DIGIPOST_MEDIA_TYPE_V5)
+				.request(MediaTypes.DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get(Autocomplete.class);
 	}
@@ -230,8 +227,8 @@ public class ApiService {
 
 	public IdentificationResult identifyRecipient(final Identification identification) {
 		return webResource.path(getEntryPoint().getIdentificationUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V5)
+				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
-				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V5), IdentificationResult.class);
+				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V6), IdentificationResult.class);
 	}
 }

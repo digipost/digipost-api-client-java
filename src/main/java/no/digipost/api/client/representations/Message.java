@@ -15,20 +15,15 @@
  */
 package no.digipost.api.client.representations;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "messageId", "senderId", "recipient", "primaryDocument", "attachments" })
+@XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "primaryDocument", "attachments" })
 @XmlRootElement(name = "message")
 public class Message {
 
@@ -36,6 +31,8 @@ public class Message {
 	protected String messageId;
 	@XmlElement(name = "sender-id")
 	protected Long senderId;
+	@XmlElement(name = "sender-organization")
+	protected SenderOrganization senderOrganization;
 	@XmlElement(name = "recipient")
 	protected MessageRecipient recipient;
 	@XmlElement(name = "primary-document", required = true)
@@ -43,7 +40,7 @@ public class Message {
 	@XmlElement(name = "attachment")
 	protected List<Document> attachments;
 
-	Message() {
+	public Message() {
 	}
 
 	public Message(String messageId, PersonalIdentificationNumber id, Document primaryDocument, Iterable<? extends Document> attachments) {
@@ -66,7 +63,7 @@ public class Message {
 		this.messageId = messageId;
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
-		this.attachments = new ArrayList<Document>();
+		this.attachments = new ArrayList<>();
 		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 	        this.attachments.add(attachment);
         }
@@ -83,6 +80,10 @@ public class Message {
 	 */
 	public void setSenderId(final long senderId) {
 		this.senderId = senderId;
+	}
+
+	public void setSenderOrganization(final SenderOrganization senderOrganization) {
+		this.senderOrganization = senderOrganization;
 	}
 
 	public boolean isDirectPrint() {

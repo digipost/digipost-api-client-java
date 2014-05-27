@@ -23,12 +23,11 @@ import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
+import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 
 import javax.ws.rs.core.MediaType;
-
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,14 +58,18 @@ class MultipartSendMessage implements SendableDelivery {
     @Override
     public final MessageDelivery send() {
 	    MultiPart formData = new MultiPart();
-		formData.bodyPart(message,MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V5))
-				.contentDisposition(ContentDisposition.type("attachment").fileName("message").build());
+	    BodyPart messageBodyPart = new BodyPart(message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
+	    ContentDisposition cd = ContentDisposition.type("attachment").fileName("message").build();
+	    messageBodyPart.setContentDisposition(cd);
+	    formData.bodyPart(messageBodyPart);
 
 		for (Entry<Document, InputStream> doc : documents.entrySet()) {
 			Document metadata = doc.getKey();
 			InputStream content = doc.getValue();
-			formData.bodyPart(content, new MediaType("application", metadata.getDigipostFileType()))
-					.contentDisposition(ContentDisposition.type("attachment").fileName(metadata.uuid).build());
+			BodyPart bp = new BodyPart(content, new MediaType("application", metadata.getDigipostFileType()));
+			ContentDisposition docCd = ContentDisposition.type("attachment").fileName(metadata.id).build();
+			bp.setContentDisposition(docCd);
+			formData.bodyPart(bp);
 		}
 
 		return sender.createMultipartMessage(formData);

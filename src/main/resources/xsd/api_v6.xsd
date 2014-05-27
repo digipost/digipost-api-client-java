@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema version="1.0" targetNamespace="http://api.digipost.no/schema/v5" xmlns="http://api.digipost.no/schema/v5"
+<xsd:schema version="1.0" targetNamespace="http://api.digipost.no/schema/v6" xmlns="http://api.digipost.no/schema/v6"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
             xmlns:annox="http://annox.dev.java.net" jaxb:extensionBindingPrefixes="annox" jaxb:version="2.0" elementFormDefault="qualified">
 
@@ -70,16 +70,16 @@
         <xsd:attribute name="media-type" type="xsd:string" />
     </xsd:complexType>
 
-    <xsd:element name="entrypoint">
-        <xsd:complexType>
-            <xsd:sequence>
-            	<!-- The element certificate contains Digipost's current public key. It can be used to verify
-            		 each response from Digipost. See the documentation for more information. -->
-           		<xsd:element name="certificate" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
-                <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
+    <xsd:element name="entrypoint" type="entrypoint" />
+
+    <xsd:complexType name="entrypoint">
+        <xsd:sequence>
+            <!-- The element certificate contains Digipost's current public key. It can be used to verify
+                 each response from Digipost. See the documentation for more information. -->
+            <xsd:element name="certificate" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
 
     <xsd:element name="recipients" type="recipients" />
 
@@ -439,31 +439,31 @@
             </xsd:choice>
             <xsd:element name="print-details" type="print-details" minOccurs="0" maxOccurs="1" nillable="false" />
             <xsd:element name="notifications" minOccurs="0" maxOccurs="1">
-            	<xsd:annotation>
-            		<xsd:documentation>
-            			Gives the message sender the opportunity to override any addresses the receiver have
-            			specified as preferred notification addresses. This feature is only available for senders
-            			of the public sector.
-            		</xsd:documentation>
-            	</xsd:annotation>
-            	<xsd:complexType>
-	            	<xsd:sequence>
-	           			<xsd:element name="email" type="xsd:string" minOccurs="0" maxOccurs="1">
-	           				<xsd:annotation>
-			                    <xsd:documentation>
-			                        Email address for notifying the receiver.
-			                    </xsd:documentation>
-			                </xsd:annotation>
-	           			</xsd:element>
-	           			<xsd:element name="sms-mobile-number" type="xsd:string" minOccurs="0" maxOccurs="1">
-		       			    <xsd:annotation>
-			                    <xsd:documentation>
-			                        Mobile number for notifying the receiver by SMS text message.
-			                    </xsd:documentation>
-			                </xsd:annotation>
-	           			</xsd:element>
-	            	</xsd:sequence>
-            	</xsd:complexType>
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Gives the message sender the opportunity to override any addresses the receiver have
+                        specified as preferred notification addresses. This feature is only available for senders
+                        of the public sector.
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="email" type="xsd:string" minOccurs="0" maxOccurs="1">
+                            <xsd:annotation>
+                                <xsd:documentation>
+                                    Email address for notifying the receiver.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:element>
+                        <xsd:element name="sms-mobile-number" type="xsd:string" minOccurs="0" maxOccurs="1">
+                            <xsd:annotation>
+                                <xsd:documentation>
+                                    Mobile number for notifying the receiver by SMS text message.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
             </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
@@ -502,10 +502,10 @@
     </xsd:complexType>
 
     <xsd:complexType name="content-hash">
-    	<xsd:simpleContent>
-	        <xsd:extension base="xsd:string">
-	            <xsd:attribute name="hash-algorithm" type="xsd:string"></xsd:attribute>
-	        </xsd:extension>
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="hash-algorithm" type="xsd:string"></xsd:attribute>
+            </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
 
@@ -539,7 +539,7 @@
 
     <xsd:complexType name="document">
         <xsd:sequence>
-            <xsd:element name="uuid" type="uuid" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="id" type="document-id" minOccurs="0" maxOccurs="1" />
             <xsd:element name="subject" minOccurs="0" maxOccurs="1">
                 <xsd:simpleType>
                     <xsd:restriction base="xsd:string">
@@ -583,18 +583,48 @@
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="message-id" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="sender-id" type="xsd:long" minOccurs="0" maxOccurs="1">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The actual sender of the message. This is used in scenarios where one party, the broker, is creating a message
-                        on behalf of another, the sender. It is only possible if the sender has granted the broker the right to send
-                        on its behalf.
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
+            <xsd:choice minOccurs="0" maxOccurs="1">
+                <xsd:element name="sender-id" type="xsd:long">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The actual sender of the message. This is used in scenarios where one party, the broker, is creating a message
+                            on behalf of another, the sender. It is only possible if the sender has granted the broker the right to send
+                            on its behalf.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+                    <xsd:element name="sender-organization" type="sender-organization" />
+            </xsd:choice>
             <xsd:element name="recipient" type="message-recipient" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="sender-organization">
+        <xsd:annotation>
+            <xsd:documentation>
+                The actual sender of the message. This is used in scenarios where one party, the broker, is creating a message
+                on behalf of another, the sender. It is only possible if the sender has granted the broker the right to send
+                on its behalf. The use of this type is limited to those with explicit permission. Consists of an
+                organization-id on the ISO/IEC 6523 format and an optional part-id identifying a unit within your organization.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="organization-id" minOccurs="1" maxOccurs="1">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:pattern value="[0-9]{4}:\w{1,35}"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="part-id" minOccurs="0" maxOccurs="1">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:maxLength value="100"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -682,7 +712,7 @@
         <xsd:sequence>
             <xsd:element name="link" type="link"  minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
-        <xsd:attribute name="uuid" type="uuid" />
+        <xsd:attribute name="document-id" type="document-id" />
         <xsd:attribute name="sender-id" type="xsd:long">
             <xsd:annotation>
                 <xsd:documentation>
@@ -698,19 +728,18 @@
         <xsd:attribute name="read" type="xsd:string" />
         <xsd:attribute name="channel" type="xsd:string" />
     </xsd:complexType>
-    
-    
-    <xsd:simpleType name="uuid">
-    	<xsd:annotation>
-    		<xsd:documentation>
-    			A UUID (Universally unique identifier). This ID must be globally unique for the sender.
-    			With Java, a UUID can be created using UUID.randomUUID(), whereas
-    			System.Guid.NewGuid() can be used in .NET C#. O og tilsvarende i andre språk.
-    		</xsd:documentation>
-    	</xsd:annotation>
-		<xsd:restriction base="xsd:string">
-            <xsd:pattern value="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/>
-        </xsd:restriction>    
-    </xsd:simpleType>    
+
+    <xsd:simpleType name="document-id">
+        <xsd:annotation>
+            <xsd:documentation>
+                This ID must be globally unique for the sender.
+                With Java, a UUID can be created using UUID.randomUUID(), whereas
+                System.Guid.NewGuid() can be used in .NET C#.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:maxLength value="36" />
+        </xsd:restriction>
+    </xsd:simpleType>
 
 </xsd:schema>

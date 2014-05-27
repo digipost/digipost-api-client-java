@@ -15,15 +15,10 @@
  */
 package no.digipost.api.client.representations;
 
-import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.AuthenticationLevel.TWO_FACTOR;
-import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.PrintDetails.PostType.B;
-import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -31,11 +26,15 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.AuthenticationLevel.TWO_FACTOR;
+import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.PrintDetails.PostType.B;
+import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 public class XsdValidationTest {
 
@@ -45,11 +44,11 @@ public class XsdValidationTest {
 	@Before
 	public void setUp() throws SAXException, JAXBException {
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api_v5.xsd"));
+		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api_v6.xsd"));
 		marshaller = JAXBContext.newInstance("no.digipost.api.client.representations").createMarshaller();
 		marshaller.setSchema(schema);
 
-		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V5);
+		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V6);
 	}
 
 	@Test
