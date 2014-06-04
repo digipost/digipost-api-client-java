@@ -29,11 +29,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import no.digipost.api.client.representations.EncryptionKey;
-import no.digipost.api.client.representations.ErrorMessage;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.*;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -150,10 +146,10 @@ public class Communicator {
 		}
 	}
 
-	protected void checkThatMessageCanBePreEncrypted(final MessageDelivery delivery) {
-		Link encryptionKeyLink = delivery.getEncryptionKeyLink();
+	protected void checkThatMessageCanBePreEncrypted(final Document document) {
+		Link encryptionKeyLink = document.getEncryptionKeyLink();
 		if (encryptionKeyLink == null) {
-			String errorMessage = "Forsendelse med id [" + delivery.getMessageId() + "] kan ikke prekrypteres.";
+			String errorMessage = "Document med id [" + document.getUuid() + "] kan ikke prekrypteres.";
 			log(errorMessage);
 			throw new DigipostClientException(ErrorType.CANNOT_PREENCRYPT, errorMessage);
 		}
@@ -163,10 +159,11 @@ public class Communicator {
 	 * Henter brukers public nøkkel fra serveren og krypterer brevet som skal
 	 * sendes med denne.
 	 */
-	public InputStream fetchKeyAndEncrypt(final MessageDelivery delivery, final InputStream content) {
-		checkThatMessageCanBePreEncrypted(delivery);
+	public InputStream fetchKeyAndEncrypt(final Document document, final InputStream content) {
+		checkThatMessageCanBePreEncrypted(document);
 
-		Response encryptionKeyResponse = apiService.getEncryptionKey(delivery.getEncryptionKeyLink().getUri());
+		Response encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri());
+
 		checkResponse(encryptionKeyResponse);
 
 		EncryptionKey key = encryptionKeyResponse.readEntity(EncryptionKey.class);

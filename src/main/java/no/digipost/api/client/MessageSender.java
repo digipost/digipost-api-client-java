@@ -115,7 +115,7 @@ public class MessageSender extends Communicator {
 		MessageDelivery delivery;
 		if (document.isPreEncrypt()) {
 			log("\n\n---DOKUMENTET SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
-			final InputStream encryptetContent = fetchKeyAndEncrypt(message, unencryptetContent);
+			final InputStream encryptetContent = fetchKeyAndEncrypt(document, unencryptetContent);
 			delivery = uploadContent(message, document, encryptetContent);
 		} else {
 			delivery = uploadContent(message, document, unencryptetContent);
