@@ -107,6 +107,8 @@ public class Document extends Representation {
 		return getLinkByRelationName(Relation.ADD_CONTENT);
 	}
 
+	public Link getEncryptionKeyLink() { return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY); }
+
 	public String getUuid() {
 		return uuid;
 	}
