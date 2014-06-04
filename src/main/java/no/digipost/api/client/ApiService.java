@@ -98,7 +98,9 @@ public class ApiService {
 	 * Oppretter og sender en multipartforsendelse
 	 */
 	public Response multipartMessage(final MultiPart multiPart) {
-		return webResource.path("/messages")
+		EntryPoint entryPoint = getEntryPoint();
+		return webResource
+				.path(entryPoint.getCreateMessageUri().getPath())
 				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.post(Entity.entity(multiPart, "multipart/mixed"));

@@ -57,11 +57,10 @@ public class MessageSender extends Communicator {
 
 	public MessageDelivery createMultipartMessage(final MultiPart multiPart) {
 		Response response = apiService.multipartMessage(multiPart);
-		if(response.getStatus() == Response.Status.OK.getStatusCode()) {
-			return response.readEntity(MessageDelivery.class);
-		} else {
-			return null;
-		}
+		checkResponse(response);
+
+		log("Brevet ble sendt. Status: [" + response.toString() + "]");
+		return response.readEntity(MessageDelivery.class);
 	}
 
 	/**
