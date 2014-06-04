@@ -20,7 +20,9 @@ import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -44,10 +46,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  */
 public class FallbackTilPrintEksempel {
 	// Din virksomhets Digipost-kontoid
-	private static final long AVSENDERS_KONTOID = 106611201;
+	private static final long AVSENDERS_KONTOID = 10987;
 
 	// Passordet sertifikatfilen er beskyttet med
-	private static final String SERTIFIKAT_PASSORD = "Qwer12345";
+	private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
 
 	public static void main(final String[] args) {
 
@@ -60,7 +62,7 @@ public class FallbackTilPrintEksempel {
 		InputStream sertifikatInputStream = lesInnSertifikat();
 
 		// 3. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient("https://qa.api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+		DigipostClient client = new DigipostClient("https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
 		// 4. Vi oppretter et fødselsnummerobjekt som skal brukes til å
 		// identifisere mottaker i Digipost
@@ -70,8 +72,8 @@ public class FallbackTilPrintEksempel {
 		// benyttes dersom mottaker ikke er Digipostbruker
 		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL);
 
-		PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("1234","Mottakers poststed")),
-				new PrintRecipient("Avsenders navn", new NorwegianAddress("1234", "Avsenders poststed")), B);
+		PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer","Mottakers poststed")),
+				new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B);
 		String dinForsendelseId = UUID.randomUUID().toString();
 		Message message = new Message(dinForsendelseId, new MessageRecipient(pin, printDetails), primaryDocument, new ArrayList<Document>());
 
@@ -84,21 +86,15 @@ public class FallbackTilPrintEksempel {
 		// innhold for print, og til slutt sender forsendelsen. Alt håndteres
 		// av klientbiblioteket.
 		client.createMessage(message)
-			  .addContent(primaryDocument, getMessageContent(), getMessageContent())
+			  .addContent(primaryDocument, getMessageContent(), getPrintContent())
 			  .send();
 
 	}
 
 	private static InputStream getMessageContent() {
-		try {
-			// Leser inn sertifikatet
-			return new FileInputStream(new File("/Users/lars/Downloads/DP--Orienteering_LZR--Bekk_Consulting_AS.pdf"));
-		} catch (FileNotFoundException e) {
-			// Håndter at sertifikatet ikke kunne leses!
-			throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);
-		}
+		// Her må du returnere brevinnholdet du ønsker for Digipost å sende istedenfor null
+		return null;
 	}
-
 
 	private static InputStream getPrintContent() {
 		// Her må du returnere brevinnholdet du ønsker for print å sende istedenfor null
@@ -108,7 +104,7 @@ public class FallbackTilPrintEksempel {
 	private static InputStream lesInnSertifikat() {
 		try {
 			// Leser inn sertifikatet selv med Apache Commons FileUtils.
-			return FileUtils.openInputStream(new File("/Users/lars/Downloads/certificate-pripyat.p12"));
+			return FileUtils.openInputStream(new File("/path/til/sertifikatfil.p12"));
 		} catch (IOException e) {
 			// Håndter at sertifikatet ikke kunne leses!
 			throw new RuntimeException("Kunne ikke lese sertifikatfil");
