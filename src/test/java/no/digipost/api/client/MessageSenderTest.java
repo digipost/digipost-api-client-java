@@ -123,6 +123,6 @@ public class MessageSenderTest {
 
 	private Message lagEnkeltForsendelse(final String subject, final String messageId, final String fnr) {
 		return new Message(messageId, new PersonalIdentificationNumber(fnr), new Document(UUID.randomUUID().toString(), subject, FileType.PDF,
-				null, new SmsNotification(0), AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL), new ArrayList<Document>());
+				null, new SmsNotification(0), null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL), new ArrayList<Document>());
 	}
 }

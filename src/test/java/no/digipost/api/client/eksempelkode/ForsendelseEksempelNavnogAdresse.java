@@ -58,7 +58,7 @@ public class ForsendelseEksempelNavnogAdresse {
 		NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1", "Oppgang B", "0001", "Oslo");
 
 		// 4. Vi oppretter hoveddokumentet
-		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL);
+		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
 		// 5. Vi opprettet en forsendelse
 		Message message = new Message(UUID.randomUUID().toString(), nameAndAddress, primaryDocument, new ArrayList<Document>());

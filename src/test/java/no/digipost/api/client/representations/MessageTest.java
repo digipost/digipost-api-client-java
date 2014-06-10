@@ -42,21 +42,21 @@ public class MessageTest {
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsDigipostAddress() {
 		Message message = new Message(UUID.randomUUID().toString(), new DigipostAddress("test.testson#1234"),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), PASSWORD, NORMAL),
+				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
 				new ArrayList<Document>());
 		assertFalse(message.isDirectPrint());
 	}
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsNameAndAddress() {
 		Message message = new Message(UUID.randomUUID().toString(), new MessageRecipient(new NameAndAddress()),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), PASSWORD, NORMAL),
+				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
 				new ArrayList<Document>());
 		assertFalse(message.isDirectPrint());
 	}
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsPersonalIdendificationNumber() {
 		Message message = new Message(UUID.randomUUID().toString(), new PersonalIdentificationNumber("12125412435"),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), PASSWORD, NORMAL),
+				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
 				new ArrayList<Document>());
 		assertFalse(message.isDirectPrint());
 	}

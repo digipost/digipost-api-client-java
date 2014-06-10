@@ -54,10 +54,10 @@ public class VedleggEksempel {
 		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 		// 4. Vi oppretter hoveddokumentet
-		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Hoveddokumentets emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL);
+		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Hoveddokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
 		// 5. Vi oppretter vedlegget
-		Document attachment = new Document(UUID.randomUUID().toString(), "Vedleggets emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL);
+		Document attachment = new Document(UUID.randomUUID().toString(), "Vedleggets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
 		// 6. Vi oppretter en forsendelse
 		Message message = new Message(UUID.randomUUID().toString(), pin, primaryDocument, asList(attachment));

@@ -46,7 +46,7 @@ public class ObjectBuilder {
 
 	public static Message newPrintMessage(final String messageId, final PrintRecipient recipient, final PrintRecipient returnAddress) {
 		return new Message(messageId, new MessageRecipient(new PrintDetails(recipient, returnAddress, B)),
-				new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL),
+				new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
 				new ArrayList<Document>());
 	}
 

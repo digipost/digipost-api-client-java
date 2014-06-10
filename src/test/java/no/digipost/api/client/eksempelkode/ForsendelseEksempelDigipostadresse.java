@@ -58,7 +58,7 @@ public class ForsendelseEksempelDigipostadresse {
 		DigipostAddress address = new DigipostAddress("fornavn.etternavn#6789");
 
 		// 4. Vi oppretter hoveddokumentet
-		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL);
+		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
 		// 5. Vi oppretter en forsendelse
 		Message message = new Message(UUID.randomUUID().toString(), address, primaryDocument, new ArrayList<Document>());

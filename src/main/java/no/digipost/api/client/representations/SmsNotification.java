@@ -24,11 +24,14 @@ import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sms-notification", propOrder = {
+	"overrides",
     "ats",
     "afterHours"
 })
 public class SmsNotification {
 
+	@XmlElement(name = "overrides")
+	protected SmsOverrides overrides;
     @XmlElement(name = "at", nillable = false)
     protected List<ListedTime> ats;
     @XmlElement(name = "after-hours", type = Integer.class, nillable = false)
@@ -39,13 +42,22 @@ public class SmsNotification {
 	}
 
 	public SmsNotification(final int afterHours) {
-		this.afterHours = new ArrayList<Integer>();
+		this(afterHours, null);
+	}
+	public SmsNotification(final int afterHours, final SmsOverrides overrides) {
+		this.overrides = overrides;
+		this.afterHours = new ArrayList<>();
 		this.afterHours.add(afterHours);
 	}
 
 	public SmsNotification(final List<ListedTime> ats, final List<Integer> afterHours) {
+		this(ats, afterHours, null);
+	}
+
+	public SmsNotification(final List<ListedTime> ats, final List<Integer> afterHours, final SmsOverrides overrides) {
 		this.ats = ats;
 		this.afterHours = afterHours;
+		this.overrides = overrides;
 	}
 
 	/**

@@ -17,10 +17,7 @@ package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.delivery.DeliveryMethod;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.representations.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,10 +36,10 @@ import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 public class ForsendelseEksempel {
 
 	// Din virksomhets Digipost-kontoid
-	private static final long AVSENDERS_KONTOID = 10987;
+	private static final long AVSENDERS_KONTOID = 1001;
 
 	// Passordet sertifikatfilen er beskyttet med
-	private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
+	private static final String SERTIFIKAT_PASSORD = "Qwer1234";
 
 	public static void main(final String[] args) {
 
@@ -51,14 +48,16 @@ public class ForsendelseEksempel {
 		InputStream sertifikatInputStream = lesInnSertifikat();
 
 		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient(DeliveryMethod.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+		DigipostClient client = new DigipostClient(DeliveryMethod.STEPWISE_REST, "http://localhost:8282", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
 		// 3. Vi oppretter et fødselsnummerobjekt
-		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("01013300001");
 
 		// 4. Vi oppretter hoveddokumentet
 		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne",
-				PDF, null, new SmsNotification(), PASSWORD, NORMAL);
+				PDF, null, new SmsNotification(1, new SmsOverrides("12345678", "Fin tekst")),
+				null,
+				PASSWORD, NORMAL);
 
 		// 5. Vi opprettet en forsendelse
 		Message message = new Message(null, pin, primaryDocument, new ArrayList<Document>());
@@ -71,14 +70,19 @@ public class ForsendelseEksempel {
 	}
 
 	private static InputStream getPrimaryDocumentContent() {
-		// Her må du returnere brevinnholdet du ønsker å sende istedenfor null
-		return null;
+		try {
+			// Leser inn sertifikatet
+			return new FileInputStream(new File("/Users/sindrenordbo/_print.pdf"));
+		} catch (FileNotFoundException e) {
+			// Håndter at sertifikatet ikke kunne leses!
+			throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);
+		}
 	}
 
 	private static InputStream lesInnSertifikat() {
 		try {
 			// Leser inn sertifikatet
-			return new FileInputStream(new File("/path/til/sertifikatfil.p12"));
+			return new FileInputStream(new File("/Users/sindrenordbo/certificate-LOCAL-hafslund.p12"));
 		} catch (FileNotFoundException e) {
 			// Håndter at sertifikatet ikke kunne leses!
 			throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);

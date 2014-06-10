@@ -30,6 +30,7 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
 		"digipostFileType",
 		"openingReceipt",
 		"smsNotification",
+		"emailNotification",
 		"authenticationLevel",
 		"sensitivityLevel",
 		"preEncrypt",
@@ -49,6 +50,8 @@ public class Document extends Representation {
 	public final String openingReceipt;
 	@XmlElement(name = "sms-notification")
 	public final SmsNotification smsNotification;
+	@XmlElement(name = "email-notification")
+	public final EmailNotification emailNotification;
 	@XmlElement(name = "authentication-level")
 	public final AuthenticationLevel authenticationLevel;
 	@XmlElement(name = "sensitivity-level")
@@ -69,17 +72,19 @@ public class Document extends Representation {
 	 * Constructor for just the required fields of a document.
 	 */
 	public Document(String id, String subject, FileType fileType) {
-		this(id, subject, fileType, null, null, null, null);
+		this(id, subject, fileType, null, null, null, null, null);
 	}
 
 	public Document(String id, String subject, FileType fileType, String openingReceipt,
-					SmsNotification smsNotification, AuthenticationLevel authenticationLevel,
+					SmsNotification smsNotification, EmailNotification emailNotification,
+					AuthenticationLevel authenticationLevel,
 					SensitivityLevel sensitivityLevel) {
 		this.id = lowerCase(id);
 		this.subject = subject;
 		this.digipostFileType = Objects.toString(fileType, null);
 		this.openingReceipt = openingReceipt;
 		this.smsNotification = smsNotification;
+		this.emailNotification = emailNotification;
 		this.authenticationLevel = authenticationLevel;
 		this.sensitivityLevel = sensitivityLevel;
 	}

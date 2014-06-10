@@ -438,33 +438,6 @@
                 <xsd:element name="name-and-address" minOccurs="0" maxOccurs="1" type="name-and-address" nillable="false" />
             </xsd:choice>
             <xsd:element name="print-details" type="print-details" minOccurs="0" maxOccurs="1" nillable="false" />
-            <xsd:element name="notifications" minOccurs="0" maxOccurs="1">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        Gives the message sender the opportunity to override any addresses the receiver have
-                        specified as preferred notification addresses. This feature is only available for senders
-                        of the public sector.
-                    </xsd:documentation>
-                </xsd:annotation>
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="email" type="xsd:string" minOccurs="0" maxOccurs="1">
-                            <xsd:annotation>
-                                <xsd:documentation>
-                                    Email address for notifying the receiver.
-                                </xsd:documentation>
-                            </xsd:annotation>
-                        </xsd:element>
-                        <xsd:element name="sms-mobile-number" type="xsd:string" minOccurs="0" maxOccurs="1">
-                            <xsd:annotation>
-                                <xsd:documentation>
-                                    Mobile number for notifying the receiver by SMS text message.
-                                </xsd:documentation>
-                            </xsd:annotation>
-                        </xsd:element>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -557,6 +530,13 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="email-notification" type="email-notification" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Optional email notification to recipient.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="authentication-level" type="authentication-level" minOccurs="0" maxOccurs="1" nillable="false"/>
             <xsd:element name="sensitivity-level" type="sensitivity-level" minOccurs="0" maxOccurs="1" nillable="false"/>
             <xsd:element name="pre-encrypt" type="xsd:boolean" minOccurs="0" maxOccurs="1">
@@ -593,7 +573,7 @@
                         </xsd:documentation>
                     </xsd:annotation>
                 </xsd:element>
-                    <xsd:element name="sender-organization" type="sender-organization" />
+                <xsd:element name="sender-organization" type="sender-organization" />
             </xsd:choice>
             <xsd:element name="recipient" type="message-recipient" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
@@ -606,15 +586,15 @@
             <xsd:documentation>
                 The actual sender of the message. This is used in scenarios where one party, the broker, is creating a message
                 on behalf of another, the sender. It is only possible if the sender has granted the broker the right to send
-                on its behalf. The use of this type is limited to those with explicit permission. Consists of an
-                organization-id on the ISO/IEC 6523 format and an optional part-id identifying a unit within your organization.
+                on its behalf. The use of this type is limited to those with explicit permission. Consists of a Norwegian
+                organization identifier and an optional part-id identifying a unit within your organization.
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="organization-id" minOccurs="1" maxOccurs="1">
                 <xsd:simpleType>
                     <xsd:restriction base="xsd:string">
-                        <xsd:pattern value="[0-9]{4}:\w{1,35}"/>
+                        <xsd:pattern value="\w{1,35}"/>
                     </xsd:restriction>
                 </xsd:simpleType>
             </xsd:element>
@@ -667,8 +647,34 @@
         </xsd:complexContent>
     </xsd:complexType>
 
+    <xsd:complexType name="sms-overrides">
+        <xsd:sequence>
+            <xsd:element name="sms-mobile-number" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Mobile number for notifying the receiver by SMS text message.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="text" minOccurs="1" maxOccurs="1" nillable="false">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The text to be used in the notification.
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:minLength value="1" />
+                        <xsd:maxLength value="160" />
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
     <xsd:complexType name="sms-notification">
         <xsd:sequence>
+            <xsd:element name="overrides" type="sms-overrides" minOccurs="0" maxOccurs="1" nillable="false"/>
             <xsd:element name="at" type="listed-time" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -682,6 +688,57 @@
                     <xsd:documentation>
                         If the message is unread, a notification will be sent after the given amount of hours after delivery.
                         SMS is only sent between 9-20. Any notification falling outside this interval, will be sent around 9 the next morning.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="email-overrides">
+        <xsd:sequence>
+            <xsd:element name="email-address" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Email address for notifying the receiver.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="subject" minOccurs="1" maxOccurs="1" nillable="false">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The subject to be used for the notification.
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:minLength value="1" />
+                        <xsd:maxLength value="100" />
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="text" minOccurs="1" maxOccurs="1" nillable="false">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The text to be used for the notification.
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:minLength value="1" />
+                        <xsd:maxLength value="500" />
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="email-notification">
+        <xsd:sequence>
+            <xsd:element name="overrides" type="email-overrides" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <xsd:element name="at" type="listed-time" minOccurs="1" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        If the message is unread, a notification will be sent at these times.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>

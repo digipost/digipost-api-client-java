@@ -370,7 +370,7 @@ public class DigipostSwingClient {
 				try {
 					String subject = attachmentSubjectField.getText();
 					FileType fileType = FileType.fromFilename(attachmentContentField.getText());
-					Document attachment = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), PASSWORD, NORMAL);
+					Document attachment = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), null, PASSWORD, NORMAL);
 					delivery.addContent(attachment, newInputStream(Paths.get(attachmentContentField.getText())));
 				} catch (IOException ex) {
 					eventLogger.log(ex.getMessage() + "\n");
@@ -395,7 +395,7 @@ public class DigipostSwingClient {
 					Message message = null;
 					String subject = subjectField.getText();
 					FileType fileType = FileType.fromFilename(contentField.getText());
-					Document primaryDocument = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), PASSWORD, NORMAL);
+					Document primaryDocument = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), null, PASSWORD, NORMAL);
 					if (identifyOnDigipostAddress.isSelected()) {
 						String digipostAddress = recipientDigipostAddressField.getText();
 						message = new Message(UUID.randomUUID().toString(), new DigipostAddress(digipostAddress), primaryDocument, new ArrayList<Document>());

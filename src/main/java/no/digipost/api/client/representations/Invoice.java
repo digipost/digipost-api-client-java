@@ -54,13 +54,13 @@ public class Invoice
 	 * fields will get their respective standard values when sent to Digipost.
 	 */
 	public Invoice(String uuid, String subject, FileType fileType, String kid, BigDecimal amount, String account, LocalDate dueDate) {
-		this(uuid, subject, fileType, null, null ,null, null, kid, amount, account, dueDate);
+		this(uuid, subject, fileType, null, null, null, null, null, kid, amount, account, dueDate);
 	}
 
-	public Invoice(String uuid, String subject, FileType fileType, String openingReceipt,
-				   SmsNotification smsNotification, AuthenticationLevel authenticationLevel, SensitivityLevel sensitivityLevel,
+	public Invoice(String uuid, String subject, FileType fileType, String openingReceipt, SmsNotification smsNotification,
+	               EmailNotification emailNotification, AuthenticationLevel authenticationLevel, SensitivityLevel sensitivityLevel,
 				   String kid, BigDecimal amount, String account, LocalDate dueDate) {
-		super(uuid, subject, fileType, openingReceipt, smsNotification, authenticationLevel, sensitivityLevel);
+		super(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel);
 		this.kid = kid;
 		this.amount = amount;
 		this.account = account;

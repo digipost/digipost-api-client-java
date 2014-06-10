@@ -15,16 +15,16 @@
  */
 package no.digipost.api.client.representations;
 
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.UUID;
+
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.UUID;
-
-import org.junit.Test;
 
 public class ForsendelseRepresentasjonTest {
 
@@ -33,9 +33,9 @@ public class ForsendelseRepresentasjonTest {
 		DigipostAddress digipostAddress = new DigipostAddress("peter.pan#0000");
 		String id1 = UUID.randomUUID().toString();
 		String id2 = UUID.randomUUID().toString();
-		Message adresseForsendelse1 = new Message(id1, digipostAddress, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL), new ArrayList<Document>());
-		Message adresseForsendelse2 = new Message(id1, digipostAddress, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL), new ArrayList<Document>());
-		Message adresseForsendelse3 = new Message(id2, digipostAddress, new Document(UUID.randomUUID().toString(), "annetemne", PDF, null, new SmsNotification(), PASSWORD, NORMAL), new ArrayList<Document>());
+		Message adresseForsendelse1 = new Message(id1, digipostAddress, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL), new ArrayList<Document>());
+		Message adresseForsendelse2 = new Message(id1, digipostAddress, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL), new ArrayList<Document>());
+		Message adresseForsendelse3 = new Message(id2, digipostAddress, new Document(UUID.randomUUID().toString(), "annetemne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL), new ArrayList<Document>());
 
 		assertTrue(adresseForsendelse1.isSameMessageAs(adresseForsendelse2));
 		assertTrue(adresseForsendelse2.isSameMessageAs(adresseForsendelse1));

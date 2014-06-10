@@ -64,7 +64,7 @@ public class FallbackTilPrintEksempel {
 
 		// 5. Vi oppretter en forsendelse for sending av brevet i Digipost og med adresseinformasjon som vil
 		// benyttes dersom mottaker ikke er Digipostbruker
-		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), PASSWORD, NORMAL);
+		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
 		PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer","Mottakers poststed")),
 				new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B);
