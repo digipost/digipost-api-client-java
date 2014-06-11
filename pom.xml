@@ -14,7 +14,7 @@
 	</parent>
 
 	<artifactId>digipost-api-client-java</artifactId>
-	<version>5.1-SNAPSHOT</version>
+	<version>5.1-rc3</version>
 	<name>${project.artifactId}</name>
 	<description>${project.artifactId}</description>
 
@@ -433,7 +433,7 @@
 		<connection>scm:git:git@github.com:digipost/digipost-api-client-java.git</connection>
 		<developerConnection>scm:git:git@github.com:digipost/digipost-api-client-java.git</developerConnection>
 		<url>scm:git:git@github.com:digipost/digipost-api-client-java</url>
-		<tag>HEAD</tag>
+		<tag>digipost-api-client-java-5.1-rc3</tag>
 	</scm>
 
 </project>
