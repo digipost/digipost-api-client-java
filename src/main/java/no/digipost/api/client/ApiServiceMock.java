@@ -19,17 +19,39 @@ import no.digipost.api.client.representations.*;
 import org.apache.commons.lang3.NotImplementedException;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
+import java.util.*;
 
 import static no.digipost.api.client.util.MockfriendlyResponse.DEFAULT_RESPONSE;
 import static no.digipost.api.client.util.MockfriendlyResponse.responses;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ApiServiceMock implements ApiService {
+
+	private final Map<String, DigipostRequest> REQUESTS = initRequestMap(100);
+	private final Marshaller marshaller;
+
+	public ApiServiceMock() {
+		this(null);
+	}
+	public ApiServiceMock(Marshaller marshaller) {
+		this.marshaller = marshaller;
+	}
+
+	public DigipostRequest getRequest(String messageId) {
+		return REQUESTS.get(messageId);
+	}
+
 	@Override
 	public EntryPoint getEntryPoint() {
 		throw new NotImplementedException("This is a mock");
@@ -38,17 +60,25 @@ public class ApiServiceMock implements ApiService {
 	@Override
 	public Response multipartMessage(final MultiPart multiPart) {
 		Message message = null;
+		List<ContentPart> contentParts = new ArrayList<>();
 		for (BodyPart bodyPart : multiPart.getBodyParts()) {
 			if (bodyPart.getMediaType().toString().equals(MediaTypes.DIGIPOST_MEDIA_TYPE_V6)) {
 				message = (Message) bodyPart.getEntity();
-				break;
+			} else {
+				contentParts.add(new ContentPart(bodyPart.getMediaType()));
 			}
 		}
 		if (message == null) {
 			throw new IllegalArgumentException("MultiPart does not contain Message");
 		}
 
-		return defaultIfNull(responses.get(message.getPrimaryDocument().subject), DEFAULT_RESPONSE);
+		if (marshaller != null) {
+			validateAgainstXsd(message);
+		}
+
+		Response response = defaultIfNull(responses.get(message.getPrimaryDocument().subject), DEFAULT_RESPONSE);
+		REQUESTS.put(message.getMessageId(), new DigipostRequest(message, contentParts));
+		return response;
 	}
 
 	@Override
@@ -94,5 +124,44 @@ public class ApiServiceMock implements ApiService {
 	@Override
 	public IdentificationResult identifyRecipient(final Identification identification) {
 		throw new NotImplementedException("This is a mock");
+	}
+
+	private Map<String, DigipostRequest> initRequestMap(final int maxSize) {
+		return Collections.synchronizedMap(new LinkedHashMap<String, DigipostRequest>() {
+			protected boolean removeEldestEntry(Map.Entry eldest) {
+				return size() > maxSize;
+			}
+		});
+	}
+
+	private void validateAgainstXsd(Message message) {
+		try {
+			marshaller.marshal(message, new DefaultHandler());
+		} catch (JAXBException e) {
+			StringWriter w = new StringWriter();
+			PrintWriter printWriter = new PrintWriter(w);
+			e.printStackTrace(printWriter);
+			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST, "DigipostClientMock failed to marshall Message to xml.\n\n" + w.toString());
+		}
+	}
+
+	public static class DigipostRequest {
+
+		public final Message message;
+		public final List<ContentPart> contentParts;
+
+		public DigipostRequest(Message message, List<ContentPart> contentParts) {
+			this.message = message;
+			this.contentParts = contentParts;
+		}
+	}
+
+	public static class ContentPart {
+
+		public final MediaType mediaType;
+
+		public ContentPart(MediaType mediaType) {
+			this.mediaType = mediaType;
+		}
 	}
 }

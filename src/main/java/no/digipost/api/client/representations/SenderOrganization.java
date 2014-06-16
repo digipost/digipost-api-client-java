@@ -38,4 +38,12 @@ public class SenderOrganization {
 		this.organizationId = organizationId;
 		this.partId = partId;
 	}
+
+	public String getOrganizationId() {
+		return organizationId;
+	}
+
+	public String getPartId() {
+		return partId;
+	}
 }

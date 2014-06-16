@@ -98,6 +98,10 @@ public class Message {
 		return senderId;
 	}
 
+	public SenderOrganization getSenderOrganization() {
+		return senderOrganization;
+	}
+
 	public Document getPrimaryDocument() {
 		return primaryDocument;
 	}
