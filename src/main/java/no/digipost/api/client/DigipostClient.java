@@ -93,10 +93,10 @@ public class DigipostClient {
 		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, sertifikatPassord), eventLogger, jerseyClient, null);
 	}
 
-	public DigipostClient(DeliveryMethod deliveryType, String digipostUrl, long senderAccountId, Signer signer, EventLogger eventLogger, Client jerseyClient, ApiService apiService) {
+	public DigipostClient(DeliveryMethod deliveryType, String digipostUrl, long senderAccountId, Signer signer, EventLogger eventLogger, Client jerseyClient, ApiService overriddenApiService) {
 		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
 		WebTarget webTarget = client.target(digipostUrl);
-		this.apiService = apiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : apiService;
+		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : overriddenApiService;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 		this.deliverer = new MessageDeliverer(deliveryType, apiService, eventLogger);
 
