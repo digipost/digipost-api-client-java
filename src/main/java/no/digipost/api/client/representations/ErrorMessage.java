@@ -15,25 +15,37 @@
  */
 package no.digipost.api.client.representations;
 
-import java.util.List;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import java.util.List;
+
+import static no.digipost.api.client.ErrorType.GENERAL_ERROR;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "error")
 public class ErrorMessage extends Representation {
 
+	@XmlElement(name = "error-code", required = true)
+	private String errorCode;
+
 	@XmlElement(name = "error-message", required = true)
 	private String errorMessage;
 
-	public ErrorMessage(final String errorMessage, final Link... linker) {
+
+
+	public ErrorMessage(String errorMessage, Link ... linker) {
+		this(GENERAL_ERROR.name(), errorMessage, linker);
+	}
+
+	public ErrorMessage(String errorCode, String errorMessage, Link... linker) {
 		super(linker);
+		this.errorCode = errorCode;
 		this.errorMessage = errorMessage;
 	}
 
@@ -67,6 +79,10 @@ public class ErrorMessage extends Representation {
 
 	public String getErrorMessage() {
 		return errorMessage;
+	}
+
+	public String getErrorCode() {
+		return errorCode;
 	}
 
 	@XmlElement(name = "link")

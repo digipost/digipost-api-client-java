@@ -11,6 +11,12 @@
 
     <xsd:simpleType name="authentication-level">
         <xsd:annotation>
+            <xsd:documentation>
+                Authentication-levels you may require the receiver to be authenticated with to read documents.
+                Note that IDPORTEN_3 and IDPORTEN_4 needs an explicit permission to use, and are intended for
+                government agencies. Using those levels while not being permitted to, will result in an error
+                response.
+            </xsd:documentation>
             <xsd:appinfo>
                 <jaxb:typesafeEnumClass />
             </xsd:appinfo>
@@ -30,6 +36,16 @@
                     <xsd:appinfo>
                         <jaxb:typesafeEnumMember name="TWO_FACTOR" />
                     </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="IDPORTEN_3">
+                <xsd:annotation>
+                    <xsd:documentation>ID-porten level 3. Can only be used by government agencies.</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="IDPORTEN_4">
+                <xsd:annotation>
+                    <xsd:documentation>ID-porten level 4. Can only be used by government agencies.</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
         </xsd:restriction>
@@ -269,7 +285,7 @@
     <xsd:element name="error">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="error-code" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="false" />
+                <xsd:element name="error-code" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
                 <xsd:element name="error-message" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
                 <xsd:element name="link" type="link" nillable="false" minOccurs="0" maxOccurs="unbounded" />
             </xsd:sequence>
