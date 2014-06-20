@@ -15,37 +15,31 @@
  */
 package no.digipost.api.client;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
+import no.digipost.api.client.errorhandling.ErrorType;
+
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.DigipostClientServerException;
+import no.digipost.api.client.representations.*;
+import org.apache.commons.io.IOUtils;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cms.*;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.operator.OutputEncryptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import no.digipost.api.client.representations.*;
-
-import org.apache.commons.io.IOUtils;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.cms.CMSAlgorithm;
-import org.bouncycastle.cms.CMSEnvelopedData;
-import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.operator.OutputEncryptor;
-import org.glassfish.jersey.client.ClientResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.*;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * Superklasse for MessageSender som har funksjonalitet for å snakke med
@@ -84,26 +78,26 @@ public class Communicator {
 	protected void checkResponse(final Response response) {
 		Status status = Status.fromStatusCode(response.getStatus());
 		if (!responseOk(response)) {
-			String errorMessage = fetchErrorMessageString(response);
-			log(errorMessage);
+			ErrorMessage error = fetchErrorMessageString(response);
+			log(error.toString());
 			switch (status) {
 			case BAD_REQUEST:
-				throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST, errorMessage);
+				throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST, error.getErrorMessage());
 			case CONFLICT:
-				throw new DigipostClientException(ErrorType.INVALID_TRANSACTION, errorMessage);
+				throw new DigipostClientException(ErrorType.INVALID_TRANSACTION, error.getErrorMessage());
 			case INTERNAL_SERVER_ERROR:
-				throw new DigipostClientException(ErrorType.SERVER_ERROR, errorMessage);
+				throw new DigipostClientException(ErrorType.SERVER_ERROR, error.getErrorMessage());
 			default:
-				throw new DigipostClientException(ErrorType.GENERAL_ERROR, errorMessage);
+				throw new DigipostClientException(error);
 			}
 		}
 	}
 
-	protected String fetchErrorMessageString(final Response response) {
+	protected ErrorMessage fetchErrorMessageString(final Response response) {
 		try {
-			return response.readEntity(ErrorMessage.class).getErrorMessage();
+			return response.readEntity(ErrorMessage.class);
 		} catch (ProcessingException | IllegalStateException | WebApplicationException e) {
-			return "Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.";
+			return new ErrorMessage("Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.");
 		}
 	}
 

@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import java.util.List;
 
-import static no.digipost.api.client.ErrorType.GENERAL_ERROR;
+import static no.digipost.api.client.errorhandling.ErrorType.GENERAL_ERROR;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "error")
@@ -74,7 +74,7 @@ public class ErrorMessage extends Representation {
 
 	@Override
 	public String toString() {
-		return String.format("%s(%s)", getClass().getSimpleName(), errorMessage);
+		return String.format(errorCode + ": " + errorMessage);
 	}
 
 	public String getErrorMessage() {

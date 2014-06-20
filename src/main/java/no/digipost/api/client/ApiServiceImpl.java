@@ -15,15 +15,20 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorType;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.MultiPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -34,7 +39,7 @@ import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_T
 /**
  * Denne klassen tar seg av de enkelte HTTP-forespørslene man kan gjøre mot
  * REST-API-et, nemlig:
- * 
+ *
  * <ul>
  * <li>Hente søkeforslag (autocomplete)</li>
  * <li>Søke etter mottakere</li>
@@ -46,21 +51,23 @@ import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_T
  * <li>Hente en allerede opprettet printforsendelsesressurs fra serveren
  * <li>Sende innholdet (PDF) for en allerede opprettet printforsendelsesressurs
  * til serveren, og dermed bestille print av brevet.
- * 
+ *
  * <ul>
- * 
+ *
  * For å sende et brev gjennom Digipost er det tilstrekkelig å gjøre disse to
  * kallene:
- * 
+ *
  * <pre>
  * createMessage(message);
  * addToContentAndSend(createdMessage, content);
  * </pre>
- * 
+ *
  * Dette kan også gjøres ved å kalle metoden {@code sendMessage} i klassen
  * {@code MessageSender}, som i tillegg gjør en del feilhåndtering.
  */
 public class ApiServiceImpl implements ApiService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
 
 	private static final String ENTRY_POINT = "/";
 	private final WebTarget webResource;
@@ -79,7 +86,8 @@ public class ApiServiceImpl implements ApiService {
 		if (cachedEntryPoint == null || entryPointCacheExpired()) {
 			Response response = getEntryPointFromServer();
 			if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-				throw new DigipostClientException(ErrorType.GENERAL_ERROR, response.readEntity(ErrorMessage.class).getErrorMessage());
+				ErrorMessage error = response.readEntity(ErrorMessage.class);
+				throw new DigipostClientException(error);
 			} else {
 				cachedEntryPoint = response.readEntity(EntryPoint.class);
 				entryPointLastCached = System.currentTimeMillis();
@@ -145,10 +153,10 @@ public class ApiServiceImpl implements ApiService {
 
 	/**
 	 * Angir innholdet i en allerede opprettet forsendelse
-	 * 
+	 *
 	 * Før man kaller denne metoden, må man allerede ha opprettet en
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
-	 * 
+	 *
 	 */
 	@Override
 	public Response addContent(final Document document, final InputStream letterContent) {
@@ -165,12 +173,12 @@ public class ApiServiceImpl implements ApiService {
 
 	/**
 	 * Sender innholdet i forsendelsen som en POST-forespørsel til serveren
-	 * 
+	 *
 	 * OBS! Denne metoden fører til at brevet blir sendt på ordentlig.
-	 * 
+	 *
 	 * Før man kaller denne metoden, må man ha lagt innhold til forsendelsen ved
 	 * metoden {@code addContent}
-	 * 
+	 *
 	 */
 	@Override
 	public Response send(final MessageDelivery createdMessage) {

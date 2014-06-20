@@ -17,6 +17,10 @@ package no.digipost.api.client.filters.response;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
+import no.digipost.api.client.errorhandling.ErrorType;
+
+import no.digipost.api.client.errorhandling.DigipostClientException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,16 +30,12 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import no.digipost.api.client.ApiService;
-import no.digipost.api.client.DigipostClientException;
-import no.digipost.api.client.ErrorType;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.Headers;
 import no.digipost.api.client.security.ClientResponseToVerify;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import org.glassfish.jersey.internal.util.Base64;
 
 import javax.ws.rs.client.ClientRequestContext;

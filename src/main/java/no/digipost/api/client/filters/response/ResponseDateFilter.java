@@ -15,14 +15,15 @@
  */
 package no.digipost.api.client.filters.response;
 
+import no.digipost.api.client.errorhandling.ErrorType;
+
+import no.digipost.api.client.errorhandling.DigipostClientException;
+
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
-import no.digipost.api.client.DigipostClientException;
-import no.digipost.api.client.ErrorType;
 import no.digipost.api.client.Headers;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 

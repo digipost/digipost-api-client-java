@@ -15,6 +15,9 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.errorhandling.ErrorType;
+
+import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.*;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -22,6 +25,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import javax.ws.rs.core.Response;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.UUID;

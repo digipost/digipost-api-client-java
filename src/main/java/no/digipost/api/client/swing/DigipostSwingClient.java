@@ -15,8 +15,9 @@
  */
 package no.digipost.api.client.swing;
 
+import no.digipost.api.client.errorhandling.DigipostClientException;
+
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.DigipostClientException;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.delivery.DeliveryMethod;
 import no.digipost.api.client.delivery.OngoingDelivery;

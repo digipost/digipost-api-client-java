@@ -19,6 +19,8 @@ import no.digipost.api.client.ApiService;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.MessageSender;
 import no.digipost.api.client.delivery.OngoingDelivery.SendableDelivery;
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorType;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
@@ -28,6 +30,7 @@ import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.MultiPart;
 
 import javax.ws.rs.core.MediaType;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,21 +60,26 @@ class MultipartSendMessage implements SendableDelivery {
 
     @Override
     public final MessageDelivery send() {
-	    MultiPart formData = new MultiPart();
-	    BodyPart messageBodyPart = new BodyPart(message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
-	    ContentDisposition cd = ContentDisposition.type("attachment").fileName("message").build();
-	    messageBodyPart.setContentDisposition(cd);
-	    formData.bodyPart(messageBodyPart);
+	    try (MultiPart multiPart = new MultiPart()) {
+	    	BodyPart messageBodyPart = new BodyPart(message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
+	    	ContentDisposition messagePart = ContentDisposition.type("attachment").fileName("message").build();
+	    	messageBodyPart.setContentDisposition(messagePart);
+	    	multiPart.bodyPart(messageBodyPart);
 
-		for (Entry<Document, InputStream> doc : documents.entrySet()) {
-			Document metadata = doc.getKey();
-			InputStream content = doc.getValue();
-			BodyPart bp = new BodyPart(content, new MediaType("application", metadata.getDigipostFileType()));
-			ContentDisposition docCd = ContentDisposition.type("attachment").fileName(metadata.id).build();
-			bp.setContentDisposition(docCd);
-			formData.bodyPart(bp);
-		}
+	    	for (Entry<Document, InputStream> document : documents.entrySet()) {
+	    		Document metadata = document.getKey();
+	    		InputStream content = document.getValue();
+	    		BodyPart bodyPart = new BodyPart(content, new MediaType("application", metadata.getDigipostFileType()));
+	    		ContentDisposition documentPart = ContentDisposition.type("attachment").fileName(metadata.id).build();
+	    		bodyPart.setContentDisposition(documentPart);
+	    		multiPart.bodyPart(bodyPart);
+	    	}
+    		return sender.createMultipartMessage(multiPart);
 
-		return sender.createMultipartMessage(formData);
+	    } catch (DigipostClientException e) {
+	    	throw e;
+	    } catch (Exception e) {
+	    	throw new DigipostClientException(ErrorType.resolve(e), e);
+        }
     }
 }

@@ -15,18 +15,18 @@
  */
 package no.digipost.api.client.filters.response;
 
+import no.digipost.api.client.errorhandling.ErrorType;
+
+import no.digipost.api.client.errorhandling.DigipostClientException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import no.digipost.api.client.DigipostClientException;
-import no.digipost.api.client.ErrorType;
 import no.digipost.api.client.Headers;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Base64;
-
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;

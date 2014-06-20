@@ -15,6 +15,9 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.errorhandling.ErrorType;
+
+import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.lang3.NotImplementedException;
 import org.glassfish.jersey.media.multipart.BodyPart;
@@ -26,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;

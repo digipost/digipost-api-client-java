@@ -15,6 +15,10 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.errorhandling.ErrorType;
+
+import no.digipost.api.client.errorhandling.DigipostClientException;
+
 import java.io.InputStream;
 
 import no.digipost.api.client.representations.*;
