@@ -28,13 +28,14 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class EmailOverrides {
 	@XmlElement(name = "email-address")
-	protected String emailAddress;
+	public final String emailAddress;
 	@XmlElement(name = "subject")
-	protected String subject;
+	public final String subject;
 	@XmlElement(name = "text")
-	protected String text;
+	public final String text;
 
 	EmailOverrides() {
+		this(null, null, null);
 	}
 
 	public EmailOverrides(final String emailAddress, final String subject, final String text) {

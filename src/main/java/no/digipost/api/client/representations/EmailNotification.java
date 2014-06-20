@@ -28,11 +28,12 @@ import java.util.List;
 })
 public class EmailNotification {
 	@XmlElement(name = "overrides")
-	protected EmailOverrides overrides;
+	public final EmailOverrides overrides;
 	@XmlElement(name = "at", nillable = false)
-	protected List<ListedTime> ats;
+	public final List<ListedTime> ats;
 
 	EmailNotification() {
+		this(null, null);
 	}
 
 	public EmailNotification(final EmailOverrides overrides, final List<ListedTime> ats) {

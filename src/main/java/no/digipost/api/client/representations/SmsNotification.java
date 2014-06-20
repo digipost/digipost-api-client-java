@@ -22,6 +22,8 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sms-notification", propOrder = {
 	"overrides",
@@ -31,103 +33,35 @@ import java.util.List;
 public class SmsNotification {
 
 	@XmlElement(name = "overrides")
-	protected SmsOverrides overrides;
+	public final SmsOverrides overrides;
     @XmlElement(name = "at", nillable = false)
-    protected List<ListedTime> ats;
+    public final List<ListedTime> ats;
     @XmlElement(name = "after-hours", type = Integer.class, nillable = false)
-    protected List<Integer> afterHours;
+    public final List<Integer> afterHours;
 
 	public SmsNotification() {
-
+		this(0);
 	}
 
 	public SmsNotification(final int afterHours) {
 		this(afterHours, null);
 	}
 	public SmsNotification(final int afterHours, final SmsOverrides overrides) {
-		this.overrides = overrides;
-		this.afterHours = new ArrayList<>();
-		this.afterHours.add(afterHours);
+		this(null, asList(afterHours), overrides);
 	}
 
 	public SmsNotification(final List<ListedTime> ats, final List<Integer> afterHours) {
 		this(ats, afterHours, null);
 	}
 
-	public SmsNotification(final List<ListedTime> ats, final List<Integer> afterHours, final SmsOverrides overrides) {
-		this.ats = ats;
-		this.afterHours = afterHours;
-		this.overrides = overrides;
+	public SmsNotification(final List<ListedTime> ats, final SmsOverrides overrides) {
+		this(ats, null, overrides);
 	}
 
-	/**
-     * Gets the value of the ats property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the ats property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getAts().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link ListedTime }
-     * 
-     * 
-     */
-    public List<ListedTime> getAts() {
-        if (ats == null) {
-            ats = new ArrayList<ListedTime>();
-        }
-        return this.ats;
-    }
-
-    /**
-     * Gets the value of the afterHours property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the afterHours property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getAfterHours().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Integer }
-     * 
-     * 
-     */
-    public List<Integer> getAfterHours() {
-        if (afterHours == null) {
-            afterHours = new ArrayList<Integer>();
-        }
-        return this.afterHours;
-    }
-
-    public void setAts(List<ListedTime> value) {
-        this.ats = null;
-        List<ListedTime> draftl = this.getAts();
-        draftl.addAll(value);
-    }
-
-    public void setAfterHours(List<Integer> value) {
-        this.afterHours = null;
-        List<Integer> draftl = this.getAfterHours();
-        draftl.addAll(value);
-    }
+	public SmsNotification(final List<ListedTime> ats, final List<Integer> afterHours, final SmsOverrides overrides) {
+		this.ats = ats != null ? ats : new ArrayList<ListedTime>();
+		this.afterHours = afterHours != null ? afterHours : new ArrayList<Integer>();
+		this.overrides = overrides;
+	}
 
 }

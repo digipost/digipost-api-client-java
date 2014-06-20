@@ -28,11 +28,12 @@ import javax.xml.bind.annotation.XmlType;
 public class SmsOverrides {
 
 	@XmlElement(name = "sms-mobile-number")
-	protected String smsMobileNumber;
+	public final String smsMobileNumber;
 	@XmlElement(name = "text")
-	protected String text;
+	public final String text;
 
 	SmsOverrides() {
+		this(null, null);
 	}
 
 	public SmsOverrides(final String smsMobileNumber, final String text) {
