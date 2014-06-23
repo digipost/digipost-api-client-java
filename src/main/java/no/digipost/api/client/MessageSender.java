@@ -52,7 +52,6 @@ public class MessageSender extends Communicator {
 
 		Response response = apiService.addContent(document, documentContent);
 
-		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);
 
 		log("Innhold ble lagt til. Status: [" + response.toString() + "]");
@@ -93,7 +92,6 @@ public class MessageSender extends Communicator {
 			log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
 			return delivery;
 		} else {
-			check404Error(response, ErrorType.RECIPIENT_DOES_NOT_EXIST);
 			checkResponse(response);
 			log("Forsendelse opprettet. Status: [" + response.toString() + "]");
 			return response.readEntity(MessageDelivery.class);
@@ -133,7 +131,6 @@ public class MessageSender extends Communicator {
 	private MessageDelivery send(final MessageDelivery delivery) {
 		Response response = apiService.send(delivery);
 
-		check404Error(response, ErrorType.MESSAGE_DOES_NOT_EXIST);
 		checkResponse(response);
 
 		log("Brevet ble sendt. Status: [" + response.toString() + "]");

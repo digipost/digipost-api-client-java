@@ -15,10 +15,8 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.errorhandling.ErrorType;
-
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.DigipostClientServerException;
+import no.digipost.api.client.errorhandling.ErrorType;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -35,7 +33,6 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import java.io.*;
 import java.security.KeyFactory;
 import java.security.PublicKey;
@@ -168,12 +165,6 @@ public class Communicator {
 		} catch (Exception e) {
 			logThrowable(e);
 			throw new DigipostClientException(ErrorType.FAILED_PREENCRYPTION, "Inneholdet kunne ikke prekrypteres.");
-		}
-	}
-
-	protected void check404Error(final Response response, final ErrorType errorBy404) {
-		if (Status.fromStatusCode(response.getStatus()) == Status.NOT_FOUND) {
-			throw new DigipostClientServerException(errorBy404, fetchErrorMessageEntity(response));
 		}
 	}
 
