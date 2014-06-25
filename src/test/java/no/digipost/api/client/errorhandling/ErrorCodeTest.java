@@ -25,31 +25,31 @@ import java.util.concurrent.CancellationException;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class ErrorTypeTest {
+public class ErrorCodeTest {
 
 	@Test
     public void resolveErrorTypeFromException() {
-		assertThat(ErrorType.resolve(new ConnectException()), is(ErrorType.CONNECTION_ERROR));
+		assertThat(ErrorCode.resolve(new ConnectException()), is(ErrorCode.CONNECTION_ERROR));
     }
 
 	@Test
     public void resolveErrorTypeFromRootCause() {
-		assertThat(ErrorType.resolve(new DirectoryIteratorException(new ConnectException())), is(ErrorType.CONNECTION_ERROR));
+		assertThat(ErrorCode.resolve(new DirectoryIteratorException(new ConnectException())), is(ErrorCode.CONNECTION_ERROR));
     }
 
 	@Test
     public void fallbackToGeneralErrorOnUnknownRootCause() {
-		assertThat(ErrorType.resolve(new CancellationException()), is(ErrorType.GENERAL_ERROR));
-	    assertThat(ErrorType.resolve(new ConnectIOException(null, new CancellationException())), is(ErrorType.GENERAL_ERROR));
+		assertThat(ErrorCode.resolve(new CancellationException()), is(ErrorCode.GENERAL_ERROR));
+	    assertThat(ErrorCode.resolve(new ConnectIOException(null, new CancellationException())), is(ErrorCode.GENERAL_ERROR));
     }
 
 	@Test
     public void resolveFromString() {
-	    assertThat(ErrorType.resolve(ErrorType.PROBLEM_WITH_REQUEST.name()), is(ErrorType.PROBLEM_WITH_REQUEST));
+	    assertThat(ErrorCode.resolve(ErrorCode.PROBLEM_WITH_REQUEST.name()), is(ErrorCode.PROBLEM_WITH_REQUEST));
     }
 
 	@Test
     public void fallbackToGeneralErrorOnUnknownString() {
-	    assertThat(ErrorType.resolve("I_AM_ERROR"), is(ErrorType.GENERAL_ERROR));
+	    assertThat(ErrorCode.resolve("I_AM_ERROR"), is(ErrorCode.GENERAL_ERROR));
     }
 }

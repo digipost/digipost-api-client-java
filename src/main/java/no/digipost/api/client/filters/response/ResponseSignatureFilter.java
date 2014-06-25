@@ -17,7 +17,7 @@ package no.digipost.api.client.filters.response;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
-import no.digipost.api.client.errorhandling.ErrorType;
+import no.digipost.api.client.errorhandling.ErrorCode;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 
@@ -74,20 +74,20 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 			instance.update(signatureString.getBytes());
 			boolean verified = instance.verify(serverSignaturBytes);
 			if (!verified) {
-				throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR, "Melding fra server matcher ikke signatur.");
+				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Melding fra server matcher ikke signatur.");
 			} else {
 				eventLogger.log("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren " + Headers.X_Digipost_Signature
 						+ " var OK: " + new String(serverSignaturBase64));
 			}
 		} catch (Exception e) {
-			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk.");
+			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk.");
 		}
 	}
 
 	private String getServerSignaturFromResponse(final ClientResponseContext response) {
 		String serverSignaturString = response.getHeaders().getFirst(Headers.X_Digipost_Signature);
 		if (StringUtils.isBlank(serverSignaturString)) {
-			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
+			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
 					"Mangler signatur-header, så server-signatur kunne ikke sjekkes");
 		}
 		return serverSignaturString;
@@ -100,12 +100,12 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 			CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 			X509Certificate sertifikat = (X509Certificate) cf.generateCertificate(certStream);
 			if (sertifikat == null) {
-				throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
+				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
 						"Kunne ikke laste Digipost's public key, så server-signatur kunne ikke sjekkes");
 			}
 			return sertifikat;
 		} catch (GeneralSecurityException e) {
-			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
+			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
 					"Kunne ikke laste Digipost's public key, så server-signatur kunne ikke sjekkes");
 		}
 	}

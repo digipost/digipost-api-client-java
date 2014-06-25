@@ -28,6 +28,7 @@ import java.util.*;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
+import static no.digipost.api.client.representations.ErrorType.CLIENT_DATA;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 
 public class MockfriendlyResponse extends Response {
@@ -41,7 +42,7 @@ public class MockfriendlyResponse extends Response {
 
 	public static Response SENDER_DOES_NOT_EXIST = MockedResponseBuilder.create()
 			.status(FORBIDDEN.getStatusCode())
-			.entity(new ErrorMessage("Sender does not exist or broker is not authorized to send on behalf of specified sender"))
+			.entity(new ErrorMessage(CLIENT_DATA, "Sender does not exist or broker is not authorized to send on behalf of specified sender"))
 			.build();
 
 	static {

@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
-import no.digipost.api.client.errorhandling.ErrorType;
+import no.digipost.api.client.errorhandling.ErrorCode;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 
@@ -33,7 +33,7 @@ public class DigipostUri {
 		try {
 			this.uri = new URI(uri);
 		} catch (URISyntaxException e) {
-			throw new DigipostClientException(ErrorType.GENERAL_ERROR, e.getMessage());
+			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
 		}
 	}
 

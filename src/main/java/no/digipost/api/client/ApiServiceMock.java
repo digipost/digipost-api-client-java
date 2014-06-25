@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.errorhandling.ErrorType;
+import no.digipost.api.client.errorhandling.ErrorCode;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.*;
@@ -145,7 +145,7 @@ public class ApiServiceMock implements ApiService {
 			StringWriter w = new StringWriter();
 			PrintWriter printWriter = new PrintWriter(w);
 			e.printStackTrace(printWriter);
-			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST, "DigipostClientMock failed to marshall Message to xml.\n\n" + w.toString());
+			throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, "DigipostClientMock failed to marshall Message to xml.\n\n" + w.toString());
 		}
 	}
 

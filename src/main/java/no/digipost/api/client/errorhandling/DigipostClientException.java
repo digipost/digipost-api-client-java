@@ -16,38 +16,43 @@
 package no.digipost.api.client.errorhandling;
 
 import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.ErrorType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class DigipostClientException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
-	private final ErrorType errorType;
+	private final ErrorCode errorCode;
 	private final String errorMessage;
 
 	public DigipostClientException(ErrorMessage error) {
-		this(ErrorType.resolve(error.getErrorCode()), getMessage(error), null);
+		this(ErrorCode.resolve(error.getErrorCode()), getMessage(error), null);
 	}
 
-	public DigipostClientException(ErrorType type, Throwable cause) {
-		this(type, getMessage(cause), cause);
+	public DigipostClientException(ErrorCode code, Throwable cause) {
+		this(code, getMessage(cause), cause);
 	}
 
-	public DigipostClientException(ErrorType type, String message) {
-		this(type, message, null);
+	public DigipostClientException(ErrorCode code, String message) {
+		this(code, message, null);
 	}
 
-	private DigipostClientException(ErrorType type, String message, Throwable cause) {
-		super(type + ": " + message, cause);
-		this.errorType = type;
+	private DigipostClientException(ErrorCode code, String message, Throwable cause) {
+		super(code + ": " + message, cause);
+		this.errorCode = code;
 		this.errorMessage = message;
 	}
 
-	public ErrorType getErrorType() {
-		return errorType;
+	public ErrorCode getErrorCode() {
+		return errorCode;
 	}
 
 	public String getErrorMessage() {
 		return errorMessage;
+	}
+
+	public ErrorType getErrorType() {
+		return errorCode.getErrorType();
 	}
 
 	private static String getMessage(Throwable t) {
@@ -56,7 +61,7 @@ public class DigipostClientException extends RuntimeException {
 	}
 
 	private static String getMessage(ErrorMessage error) {
-		return (ErrorType.isKnown(error.getErrorCode()) ? "" : "(unknown errorcode: " + error.getErrorCode() + ") ") + error.getErrorMessage();
+		return (ErrorCode.isKnown(error.getErrorCode()) ? "" : "(unknown errorcode: " + error.getErrorCode() + ") ") + error.getErrorMessage();
 	}
 
 }

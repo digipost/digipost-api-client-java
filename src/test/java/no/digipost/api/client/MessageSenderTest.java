@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.errorhandling.ErrorType;
+import no.digipost.api.client.errorhandling.ErrorCode;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.*;
@@ -90,7 +90,7 @@ public class MessageSenderTest {
 			brevSender.createOrFetchMessage(forsendelseIn);
 			fail();
 		} catch (DigipostClientException e) {
-			assertEquals(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, e.getErrorType());
+			assertEquals(ErrorCode.DIGIPOST_MESSAGE_ALREADY_DELIVERED, e.getErrorCode());
 		}
 
 	}
@@ -116,7 +116,7 @@ public class MessageSenderTest {
 			brevSender.createOrFetchMessage(forsendelseIn);
 			fail();
 		} catch (DigipostClientException e) {
-			assertEquals(ErrorType.PRINT_MESSAGE_ALREADY_DELIVERED, e.getErrorType());
+			assertEquals(ErrorCode.PRINT_MESSAGE_ALREADY_DELIVERED, e.getErrorCode());
 		}
 
 	}

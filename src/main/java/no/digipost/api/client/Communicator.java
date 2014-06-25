@@ -16,7 +16,7 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.ErrorType;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -37,6 +37,8 @@ import java.io.*;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+
+import static no.digipost.api.client.representations.ErrorType.SERVER;
 
 /**
  * Superklasse for MessageSender som har funksjonalitet for å snakke med
@@ -79,11 +81,11 @@ public class Communicator {
 			log(error.toString());
 			switch (status) {
 			case BAD_REQUEST:
-				throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST, error.getErrorMessage());
+				throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, error.getErrorMessage());
 			case CONFLICT:
-				throw new DigipostClientException(ErrorType.INVALID_TRANSACTION, error.getErrorMessage());
+				throw new DigipostClientException(ErrorCode.INVALID_TRANSACTION, error.getErrorMessage());
 			case INTERNAL_SERVER_ERROR:
-				throw new DigipostClientException(ErrorType.SERVER_ERROR, error.getErrorMessage());
+				throw new DigipostClientException(ErrorCode.SERVER_ERROR, error.getErrorMessage());
 			default:
 				throw new DigipostClientException(error);
 			}
@@ -94,7 +96,7 @@ public class Communicator {
 		try {
 			return response.readEntity(ErrorMessage.class);
 		} catch (ProcessingException | IllegalStateException | WebApplicationException e) {
-			return new ErrorMessage("Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.");
+			return new ErrorMessage(SERVER, "Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.");
 		}
 	}
 
@@ -133,7 +135,7 @@ public class Communicator {
 		if (!exisitingMessage.isSameMessageAs(message)) {
 			String errorMessage = "Forsendelse med id [" + message.getMessageId() + "] finnes fra før med annen spesifikasjon.";
 			log(errorMessage);
-			throw new DigipostClientException(ErrorType.DUPLICATE_MESSAGE_ID, errorMessage);
+			throw new DigipostClientException(ErrorCode.DUPLICATE_MESSAGE, errorMessage);
 		}
 	}
 
@@ -142,7 +144,7 @@ public class Communicator {
 		if (encryptionKeyLink == null) {
 			String errorMessage = "Document med id [" + document.getUuid() + "] kan ikke prekrypteres.";
 			log(errorMessage);
-			throw new DigipostClientException(ErrorType.CANNOT_PREENCRYPT, errorMessage);
+			throw new DigipostClientException(ErrorCode.CANNOT_PREENCRYPT, errorMessage);
 		}
 	}
 
@@ -164,12 +166,8 @@ public class Communicator {
 			return new ByteArrayInputStream(encryptedContent);
 		} catch (Exception e) {
 			logThrowable(e);
-			throw new DigipostClientException(ErrorType.FAILED_PREENCRYPTION, "Inneholdet kunne ikke prekrypteres.");
+			throw new DigipostClientException(ErrorCode.FAILED_PREENCRYPTION, "Inneholdet kunne ikke prekrypteres.");
 		}
-	}
-
-	private ErrorMessage fetchErrorMessageEntity(final Response response) {
-		return response.readEntity(ErrorMessage.class);
 	}
 
 }

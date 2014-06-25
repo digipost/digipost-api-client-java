@@ -287,6 +287,7 @@
             <xsd:sequence>
                 <xsd:element name="error-code" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
                 <xsd:element name="error-message" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
+                <xsd:element name="error-type" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
                 <xsd:element name="link" type="link" nillable="false" minOccurs="0" maxOccurs="unbounded" />
             </xsd:sequence>
         </xsd:complexType>

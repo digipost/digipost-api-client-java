@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.filters.response;
 
-import no.digipost.api.client.errorhandling.ErrorType;
+import no.digipost.api.client.errorhandling.ErrorCode;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 
@@ -46,14 +46,14 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 		try {
 			String hashHeader = response.getHeaders().getFirst(Headers.X_Content_SHA256);
 			if (StringUtils.isBlank(hashHeader)) {
-				throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
+				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
 						"Ikke definert X-Content-SHA256-header, så server-signatur kunne ikke sjekkes");
 			}
 			byte[] entityBytes = IOUtils.toByteArray(response.getEntityStream());
 			validerBytesMotHashHeader(hashHeader, entityBytes);
 			response.setEntityStream(new ByteArrayInputStream(entityBytes));
 		} catch (IOException e) {
-			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
+			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
 					"Det skjedde en feil under uthenting av innhold for validering av X-Content-SHA256-header, så server-signatur kunne ikke sjekkes");
 		}
 	}
@@ -66,7 +66,7 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 		digest.doFinal(result, 0);
 		String ourHash = new String(Base64.encode(result));
 		if (!serverHash.equals(ourHash)) {
-			throw new DigipostClientException(ErrorType.SERVER_SIGNATURE_ERROR,
+			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
 					"X-Content-SHA256-header matchet ikke innholdet, så server-signatur er feil.");
 		}
 	}

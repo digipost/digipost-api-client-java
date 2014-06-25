@@ -16,7 +16,7 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.ErrorType;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -194,7 +194,7 @@ public class ApiServiceImpl implements ApiService {
 	private Link fetchAddContentLink(final Document document) {
 		Link addContentLink = document.getAddContentLink();
 		if (addContentLink == null) {
-			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST,
+			throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST,
 					"Kan ikke legge til innhold til et dokument som ikke har en link for å gjøre dette.");
 		}
 		return addContentLink;
@@ -203,7 +203,7 @@ public class ApiServiceImpl implements ApiService {
 	private Link fetchSendLink(final MessageDelivery delivery) {
 		Link sendLink = delivery.getSendLink();
 		if (sendLink == null) {
-			throw new DigipostClientException(ErrorType.PROBLEM_WITH_REQUEST,
+			throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST,
 					"Kan ikke sende en forsendelse som ikke har en link for å gjøre dette.");
 		}
 		return sendLink;

@@ -20,7 +20,7 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.MessageSender;
 import no.digipost.api.client.delivery.OngoingDelivery.SendableDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.ErrorType;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
@@ -79,7 +79,7 @@ class MultipartSendMessage implements SendableDelivery {
 	    } catch (DigipostClientException e) {
 	    	throw e;
 	    } catch (Exception e) {
-	    	throw new DigipostClientException(ErrorType.resolve(e), e);
+	    	throw new DigipostClientException(ErrorCode.resolve(e), e);
         }
     }
 }

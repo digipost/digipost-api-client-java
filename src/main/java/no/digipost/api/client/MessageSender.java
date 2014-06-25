@@ -15,18 +15,13 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.errorhandling.ErrorType;
-
 import no.digipost.api.client.errorhandling.DigipostClientException;
-
-import java.io.InputStream;
-
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
-import org.glassfish.jersey.client.ClientResponse;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 
 public class MessageSender extends Communicator {
 
@@ -144,14 +139,14 @@ public class MessageSender extends Communicator {
 					+ "Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(),
 					existingMessage.getDeliveredDate());
 			log(errorMessage);
-			throw new DigipostClientException(ErrorType.DIGIPOST_MESSAGE_ALREADY_DELIVERED, errorMessage);
+			throw new DigipostClientException(ErrorCode.DIGIPOST_MESSAGE_ALREADY_DELIVERED, errorMessage);
 		}
 		case DELIVERED_TO_PRINT: {
 			String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til print den [%s]. "
 					+ "Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(),
 					existingMessage.getDeliveredDate());
 			log(errorMessage);
-			throw new DigipostClientException(ErrorType.PRINT_MESSAGE_ALREADY_DELIVERED, errorMessage);
+			throw new DigipostClientException(ErrorCode.PRINT_MESSAGE_ALREADY_DELIVERED, errorMessage);
 		}
 		default:
 			break;
@@ -160,7 +155,7 @@ public class MessageSender extends Communicator {
 
 	protected void verifyCorrectStatus(final MessageDelivery createdMessage, final MessageStatus expectedStatus) {
 		if (createdMessage.getStatus() != expectedStatus) {
-			throw new DigipostClientException(ErrorType.INVALID_TRANSACTION,
+			throw new DigipostClientException(ErrorCode.INVALID_TRANSACTION,
 					"Kan ikke legge til innhold til en forsendelse som ikke er i tilstanden " + expectedStatus + ".");
 		}
 	}

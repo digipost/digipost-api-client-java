@@ -376,7 +376,7 @@ public class DigipostSwingClient {
 				} catch (IOException ex) {
 					eventLogger.log(ex.getMessage() + "\n");
 				} catch (DigipostClientException ex) {
-					eventLogger.log("\nDigipostClient kastet exception. \nFeilkode: " + ex.getErrorType() + "\nFeilmelding: "
+					eventLogger.log("\nDigipostClient kastet exception. \nFeilkode: " + ex.getErrorCode() + "\nFeilmelding: "
 							+ ex.getErrorMessage());
 				}
 			}
@@ -443,7 +443,7 @@ public class DigipostSwingClient {
 				} catch (IOException ex) {
 					eventLogger.log(ex.getMessage() + "\n");
 				} catch (DigipostClientException ex) {
-					eventLogger.log("\nDigipostClient kastet exception. \nFeilkode: " + ex.getErrorType() + "\nFeilmelding: "
+					eventLogger.log("\nDigipostClient kastet exception. \nFeilkode: " + ex.getErrorCode() + "\nFeilmelding: "
 							+ ex.getErrorMessage());
 				}
 			}

@@ -32,6 +32,7 @@ import java.util.UUID;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.AuthenticationLevel.TWO_FACTOR;
+import static no.digipost.api.client.representations.ErrorType.CLIENT_DATA;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
@@ -64,7 +65,7 @@ public class XsdValidationTest {
 
 	@Test
 	public void validateErrorMessage() throws JAXBException {
-		marshallAndValidate(new ErrorMessage("Error message", link));
+		marshallAndValidate(new ErrorMessage(CLIENT_DATA, "Error message", link));
 	}
 
 	@Test
