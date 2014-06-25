@@ -15,9 +15,8 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.errorhandling.ErrorCode;
-
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.lang3.NotImplementedException;
 import org.glassfish.jersey.media.multipart.BodyPart;
@@ -29,16 +28,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.util.*;
 
-import static no.digipost.api.client.util.MockfriendlyResponse.DEFAULT_RESPONSE;
-import static no.digipost.api.client.util.MockfriendlyResponse.responses;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static java.lang.Integer.parseInt;
+import static no.digipost.api.client.util.MockfriendlyResponse.*;
 
 public class ApiServiceMock implements ApiService {
 
@@ -80,7 +77,22 @@ public class ApiServiceMock implements ApiService {
 			validateAgainstXsd(message);
 		}
 
-		Response response = defaultIfNull(responses.get(message.getPrimaryDocument().subject), DEFAULT_RESPONSE);
+		Response response;
+		String subject = message.getPrimaryDocument().subject;
+		if (responses.containsKey(subject)) {
+			response = responses.get(subject);
+		} else if (subject.matches("^[0-9]{3}:(.)+")) {
+			String[] split = subject.split(":");
+			if (ErrorCode.isKnown(split[1])) {
+				ErrorCode errorCode = ErrorCode.resolve(split[1]);
+				response = MockedResponseBuilder.create().status(parseInt(split[0]))
+						.entity(new ErrorMessage(errorCode.getErrorType(), errorCode.name(), "Generic error-message from digipost-api-client-mock")).build();
+			} else {
+				throw new IllegalArgumentException("ErrorCode " + split[1] + " is unknown");
+			}
+		} else {
+			response = DEFAULT_RESPONSE;
+		}
 		REQUESTS.put(message.getMessageId(), new DigipostRequest(message, contentParts));
 		return response;
 	}

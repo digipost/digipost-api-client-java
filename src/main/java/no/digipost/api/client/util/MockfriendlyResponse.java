@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client.util;
 
-import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.MessageDelivery;
 import org.apache.commons.lang3.NotImplementedException;
 import org.joda.time.DateTime;
@@ -25,10 +24,8 @@ import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.util.*;
 
-import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
-import static no.digipost.api.client.representations.ErrorType.CLIENT_DATA;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 
 public class MockfriendlyResponse extends Response {
@@ -40,17 +37,11 @@ public class MockfriendlyResponse extends Response {
 			.entity(new MessageDelivery(UUID.randomUUID().toString(), DIGIPOST, COMPLETE, DateTime.now()))
 			.build();
 
-	public static Response SENDER_DOES_NOT_EXIST = MockedResponseBuilder.create()
-			.status(FORBIDDEN.getStatusCode())
-			.entity(new ErrorMessage(CLIENT_DATA, "Sender does not exist or broker is not authorized to send on behalf of specified sender"))
-			.build();
-
 	static {
 		responses.put("200:OK", DEFAULT_RESPONSE);
-		responses.put("403:SENDER_DOES_NOT_EXIST", SENDER_DOES_NOT_EXIST);
 	}
 
-	private static class MockedResponseBuilder {
+	public static class MockedResponseBuilder {
 		private int status;
 		private Object entity;
 
