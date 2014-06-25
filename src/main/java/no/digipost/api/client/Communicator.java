@@ -76,16 +76,14 @@ public class Communicator {
 
 	protected void checkResponse(final Response response) {
 		Status status = Status.fromStatusCode(response.getStatus());
-		if (!responseOk(response)) {
+		if (!responseOk(status)) {
 			ErrorMessage error = fetchErrorMessageString(response);
 			log(error.toString());
 			switch (status) {
-			case BAD_REQUEST:
-				throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, error.getErrorMessage());
-			case CONFLICT:
-				throw new DigipostClientException(ErrorCode.INVALID_TRANSACTION, error.getErrorMessage());
 			case INTERNAL_SERVER_ERROR:
 				throw new DigipostClientException(ErrorCode.SERVER_ERROR, error.getErrorMessage());
+			case SERVICE_UNAVAILABLE:
+				throw new DigipostClientException(ErrorCode.API_UNAVAILABLE, error.getErrorMessage());
 			default:
 				throw new DigipostClientException(error);
 			}
@@ -100,8 +98,7 @@ public class Communicator {
 		}
 	}
 
-	private boolean responseOk(final Response response) {
-		Status status = Status.fromStatusCode(response.getStatus());
+	private boolean responseOk(final Status status) {
 		if (status == null) {
 			return false;
 		}
