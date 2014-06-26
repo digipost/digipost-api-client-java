@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,22 +44,23 @@ public class SmsNotification {
 		this(0);
 	}
 
-	public SmsNotification(final int afterHours) {
-		this(afterHours, null);
-	}
-	public SmsNotification(final int afterHours, final SmsOverrides overrides) {
-		this(null, asList(afterHours), overrides);
+	public SmsNotification(int afterHours) {
+		this(null, asList(afterHours));
 	}
 
-	public SmsNotification(final List<ListedTime> ats, final List<Integer> afterHours) {
+	public SmsNotification(List<ListedTime> ats, List<Integer> afterHours) {
 		this(ats, afterHours, null);
 	}
 
-	public SmsNotification(final List<ListedTime> ats, final SmsOverrides overrides) {
+	/**
+	 * This constructor requires that the sender is allowed to override SMS
+	 * preferences with {@link SmsOverrides}.
+	 */
+	public SmsNotification(List<ListedTime> ats, SmsOverrides overrides) {
 		this(ats, null, overrides);
 	}
 
-	public SmsNotification(final List<ListedTime> ats, final List<Integer> afterHours, final SmsOverrides overrides) {
+	private SmsNotification(List<ListedTime> ats, List<Integer> afterHours, SmsOverrides overrides) {
 		this.ats = ats != null ? ats : new ArrayList<ListedTime>();
 		this.afterHours = afterHours != null ? afterHours : new ArrayList<Integer>();
 		this.overrides = overrides;

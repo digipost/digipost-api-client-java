@@ -17,7 +17,10 @@ package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.delivery.DeliveryMethod;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.SmsNotification;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +58,7 @@ public class ForsendelseEksempel {
 
 		// 4. Vi oppretter hoveddokumentet
 		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne",
-				PDF, null, new SmsNotification(1, new SmsOverrides("12345678", "Fin tekst")),
+				PDF, null, new SmsNotification(1),
 				null,
 				PASSWORD, NORMAL);
 

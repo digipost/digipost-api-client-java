@@ -15,9 +15,8 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.errorhandling.ErrorCode;
-
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -127,6 +126,6 @@ public class MessageSenderTest {
 
 	private Message lagEnkeltForsendelse(final String subject, final String messageId, final String fnr) {
 		return new Message(messageId, new PersonalIdentificationNumber(fnr), new Document(UUID.randomUUID().toString(), subject, FileType.PDF,
-				null, new SmsNotification(0), null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL), new ArrayList<Document>());
+				null, new SmsNotification(), null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL), new ArrayList<Document>());
 	}
 }

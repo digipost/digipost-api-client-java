@@ -26,6 +26,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -83,15 +84,15 @@ public class XsdValidationTest {
 	@Test
 	public void validateMessage() throws JAXBException {
 		Message messageWithDigipostAddress = new Message(UUID.randomUUID().toString(), new DigipostAddress("even.beinlaus#1234"),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(0), null, TWO_FACTOR, NORMAL),
+				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL),
 				new ArrayList<Document>());
 
 		Message messageWithPersonalIdentificationNumber = new Message(UUID.randomUUID().toString(), new PersonalIdentificationNumber("12345678901"),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(0), null, TWO_FACTOR, NORMAL),
+				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL),
 				new ArrayList<Document>());
 		marshallAndValidate(messageWithDigipostAddress);
 
-		Document primaryDocumentToPreEncrypt = new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(0), null, TWO_FACTOR, NORMAL);
+		Document primaryDocumentToPreEncrypt = new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL);
 		Message messageWithPreEncryptAndSenderId = new Message(UUID.randomUUID().toString(), new PersonalIdentificationNumber("12345678901"),
 				primaryDocumentToPreEncrypt, new ArrayList<Document>());
 
