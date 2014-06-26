@@ -82,7 +82,7 @@ public class ApiServiceMock implements ApiService {
 		if (responses.containsKey(subject)) {
 			response = responses.get(subject);
 		} else if (errors.containsKey(subject)) {
-			throw new RuntimeException(errors.get(subject));
+			throw errors.get(subject);
 		} else if (subject.matches("^[0-9]{3}:(.)+")) {
 			String[] split = subject.split(":");
 			if (ErrorCode.isKnown(split[1])) {

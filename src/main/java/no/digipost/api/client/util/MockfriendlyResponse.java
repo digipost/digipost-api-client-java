@@ -19,6 +19,7 @@ import no.digipost.api.client.representations.MessageDelivery;
 import org.apache.commons.lang3.NotImplementedException;
 import org.joda.time.DateTime;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.*;
 import java.lang.annotation.Annotation;
 import java.net.ConnectException;
@@ -32,14 +33,14 @@ import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 public class MockfriendlyResponse extends Response {
 
 	public static final Map<String, Response> responses = new HashMap<>();
-	public static final Map<String, Throwable> errors = new HashMap<>();
+	public static final Map<String, RuntimeException> errors = new HashMap<>();
 
 	public static Response DEFAULT_RESPONSE = MockedResponseBuilder.create()
 			.status(OK.getStatusCode())
 			.entity(new MessageDelivery(UUID.randomUUID().toString(), DIGIPOST, COMPLETE, DateTime.now()))
 			.build();
 
-	public static ConnectException CONNECTION_REFUSED = new ConnectException("Connection refused");
+	public static ProcessingException CONNECTION_REFUSED = new ProcessingException(new ConnectException("Connection refused"));
 
 	static {
 		responses.put("200:OK", DEFAULT_RESPONSE);
