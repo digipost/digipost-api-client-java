@@ -529,7 +529,7 @@
 
     <xsd:complexType name="document">
         <xsd:sequence>
-            <xsd:element name="id" type="document-id" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="uuid" type="uuid" minOccurs="0" maxOccurs="1" />
             <xsd:element name="subject" minOccurs="0" maxOccurs="1">
                 <xsd:simpleType>
                     <xsd:restriction base="xsd:string">
@@ -786,7 +786,7 @@
         <xsd:sequence>
             <xsd:element name="link" type="link"  minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
-        <xsd:attribute name="document-id" type="document-id" />
+        <xsd:attribute name="uuid" type="uuid" />
         <xsd:attribute name="sender-id" type="xsd:long">
             <xsd:annotation>
                 <xsd:documentation>
@@ -803,16 +803,17 @@
         <xsd:attribute name="channel" type="xsd:string" />
     </xsd:complexType>
 
-    <xsd:simpleType name="document-id">
-        <xsd:annotation>
-            <xsd:documentation>
-                This ID must be globally unique for the sender.
-                With Java, a UUID can be created using UUID.randomUUID(), whereas
-                System.Guid.NewGuid() can be used in .NET C#.
-            </xsd:documentation>
-        </xsd:annotation>
-        <xsd:restriction base="xsd:string">
-            <xsd:maxLength value="36" />
+
+    <xsd:simpleType name="uuid">
+    	<xsd:annotation>
+    		<xsd:documentation>
+    			A UUID (Universally unique identifier). This ID must be globally unique for the sender.
+    			With Java, a UUID can be created using UUID.randomUUID(), whereas
+    			System.Guid.NewGuid() can be used in .NET C#. O og tilsvarende i andre språk.
+    		</xsd:documentation>
+    	</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+            <xsd:pattern value="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/>
         </xsd:restriction>
     </xsd:simpleType>
 

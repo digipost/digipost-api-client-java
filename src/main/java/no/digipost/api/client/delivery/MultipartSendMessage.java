@@ -70,7 +70,7 @@ class MultipartSendMessage implements SendableDelivery {
 	    		Document metadata = document.getKey();
 	    		InputStream content = document.getValue();
 	    		BodyPart bodyPart = new BodyPart(content, new MediaType("application", metadata.getDigipostFileType()));
-	    		ContentDisposition documentPart = ContentDisposition.type("attachment").fileName(metadata.id).build();
+	    		ContentDisposition documentPart = ContentDisposition.type("attachment").fileName(metadata.uuid).build();
 	    		bodyPart.setContentDisposition(documentPart);
 	    		multiPart.bodyPart(bodyPart);
 	    	}
