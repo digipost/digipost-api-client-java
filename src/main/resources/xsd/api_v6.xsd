@@ -711,7 +711,7 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:complexType name="email-overrides">
+    <xsd:complexType name="email-notification">
         <xsd:sequence>
             <xsd:element name="email-address" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false">
                 <xsd:annotation>
@@ -746,12 +746,6 @@
                     </xsd:restriction>
                 </xsd:simpleType>
             </xsd:element>
-        </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:complexType name="email-notification">
-        <xsd:sequence>
-            <xsd:element name="overrides" type="email-overrides" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="at" type="listed-time" minOccurs="1" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>

@@ -19,25 +19,34 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "email-notification", propOrder = {
-		"overrides",
+		"emailAddress",
+		"subject",
+		"text",
 		"ats"
 })
 public class EmailNotification {
-	@XmlElement(name = "overrides")
-	public final EmailOverrides overrides;
+	@XmlElement(name = "email-address")
+	public final String emailAddress;
+	@XmlElement(name = "subject")
+	public final String subject;
+	@XmlElement(name = "text")
+	public final String text;
 	@XmlElement(name = "at", nillable = false)
 	public final List<ListedTime> ats;
 
 	EmailNotification() {
-		this(null, null);
+		this(null, null, null, null);
 	}
 
-	public EmailNotification(final EmailOverrides overrides, final List<ListedTime> ats) {
-		this.overrides = overrides;
+	public EmailNotification(String emailAddress, String subject, String text, List<ListedTime> ats) {
+		this.emailAddress = emailAddress;
+		this.subject = subject;
+		this.text = text;
 		this.ats = ats;
 	}
 }
