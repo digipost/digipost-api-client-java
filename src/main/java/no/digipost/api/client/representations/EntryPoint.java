@@ -15,18 +15,14 @@
  */
 package no.digipost.api.client.representations;
 
-import static no.digipost.api.client.representations.Relation.AUTOCOMPLETE;
-import static no.digipost.api.client.representations.Relation.CREATE_MESSAGE;
-import static no.digipost.api.client.representations.Relation.IDENTIFY_RECIPIENT;
-import static no.digipost.api.client.representations.Relation.SEARCH;
-
-import java.net.URI;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.net.URI;
+import java.util.List;
+
+import static no.digipost.api.client.representations.Relation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "entrypoint")
@@ -57,6 +53,10 @@ public class EntryPoint extends Representation {
 
 	public URI getIdentificationUri() {
 		return getLinkByRelationName(IDENTIFY_RECIPIENT).getUri();
+	}
+
+	public URI getDocumentEventsUri() {
+		return getLinkByRelationName(DOCUMENT_EVENTS).getUri();
 	}
 
 	public String getCertificate() {

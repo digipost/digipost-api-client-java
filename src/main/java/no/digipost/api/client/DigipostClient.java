@@ -34,6 +34,7 @@ import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +69,7 @@ public class DigipostClient {
 	private final EventLogger eventLogger;
 	private final ApiService apiService;
 	private final MessageDeliverer deliverer;
+	private final DocumentCommunicator documentCommunicator;
 
 	public DigipostClient(DeliveryMethod deliveryType, String digipostUrl, long senderAccountId, InputStream certificateP12File, String certificatePassword) {
 		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
@@ -99,6 +101,7 @@ public class DigipostClient {
 		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : overriddenApiService;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 		this.deliverer = new MessageDeliverer(deliveryType, apiService, eventLogger);
+		this.documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
 
 
 		webTarget.register(new LoggingFilter());
@@ -145,6 +148,11 @@ public class DigipostClient {
 
 	public Autocomplete getAutocompleteSuggestions(final String searchString) {
 		return apiService.searchSuggest(searchString);
+	}
+
+	public DocumentEvents getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to,
+	                                        final int offset, final int maxResults) {
+		return documentCommunicator.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
 	}
 
 	private void log(final String stringToSignMsg) {

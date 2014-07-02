@@ -15,16 +15,23 @@
  */
 package no.digipost.api.client.representations;
 
-public enum Relation {
-	SELF,
-	ADD_CONTENT,
-	SEND,
-	SEARCH,
-	AUTOCOMPLETE,
-	CREATE_MESSAGE,
-	API_DOCUMENTATION,
-	GET_ENCRYPTION_KEY,
-	IDENTIFY_RECIPIENT,
-	DOCUMENT_EVENTS,
-	UNSUPPORTED
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlType(name = "event-type")
+@XmlEnum
+public enum DocumentEventType {
+
+	EMAIL_NOTIFICATION_FAILED,
+	SMS_NOTIFICATION_FAILED,
+	OPENED;
+
+	public String value() {
+		return name();
+	}
+
+	public static DocumentEventType fromValue(String v) {
+		return valueOf(v);
+	}
+
 }

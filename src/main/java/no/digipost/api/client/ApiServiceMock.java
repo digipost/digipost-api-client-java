@@ -21,6 +21,7 @@ import no.digipost.api.client.representations.*;
 import org.apache.commons.lang3.NotImplementedException;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
+import org.joda.time.DateTime;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.ws.rs.client.ClientRequestFilter;
@@ -141,6 +142,11 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public IdentificationResult identifyRecipient(final Identification identification) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public Response getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
 		throw new NotImplementedException("This is a mock");
 	}
 

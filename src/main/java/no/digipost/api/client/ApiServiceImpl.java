@@ -20,6 +20,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.MultiPart;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -36,35 +36,6 @@ import java.net.URI;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
 
-/**
- * Denne klassen tar seg av de enkelte HTTP-forespørslene man kan gjøre mot
- * REST-API-et, nemlig:
- *
- * <ul>
- * <li>Hente søkeforslag (autocomplete)</li>
- * <li>Søke etter mottakere</li>
- * <li>Opprette en forsendelsesressurs på serveren
- * <li>Hente en allerede opprettet forsendelsesressurs fra serveren
- * <li>Sende innholdet for en allerede opprettet forsendelsesressurs til
- * serveren, og dermed sende brevet til mottakeren
- * <li>Opprette en printforsendelsesressurs på serveren
- * <li>Hente en allerede opprettet printforsendelsesressurs fra serveren
- * <li>Sende innholdet (PDF) for en allerede opprettet printforsendelsesressurs
- * til serveren, og dermed bestille print av brevet.
- *
- * <ul>
- *
- * For å sende et brev gjennom Digipost er det tilstrekkelig å gjøre disse to
- * kallene:
- *
- * <pre>
- * createMessage(message);
- * addToContentAndSend(createdMessage, content);
- * </pre>
- *
- * Dette kan også gjøres ved å kalle metoden {@code sendMessage} i klassen
- * {@code MessageSender}, som i tillegg gjør en del feilhåndtering.
- */
 public class ApiServiceImpl implements ApiService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
@@ -103,9 +74,6 @@ public class ApiServiceImpl implements ApiService {
 				.get();
 	}
 
-	/**
-	 * Oppretter og sender en multipartforsendelse
-	 */
 	@Override
 	public Response multipartMessage(final MultiPart multiPart) {
 		EntryPoint entryPoint = getEntryPoint();
@@ -116,10 +84,6 @@ public class ApiServiceImpl implements ApiService {
 				.post(Entity.entity(multiPart, "multipart/mixed"));
 	}
 
-	/**
-	 * Oppretter en ny forsendelsesressurs på serveren ved å sende en
-	 * POST-forespørsel.
-	 */
 	@Override
 	public Response createMessage(final Message message) {
 		EntryPoint entryPoint = getEntryPoint();
@@ -130,9 +94,6 @@ public class ApiServiceImpl implements ApiService {
 				.post(Entity.entity(message, DIGIPOST_MEDIA_TYPE_V6));
 	}
 
-	/**
-	 * Henter en allerede eksisterende forsendelsesressurs fra serveren.
-	 */
 	@Override
 	public Response fetchExistingMessage(final URI location) {
 		return webResource
@@ -151,13 +112,6 @@ public class ApiServiceImpl implements ApiService {
 				.get();
 	}
 
-	/**
-	 * Angir innholdet i en allerede opprettet forsendelse
-	 *
-	 * Før man kaller denne metoden, må man allerede ha opprettet en
-	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
-	 *
-	 */
 	@Override
 	public Response addContent(final Document document, final InputStream letterContent) {
 		Link addContentLink = fetchAddContentLink(document);
@@ -171,15 +125,6 @@ public class ApiServiceImpl implements ApiService {
 				.post(Entity.entity(content, MediaType.APPLICATION_OCTET_STREAM_TYPE));
 	}
 
-	/**
-	 * Sender innholdet i forsendelsen som en POST-forespørsel til serveren
-	 *
-	 * OBS! Denne metoden fører til at brevet blir sendt på ordentlig.
-	 *
-	 * Før man kaller denne metoden, må man ha lagt innhold til forsendelsen ved
-	 * metoden {@code addContent}
-	 *
-	 */
 	@Override
 	public Response send(final MessageDelivery createdMessage) {
 		Link sendLink = fetchSendLink(createdMessage);
@@ -215,6 +160,25 @@ public class ApiServiceImpl implements ApiService {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+
+	@Override
+	public Response getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
+		WebTarget target = webResource
+				.path(getEntryPoint().getDocumentEventsUri().getPath())
+				.queryParam("org", organisation)
+				.queryParam("from", from.toString("dd.MM.yyyy"))
+				.queryParam("to", to.toString("dd.MM.yyyy"))
+				.queryParam("offset", String.valueOf(offset))
+				.queryParam("maxResults", String.valueOf(maxResults));
+		if (partId != null) {
+			target = target.queryParam("part", partId);
+		}
+		return target
+				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.header(X_Digipost_UserId, senderAccountId)
+				.get();
 	}
 
 	@Override

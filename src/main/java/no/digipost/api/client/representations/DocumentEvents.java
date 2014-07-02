@@ -15,16 +15,20 @@
  */
 package no.digipost.api.client.representations;
 
-public enum Relation {
-	SELF,
-	ADD_CONTENT,
-	SEND,
-	SEARCH,
-	AUTOCOMPLETE,
-	CREATE_MESSAGE,
-	API_DOCUMENTATION,
-	GET_ENCRYPTION_KEY,
-	IDENTIFY_RECIPIENT,
-	DOCUMENT_EVENTS,
-	UNSUPPORTED
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
+
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "document-events", propOrder = { "events" })
+@XmlRootElement(name = "document-events")
+public class DocumentEvents {
+
+	@XmlElement(name = "event")
+	private List<DocumentEvent> events = new ArrayList<>();
+
+	public DocumentEvents() {
+	}
+
 }

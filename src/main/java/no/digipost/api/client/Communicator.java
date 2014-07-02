@@ -45,7 +45,7 @@ import static no.digipost.api.client.representations.ErrorType.SERVER;
  * ApiService.
  *
  */
-public class Communicator {
+public abstract class Communicator {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Communicator.class);
 
