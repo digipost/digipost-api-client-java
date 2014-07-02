@@ -167,11 +167,13 @@ public class ApiServiceImpl implements ApiService {
 	public Response getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
 		WebTarget target = webResource
 				.path(getEntryPoint().getDocumentEventsUri().getPath())
-				.queryParam("org", organisation)
 				.queryParam("from", from.toString("dd.MM.yyyy"))
 				.queryParam("to", to.toString("dd.MM.yyyy"))
 				.queryParam("offset", String.valueOf(offset))
 				.queryParam("maxResults", String.valueOf(maxResults));
+		if (organisation != null) {
+			target = target.queryParam("org", organisation);
+		}
 		if (partId != null) {
 			target = target.queryParam("part", partId);
 		}

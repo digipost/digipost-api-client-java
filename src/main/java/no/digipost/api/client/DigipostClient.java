@@ -150,6 +150,11 @@ public class DigipostClient {
 		return apiService.searchSuggest(searchString);
 	}
 
+	public DocumentEvents getDocumentEvents(final DateTime from, final DateTime to,
+	                                        final int offset, final int maxResults) {
+		return getDocumentEvents(null, null, from, to, offset, maxResults);
+	}
+
 	public DocumentEvents getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to,
 	                                        final int offset, final int maxResults) {
 		return documentCommunicator.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
