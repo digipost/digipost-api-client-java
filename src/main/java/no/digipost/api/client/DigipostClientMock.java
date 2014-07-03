@@ -16,6 +16,7 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.delivery.DeliveryMethod;
+import no.digipost.api.client.representations.DocumentEvents;
 import no.digipost.api.client.security.Signer;
 
 import javax.xml.XMLConstants;
@@ -55,6 +56,14 @@ public class DigipostClientMock {
 		return apiService.getRequest(messageId);
 	}
 
+	public void addExpectedDocumentEvents(DocumentEvents documentEvents) {
+		apiService.addExpectedDocumentEvents(documentEvents);
+	}
+
+	public void reset() {
+		apiService.reset();
+	}
+
 	/**
 	 * Used to validate that requests are according to XSD
 	 */
@@ -71,5 +80,4 @@ public class DigipostClientMock {
 		marshaller.setSchema(schema);
 		return marshaller;
 	}
-
 }

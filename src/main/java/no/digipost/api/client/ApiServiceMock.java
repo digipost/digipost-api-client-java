@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client;
 
-import jersey.repackaged.com.google.common.collect.Lists;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
@@ -35,16 +34,16 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.lang.Integer.parseInt;
 import static javax.ws.rs.core.Response.Status.OK;
-import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
-import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 import static no.digipost.api.client.util.MockfriendlyResponse.*;
 
 public class ApiServiceMock implements ApiService {
 
-	private final Map<String, DigipostRequest> REQUESTS = initRequestMap(100);
+	private final Map<String, DigipostRequest> requests = initRequestMap(100);
+	private final Queue<DocumentEvents> expectedDocumentEvents = new ConcurrentLinkedQueue<>();
 	private final Marshaller marshaller;
 
 	public ApiServiceMock() {
@@ -54,8 +53,17 @@ public class ApiServiceMock implements ApiService {
 		this.marshaller = marshaller;
 	}
 
+	public void reset() {
+		requests.clear();
+		expectedDocumentEvents.clear();
+	}
+
 	public DigipostRequest getRequest(String messageId) {
-		return REQUESTS.get(messageId);
+		return requests.get(messageId);
+	}
+
+	public void addExpectedDocumentEvents(DocumentEvents documentEvents) {
+		expectedDocumentEvents.offer(documentEvents);
 	}
 
 	@Override
@@ -100,7 +108,7 @@ public class ApiServiceMock implements ApiService {
 		} else {
 			response = DEFAULT_RESPONSE;
 		}
-		REQUESTS.put(message.getMessageId(), new DigipostRequest(message, contentParts));
+		requests.put(message.getMessageId(), new DigipostRequest(message, contentParts));
 		return response;
 	}
 
@@ -151,30 +159,14 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public Response getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
-		DigipostRequest r = findMatchingRequest(organisation, partId);
-
-		DocumentEvents documentEvents;
-		if (r == null) {
-			documentEvents = new DocumentEvents();
-		} else {
-			documentEvents = new DocumentEvents(Arrays.asList(new DocumentEvent(r.message.getPrimaryDocument().getUuid(), DocumentEventType.OPENED, from, "Åpnet")));
+		DocumentEvents next = expectedDocumentEvents.poll();
+		if (next == null) {
+			next = new DocumentEvents();
 		}
-
 		return MockedResponseBuilder.create()
 				.status(OK.getStatusCode())
-				.entity(documentEvents)
+				.entity(next)
 				.build();
-	}
-
-	private DigipostRequest findMatchingRequest(String organisation, String partId) {
-		for (DigipostRequest request : REQUESTS.values()) {
-			if (request.message.getSenderOrganization().getOrganizationId().equals(organisation)
-					&& (request.message.getSenderOrganization().getPartId() == null && partId == null
-			 			|| request.message.getSenderOrganization().getPartId().equals(partId))) {
-				return request;
-			}
-		}
-		return null;
 	}
 
 	private Map<String, DigipostRequest> initRequestMap(final int maxSize) {
