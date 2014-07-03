@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client;
 
+import jersey.repackaged.com.google.common.collect.Lists;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
@@ -36,6 +37,9 @@ import java.net.URI;
 import java.util.*;
 
 import static java.lang.Integer.parseInt;
+import static javax.ws.rs.core.Response.Status.OK;
+import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
+import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 import static no.digipost.api.client.util.MockfriendlyResponse.*;
 
 public class ApiServiceMock implements ApiService {
@@ -147,7 +151,30 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public Response getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
-		throw new NotImplementedException("This is a mock");
+		DigipostRequest r = findMatchingRequest(organisation, partId);
+
+		DocumentEvents documentEvents;
+		if (r == null) {
+			documentEvents = new DocumentEvents();
+		} else {
+			documentEvents = new DocumentEvents(Arrays.asList(new DocumentEvent(r.message.getPrimaryDocument().getUuid(), DocumentEventType.OPENED, from, "Åpnet")));
+		}
+
+		return MockedResponseBuilder.create()
+				.status(OK.getStatusCode())
+				.entity(documentEvents)
+				.build();
+	}
+
+	private DigipostRequest findMatchingRequest(String organisation, String partId) {
+		for (DigipostRequest request : REQUESTS.values()) {
+			if (request.message.getSenderOrganization().getOrganizationId().equals(organisation)
+					&& (request.message.getSenderOrganization().getPartId() == null && partId == null
+			 			|| request.message.getSenderOrganization().getPartId().equals(partId))) {
+				return request;
+			}
+		}
+		return null;
 	}
 
 	private Map<String, DigipostRequest> initRequestMap(final int maxSize) {

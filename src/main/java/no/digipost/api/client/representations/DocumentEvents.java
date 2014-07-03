@@ -29,6 +29,14 @@ public class DocumentEvents {
 	private List<DocumentEvent> events = new ArrayList<>();
 
 	public DocumentEvents() {
+		this(new ArrayList<DocumentEvent>());
 	}
 
+	public DocumentEvents(List<DocumentEvent> events) {
+		this.events = events;
+	}
+
+	public List<DocumentEvent> getEvents() {
+		return events;
+	}
 }

@@ -37,4 +37,27 @@ public class DocumentEvent {
 
 	public DocumentEvent() {
 	}
+
+	public DocumentEvent(String document, DocumentEventType type, DateTime created, String description) {
+		this.document = document;
+		this.type = type;
+		this.created = created;
+		this.description = description;
+	}
+
+	public String getDocument() {
+		return document;
+	}
+
+	public DocumentEventType getType() {
+		return type;
+	}
+
+	public DateTime getCreated() {
+		return created;
+	}
+
+	public String getDescription() {
+		return description;
+	}
 }
