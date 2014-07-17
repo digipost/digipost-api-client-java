@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "event")
 public class DocumentEvent {
-	@XmlAttribute(name = "document", required = true)
-	private String document;
+	@XmlAttribute(name = "uuid", required = true)
+	private String uuid;
 	@XmlAttribute(name = "type", required = true)
 	private DocumentEventType type;
 	@XmlAttribute(name = "created", required = true)
@@ -38,15 +38,15 @@ public class DocumentEvent {
 	public DocumentEvent() {
 	}
 
-	public DocumentEvent(String document, DocumentEventType type, DateTime created, String description) {
-		this.document = document;
+	public DocumentEvent(String uuid, DocumentEventType type, DateTime created, String description) {
+		this.uuid = uuid;
 		this.type = type;
 		this.created = created;
 		this.description = description;
 	}
 
-	public String getDocument() {
-		return document;
+	public String getUuid() {
+		return uuid;
 	}
 
 	public DocumentEventType getType() {

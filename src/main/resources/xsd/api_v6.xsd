@@ -813,7 +813,7 @@
     </xsd:complexType>
 
     <xsd:complexType name="event">
-        <xsd:attribute name="document" type="uuid" use="required" />
+        <xsd:attribute name="uuid" type="uuid" use="required" />
         <xsd:attribute name="type" type="event-type" use="required" />
         <xsd:attribute name="created" type="xsd:dateTime" use="required" />
         <xsd:attribute name="description" type="xsd:string" />
