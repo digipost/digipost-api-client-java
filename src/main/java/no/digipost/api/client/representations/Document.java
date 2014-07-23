@@ -19,6 +19,7 @@ package no.digipost.api.client.representations;
 import javax.xml.bind.annotation.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.lowerCase;
@@ -68,6 +69,9 @@ public class Document extends Representation {
 		return links;
 	}
 
+	@XmlAttribute(name = "technical-type")
+	private TechnicalType technicalType;
+
 	public Document() { this(null, null, null); }
 
 	/**
@@ -94,6 +98,12 @@ public class Document extends Representation {
 		this.sensitivityLevel = sensitivityLevel;
 	}
 
+	public static Document technicalAttachment(TechnicalType type, FileType fileType) {
+		Document document = new Document(UUID.randomUUID().toString(), null, fileType);
+		document.technicalType = type;
+		return document;
+	}
+
 	public void setDigipostFileType(FileType fileType) {
 		this.digipostFileType = fileType.toString();
 	}
@@ -118,5 +128,9 @@ public class Document extends Representation {
 
 	public String getUuid() {
 		return uuid;
+	}
+
+	public TechnicalType getTechnicalType() {
+		return technicalType;
 	}
 }

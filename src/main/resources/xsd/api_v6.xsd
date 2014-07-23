@@ -566,7 +566,20 @@
             <xsd:element name="content-hash" type="content-hash" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
+        <xsd:attribute name="technical-type" type="technical-type"/>
     </xsd:complexType>
+
+    <xsd:simpleType name="technical-type">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="DIFI_METADATA_V10">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="DIFI_METADATA_V10" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
 
     <xsd:element name="message" type="message" />
 
