@@ -15,13 +15,13 @@
  */
 package no.digipost.api.client.representations;
 
-import static org.apache.commons.io.FilenameUtils.getExtension;
-
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.util.regex.Pattern;
+
+import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public class FileType {
 	private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[a-zA-Z0-9\\-_]+$");
@@ -35,6 +35,7 @@ public class FileType {
 	public static final FileType JPG = new FileType("jpg");
 	public static final FileType JPEG = new FileType("jpeg");
 	public static final FileType GIF = new FileType("gif");
+	public static final FileType ZIP = new FileType("zip");
 
 	private final String fileType;
 
