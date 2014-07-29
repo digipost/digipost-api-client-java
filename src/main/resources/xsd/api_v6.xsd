@@ -608,6 +608,7 @@
             <xsd:element name="recipient" type="message-recipient" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
+            <xsd:element name="received-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
     </xsd:complexType>
 

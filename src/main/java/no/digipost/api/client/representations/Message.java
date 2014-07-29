@@ -15,7 +15,11 @@
  */
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
+import org.joda.time.DateTime;
+
 import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +27,7 @@ import java.util.List;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "primaryDocument", "attachments" })
+@XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "primaryDocument", "attachments", "receivedDate" })
 @XmlRootElement(name = "message")
 public class Message {
 
@@ -39,31 +43,44 @@ public class Message {
 	protected Document primaryDocument;
 	@XmlElement(name = "attachment")
 	protected List<Document> attachments;
+	@XmlElement(name = "received-date", type = String.class, nillable = false)
+	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+	@XmlSchemaType(name = "dateTime")
+	protected DateTime receivedDate;
 
 	public Message() {
 	}
 
 	public Message(String messageId, PersonalIdentificationNumber id, Document primaryDocument, Iterable<? extends Document> attachments) {
-		this(messageId, new MessageRecipient(id), primaryDocument, attachments);
+		this(messageId, new MessageRecipient(id), primaryDocument, attachments, null);
 	}
 
 	public Message(String messageId, OrganisationNumber id, Document primaryDocument, Iterable<? extends Document> attachments) {
-		this(messageId, new MessageRecipient(id), primaryDocument, attachments);
+		this(messageId, new MessageRecipient(id), primaryDocument, attachments, null);
 	}
 
 	public Message(String messageId, DigipostAddress digipostAdress, Document primaryDocument, Iterable<? extends Document> attachments) {
-		this(messageId, new MessageRecipient(digipostAdress), primaryDocument, attachments);
+		this(messageId, new MessageRecipient(digipostAdress), primaryDocument, attachments, null);
 	}
 
 	public Message(String messageId, NameAndAddress nameAndAddress, Document primaryDocument, Iterable<? extends Document> attachments) {
-		this(messageId, new MessageRecipient(nameAndAddress), primaryDocument, attachments);
+		this(messageId, new MessageRecipient(nameAndAddress), primaryDocument, attachments, null);
+	}
+
+	public Message(String messageId, NameAndAddress nameAndAddress, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {
+		this(messageId, new MessageRecipient(nameAndAddress), primaryDocument, attachments, receivedDate);
 	}
 
 	public Message(String messageId, MessageRecipient recipient, Document primaryDocument, Iterable<? extends Document> attachments) {
+		this(messageId, recipient, primaryDocument, attachments, null);
+	}
+
+	public Message(String messageId, MessageRecipient recipient, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {
 		this.messageId = messageId;
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
 		this.attachments = new ArrayList<>();
+		this.receivedDate = receivedDate;
 		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 	        this.attachments.add(attachment);
         }
@@ -112,5 +129,9 @@ public class Message {
 
 	public boolean isSameMessageAs(final Message message) {
 		return this.messageId != null && this.messageId.equals(message.messageId);
+	}
+
+	public DateTime getReceivedDate() {
+		return receivedDate;
 	}
 }
