@@ -24,11 +24,10 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import javax.ws.rs.core.Response;
-
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.UUID;
 
+import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -125,7 +124,8 @@ public class MessageSenderTest {
 	}
 
 	private Message lagEnkeltForsendelse(final String subject, final String messageId, final String fnr) {
-		return new Message(messageId, new PersonalIdentificationNumber(fnr), new Document(UUID.randomUUID().toString(), subject, FileType.PDF,
-				null, new SmsNotification(), null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL), new ArrayList<Document>());
+		return newMessage(messageId, new Document(UUID.randomUUID().toString(), subject, FileType.PDF, null, new SmsNotification(), null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL))
+				.personalIdentificationNumber(new PersonalIdentificationNumber(fnr))
+				.build();
 	}
 }

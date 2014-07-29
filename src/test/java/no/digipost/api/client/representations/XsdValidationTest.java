@@ -35,6 +35,7 @@ import static no.digipost.api.client.representations.AuthenticationLevel.PASSWOR
 import static no.digipost.api.client.representations.AuthenticationLevel.TWO_FACTOR;
 import static no.digipost.api.client.representations.ErrorType.CLIENT_DATA;
 import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
@@ -83,18 +84,23 @@ public class XsdValidationTest {
 
 	@Test
 	public void validateMessage() throws JAXBException {
-		Message messageWithDigipostAddress = new Message(UUID.randomUUID().toString(), new DigipostAddress("even.beinlaus#1234"),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL),
-				new ArrayList<Document>());
+		Message messageWithDigipostAddress = newMessage(UUID.randomUUID().toString(),
+						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
+				)
+				.digipostAddress(new DigipostAddress("even.beinlaus#1234"))
+				.build();
 
-		Message messageWithPersonalIdentificationNumber = new Message(UUID.randomUUID().toString(), new PersonalIdentificationNumber("12345678901"),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL),
-				new ArrayList<Document>());
+		Message messageWithPersonalIdentificationNumber = newMessage(UUID.randomUUID().toString(),
+						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
+				)
+				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+				.build();
 		marshallAndValidate(messageWithDigipostAddress);
 
 		Document primaryDocumentToPreEncrypt = new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL);
-		Message messageWithPreEncryptAndSenderId = new Message(UUID.randomUUID().toString(), new PersonalIdentificationNumber("12345678901"),
-				primaryDocumentToPreEncrypt, new ArrayList<Document>());
+		Message messageWithPreEncryptAndSenderId = newMessage(UUID.randomUUID().toString(), primaryDocumentToPreEncrypt)
+				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+				.build();
 
 		messageWithPreEncryptAndSenderId.setSenderId(10L);
 		primaryDocumentToPreEncrypt.setPreEncrypt();
@@ -107,27 +113,33 @@ public class XsdValidationTest {
 	@Test
 	public void validatePrintMessage() throws JAXBException {
 		PrintRecipient address = new PrintRecipient("name", new NorwegianAddress("1234", "Oslo"));
-		Message message = new Message(UUID.randomUUID().toString(), new MessageRecipient(new PrintDetails(address, address, B)),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
-				new ArrayList<Document>());
+		Message message = newMessage(UUID.randomUUID().toString(),
+						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+				)
+				.recipient(new MessageRecipient(new PrintDetails(address, address, B)))
+				.build();
 		marshallAndValidate(message);
 	}
 
 	@Test
 	public void validatePrintMessageWithForeignRecipiantWihtCountry() throws JAXBException {
 		PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", "Sverige", null));
-		Message message = new Message(UUID.randomUUID().toString(), new MessageRecipient(new PrintDetails(address, address, B)),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
-				new ArrayList<Document>());
+		Message message = newMessage(UUID.randomUUID().toString(),
+						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+				)
+				.recipient(new MessageRecipient(new PrintDetails(address, address, B)))
+				.build();
 		marshallAndValidate(message);
 	}
 
 	@Test
 	public void validatePrintMessageWithForeignRecipiantWihtCountryCode() throws JAXBException {
 		PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", null, "SE"));
-		Message message = new Message(UUID.randomUUID().toString(), new MessageRecipient(new PrintDetails(address, address, B)),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
-				new ArrayList<Document>());
+		Message message = newMessage(UUID.randomUUID().toString(),
+						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+				)
+				.recipient(new MessageRecipient(new PrintDetails(address, address, B)))
+				.build();
 		marshallAndValidate(message);
 	}
 

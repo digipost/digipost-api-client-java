@@ -52,40 +52,84 @@ public class Message {
 	public Message() {
 	}
 
-	public Message(String messageId, PersonalIdentificationNumber id, Document primaryDocument, Iterable<? extends Document> attachments) {
-		this(messageId, new MessageRecipient(id), primaryDocument, attachments, null);
-	}
+	public static class MessageBuilder {
+		private String messageId;
+		private Long senderId;
+		private SenderOrganization senderOrganization;
+		private MessageRecipient recipient;
+		private Document primaryDocument;
+		private List<Document> attachments = new ArrayList<>();
+		private DateTime receivedDate;
 
-	public Message(String messageId, PersonalIdentificationNumber id, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {
-		this(messageId, new MessageRecipient(id), primaryDocument, attachments, receivedDate);
-	}
+		private MessageBuilder(String messageId, Document primaryDocument) {
+			this.messageId = messageId;
+			this.primaryDocument = primaryDocument;
+		}
 
-	public Message(String messageId, OrganisationNumber id, Document primaryDocument, Iterable<? extends Document> attachments) {
-		this(messageId, new MessageRecipient(id), primaryDocument, attachments, null);
-	}
+		public static MessageBuilder newMessage(String messageId, Document primaryDocument) {
+			return new MessageBuilder(messageId, primaryDocument);
+		}
 
-	public Message(String messageId, OrganisationNumber id, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {
-		this(messageId, new MessageRecipient(id), primaryDocument, attachments, receivedDate);
-	}
+		public MessageBuilder senderId(Long senderId) {
+			this.senderId = senderId;
+			return this;
+		}
 
-	public Message(String messageId, DigipostAddress digipostAdress, Document primaryDocument, Iterable<? extends Document> attachments) {
-		this(messageId, new MessageRecipient(digipostAdress), primaryDocument, attachments, null);
-	}
+		public MessageBuilder senderOrganization(SenderOrganization senderOrganization) {
+			this.senderOrganization = senderOrganization;
+			return this;
+		}
 
-	public Message(String messageId, DigipostAddress digipostAdress, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {
-		this(messageId, new MessageRecipient(digipostAdress), primaryDocument, attachments, receivedDate);
-	}
+		public MessageBuilder recipient(MessageRecipient recipient) {
+			this.recipient = recipient;
+			return this;
+		}
 
-	public Message(String messageId, NameAndAddress nameAndAddress, Document primaryDocument, Iterable<? extends Document> attachments) {
-		this(messageId, new MessageRecipient(nameAndAddress), primaryDocument, attachments, null);
-	}
+		public MessageBuilder digipostAddress(DigipostAddress digipostAddress) {
+			this.recipient = new MessageRecipient(digipostAddress);
+			return this;
+		}
 
-	public Message(String messageId, NameAndAddress nameAndAddress, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {
-		this(messageId, new MessageRecipient(nameAndAddress), primaryDocument, attachments, receivedDate);
-	}
+		public MessageBuilder personalIdentificationNumber(PersonalIdentificationNumber personalIdentificationNumber) {
+			this.recipient = new MessageRecipient(personalIdentificationNumber);
+			return this;
+		}
 
-	public Message(String messageId, MessageRecipient recipient, Document primaryDocument, Iterable<? extends Document> attachments) {
-		this(messageId, recipient, primaryDocument, attachments, null);
+		public MessageBuilder organisationNumber(OrganisationNumber organisationNumber) {
+			this.recipient = new MessageRecipient(organisationNumber);
+			return this;
+		}
+
+		public MessageBuilder nameAndAddress(NameAndAddress nameAndAddress) {
+			this.recipient = new MessageRecipient(nameAndAddress);
+			return this;
+		}
+
+		public MessageBuilder attachments(Iterable<? extends Document> attachments) {
+			for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
+				this.attachments.add(attachment);
+			}
+			return this;
+		}
+
+		public MessageBuilder receivedDate(DateTime receivedDate) {
+			this.receivedDate = receivedDate;
+			return this;
+		}
+
+		public Message build() {
+			if (recipient == null) {
+				throw new IllegalStateException("You must specify a recipient.");
+			}
+			Message message = new Message(messageId, recipient, primaryDocument, attachments, receivedDate);
+			if (senderId != null) {
+				message.setSenderId(senderId);
+			}
+			if (senderOrganization != null) {
+				message.setSenderOrganization(senderOrganization);
+			}
+			return message;
+		}
 	}
 
 	public Message(String messageId, MessageRecipient recipient, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {

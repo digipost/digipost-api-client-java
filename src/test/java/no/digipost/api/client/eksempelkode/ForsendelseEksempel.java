@@ -26,11 +26,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 /**
@@ -63,7 +63,9 @@ public class ForsendelseEksempel {
 				PASSWORD, NORMAL);
 
 		// 5. Vi opprettet en forsendelse
-		Message message = new Message(null, pin, primaryDocument, new ArrayList<Document>());
+		Message message = newMessage(null, primaryDocument)
+				.personalIdentificationNumber(pin)
+				.build();
 
 		// 6. Vi lar klientbiblioteket håndtere opprettelse av forsendelse, legge til innhold,
 		// og til slutt å sende forsendelsen

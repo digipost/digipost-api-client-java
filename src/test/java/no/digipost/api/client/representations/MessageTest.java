@@ -24,6 +24,7 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -34,43 +35,49 @@ public class MessageTest {
 
 	@Test
 	public void shouldBeDirectPrintWhenMessageContainsOnlyPrintDetails() {
-		Message message = new Message(UUID.randomUUID().toString(), new MessageRecipient(new PrintDetails()),
-				new Document(UUID.randomUUID().toString(), "subject", PDF), new ArrayList<Document>());
+		Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF))
+				.recipient(new MessageRecipient(new PrintDetails()))
+				.build();
 		assertTrue(message.isDirectPrint());
 	}
 
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsDigipostAddress() {
-		Message message = new Message(UUID.randomUUID().toString(), new DigipostAddress("test.testson#1234"),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
-				new ArrayList<Document>());
+		Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+				.digipostAddress(new DigipostAddress("test.testson#1234"))
+				.build();
 		assertFalse(message.isDirectPrint());
 	}
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsNameAndAddress() {
-		Message message = new Message(UUID.randomUUID().toString(), new MessageRecipient(new NameAndAddress()),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
-				new ArrayList<Document>());
+		Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+				.recipient(new MessageRecipient(new NameAndAddress()))
+				.build();
 		assertFalse(message.isDirectPrint());
 	}
 	@Test
 	public void shouldNotBeDirectPrintWhenMessageContainsPersonalIdendificationNumber() {
-		Message message = new Message(UUID.randomUUID().toString(), new PersonalIdentificationNumber("12125412435"),
-				new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
-				new ArrayList<Document>());
+		Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+				.personalIdentificationNumber(new PersonalIdentificationNumber("12125412435"))
+				.build();
 		assertFalse(message.isDirectPrint());
 	}
 
 	@Test
     public void possibleToPassNullForNoAttachments() {
-	    Message message = new Message(UUID.randomUUID().toString(), new DigipostAddress("test.testson#1234"), new Document(UUID.randomUUID().toString(), "subject", PDF), null);
+		Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF))
+				.digipostAddress(new DigipostAddress("test.testson#1234"))
+				.build();
 		assertThat(message.attachments, hasSize(0));
     }
 
 	@Test
     public void changingThePassedAttachmentListDoesNotChangeTheMessage() {
 		List<Document> attachments = new ArrayList<Document>(asList(new Document(UUID.randomUUID().toString(), "subject", PDF), new Document(UUID.randomUUID().toString(), "subject", PDF)));
-		Message message = new Message(UUID.randomUUID().toString(), new DigipostAddress("test.testson#1234"), new Document(UUID.randomUUID().toString(), "subject", PDF), attachments);
+		Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF))
+				.digipostAddress(new DigipostAddress("test.testson#1234"))
+				.attachments(attachments)
+				.build();
 		attachments.clear();
 
 		assertThat(attachments, empty());

@@ -16,11 +16,11 @@
 package no.digipost.api.client.representations;
 
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
@@ -45,9 +45,9 @@ public class ObjectBuilder {
 	}
 
 	public static Message newPrintMessage(final String messageId, final PrintRecipient recipient, final PrintRecipient returnAddress) {
-		return new Message(messageId, new MessageRecipient(new PrintDetails(recipient, returnAddress, B)),
-				new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL),
-				new ArrayList<Document>());
+		return newMessage(messageId, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+				.recipient(new MessageRecipient(new PrintDetails(recipient, returnAddress, B)))
+				.build();
 	}
 
 }

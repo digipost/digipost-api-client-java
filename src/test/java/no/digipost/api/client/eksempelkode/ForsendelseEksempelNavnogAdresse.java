@@ -15,9 +15,8 @@
  */
 package no.digipost.api.client.eksempelkode;
 
-import no.digipost.api.client.delivery.DeliveryMethod;
-
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.delivery.DeliveryMethod;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.NameAndAddress;
@@ -27,11 +26,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 /**
@@ -61,7 +60,9 @@ public class ForsendelseEksempelNavnogAdresse {
 		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
 		// 5. Vi opprettet en forsendelse
-		Message message = new Message(UUID.randomUUID().toString(), nameAndAddress, primaryDocument, new ArrayList<Document>());
+		Message message = newMessage(UUID.randomUUID().toString(), primaryDocument)
+				.nameAndAddress(nameAndAddress)
+				.build();
 
 		// 6. Klientbiblioteket håndterer opprettelse av forsendelse,
 		// legge til innhold, og til slutt sending av forsendelsen.

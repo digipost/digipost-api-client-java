@@ -15,9 +15,8 @@
  */
 package no.digipost.api.client.eksempelkode;
 
-import no.digipost.api.client.delivery.DeliveryMethod;
-
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.delivery.DeliveryMethod;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -26,11 +25,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Security;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
@@ -69,7 +68,9 @@ public class FallbackTilPrintEksempel {
 		PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer","Mottakers poststed")),
 				new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B);
 		String dinForsendelseId = UUID.randomUUID().toString();
-		Message message = new Message(dinForsendelseId, new MessageRecipient(pin, printDetails), primaryDocument, new ArrayList<Document>());
+		Message message = newMessage(dinForsendelseId, primaryDocument)
+				.recipient(new MessageRecipient(pin, printDetails))
+				.build();
 
 		// 7. Foreløpig støtter Digipost kun å sende krypterte brev til print. Å
 		// spesifisere PreEncrypt gjør at klientbiblioteket krypterer filen for
