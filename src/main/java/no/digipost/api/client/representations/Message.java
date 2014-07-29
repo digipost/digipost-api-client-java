@@ -22,13 +22,12 @@ import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "primaryDocument", "attachments", "receivedDate" })
+@XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "deliveryDate", "primaryDocument", "attachments", "receivedDate" })
 @XmlRootElement(name = "message")
 public class Message {
 
@@ -40,6 +39,10 @@ public class Message {
 	protected SenderOrganization senderOrganization;
 	@XmlElement(name = "recipient")
 	protected MessageRecipient recipient;
+	@XmlElement(name = "delivery-date", type = String.class, nillable = false)
+	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+	@XmlSchemaType(name = "dateTime")
+	protected DateTime deliveryDate;
 	@XmlElement(name = "primary-document", required = true)
 	protected Document primaryDocument;
 	@XmlElement(name = "attachment")
@@ -57,6 +60,7 @@ public class Message {
 		private Long senderId;
 		private SenderOrganization senderOrganization;
 		private MessageRecipient recipient;
+		private DateTime deliveryDate;
 		private Document primaryDocument;
 		private List<Document> attachments = new ArrayList<>();
 		private DateTime receivedDate;
@@ -105,6 +109,11 @@ public class Message {
 			return this;
 		}
 
+		public MessageBuilder deliveryDate(DateTime deliveryDate) {
+			this.deliveryDate = deliveryDate;
+			return this;
+		}
+
 		public MessageBuilder attachments(Iterable<? extends Document> attachments) {
 			for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 				this.attachments.add(attachment);
@@ -121,7 +130,7 @@ public class Message {
 			if (recipient == null) {
 				throw new IllegalStateException("You must specify a recipient.");
 			}
-			Message message = new Message(messageId, recipient, primaryDocument, attachments, receivedDate);
+			Message message = new Message(messageId, recipient, primaryDocument, attachments, deliveryDate, receivedDate);
 			if (senderId != null) {
 				message.setSenderId(senderId);
 			}
@@ -132,11 +141,12 @@ public class Message {
 		}
 	}
 
-	public Message(String messageId, MessageRecipient recipient, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {
+	private Message(String messageId, MessageRecipient recipient, Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryDate, DateTime receivedDate) {
 		this.messageId = messageId;
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
 		this.attachments = new ArrayList<>();
+		this.deliveryDate = deliveryDate;
 		this.receivedDate = receivedDate;
 		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 	        this.attachments.add(attachment);

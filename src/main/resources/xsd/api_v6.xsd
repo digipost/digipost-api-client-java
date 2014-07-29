@@ -494,7 +494,7 @@
     <xsd:complexType name="content-hash">
         <xsd:simpleContent>
             <xsd:extension base="xsd:string">
-                <xsd:attribute name="hash-algorithm" type="xsd:string"></xsd:attribute>
+                <xsd:attribute name="hash-algorithm" type="xsd:string"/>
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -506,7 +506,7 @@
             <xsd:element name="message-id" type="xsd:string" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="delivery-method" type="delivery-method"  minOccurs="1" maxOccurs="1" />
             <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="delivered-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="delivery-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" />
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
@@ -615,6 +615,14 @@
                 <xsd:element name="sender-organization" type="sender-organization" />
             </xsd:choice>
             <xsd:element name="recipient" type="message-recipient" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <xsd:element name="delivery-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1" nillable="false">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The time the message should be made available to the receiver.
+                    The use of this field is limited to those with explicit permission.
+                </xsd:documentation>
+            </xsd:annotation>
+            </xsd:element>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
             <xsd:element name="received-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
