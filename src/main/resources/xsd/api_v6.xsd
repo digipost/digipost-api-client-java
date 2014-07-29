@@ -538,7 +538,16 @@
                 </xsd:simpleType>
             </xsd:element>
             <xsd:element name="file-type" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
-            <xsd:element name="opening-receipt" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="false" />
+            <xsd:choice>
+                <xsd:element name="opening-receipt" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="false" />
+                <xsd:element name="opened" type="xsd:boolean" minOccurs="0" maxOccurs="1">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Indicates if the document has already been opened
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+            </xsd:choice>
             <xsd:element name="sms-notification" type="sms-notification" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>

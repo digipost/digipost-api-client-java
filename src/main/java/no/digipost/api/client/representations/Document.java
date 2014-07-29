@@ -29,6 +29,7 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
 		"uuid",
 		"subject",
 		"digipostFileType",
+		"opened",
 		"openingReceipt",
 		"smsNotification",
 		"emailNotification",
@@ -49,6 +50,8 @@ public class Document extends Representation {
 	public final String subject;
 	@XmlElement(name = "file-type", required = true)
 	protected String digipostFileType;
+	@XmlElement(nillable = false)
+	protected Boolean opened;
 	@XmlElement(name = "opening-receipt")
 	public final String openingReceipt;
 	@XmlElement(name = "sms-notification")
@@ -78,13 +81,21 @@ public class Document extends Representation {
 	 * Constructor for just the required fields of a document.
 	 */
 	public Document(String id, String subject, FileType fileType) {
-		this(id, subject, fileType, null, null, null, null, null);
+		this(id, subject, fileType, null, null, null, null, null, null);
 	}
 
 	public Document(String uuid, String subject, FileType fileType, String openingReceipt,
 					SmsNotification smsNotification, EmailNotification emailNotification,
 					AuthenticationLevel authenticationLevel,
 					SensitivityLevel sensitivityLevel) {
+		this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel, false);
+	}
+
+
+	public Document(String uuid, String subject, FileType fileType, String openingReceipt,
+					SmsNotification smsNotification, EmailNotification emailNotification,
+					AuthenticationLevel authenticationLevel,
+					SensitivityLevel sensitivityLevel, Boolean opened) {
 		this.uuid = lowerCase(uuid);
 		if (uuid != null && !UUID_PATTERN.matcher(this.uuid).matches()) {
 			throw new IllegalArgumentException("Not a UUID: " + uuid);
@@ -96,6 +107,7 @@ public class Document extends Representation {
 		this.emailNotification = emailNotification;
 		this.authenticationLevel = authenticationLevel;
 		this.sensitivityLevel = sensitivityLevel;
+		this.opened = opened;
 	}
 
 	public static Document technicalAttachment(TechnicalType type, FileType fileType) {
@@ -132,5 +144,9 @@ public class Document extends Representation {
 
 	public TechnicalType getTechnicalType() {
 		return technicalType;
+	}
+
+	public boolean isOpened() {
+		return opened != null && opened;
 	}
 }
