@@ -88,7 +88,7 @@ public class Document extends Representation {
 					SmsNotification smsNotification, EmailNotification emailNotification,
 					AuthenticationLevel authenticationLevel,
 					SensitivityLevel sensitivityLevel) {
-		this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel, false);
+		this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel, null);
 	}
 
 
