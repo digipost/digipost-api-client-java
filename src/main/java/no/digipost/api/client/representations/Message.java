@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -55,12 +56,24 @@ public class Message {
 		this(messageId, new MessageRecipient(id), primaryDocument, attachments, null);
 	}
 
+	public Message(String messageId, PersonalIdentificationNumber id, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {
+		this(messageId, new MessageRecipient(id), primaryDocument, attachments, receivedDate);
+	}
+
 	public Message(String messageId, OrganisationNumber id, Document primaryDocument, Iterable<? extends Document> attachments) {
 		this(messageId, new MessageRecipient(id), primaryDocument, attachments, null);
 	}
 
+	public Message(String messageId, OrganisationNumber id, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {
+		this(messageId, new MessageRecipient(id), primaryDocument, attachments, receivedDate);
+	}
+
 	public Message(String messageId, DigipostAddress digipostAdress, Document primaryDocument, Iterable<? extends Document> attachments) {
 		this(messageId, new MessageRecipient(digipostAdress), primaryDocument, attachments, null);
+	}
+
+	public Message(String messageId, DigipostAddress digipostAdress, Document primaryDocument, Iterable<? extends Document> attachments, DateTime receivedDate) {
+		this(messageId, new MessageRecipient(digipostAdress), primaryDocument, attachments, receivedDate);
 	}
 
 	public Message(String messageId, NameAndAddress nameAndAddress, Document primaryDocument, Iterable<? extends Document> attachments) {
