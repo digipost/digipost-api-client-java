@@ -153,7 +153,6 @@ public class Message {
 		this.primaryDocument = primaryDocument;
 		this.attachments = new ArrayList<>();
 		this.deliveryTime = deliveryDate;
-		this.receivedDate = receivedDate;
 		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 	        this.attachments.add(attachment);
         }
