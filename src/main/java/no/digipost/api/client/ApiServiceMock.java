@@ -91,7 +91,7 @@ public class ApiServiceMock implements ApiService {
 		}
 
 		Response response;
-		String subject = message.getPrimaryDocument().subject;
+		String subject = message.primaryDocument.subject;
 		if (responses.containsKey(subject)) {
 			response = responses.get(subject);
 		} else if (errors.containsKey(subject)) {
@@ -108,7 +108,7 @@ public class ApiServiceMock implements ApiService {
 		} else {
 			response = DEFAULT_RESPONSE;
 		}
-		requests.put(message.getMessageId(), new DigipostRequest(message, contentParts));
+		requests.put(message.messageId, new DigipostRequest(message, contentParts));
 		return response;
 	}
 

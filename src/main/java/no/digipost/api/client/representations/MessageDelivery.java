@@ -82,7 +82,7 @@ public class MessageDelivery extends Representation {
 	}
 
 	public boolean isSameMessageAs(final Message message) {
-		return messageId.equals(message.getMessageId());
+		return messageId.equals(message.messageId);
 	}
 
 	public MessageStatus getStatus() {

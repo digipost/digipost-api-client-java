@@ -54,7 +54,7 @@ public class MessageSenderTest {
 		when(mockClientResponse.getStatus()).thenReturn(Response.Status.CONFLICT.getStatusCode());
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.getMessageId(), DeliveryMethod.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, DeliveryMethod.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
 
 		when(mockClientResponse2.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
 		when(mockClientResponse2.readEntity(MessageDelivery.class)).thenReturn(eksisterendeForsendelse);
@@ -75,7 +75,7 @@ public class MessageSenderTest {
 		when(mockClientResponse.getStatus()).thenReturn(Response.Status.CONFLICT.getStatusCode());
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.getMessageId(), DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED,
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED,
 				DateTime.now());
 
 		when(mockClientResponse2.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
@@ -101,7 +101,7 @@ public class MessageSenderTest {
 		when(mockClientResponse.getStatus()).thenReturn(Response.Status.CONFLICT.getStatusCode());
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.getMessageId(), DeliveryMethod.PRINT, MessageStatus.DELIVERED_TO_PRINT,
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, DeliveryMethod.PRINT, MessageStatus.DELIVERED_TO_PRINT,
 				DateTime.now());
 
 		when(mockClientResponse2.getStatus()).thenReturn(Response.Status.OK.getStatusCode());

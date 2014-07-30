@@ -100,9 +100,9 @@ public class XsdValidationTest {
 		Document primaryDocumentToPreEncrypt = new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL);
 		Message messageWithPreEncryptAndSenderId = newMessage(UUID.randomUUID().toString(), primaryDocumentToPreEncrypt)
 				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+				.senderId(10L)
 				.build();
 
-		messageWithPreEncryptAndSenderId.setSenderId(10L);
 		primaryDocumentToPreEncrypt.setPreEncrypt();
 
 		marshallAndValidate(messageWithDigipostAddress);

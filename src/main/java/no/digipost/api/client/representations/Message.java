@@ -32,27 +32,28 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class Message {
 
 	@XmlElement(name = "message-id")
-	protected String messageId;
+	public final String messageId;
 	@XmlElement(name = "sender-id")
-	protected Long senderId;
+	public final Long senderId;
 	@XmlElement(name = "sender-organization")
-	protected SenderOrganization senderOrganization;
+	public final SenderOrganization senderOrganization;
 	@XmlElement(name = "recipient")
-	protected MessageRecipient recipient;
+	public final MessageRecipient recipient;
 	@XmlElement(name = "delivery-date", type = String.class, nillable = false)
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
-	protected DateTime deliveryDate;
+	public final DateTime deliveryDate;
 	@XmlElement(name = "primary-document", required = true)
-	protected Document primaryDocument;
+	public final Document primaryDocument;
 	@XmlElement(name = "attachment")
-	protected List<Document> attachments;
+	public final List<Document> attachments;
 	@XmlElement(name = "received-date", type = String.class, nillable = false)
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
-	protected DateTime receivedDate;
+	public final DateTime receivedDate;
 
 	public Message() {
+		this(null, null, null, null, null, null, null, null);
 	}
 
 	public static class MessageBuilder {
@@ -74,11 +75,21 @@ public class Message {
 			return new MessageBuilder(messageId, primaryDocument);
 		}
 
+		/**
+		 * Only neccessary when sending on behalf of another user. In this case
+		 * senderId must be the party you are sending on behalf of. Your own user id
+		 * should be set in the http header X-Digipost-UserId.
+		 */
 		public MessageBuilder senderId(Long senderId) {
 			this.senderId = senderId;
 			return this;
 		}
 
+		/**
+		 * Only neccessary when sending on behalf of another user. In this case
+		 * senderOrganization must be the party you are sending on behalf of.
+		 * Your own user id should be set in the http header X-Digipost-UserId.
+		 */
 		public MessageBuilder senderOrganization(SenderOrganization senderOrganization) {
 			this.senderOrganization = senderOrganization;
 			return this;
@@ -130,19 +141,18 @@ public class Message {
 			if (recipient == null) {
 				throw new IllegalStateException("You must specify a recipient.");
 			}
-			Message message = new Message(messageId, recipient, primaryDocument, attachments, deliveryDate, receivedDate);
-			if (senderId != null) {
-				message.setSenderId(senderId);
+			if (senderId != null && senderOrganization != null) {
+				throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
 			}
-			if (senderOrganization != null) {
-				message.setSenderOrganization(senderOrganization);
-			}
-			return message;
+			return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryDate, receivedDate);
 		}
 	}
 
-	private Message(String messageId, MessageRecipient recipient, Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryDate, DateTime receivedDate) {
+	private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
+	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryDate, DateTime receivedDate) {
 		this.messageId = messageId;
+		this.senderId = senderId;
+		this.senderOrganization = senderOrganization;
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
 		this.attachments = new ArrayList<>();
@@ -153,52 +163,11 @@ public class Message {
         }
 	}
 
-	public MessageRecipient getRecipient() {
-		return recipient;
-	}
-
-	/**
-	 * Only neccessary when sending on behalf of another user. In this case
-	 * senderId must be the party you are sending on behalf of. Your own user id
-	 * should be set in the http header X-Digipost-UserId.
-	 */
-	public void setSenderId(final long senderId) {
-		this.senderId = senderId;
-	}
-
-	public void setSenderOrganization(final SenderOrganization senderOrganization) {
-		this.senderOrganization = senderOrganization;
-	}
-
 	public boolean isDirectPrint() {
 		return recipient.isDirectPrint();
 	}
 
-	public String getMessageId() {
-		return messageId;
-	}
-
-	public Long getSenderId() {
-		return senderId;
-	}
-
-	public SenderOrganization getSenderOrganization() {
-		return senderOrganization;
-	}
-
-	public Document getPrimaryDocument() {
-		return primaryDocument;
-	}
-
-	public List<Document> getAttachments() {
-		return attachments;
-	}
-
 	public boolean isSameMessageAs(final Message message) {
 		return this.messageId != null && this.messageId.equals(message.messageId);
-	}
-
-	public DateTime getReceivedDate() {
-		return receivedDate;
 	}
 }

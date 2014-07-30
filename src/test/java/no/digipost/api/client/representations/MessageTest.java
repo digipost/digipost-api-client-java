@@ -81,6 +81,6 @@ public class MessageTest {
 		attachments.clear();
 
 		assertThat(attachments, empty());
-		assertThat(message.getAttachments(), hasSize(2));
+		assertThat(message.attachments, hasSize(2));
     }
 }
