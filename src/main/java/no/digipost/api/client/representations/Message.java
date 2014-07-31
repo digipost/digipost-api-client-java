@@ -49,7 +49,7 @@ public class Message {
 	public final List<Document> attachments;
 
 	public Message() {
-		this(null, null, null, null, null, null, null, null);
+		this(null, null, null, null, null, null, null);
 	}
 
 	public static class MessageBuilder {
@@ -60,7 +60,6 @@ public class Message {
 		private DateTime deliveryTime;
 		private Document primaryDocument;
 		private List<Document> attachments = new ArrayList<>();
-		private DateTime receivedDate;
 
 		private MessageBuilder(String messageId, Document primaryDocument) {
 			this.messageId = messageId;
@@ -128,11 +127,6 @@ public class Message {
 			return this;
 		}
 
-		public MessageBuilder receivedDate(DateTime receivedDate) {
-			this.receivedDate = receivedDate;
-			return this;
-		}
-
 		public Message build() {
 			if (recipient == null) {
 				throw new IllegalStateException("You must specify a recipient.");
@@ -140,12 +134,12 @@ public class Message {
 			if (senderId != null && senderOrganization != null) {
 				throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
 			}
-			return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryTime, receivedDate);
+			return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryTime);
 		}
 	}
 
 	private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
-	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryDate, DateTime receivedDate) {
+	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryDate) {
 		this.messageId = messageId;
 		this.senderId = senderId;
 		this.senderOrganization = senderOrganization;
