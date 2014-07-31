@@ -139,14 +139,14 @@ public class Message {
 	}
 
 	private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
-	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryDate) {
+	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryTime) {
 		this.messageId = messageId;
 		this.senderId = senderId;
 		this.senderOrganization = senderOrganization;
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
 		this.attachments = new ArrayList<>();
-		this.deliveryTime = deliveryDate;
+		this.deliveryTime = deliveryTime;
 		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 	        this.attachments.add(attachment);
         }
