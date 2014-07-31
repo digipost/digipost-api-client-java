@@ -623,7 +623,14 @@
                 </xsd:documentation>
             </xsd:annotation>
             </xsd:element>
-            <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
+			<xsd:element name="invoicing-account" minOccurs="0" maxOccurs="1">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="100"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
             <xsd:element name="received-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>

@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -108,6 +109,17 @@ public class XsdValidationTest {
 		marshallAndValidate(messageWithDigipostAddress);
 		marshallAndValidate(messageWithPersonalIdentificationNumber);
 		marshallAndValidate(messageWithPreEncryptAndSenderId);
+	}
+
+	@Test
+	public void validateMessage_invoicingAccount() throws JAXBException {
+		Document document = new Document(UUID.randomUUID().toString(), "subject", PDF, null, null, null, TWO_FACTOR, NORMAL);
+		Message message = newMessage(UUID.randomUUID().toString(), document)
+				.digipostAddress(new DigipostAddress("even.beinlaus#1234"))
+				.invoicingAccount("ACCOUNT01")
+				.deliveryDate(DateTime.now())
+				.build();
+		marshallAndValidate(message);
 	}
 
 	@Test

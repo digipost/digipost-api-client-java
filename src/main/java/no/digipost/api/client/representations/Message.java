@@ -27,7 +27,8 @@ import java.util.List;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "deliveryDate", "primaryDocument", "attachments", "receivedDate" })
+@XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "deliveryDate",
+		"invoicingAccount", "primaryDocument", "attachments", "receivedDate" })
 @XmlRootElement(name = "message")
 public class Message {
 
@@ -43,6 +44,8 @@ public class Message {
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
 	public final DateTime deliveryDate;
+	@XmlElement(name = "invoicing-account")
+	public final String invoicingAccount;
 	@XmlElement(name = "primary-document", required = true)
 	public final Document primaryDocument;
 	@XmlElement(name = "attachment")
@@ -53,7 +56,7 @@ public class Message {
 	public final DateTime receivedDate;
 
 	public Message() {
-		this(null, null, null, null, null, null, null, null);
+		this(null, null, null, null, null, null, null, null, null);
 	}
 
 	public static class MessageBuilder {
@@ -65,6 +68,7 @@ public class Message {
 		private Document primaryDocument;
 		private List<Document> attachments = new ArrayList<>();
 		private DateTime receivedDate;
+		private String invoicingAccount;
 
 		private MessageBuilder(String messageId, Document primaryDocument) {
 			this.messageId = messageId;
@@ -125,6 +129,11 @@ public class Message {
 			return this;
 		}
 
+		public MessageBuilder invoicingAccount(String invoicingAccount) {
+			this.invoicingAccount = invoicingAccount;
+			return this;
+		}
+
 		public MessageBuilder attachments(Iterable<? extends Document> attachments) {
 			for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 				this.attachments.add(attachment);
@@ -144,17 +153,20 @@ public class Message {
 			if (senderId != null && senderOrganization != null) {
 				throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
 			}
-			return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryDate, receivedDate);
+			return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments,
+					deliveryDate, invoicingAccount, receivedDate);
 		}
 	}
 
 	private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
-	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryDate, DateTime receivedDate) {
+	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryDate,
+					String invoicingAccount, DateTime receivedDate) {
 		this.messageId = messageId;
 		this.senderId = senderId;
 		this.senderOrganization = senderOrganization;
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
+		this.invoicingAccount = invoicingAccount;
 		this.attachments = new ArrayList<>();
 		this.deliveryDate = deliveryDate;
 		this.receivedDate = receivedDate;
