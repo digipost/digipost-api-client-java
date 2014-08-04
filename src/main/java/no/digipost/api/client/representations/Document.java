@@ -17,12 +17,14 @@
 package no.digipost.api.client.representations;
 
 import javax.xml.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static org.apache.commons.lang3.StringUtils.lowerCase;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "document", propOrder = {
@@ -97,18 +99,31 @@ public class Document extends Representation {
 					AuthenticationLevel authenticationLevel,
 					SensitivityLevel sensitivityLevel, Boolean opened) {
 		this.uuid = lowerCase(uuid);
-		if (uuid != null && !UUID_PATTERN.matcher(this.uuid).matches()) {
-			throw new IllegalArgumentException("Not a UUID: " + uuid);
-		}
 		this.subject = subject;
 		this.digipostFileType = Objects.toString(fileType, null);
-		this.openingReceipt = openingReceipt;
+		this.openingReceipt = defaultIfBlank(openingReceipt, null);
+		this.opened = opened == Boolean.TRUE ? true : null;
 		this.smsNotification = smsNotification;
 		this.emailNotification = emailNotification;
 		this.authenticationLevel = authenticationLevel;
 		this.sensitivityLevel = sensitivityLevel;
-		this.opened = opened;
+		validate();
 	}
+
+	private void validate() {
+		List<String> errors = new ArrayList<>();
+		if (uuid != null && !UUID_PATTERN.matcher(this.uuid).matches()) {
+			errors.add("Not a UUID: " + uuid);
+		}
+		if (openingReceipt != null && opened != null) {
+			errors.add("Both openingReceipt and opened was set");
+		}
+		if (!errors.isEmpty()) {
+			throw new IllegalStateException(
+					errors.size() + " errors when instantiating " + Document.class.getSimpleName() +
+					"\n - " + join(errors, "\n - "));
+		}
+    }
 
 	public static Document technicalAttachment(TechnicalType type, FileType fileType) {
 		Document document = new Document(UUID.randomUUID().toString(), null, fileType);
