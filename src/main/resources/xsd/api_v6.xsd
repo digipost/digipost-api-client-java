@@ -851,12 +851,37 @@
     </xsd:complexType>
 
     <xsd:complexType name="event">
+        <xsd:sequence>
+            <xsd:element name="metadata" type="event-metadata" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
         <xsd:attribute name="uuid" type="uuid" use="required" />
         <xsd:attribute name="type" type="event-type" use="required" />
         <xsd:attribute name="created" type="xsd:dateTime" use="required" />
         <xsd:attribute name="description" type="xsd:string" />
     </xsd:complexType>
-    
+
+    <xsd:complexType name="event-metadata" abstract="true" />
+
+    <xsd:complexType name="move-files-from-public-sector-metadata">
+        <xsd:complexContent>
+            <xsd:extension base="event-metadata">
+                <xsd:sequence>
+                    <xsd:element name="document" type="document-metadata" minOccurs="1" maxOccurs="unbounded" />
+                </xsd:sequence>
+                <xsd:attribute name="opened" type="xsd:boolean" use="required" />
+                <xsd:attribute name="delivery-time" type="xsd:dateTime" use="required" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="document-metadata">
+        <xsd:sequence>
+            <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:attribute name="uuid" type="uuid" use="required" />
+        <xsd:attribute name="technical-type" type="technical-type" use="optional" />
+    </xsd:complexType>
+
     <xsd:simpleType name="event-type">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="EMAIL_NOTIFICATION_FAILED">
@@ -877,6 +902,13 @@
                 <xsd:annotation>
                     <xsd:appinfo>
                         <jaxb:typesafeEnumMember name="OPENED" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="MOVE_FILES_FROM_PUBLIC_SECTOR">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="MOVE_FILES_FROM_PUBLIC_SECTOR" />
                     </xsd:appinfo>
                 </xsd:annotation>
             </xsd:enumeration>

@@ -24,7 +24,8 @@ public enum DocumentEventType {
 
 	EMAIL_NOTIFICATION_FAILED,
 	SMS_NOTIFICATION_FAILED,
-	OPENED;
+	OPENED,
+	MOVE_FILES_FROM_PUBLIC_SECTOR;
 
 	public String value() {
 		return name();

@@ -34,15 +34,22 @@ public class DocumentEvent {
 	private DateTime created;
 	@XmlAttribute(name = "description")
 	private String description;
+	@XmlElement(name = "metadata")
+	private EventMetadata metadata;
 
 	public DocumentEvent() {
 	}
 
 	public DocumentEvent(String uuid, DocumentEventType type, DateTime created, String description) {
+		this(uuid, type, created, description, null);
+	}
+
+	public DocumentEvent(String uuid, DocumentEventType type, DateTime created, String description, EventMetadata metadata) {
 		this.uuid = uuid;
 		this.type = type;
 		this.created = created;
 		this.description = description;
+		this.metadata = metadata;
 	}
 
 	public String getUuid() {
@@ -59,5 +66,9 @@ public class DocumentEvent {
 
 	public String getDescription() {
 		return description;
+	}
+
+	public EventMetadata getMetadata() {
+		return metadata;
 	}
 }
