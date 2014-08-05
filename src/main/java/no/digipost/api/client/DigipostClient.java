@@ -205,4 +205,8 @@ public class DigipostClient {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public InputStream getContent(String path) {
+		return documentCommunicator.getContent(path);
+	}
 }

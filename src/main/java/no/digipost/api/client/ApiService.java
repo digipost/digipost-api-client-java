@@ -111,4 +111,6 @@ public interface ApiService {
 	 *
 	 */
 	Response getDocumentEvents(String organisation, String partId, DateTime from, DateTime to, int offset, int maxResults);
+
+	Response getContent(String path);
 }

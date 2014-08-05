@@ -184,6 +184,15 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
+	public Response getContent(String path) {
+		return webResource
+				.path(path)
+				.request()
+				.header(X_Digipost_UserId, senderAccountId)
+				.get();
+	}
+
+	@Override
 	public Recipients search(final String searchString) {
 		return webResource
 				.path(getEntryPoint().getSearchUri().getPath() + "/" + searchString)

@@ -19,6 +19,7 @@ import no.digipost.api.client.representations.DocumentEvents;
 import org.joda.time.DateTime;
 
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 
 public class DocumentCommunicator extends Communicator {
 
@@ -30,5 +31,11 @@ public class DocumentCommunicator extends Communicator {
 		Response response = apiService.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
 		checkResponse(response);
 		return response.readEntity(DocumentEvents.class);
+	}
+
+	public InputStream getContent(String path) {
+		Response response = apiService.getContent(path);
+		checkResponse(response);
+		return response.readEntity(InputStream.class);
 	}
 }

@@ -169,6 +169,11 @@ public class ApiServiceMock implements ApiService {
 				.build();
 	}
 
+	@Override
+	public Response getContent(String path) {
+		throw new NotImplementedException("This is a mock");
+	}
+
 	private Map<String, DigipostRequest> initRequestMap(final int maxSize) {
 		return Collections.synchronizedMap(new LinkedHashMap<String, DigipostRequest>() {
 			protected boolean removeEldestEntry(Map.Entry eldest) {
