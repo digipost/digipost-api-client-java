@@ -615,13 +615,16 @@
                 <xsd:element name="sender-organization" type="sender-organization" />
             </xsd:choice>
             <xsd:element name="recipient" type="message-recipient" minOccurs="1" maxOccurs="1" nillable="false"/>
-            <xsd:element name="delivery-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1" nillable="false">
-            <xsd:annotation>
-                <xsd:documentation>
-                    The time the message should be made available to the receiver.
-                    The use of this field is limited to those with explicit permission.
-                </xsd:documentation>
-            </xsd:annotation>
+            <xsd:element name="delivery-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1" nillable="false">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The delivery time of the message as it appears in the receiver's mail box.
+                        The use of this field is limited to those with explicit permission. If set in the
+                        future, the message will not appear until the set time. Setting the time to the past will
+                        cause the message to be delivered immediately (same as not setting delivery-time),
+                        but will appear as having been received at the set time.
+                    </xsd:documentation>
+                </xsd:annotation>
             </xsd:element>
 			<xsd:element name="invoicing-account" minOccurs="0" maxOccurs="1">
 				<xsd:simpleType>
@@ -632,7 +635,6 @@
 			</xsd:element>
 			<xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
-            <xsd:element name="received-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
     </xsd:complexType>
 
@@ -916,14 +918,14 @@
     </xsd:simpleType>
 
     <xsd:simpleType name="uuid">
-    	<xsd:annotation>
-    		<xsd:documentation>
-    			A UUID (Universally unique identifier). This ID must be globally unique for the sender.
-    			With Java, a UUID can be created using UUID.randomUUID(), whereas
-    			System.Guid.NewGuid() can be used in .NET C#. O og tilsvarende i andre språk.
-    		</xsd:documentation>
-    	</xsd:annotation>
-		<xsd:restriction base="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>
+                A UUID (Universally unique identifier). This ID must be globally unique for the sender.
+                With Java, a UUID can be created using UUID.randomUUID(), whereas
+                System.Guid.NewGuid() can be used in .NET C#. O og tilsvarende i andre språk.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
             <xsd:pattern value="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/>
         </xsd:restriction>
     </xsd:simpleType>

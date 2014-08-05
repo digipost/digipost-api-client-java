@@ -27,8 +27,8 @@ import java.util.List;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "deliveryDate",
-		"invoicingAccount", "primaryDocument", "attachments", "receivedDate" })
+@XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "deliveryTime",
+		"invoicingAccount", "primaryDocument", "attachments" })
 @XmlRootElement(name = "message")
 public class Message {
 
@@ -40,23 +40,19 @@ public class Message {
 	public final SenderOrganization senderOrganization;
 	@XmlElement(name = "recipient")
 	public final MessageRecipient recipient;
-	@XmlElement(name = "delivery-date", type = String.class, nillable = false)
+	@XmlElement(name = "delivery-time", type = String.class, nillable = false)
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
-	public final DateTime deliveryDate;
+	public final DateTime deliveryTime;
 	@XmlElement(name = "invoicing-account")
 	public final String invoicingAccount;
 	@XmlElement(name = "primary-document", required = true)
 	public final Document primaryDocument;
 	@XmlElement(name = "attachment")
 	public final List<Document> attachments;
-	@XmlElement(name = "received-date", type = String.class, nillable = false)
-	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
-	@XmlSchemaType(name = "dateTime")
-	public final DateTime receivedDate;
 
 	public Message() {
-		this(null, null, null, null, null, null, null, null, null);
+		this(null, null, null, null, null, null, null, null);
 	}
 
 	public static class MessageBuilder {
@@ -64,10 +60,9 @@ public class Message {
 		private Long senderId;
 		private SenderOrganization senderOrganization;
 		private MessageRecipient recipient;
-		private DateTime deliveryDate;
+		private DateTime deliveryTime;
 		private Document primaryDocument;
 		private List<Document> attachments = new ArrayList<>();
-		private DateTime receivedDate;
 		private String invoicingAccount;
 
 		private MessageBuilder(String messageId, Document primaryDocument) {
@@ -124,8 +119,8 @@ public class Message {
 			return this;
 		}
 
-		public MessageBuilder deliveryDate(DateTime deliveryDate) {
-			this.deliveryDate = deliveryDate;
+		public MessageBuilder deliveryTime(DateTime deliveryTime) {
+			this.deliveryTime = deliveryTime;
 			return this;
 		}
 
@@ -141,11 +136,6 @@ public class Message {
 			return this;
 		}
 
-		public MessageBuilder receivedDate(DateTime receivedDate) {
-			this.receivedDate = receivedDate;
-			return this;
-		}
-
 		public Message build() {
 			if (recipient == null) {
 				throw new IllegalStateException("You must specify a recipient.");
@@ -154,13 +144,13 @@ public class Message {
 				throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
 			}
 			return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments,
-					deliveryDate, invoicingAccount, receivedDate);
+					deliveryTime, invoicingAccount);
 		}
 	}
 
 	private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
-	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryDate,
-					String invoicingAccount, DateTime receivedDate) {
+	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryTime,
+					String invoicingAccount) {
 		this.messageId = messageId;
 		this.senderId = senderId;
 		this.senderOrganization = senderOrganization;
@@ -168,8 +158,7 @@ public class Message {
 		this.primaryDocument = primaryDocument;
 		this.invoicingAccount = invoicingAccount;
 		this.attachments = new ArrayList<>();
-		this.deliveryDate = deliveryDate;
-		this.receivedDate = receivedDate;
+		this.deliveryTime = deliveryTime;
 		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 	        this.attachments.add(attachment);
         }

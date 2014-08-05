@@ -117,7 +117,7 @@ public class XsdValidationTest {
 		Message message = newMessage(UUID.randomUUID().toString(), document)
 				.digipostAddress(new DigipostAddress("even.beinlaus#1234"))
 				.invoicingAccount("ACCOUNT01")
-				.deliveryDate(DateTime.now())
+				.deliveryTime(DateTime.now())
 				.build();
 		marshallAndValidate(message);
 	}
