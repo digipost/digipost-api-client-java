@@ -28,7 +28,7 @@ public class DocumentMetadata extends Representation {
 	@XmlAttribute(name = "uuid", required = true)
 	public final String uuid;
 	@XmlAttribute(name = "technical-type")
-	public final TechnicalType technicalType;
+	public final String technicalType;
 
 	@XmlElement(name = "link")
 	protected List<Link> getLinks() {
@@ -39,7 +39,7 @@ public class DocumentMetadata extends Representation {
 		this(null, null);
 	}
 
-	public DocumentMetadata(String uuid, TechnicalType technicalType, Link... links) {
+	public DocumentMetadata(String uuid, String technicalType, Link... links) {
 		super(links);
 		this.uuid = uuid;
 		this.technicalType = technicalType;

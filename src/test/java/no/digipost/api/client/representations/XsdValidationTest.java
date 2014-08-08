@@ -29,6 +29,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -106,9 +107,17 @@ public class XsdValidationTest {
 
 		primaryDocumentToPreEncrypt.setPreEncrypt();
 
+		Message messageWithTechnicalAttachment = newMessage(UUID.randomUUID().toString(),
+					new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL))
+				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+				.attachments(Collections.singleton(Document.technicalAttachment("tech-type", PDF)))
+				.build();
+
+
 		marshallAndValidate(messageWithDigipostAddress);
 		marshallAndValidate(messageWithPersonalIdentificationNumber);
 		marshallAndValidate(messageWithPreEncryptAndSenderId);
+		marshallAndValidate(messageWithTechnicalAttachment);
 	}
 
 	@Test

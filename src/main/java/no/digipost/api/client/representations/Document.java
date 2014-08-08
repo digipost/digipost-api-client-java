@@ -75,7 +75,7 @@ public class Document extends Representation {
 	}
 
 	@XmlAttribute(name = "technical-type")
-	private TechnicalType technicalType;
+	private String technicalType;
 
 	public Document() { this(null, null, null); }
 
@@ -125,7 +125,7 @@ public class Document extends Representation {
 		}
     }
 
-	public static Document technicalAttachment(TechnicalType type, FileType fileType) {
+	public static Document technicalAttachment(String type, FileType fileType) {
 		Document document = new Document(UUID.randomUUID().toString(), null, fileType);
 		document.technicalType = type;
 		return document;
@@ -157,7 +157,7 @@ public class Document extends Representation {
 		return uuid;
 	}
 
-	public TechnicalType getTechnicalType() {
+	public String getTechnicalType() {
 		return technicalType;
 	}
 
