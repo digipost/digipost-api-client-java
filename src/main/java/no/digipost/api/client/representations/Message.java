@@ -28,7 +28,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "deliveryTime",
-		"invoicingAccount", "primaryDocument", "attachments" })
+		"invoiceReference", "primaryDocument", "attachments" })
 @XmlRootElement(name = "message")
 public class Message {
 
@@ -44,8 +44,8 @@ public class Message {
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
 	public final DateTime deliveryTime;
-	@XmlElement(name = "invoicing-account")
-	public final String invoicingAccount;
+	@XmlElement(name = "invoice-reference")
+	public final String invoiceReference;
 	@XmlElement(name = "primary-document", required = true)
 	public final Document primaryDocument;
 	@XmlElement(name = "attachment")
@@ -63,7 +63,7 @@ public class Message {
 		private DateTime deliveryTime;
 		private Document primaryDocument;
 		private List<Document> attachments = new ArrayList<>();
-		private String invoicingAccount;
+		private String invoiceReference;
 
 		private MessageBuilder(String messageId, Document primaryDocument) {
 			this.messageId = messageId;
@@ -124,8 +124,8 @@ public class Message {
 			return this;
 		}
 
-		public MessageBuilder invoicingAccount(String invoicingAccount) {
-			this.invoicingAccount = invoicingAccount;
+		public MessageBuilder invoiceReference(String invoiceReference) {
+			this.invoiceReference = invoiceReference;
 			return this;
 		}
 
@@ -144,19 +144,19 @@ public class Message {
 				throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
 			}
 			return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments,
-					deliveryTime, invoicingAccount);
+					deliveryTime, invoiceReference);
 		}
 	}
 
 	private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
 	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryTime,
-					String invoicingAccount) {
+					String invoiceReference) {
 		this.messageId = messageId;
 		this.senderId = senderId;
 		this.senderOrganization = senderOrganization;
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
-		this.invoicingAccount = invoicingAccount;
+		this.invoiceReference = invoiceReference;
 		this.attachments = new ArrayList<>();
 		this.deliveryTime = deliveryTime;
 		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {

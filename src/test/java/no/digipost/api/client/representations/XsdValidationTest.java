@@ -125,7 +125,7 @@ public class XsdValidationTest {
 		Document document = new Document(UUID.randomUUID().toString(), "subject", PDF, null, null, null, TWO_FACTOR, NORMAL);
 		Message message = newMessage(UUID.randomUUID().toString(), document)
 				.digipostAddress(new DigipostAddress("even.beinlaus#1234"))
-				.invoicingAccount("ACCOUNT01")
+				.invoiceReference("ACCOUNT01")
 				.deliveryTime(DateTime.now())
 				.build();
 		marshallAndValidate(message);
