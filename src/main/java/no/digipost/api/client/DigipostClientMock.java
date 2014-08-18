@@ -60,6 +60,10 @@ public class DigipostClientMock {
 		apiService.addExpectedDocumentEvents(documentEvents);
 	}
 
+	public void addExpectedContent(byte[] content) {
+		apiService.addExpectedContent(content);
+	}
+
 	public void reset() {
 		apiService.reset();
 	}

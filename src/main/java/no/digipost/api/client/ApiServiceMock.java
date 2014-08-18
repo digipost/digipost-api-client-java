@@ -29,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -37,6 +38,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.lang.Integer.parseInt;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.util.MockfriendlyResponse.*;
 
@@ -44,6 +46,7 @@ public class ApiServiceMock implements ApiService {
 
 	private final Map<String, DigipostRequest> requests = initRequestMap(100);
 	private final Queue<DocumentEvents> expectedDocumentEvents = new ConcurrentLinkedQueue<>();
+	private final Queue<byte[]> expectedContent = new ConcurrentLinkedQueue<>();
 	private final Marshaller marshaller;
 
 	public ApiServiceMock() {
@@ -56,6 +59,7 @@ public class ApiServiceMock implements ApiService {
 	public void reset() {
 		requests.clear();
 		expectedDocumentEvents.clear();
+		expectedContent.clear();
 	}
 
 	public DigipostRequest getRequest(String messageId) {
@@ -64,6 +68,9 @@ public class ApiServiceMock implements ApiService {
 
 	public void addExpectedDocumentEvents(DocumentEvents documentEvents) {
 		expectedDocumentEvents.offer(documentEvents);
+	}
+	public void addExpectedContent(byte[] content) {
+		expectedContent.offer(content);
 	}
 
 	@Override
@@ -171,7 +178,16 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public Response getContent(String path) {
-		throw new NotImplementedException("This is a mock");
+		byte[] content = expectedContent.poll();
+		if (content != null) {
+			return MockedResponseBuilder.create()
+					.status(OK.getStatusCode())
+					.entity(new ByteArrayInputStream(content))
+					.build();
+		} else {
+			return MockedResponseBuilder.create().status(NOT_FOUND.getStatusCode()).build();
+		}
+
 	}
 
 	private Map<String, DigipostRequest> initRequestMap(final int maxSize) {
