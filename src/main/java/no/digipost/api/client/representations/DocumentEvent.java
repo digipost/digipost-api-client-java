@@ -32,23 +32,20 @@ public class DocumentEvent {
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
 	private DateTime created;
-	@XmlAttribute(name = "description")
-	private String description;
 	@XmlElement(name = "metadata")
 	private EventMetadata metadata;
 
 	public DocumentEvent() {
 	}
 
-	public DocumentEvent(String uuid, DocumentEventType type, DateTime created, String description) {
-		this(uuid, type, created, description, null);
+	public DocumentEvent(String uuid, DocumentEventType type, DateTime created) {
+		this(uuid, type, created, null);
 	}
 
-	public DocumentEvent(String uuid, DocumentEventType type, DateTime created, String description, EventMetadata metadata) {
+	public DocumentEvent(String uuid, DocumentEventType type, DateTime created, EventMetadata metadata) {
 		this.uuid = uuid;
 		this.type = type;
 		this.created = created;
-		this.description = description;
 		this.metadata = metadata;
 	}
 
@@ -62,10 +59,6 @@ public class DocumentEvent {
 
 	public DateTime getCreated() {
 		return created;
-	}
-
-	public String getDescription() {
-		return description;
 	}
 
 	public EventMetadata getMetadata() {

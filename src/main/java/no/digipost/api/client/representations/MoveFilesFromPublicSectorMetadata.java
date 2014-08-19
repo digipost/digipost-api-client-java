@@ -34,17 +34,37 @@ public class MoveFilesFromPublicSectorMetadata extends EventMetadata {
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
 	public final DateTime deliveryTime;
+	@XmlAttribute(name = "subject")
+	public final String subject;
+	@XmlAttribute(name = "sensitivity-level")
+	public final SensitivityLevel sensitivityLevel;
+	@XmlAttribute(name = "authentication-level")
+	public final AuthenticationLevel authenticationLevel;
+	@XmlElement(name = "x509Certificate")
+	public final String x509Certificate;
+	@XmlAttribute(name = "destination-mailbox")
+	public final String destinationMailbox;
+	@XmlAttribute(name = "destination-mailbox-address")
+	public final String destinationMailboxAddress;
 
 	@XmlElement(name = "document")
 	public final List<DocumentMetadata> documents;
 
 	public MoveFilesFromPublicSectorMetadata() {
-		this(null, null, new ArrayList<DocumentMetadata>());
+		this(null, null, null, null, null, null, null, null, new ArrayList<DocumentMetadata>());
 	}
 
-	public MoveFilesFromPublicSectorMetadata(Boolean opened, DateTime deliveryTime, List<DocumentMetadata> documents) {
+	public MoveFilesFromPublicSectorMetadata(Boolean opened, DateTime deliveryTime, String subject, SensitivityLevel sensitivityLevel,
+	                                         AuthenticationLevel authenticationLevel, String x509Certificate, String destinationMailbox,
+	                                         String destinationMailboxAddress, List<DocumentMetadata> documents) {
 		this.opened = opened;
 		this.deliveryTime = deliveryTime;
+		this.subject = subject;
+		this.sensitivityLevel = sensitivityLevel;
+		this.authenticationLevel = authenticationLevel;
+		this.x509Certificate = x509Certificate;
+		this.destinationMailbox = destinationMailbox;
+		this.destinationMailboxAddress = destinationMailboxAddress;
 		this.documents = documents;
 	}
 }

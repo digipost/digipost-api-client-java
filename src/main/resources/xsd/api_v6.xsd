@@ -847,7 +847,6 @@
         <xsd:attribute name="uuid" type="uuid" use="required" />
         <xsd:attribute name="type" type="event-type" use="required" />
         <xsd:attribute name="created" type="xsd:dateTime" use="required" />
-        <xsd:attribute name="description" type="xsd:string" />
     </xsd:complexType>
 
     <xsd:complexType name="event-metadata" abstract="true" />
@@ -857,9 +856,15 @@
             <xsd:extension base="event-metadata">
                 <xsd:sequence>
                     <xsd:element name="document" type="document-metadata" minOccurs="1" maxOccurs="unbounded" />
+                    <xsd:element name="x509Certificate" type="xsd:string" minOccurs="1" maxOccurs="1" />
                 </xsd:sequence>
                 <xsd:attribute name="opened" type="xsd:boolean" use="required" />
                 <xsd:attribute name="delivery-time" type="xsd:dateTime" use="required" />
+                <xsd:attribute name="subject" type="xsd:string" use="required" />
+                <xsd:attribute name="authentication-level" type="authentication-level" use="required" />
+                <xsd:attribute name="sensitivity-level" type="sensitivity-level" use="required" />
+                <xsd:attribute name="destination-mailbox" type="xsd:string" use="required" />
+                <xsd:attribute name="destination-mailbox-address" type="xsd:string" use="required" />
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
