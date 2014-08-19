@@ -15,9 +15,10 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.DigipostClientMock.ValidatingMarshaller;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.util.MockfriendlyResponse.MockedResponseBuilder;
 import org.apache.commons.lang3.NotImplementedException;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -27,12 +28,9 @@ import org.xml.sax.helpers.DefaultHandler;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -41,25 +39,31 @@ import static java.lang.Integer.parseInt;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.util.MockfriendlyResponse.*;
+import static org.apache.commons.lang3.StringUtils.join;
 
 public class ApiServiceMock implements ApiService {
 
 	private final Map<String, DigipostRequest> requests = initRequestMap(100);
 	private final Queue<DocumentEvents> expectedDocumentEvents = new ConcurrentLinkedQueue<>();
 	private final Queue<byte[]> expectedContent = new ConcurrentLinkedQueue<>();
-	private final Marshaller marshaller;
+
+	private final ValidatingMarshaller marshaller;
 
 	public ApiServiceMock() {
 		this(null);
 	}
-	public ApiServiceMock(Marshaller marshaller) {
-		this.marshaller = marshaller;
+	public ApiServiceMock(ValidatingMarshaller validatingMarshaller) {
+		this.marshaller = validatingMarshaller;
 	}
 
 	public void reset() {
 		requests.clear();
 		expectedDocumentEvents.clear();
 		expectedContent.clear();
+	}
+
+	public Map<String, DigipostRequest> getAllRequests() {
+		return requests;
 	}
 
 	public DigipostRequest getRequest(String messageId) {
@@ -94,7 +98,7 @@ public class ApiServiceMock implements ApiService {
 		}
 
 		if (marshaller != null) {
-			validateAgainstXsd(message);
+			marshaller.marshal(message, new DefaultHandler());
 		}
 
 		Response response;
@@ -192,21 +196,11 @@ public class ApiServiceMock implements ApiService {
 
 	private Map<String, DigipostRequest> initRequestMap(final int maxSize) {
 		return Collections.synchronizedMap(new LinkedHashMap<String, DigipostRequest>() {
-			protected boolean removeEldestEntry(Map.Entry eldest) {
+			@Override
+            protected boolean removeEldestEntry(Map.Entry<String, DigipostRequest> eldest) {
 				return size() > maxSize;
 			}
 		});
-	}
-
-	private void validateAgainstXsd(Message message) {
-		try {
-			marshaller.marshal(message, new DefaultHandler());
-		} catch (JAXBException e) {
-			StringWriter w = new StringWriter();
-			PrintWriter printWriter = new PrintWriter(w);
-			e.printStackTrace(printWriter);
-			throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, "DigipostClientMock failed to marshall Message to xml.\n\n" + w.toString());
-		}
 	}
 
 	public static class DigipostRequest {
@@ -217,6 +211,11 @@ public class ApiServiceMock implements ApiService {
 		public DigipostRequest(Message message, List<ContentPart> contentParts) {
 			this.message = message;
 			this.contentParts = contentParts;
+		}
+
+		@Override
+		public String toString() {
+			return "* Message:\n" + message + "* ContentParts:\n" + join(contentParts, "\n");
 		}
 	}
 
