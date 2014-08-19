@@ -39,7 +39,6 @@ import static java.lang.Integer.parseInt;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.util.MockfriendlyResponse.*;
-import static org.apache.commons.lang3.StringUtils.join;
 
 public class ApiServiceMock implements ApiService {
 
@@ -213,10 +212,6 @@ public class ApiServiceMock implements ApiService {
 			this.contentParts = contentParts;
 		}
 
-		@Override
-		public String toString() {
-			return "* Message:\n" + message + "* ContentParts:\n" + join(contentParts, "\n");
-		}
 	}
 
 	public static class ContentPart {
