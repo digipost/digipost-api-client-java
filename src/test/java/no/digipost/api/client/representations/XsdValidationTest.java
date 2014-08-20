@@ -28,13 +28,13 @@ import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+import static java.util.Arrays.asList;
+import static no.digipost.api.client.representations.AuthenticationLevel.IDPORTEN_3;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.AuthenticationLevel.TWO_FACTOR;
+import static no.digipost.api.client.representations.DocumentEventType.*;
 import static no.digipost.api.client.representations.ErrorType.CLIENT_DATA;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
@@ -162,6 +162,25 @@ public class XsdValidationTest {
 				.recipient(new MessageRecipient(new PrintDetails(address, address, B)))
 				.build();
 		marshallAndValidate(message);
+	}
+
+	@Test
+	public void validateDocumentEvents() throws JAXBException {
+		DocumentEvent openedEvent = new DocumentEvent(UUID.randomUUID().toString(), OPENED, DateTime.now());
+
+		DocumentEvent failedEmailNotificationEvent = new DocumentEvent(UUID.randomUUID().toString(), EMAIL_NOTIFICATION_FAILED, DateTime.now(),
+				new EmailNotificationFailedMetadata("emailAddress", "ERROR_CODE"));
+
+		DocumentEvent failedSmsNotificationEvent = new DocumentEvent(UUID.randomUUID().toString(), SMS_NOTIFICATION_FAILED, DateTime.now(),
+				new SmsNotificationFailedMetadata("12345678", "ERROR_CODE"));
+
+		DocumentEvent movedFilesEvent = new DocumentEvent(UUID.randomUUID().toString(), MOVE_FILES_FROM_PUBLIC_SECTOR, DateTime.now(),
+				new MoveFilesFromPublicSectorMetadata(true, DateTime.now().minusDays(3), "Subject", NORMAL, IDPORTEN_3, "fake-cert",
+						"dest-mailbox", "dest-mailbox-address", asList(new DocumentMetadata(UUID.randomUUID().toString(), null)))
+		);
+
+		DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent, failedSmsNotificationEvent, movedFilesEvent));
+		marshallAndValidate(documentEvents);
 	}
 
 	public void marshallAndValidate(final Object element) throws JAXBException {

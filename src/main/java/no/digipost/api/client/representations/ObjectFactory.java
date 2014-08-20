@@ -46,4 +46,8 @@ public class ObjectFactory {
 	public Invoice createInvoice() {
 		return new Invoice();
 	}
+
+	public DocumentEvents createDocumentEvents() {
+		return new DocumentEvents();
+	}
 }

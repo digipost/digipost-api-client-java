@@ -40,8 +40,6 @@ public class MoveFilesFromPublicSectorMetadata extends EventMetadata {
 	public final SensitivityLevel sensitivityLevel;
 	@XmlAttribute(name = "authentication-level")
 	public final AuthenticationLevel authenticationLevel;
-	@XmlElement(name = "x509Certificate")
-	public final String x509Certificate;
 	@XmlAttribute(name = "destination-mailbox")
 	public final String destinationMailbox;
 	@XmlAttribute(name = "destination-mailbox-address")
@@ -49,6 +47,8 @@ public class MoveFilesFromPublicSectorMetadata extends EventMetadata {
 
 	@XmlElement(name = "document")
 	public final List<DocumentMetadata> documents;
+	@XmlElement(name = "x509Certificate")
+	public final String x509Certificate;
 
 	public MoveFilesFromPublicSectorMetadata() {
 		this(null, null, null, null, null, null, null, null, new ArrayList<DocumentMetadata>());

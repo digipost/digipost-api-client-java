@@ -869,6 +869,24 @@
         </xsd:complexContent>
     </xsd:complexType>
 
+    <xsd:complexType name="email-notification-failed-metadata">
+        <xsd:complexContent>
+            <xsd:extension base="event-metadata">
+                <xsd:attribute name="email-address" type="xsd:string" use="required" />
+                <xsd:attribute name="error-code" type="xsd:string" use="required" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="sms-notification-failed-metadata">
+        <xsd:complexContent>
+            <xsd:extension base="event-metadata">
+                <xsd:attribute name="mobile-number" type="xsd:string" use="required" />
+                <xsd:attribute name="error-code" type="xsd:string" use="required" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
     <xsd:complexType name="document-metadata">
         <xsd:sequence>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
