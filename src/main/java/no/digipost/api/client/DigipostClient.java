@@ -34,6 +34,7 @@ import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.message.GZipEncoder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,6 +98,7 @@ public class DigipostClient {
 
 	public DigipostClient(DeliveryMethod deliveryType, String digipostUrl, long senderAccountId, Signer signer, EventLogger eventLogger, Client jerseyClient, ApiService overriddenApiService) {
 		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
+		client.register(new GZipEncoder());
 		WebTarget webTarget = client.target(digipostUrl);
 		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : overriddenApiService;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
