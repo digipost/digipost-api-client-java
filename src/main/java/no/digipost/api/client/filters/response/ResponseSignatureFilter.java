@@ -17,10 +17,6 @@ package no.digipost.api.client.filters.response;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
-import no.digipost.api.client.errorhandling.ErrorCode;
-
-import no.digipost.api.client.errorhandling.DigipostClientException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,18 +25,21 @@ import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import no.digipost.api.client.ApiService;
-import no.digipost.api.client.EventLogger;
-import no.digipost.api.client.Headers;
-import no.digipost.api.client.security.ClientResponseToVerify;
-import no.digipost.api.client.security.ResponseMessageSignatureUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.glassfish.jersey.internal.util.Base64;
-
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
+
+import no.digipost.api.client.ApiService;
+import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.Headers;
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
+import no.digipost.api.client.security.ClientResponseToVerify;
+import no.digipost.api.client.security.ResponseMessageSignatureUtil;
+
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.glassfish.jersey.internal.util.Base64;
 
 public class ResponseSignatureFilter implements ClientResponseFilter {
 
@@ -57,7 +56,7 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 	}
 
 	@Override
-	public void filter(ClientRequestContext clientRequestContext, ClientResponseContext clientResponseContext) throws IOException {
+	public void filter(final ClientRequestContext clientRequestContext, final ClientResponseContext clientResponseContext) throws IOException {
 		if ("/".equals(clientRequestContext.getUri().getPath())) {
 			eventLogger.log("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
 			return;
@@ -74,7 +73,8 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 			instance.update(signatureString.getBytes());
 			boolean verified = instance.verify(serverSignaturBytes);
 			if (!verified) {
-				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Melding fra server matcher ikke signatur.");
+				eventLogger.log("Feilet signaturvalidering fra server [" + signatureString + "] [" + serverSignaturBase64 + "]");
+				//throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Melding fra server matcher ikke signatur.");
 			} else {
 				eventLogger.log("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren " + Headers.X_Digipost_Signature
 						+ " var OK: " + new String(serverSignaturBase64));
