@@ -56,7 +56,7 @@ public class Message {
 	@XmlElement(name = "invoice-reference")
 	public final String invoiceReference;
 	@XmlElement(name = "standard-notification", defaultValue = "DEFAULT", nillable = false)
-    protected StandardNotification standardNotification;
+    public final StandardNotification standardNotification;
 	@XmlElement(name = "primary-document", required = true)
 	public final Document primaryDocument;
 	@XmlElement(name = "attachment")
