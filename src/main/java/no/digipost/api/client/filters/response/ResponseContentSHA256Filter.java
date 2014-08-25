@@ -15,30 +15,46 @@
  */
 package no.digipost.api.client.filters.response;
 
-import no.digipost.api.client.errorhandling.ErrorCode;
-
-import no.digipost.api.client.errorhandling.DigipostClientException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
-import no.digipost.api.client.Headers;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.util.encoders.Base64;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 
+import no.digipost.api.client.Headers;
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.util.encoders.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class ResponseContentSHA256Filter implements ClientResponseFilter {
+	private static final Logger LOG = LoggerFactory.getLogger(ResponseContentSHA256Filter.class);
+
+	private boolean shouldThrow = true;
+	public void setThrowOnError(final boolean shouldThrow) {
+		this.shouldThrow = shouldThrow;
+	}
+
 
 	@Override
-	public void filter(ClientRequestContext clientRequestContext, ClientResponseContext clientResponseContext) throws IOException {
+	public void filter(final ClientRequestContext clientRequestContext, final ClientResponseContext clientResponseContext) throws IOException {
 		if (clientResponseContext.hasEntity()) {
-			validerContentHash(clientResponseContext);
+			try {
+				validerContentHash(clientResponseContext);
+			} catch(Exception e) {
+				if (shouldThrow) {
+					throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk: " + e.getMessage());
+				} else {
+					LOG.warn("Feil under validering av server signatur", e);
+				}
+			}
 		}
 	}
 

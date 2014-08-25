@@ -15,32 +15,48 @@
  */
 package no.digipost.api.client.filters.response;
 
-import no.digipost.api.client.Headers;
-import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.ErrorCode;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.DateUtils;
-
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.client.ClientResponseFilter;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
-public class ResponseDateFilter implements ClientResponseFilter {
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
+import javax.ws.rs.client.ClientResponseFilter;
 
+import no.digipost.api.client.Headers;
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class ResponseDateFilter implements ClientResponseFilter {
+	private static final Logger LOG = LoggerFactory.getLogger(ResponseDateFilter.class);
 	private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
 
-	@Override
-	public void filter(ClientRequestContext clientRequestContext, ClientResponseContext clientResponseContext) throws IOException {
-		String dateHeader = clientResponseContext.getHeaders().getFirst(Headers.Date);
+	private boolean shouldThrow = true;
+	public void setThrowOnError(final boolean shouldThrow) {
+		this.shouldThrow = shouldThrow;
+	}
 
-		if(!StringUtils.isBlank(dateHeader)) {
-			sjekkDato(dateHeader);
-		} else {
-			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
-					"Mangler dato-header, så server-signatur kunne ikke sjekkes");
+	@Override
+	public void filter(final ClientRequestContext clientRequestContext, final ClientResponseContext clientResponseContext) throws IOException {
+		String dateHeader = clientResponseContext.getHeaders().getFirst(Headers.Date);
+		try {
+			if(!StringUtils.isBlank(dateHeader)) {
+				sjekkDato(dateHeader);
+			} else {
+				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
+						"Mangler dato-header, så server-signatur kunne ikke sjekkes");
+			}
+		} catch(Exception e) {
+			if (shouldThrow) {
+				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk: " + e.getMessage());
+			} else {
+				LOG.warn("Feil under validering av server signatur", e);
+			}
 		}
 	}
 

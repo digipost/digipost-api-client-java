@@ -40,8 +40,15 @@ import no.digipost.api.client.security.ResponseMessageSignatureUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.glassfish.jersey.internal.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResponseSignatureFilter implements ClientResponseFilter {
+	private static final Logger LOG = LoggerFactory.getLogger(ResponseSignatureFilter.class);
+	private boolean shouldThrow = true;
+	public void setThrowOnError(final boolean shouldThrow) {
+		this.shouldThrow = shouldThrow;
+	}
 
 	private final EventLogger eventLogger;
 	private final ApiService apiService;
@@ -62,12 +69,12 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 			return;
 		}
 
-		String serverSignaturBase64 = getServerSignaturFromResponse(clientResponseContext);
-		byte[] serverSignaturBytes = Base64.decode(serverSignaturBase64.getBytes());
-
-		String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ClientResponseToVerify(clientRequestContext, clientResponseContext));
-
 		try {
+			String serverSignaturBase64 = getServerSignaturFromResponse(clientResponseContext);
+			byte[] serverSignaturBytes = Base64.decode(serverSignaturBase64.getBytes());
+
+			String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ClientResponseToVerify(clientRequestContext, clientResponseContext));
+
 			Signature instance = Signature.getInstance("SHA256WithRSAEncryption");
 			instance.initVerify(lastSertifikat());
 			instance.update(signatureString.getBytes());
@@ -80,7 +87,11 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 						+ " var OK: " + new String(serverSignaturBase64));
 			}
 		} catch (Exception e) {
-			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk.");
+			if (shouldThrow) {
+				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk: " + e.getMessage());
+			} else {
+				LOG.warn("Feil under validering av server signatur", e);
+			}
 		}
 	}
 
