@@ -140,7 +140,7 @@ public class DigipostClient {
 	 * om den heller skal logge med log level warn.
 	 * @param throwOnError true hvis den skal kaste exception, false for warn logging
 	 */
-	public void setThrowOnResponseValidation(final boolean throwOnError) {
+	public void setThrowOnResponseValidationError(final boolean throwOnError) {
 		responseDateFilter.setThrowOnError(throwOnError);
 		responseHashFilter.setThrowOnError(throwOnError);
 		responseSignatureFilter.setThrowOnError(throwOnError);

@@ -49,11 +49,7 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 			try {
 				validerContentHash(clientResponseContext);
 			} catch(Exception e) {
-				if (shouldThrow) {
-					throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk: " + e.getMessage());
-				} else {
-					LOG.warn("Feil under validering av server signatur", e);
-				}
+				logOrThrow("Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
 			}
 		}
 	}
@@ -82,8 +78,14 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 		digest.doFinal(result, 0);
 		String ourHash = new String(Base64.encode(result));
 		if (!serverHash.equals(ourHash)) {
-			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
-					"X-Content-SHA256-header matchet ikke innholdet, så server-signatur er feil.");
+			logOrThrow("X-Content-SHA256-header matchet ikke innholdet, så server-signatur er feil.", null);
+		}
+	}
+	private void logOrThrow(final String message, final Exception e) {
+		if (shouldThrow) {
+			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, message);
+		} else {
+			LOG.warn("Feil under validering av server signatur", e);
 		}
 	}
 }

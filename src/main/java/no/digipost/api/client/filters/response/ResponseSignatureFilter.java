@@ -80,8 +80,7 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 			instance.update(signatureString.getBytes());
 			boolean verified = instance.verify(serverSignaturBytes);
 			if (!verified) {
-				eventLogger.log("Feilet signaturvalidering fra server [" + signatureString + "] [" + serverSignaturBase64 + "]");
-				//throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Melding fra server matcher ikke signatur.");
+				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Melding fra server matcher ikke signatur.");
 			} else {
 				eventLogger.log("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren " + Headers.X_Digipost_Signature
 						+ " var OK: " + new String(serverSignaturBase64));
