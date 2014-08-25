@@ -61,8 +61,8 @@ public class SmsNotification {
 	}
 
 	private SmsNotification(List<ListedTime> ats, List<Integer> afterHours, SmsOverrides overrides) {
-		this.ats = ats != null ? ats : new ArrayList<ListedTime>();
-		this.afterHours = afterHours != null ? afterHours : new ArrayList<Integer>();
+		this.ats = ats != null ? new ArrayList<>(ats) : new ArrayList<ListedTime>();
+		this.afterHours = afterHours != null ? new ArrayList<>(afterHours) : new ArrayList<Integer>();
 		this.overrides = overrides;
 	}
 

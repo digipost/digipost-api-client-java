@@ -18,74 +18,87 @@ package no.digipost.api.client.representations;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
-import static no.digipost.api.client.representations.AuthenticationLevel.IDPORTEN_3;
-import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.AuthenticationLevel.TWO_FACTOR;
+import static no.digipost.api.client.representations.AuthenticationLevel.*;
 import static no.digipost.api.client.representations.DocumentEventType.*;
 import static no.digipost.api.client.representations.ErrorType.CLIENT_DATA;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public class XsdValidationTest {
 
-	private Marshaller marshaller;
+
+    private static final Logger LOG = LoggerFactory.getLogger(XsdValidationTest.class);
+    private final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+    private Schema schema;
+    private JAXBContext jaxbContext;
+
 	private Link link;
+
 
 	@Before
 	public void setUp() throws SAXException, JAXBException {
-		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		Schema schema = schemaFactory.newSchema(getClass().getResource("/xsd/api_v6.xsd"));
-		marshaller = JAXBContext.newInstance("no.digipost.api.client.representations").createMarshaller();
-		marshaller.setSchema(schema);
+		schema = schemaFactory.newSchema(getClass().getResource("/xsd/api_v6.xsd"));
+		jaxbContext = JAXBContext.newInstance("no.digipost.api.client.representations");
 
 		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V6);
 	}
 
 	@Test
-	public void validateRecipients() throws JAXBException {
+	public void validateRecipients() {
 		Address address = new Address("Streetn", "houseNumber", "houseLetter", "additionalAddressLine", "zipCode", "city");
 		ArrayList<Address> addresses = new ArrayList<Address>();
 		addresses.add(address);
 		Recipients recipients = new Recipients();
 		Recipient recipient = new Recipient("Even", "Emmil", "Beinlaus", "even.beinlaus#1234", addresses, link);
 		recipients.add(recipient);
-		marshallAndValidate(recipients);
+		marshallValidateAndUnmarshall(recipients);
 	}
 
 	@Test
-	public void validateErrorMessage() throws JAXBException {
-		marshallAndValidate(new ErrorMessage(CLIENT_DATA, "Error message", link));
+	public void validateErrorMessage() {
+		marshallValidateAndUnmarshall(new ErrorMessage(CLIENT_DATA, "Error message", link));
 	}
 
 	@Test
-	public void validateAutocomplete() throws JAXBException {
+	public void validateAutocomplete() {
 		List<Suggestion> suggestions = new ArrayList<Suggestion>();
 		suggestions.add(new Suggestion("even", link));
-		marshallAndValidate(new Autocomplete(suggestions, link));
+		marshallValidateAndUnmarshall(new Autocomplete(suggestions, link));
 	}
 
 	@Test
-	public void validateEntryPoint() throws JAXBException {
-		marshallAndValidate(new EntryPoint("dummy certificate-PEM", link, link, link));
+	public void validateEntryPoint() {
+		marshallValidateAndUnmarshall(new EntryPoint("dummy certificate-PEM", link, link, link));
 	}
 
 	@Test
-	public void validateMessage() throws JAXBException {
+	public void validateMessage() {
 		Message messageWithDigipostAddress = newMessage(UUID.randomUUID().toString(),
 						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
 				)
@@ -97,7 +110,6 @@ public class XsdValidationTest {
 				)
 				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
 				.build();
-		marshallAndValidate(messageWithDigipostAddress);
 
 		Document primaryDocumentToPreEncrypt = new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL);
 		Message messageWithPreEncryptAndSenderId = newMessage(UUID.randomUUID().toString(), primaryDocumentToPreEncrypt)
@@ -114,58 +126,58 @@ public class XsdValidationTest {
 				.build();
 
 
-		marshallAndValidate(messageWithDigipostAddress);
-		marshallAndValidate(messageWithPersonalIdentificationNumber);
-		marshallAndValidate(messageWithPreEncryptAndSenderId);
-		marshallAndValidate(messageWithTechnicalAttachment);
+		marshallValidateAndUnmarshall(messageWithDigipostAddress);
+		marshallValidateAndUnmarshall(messageWithPersonalIdentificationNumber);
+		marshallValidateAndUnmarshall(messageWithPreEncryptAndSenderId);
+		marshallValidateAndUnmarshall(messageWithTechnicalAttachment);
 	}
 
 	@Test
-	public void validateMessage_invoicingAccount() throws JAXBException {
+	public void validateMessage_invoicingAccount() {
 		Document document = new Document(UUID.randomUUID().toString(), "subject", PDF, null, null, null, TWO_FACTOR, NORMAL);
 		Message message = newMessage(UUID.randomUUID().toString(), document)
 				.digipostAddress(new DigipostAddress("even.beinlaus#1234"))
 				.invoiceReference("ACCOUNT01")
 				.deliveryTime(DateTime.now())
 				.build();
-		marshallAndValidate(message);
+		marshallValidateAndUnmarshall(message);
 	}
 
 	@Test
-	public void validatePrintMessage() throws JAXBException {
+	public void validatePrintMessage() {
 		PrintRecipient address = new PrintRecipient("name", new NorwegianAddress("1234", "Oslo"));
 		Message message = newMessage(UUID.randomUUID().toString(),
 						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
 				)
 				.recipient(new MessageRecipient(new PrintDetails(address, address, B)))
 				.build();
-		marshallAndValidate(message);
+		marshallValidateAndUnmarshall(message);
 	}
 
 	@Test
-	public void validatePrintMessageWithForeignRecipiantWihtCountry() throws JAXBException {
+	public void validatePrintMessageWithForeignRecipiantWihtCountry() {
 		PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", "Sverige", null));
 		Message message = newMessage(UUID.randomUUID().toString(),
 						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
 				)
 				.recipient(new MessageRecipient(new PrintDetails(address, address, B)))
 				.build();
-		marshallAndValidate(message);
+		marshallValidateAndUnmarshall(message);
 	}
 
 	@Test
-	public void validatePrintMessageWithForeignRecipiantWihtCountryCode() throws JAXBException {
+	public void validatePrintMessageWithForeignRecipiantWihtCountryCode() {
 		PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", null, "SE"));
 		Message message = newMessage(UUID.randomUUID().toString(),
 						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
 				)
 				.recipient(new MessageRecipient(new PrintDetails(address, address, B)))
 				.build();
-		marshallAndValidate(message);
+		marshallValidateAndUnmarshall(message);
 	}
 
 	@Test
-	public void validateDocumentEvents() throws JAXBException {
+	public void validateDocumentEvents() {
 		DocumentEvent openedEvent = new DocumentEvent(UUID.randomUUID().toString(), OPENED, DateTime.now());
 
 		DocumentEvent failedEmailNotificationEvent = new DocumentEvent(UUID.randomUUID().toString(), EMAIL_NOTIFICATION_FAILED, DateTime.now(),
@@ -180,10 +192,36 @@ public class XsdValidationTest {
 		);
 
 		DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent, failedSmsNotificationEvent, movedFilesEvent));
-		marshallAndValidate(documentEvents);
+		marshallValidateAndUnmarshall(documentEvents);
 	}
 
-	public void marshallAndValidate(final Object element) throws JAXBException {
-		marshaller.marshal(element, new DefaultHandler());
+	public <T> T marshallValidateAndUnmarshall(T element) {
+		return marshallValidateAndUnmarshall(element, false);
+	}
+
+	public <T> T marshallValidateAndUnmarshall(T element, boolean log) {
+		InputStream in = null;
+		try (ByteArrayOutputStream resultXml = new ByteArrayOutputStream()) {
+			Marshaller marshaller = jaxbContext.createMarshaller();
+			marshaller.setSchema(schema);
+			marshaller.setProperty("jaxb.formatted.output", true);
+			marshaller.marshal(element, new StreamResult(resultXml));
+			resultXml.flush();
+			byte[] xml = resultXml.toByteArray();
+			if (log) {
+				LOG.info("Marshalled XML:\n{}", new String(xml));
+			}
+			in = new ByteArrayInputStream(xml);
+
+			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+			unmarshaller.setSchema(schema);
+			@SuppressWarnings("unchecked")
+            T unmarshalled = (T) unmarshaller.unmarshal(in);
+			return unmarshalled;
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		} finally {
+			closeQuietly(in);
+		}
 	}
 }
