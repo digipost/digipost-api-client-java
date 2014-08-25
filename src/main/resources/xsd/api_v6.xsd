@@ -621,10 +621,46 @@
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:element>
+			<xsd:element name="standard-notification" type="standard-notification" minOccurs="0" maxOccurs="1" nillable="false" default="DEFAULT">
+				<xsd:annotation>
+					<xsd:documentation>
+						Specify a set of standard notifications which will be sent to the receiver.
+						You need explicit permissions to be allowed to use this element.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
 			<xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
         </xsd:sequence>
     </xsd:complexType>
+
+    <xsd:simpleType name="standard-notification">
+    	<xsd:annotation>
+    		<xsd:documentation>
+    			Specifies a set of standard notifications which will be sent to the receiver. This is
+    			independent from any email and/or SMS notifications declared on documents.
+    		</xsd:documentation>
+    	</xsd:annotation>
+    	<xsd:restriction base="xsd:string">
+    		<xsd:enumeration value="DEFAULT" >
+    			<xsd:annotation>
+    				<xsd:documentation>
+    					The receiver will get an email when the message has arrived in the receiver's mailbox.
+    					In addition, the receiver will get reminder(s) after some time by email if the message
+    					remains unread.
+   					</xsd:documentation>
+    			</xsd:annotation>
+    		</xsd:enumeration>
+    		<xsd:enumeration value="NONE" >
+    			<xsd:annotation>
+    				<xsd:documentation>
+    					This turns off standard notifications and reminders. Any declared sms-notification and/or email-notification on
+    					document(s) will still apply.
+   					</xsd:documentation>
+    			</xsd:annotation>
+    		</xsd:enumeration>
+    	</xsd:restriction>
+    </xsd:simpleType>
 
     <xsd:complexType name="sender-organization">
         <xsd:annotation>

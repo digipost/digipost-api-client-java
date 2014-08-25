@@ -48,6 +48,9 @@ import static no.digipost.api.client.representations.Message.MessageBuilder.newM
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static org.apache.commons.io.IOUtils.closeQuietly;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
 
 public class XsdValidationTest {
 
@@ -123,13 +126,18 @@ public class XsdValidationTest {
 					new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL))
 				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
 				.attachments(Collections.singleton(Document.technicalAttachment("tech-type", PDF)))
+				.standardNotification(StandardNotification.NONE)
 				.build();
 
 
-		marshallValidateAndUnmarshall(messageWithDigipostAddress);
+		Message unmarshalled = marshallValidateAndUnmarshall(messageWithDigipostAddress);
+		assertThat("Does not include standard-notification element in XML when not set", unmarshalled.standardNotification, nullValue());
+
 		marshallValidateAndUnmarshall(messageWithPersonalIdentificationNumber);
 		marshallValidateAndUnmarshall(messageWithPreEncryptAndSenderId);
-		marshallValidateAndUnmarshall(messageWithTechnicalAttachment);
+
+		unmarshalled = marshallValidateAndUnmarshall(messageWithTechnicalAttachment);
+		assertThat(unmarshalled.standardNotification, is(StandardNotification.NONE));
 	}
 
 	@Test

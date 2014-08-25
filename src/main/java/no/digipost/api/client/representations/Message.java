@@ -20,6 +20,7 @@ import org.joda.time.DateTime;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +28,16 @@ import java.util.List;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message", propOrder = { "messageId", "senderId", "senderOrganization", "recipient", "deliveryTime",
-		"invoiceReference", "primaryDocument", "attachments" })
+@XmlType(name = "message", propOrder = {
+		"messageId",
+		"senderId",
+		"senderOrganization",
+		"recipient",
+		"deliveryTime",
+		"invoiceReference",
+		"standardNotification",
+		"primaryDocument",
+		"attachments" })
 @XmlRootElement(name = "message")
 public class Message {
 
@@ -46,13 +55,15 @@ public class Message {
 	public final DateTime deliveryTime;
 	@XmlElement(name = "invoice-reference")
 	public final String invoiceReference;
+	@XmlElement(name = "standard-notification", defaultValue = "DEFAULT", nillable = false)
+    protected StandardNotification standardNotification;
 	@XmlElement(name = "primary-document", required = true)
 	public final Document primaryDocument;
 	@XmlElement(name = "attachment")
 	public final List<Document> attachments;
 
-	public Message() {
-		this(null, null, null, null, null, null, null, null);
+	Message() {
+		this(null, null, null, null, null, null, null, null, null);
 	}
 
 	public static class MessageBuilder {
@@ -64,6 +75,7 @@ public class Message {
 		private Document primaryDocument;
 		private List<Document> attachments = new ArrayList<>();
 		private String invoiceReference;
+		private StandardNotification standardNotification;
 
 		private MessageBuilder(String messageId, Document primaryDocument) {
 			this.messageId = messageId;
@@ -129,6 +141,11 @@ public class Message {
 			return this;
 		}
 
+		public MessageBuilder standardNotification(StandardNotification standardNotification) {
+			this.standardNotification = standardNotification;
+			return this;
+		}
+
 		public MessageBuilder attachments(Iterable<? extends Document> attachments) {
 			for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 				this.attachments.add(attachment);
@@ -144,19 +161,21 @@ public class Message {
 				throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
 			}
 			return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments,
-					deliveryTime, invoiceReference);
+					deliveryTime, invoiceReference, standardNotification);
 		}
+
 	}
 
 	private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
 	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryTime,
-					String invoiceReference) {
+					String invoiceReference, StandardNotification standardNotification) {
 		this.messageId = messageId;
 		this.senderId = senderId;
 		this.senderOrganization = senderOrganization;
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
 		this.invoiceReference = invoiceReference;
+		this.standardNotification = standardNotification;
 		this.attachments = new ArrayList<>();
 		this.deliveryTime = deliveryTime;
 		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
