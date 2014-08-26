@@ -506,7 +506,7 @@
             <xsd:element name="message-id" type="xsd:string" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="delivery-method" type="delivery-method"  minOccurs="1" maxOccurs="1" />
             <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="delivery-date" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="delivery-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" />
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />

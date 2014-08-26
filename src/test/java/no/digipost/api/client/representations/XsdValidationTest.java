@@ -48,8 +48,7 @@ import static no.digipost.api.client.representations.Message.MessageBuilder.newM
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static org.apache.commons.io.IOUtils.closeQuietly;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class XsdValidationTest {
@@ -202,6 +201,21 @@ public class XsdValidationTest {
 		DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent, failedSmsNotificationEvent, movedFilesEvent));
 		marshallValidateAndUnmarshall(documentEvents);
 	}
+
+	@Test
+    public void validateMessageDelivery() {
+		DateTime deliveryTime = DateTime.now();
+		MessageDelivery delivery = new MessageDelivery(UUID.randomUUID().toString(), DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED, deliveryTime);
+		delivery.primaryDocument = new Document(UUID.randomUUID().toString(), "primary", FileType.PDF);
+		MessageDelivery unmarshalled = marshallValidateAndUnmarshall(delivery);
+		assertThat(unmarshalled, not(sameInstance(delivery)));
+		assertThat(unmarshalled.primaryDocument.uuid, is(delivery.primaryDocument.uuid));
+		assertThat(unmarshalled.primaryDocument.subject, is(delivery.primaryDocument.subject));
+		assertThat(unmarshalled.messageId, is(delivery.messageId));
+		assertThat(unmarshalled.deliveryMethod, is(delivery.deliveryMethod));
+		assertThat(unmarshalled.deliveryTime, is(delivery.deliveryTime));
+		assertThat(unmarshalled.status, is(delivery.status));
+    }
 
 	public <T> T marshallValidateAndUnmarshall(T element) {
 		return marshallValidateAndUnmarshall(element, false);

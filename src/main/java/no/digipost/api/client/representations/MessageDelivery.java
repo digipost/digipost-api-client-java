@@ -15,26 +15,20 @@
  */
 package no.digipost.api.client.representations;
 
-import static java.util.Collections.unmodifiableList;
+import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
+import org.joda.time.DateTime;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-
-import org.joda.time.DateTime;
+import static java.util.Collections.unmodifiableList;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveredDate", "primaryDocument",
+@XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveryTime", "primaryDocument",
 		"attachments", "links" })
 @XmlRootElement(name = "message-delivery")
 public class MessageDelivery extends Representation {
@@ -45,10 +39,10 @@ public class MessageDelivery extends Representation {
 	protected DeliveryMethod deliveryMethod;
 	@XmlElement(required = true)
 	protected MessageStatus status;
-	@XmlElement(name = "delivered-date", type = String.class, nillable = false)
+	@XmlElement(name = "delivery-time", type = String.class, nillable = false)
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
-	protected DateTime deliveredDate;
+	protected DateTime deliveryTime;
 	@XmlElement(name = "primary-document", required = true)
 	protected Document primaryDocument;
 	@XmlElement(name = "attachment")
@@ -57,11 +51,11 @@ public class MessageDelivery extends Representation {
 	public MessageDelivery() {
 	}
 
-	public MessageDelivery(String messageId, DeliveryMethod deliveryMethod, MessageStatus status, DateTime deliveredDate) {
+	public MessageDelivery(String messageId, DeliveryMethod deliveryMethod, MessageStatus status, DateTime deliveryTime) {
 		this.messageId = messageId;
 		this.deliveryMethod = deliveryMethod;
 		this.status = status;
-		this.deliveredDate = deliveredDate;
+		this.deliveryTime = deliveryTime;
 	}
 
 	@XmlElement(name = "link")
@@ -102,7 +96,7 @@ public class MessageDelivery extends Representation {
 	}
 
 	public boolean isAlreadyDeliveredToDigipost() {
-		return DeliveryMethod.DIGIPOST.equals(deliveryMethod) && deliveredDate != null;
+		return DeliveryMethod.DIGIPOST.equals(deliveryMethod) && deliveryTime != null;
 	}
 
 	public Link getSelfLink() {
@@ -113,8 +107,8 @@ public class MessageDelivery extends Representation {
 		return deliveryMethod;
 	}
 
-	public DateTime getDeliveredDate() {
-		return deliveredDate;
+	public DateTime getDeliveryTime() {
+		return deliveryTime;
 	}
 
 	public Document getPrimaryDocument() {

@@ -39,6 +39,10 @@ public class ObjectFactory {
 		return new Message();
 	}
 
+	public MessageDelivery createMessageDelivery() {
+		return new MessageDelivery();
+	}
+
 	public EntryPoint createEntryPoint() {
 		return new EntryPoint();
 	}

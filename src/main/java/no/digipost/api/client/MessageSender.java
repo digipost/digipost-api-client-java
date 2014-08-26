@@ -137,14 +137,14 @@ public class MessageSender extends Communicator {
 		case DELIVERED: {
 			String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til mottaker den [%s]. "
 					+ "Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(),
-					existingMessage.getDeliveredDate());
+					existingMessage.getDeliveryTime());
 			log(errorMessage);
 			throw new DigipostClientException(ErrorCode.DIGIPOST_MESSAGE_ALREADY_DELIVERED, errorMessage);
 		}
 		case DELIVERED_TO_PRINT: {
 			String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til print den [%s]. "
 					+ "Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(),
-					existingMessage.getDeliveredDate());
+					existingMessage.getDeliveryTime());
 			log(errorMessage);
 			throw new DigipostClientException(ErrorCode.PRINT_MESSAGE_ALREADY_DELIVERED, errorMessage);
 		}
