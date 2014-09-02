@@ -15,21 +15,22 @@
  */
 package no.digipost.api.client.errorhandling;
 
-import no.digipost.api.client.representations.ErrorType;
-
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static no.digipost.api.client.representations.ErrorType.*;
+import static no.digipost.api.client.errorhandling.ErrorType.*;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCause;
 
 public enum ErrorCode {
 
+	// Internal client errors
+	CLIENT_ERROR(CLIENT_TECHNICAL),
+
 	// Server errors
-	GENERAL_ERROR(SERVER),
+	GENERAL_ERROR(UNKNOWN),
 	API_UNAVAILABLE(SERVER),
 	SERVER_ERROR(SERVER),
 
@@ -124,7 +125,7 @@ public enum ErrorCode {
 		this.fittingThrowables = asList(fittingThrowables);
 	}
 
-	public ErrorType getErrorType() {
+	public ErrorType getOverriddenErrorType() {
 		return errorType;
 	}
 

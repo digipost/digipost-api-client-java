@@ -16,32 +16,34 @@
 package no.digipost.api.client.errorhandling;
 
 import no.digipost.api.client.representations.ErrorMessage;
-import no.digipost.api.client.representations.ErrorType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import static java.util.Arrays.asList;
+import static no.digipost.api.client.errorhandling.ErrorType.*;
 
 public class DigipostClientException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	private final ErrorCode errorCode;
+	private final ErrorType errorType;
 	private final String errorMessage;
 
 	public DigipostClientException(ErrorMessage error) {
-		this(ErrorCode.resolve(error.getErrorCode()), getMessage(error), null);
+		this(ErrorCode.resolve(error.getErrorCode()), resolve(error.getErrorType()), getMessage(error), null);
 	}
 
 	public DigipostClientException(ErrorCode code, Throwable cause) {
-		this(code, getMessage(cause), cause);
+		this(code, NONE, getMessage(cause), cause);
 	}
 
 	public DigipostClientException(ErrorCode code, String message) {
-		this(code, message, null);
+		this(code, NONE, message, null);
 	}
 
-	private DigipostClientException(ErrorCode code, String message, Throwable cause) {
+	private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, Throwable cause) {
 		super(code + ": " + message, cause);
 		this.errorCode = code;
+		this.errorType = code.getOverriddenErrorType() == UNKNOWN ? errorTypeFromServer : code.getOverriddenErrorType();
 		this.errorMessage = message;
 	}
 
@@ -67,7 +69,7 @@ public class DigipostClientException extends RuntimeException {
 	}
 
 	public ErrorType getErrorType() {
-		return errorCode.getErrorType();
+		return errorType;
 	}
 
 	private static String getMessage(Throwable t) {
@@ -76,7 +78,11 @@ public class DigipostClientException extends RuntimeException {
 	}
 
 	private static String getMessage(ErrorMessage error) {
-		return (ErrorCode.isKnown(error.getErrorCode()) ? "" : "(unknown errorcode: " + error.getErrorCode() + ") ") + error.getErrorMessage();
+		String prefix = "";
+		if (!ErrorCode.isKnown(error.getErrorCode())) {
+			prefix = String.format("(unknown errorcode: %s with errorType: %s) ", error.getErrorCode(), error.getErrorType().name());
+		}
+		return prefix + error.getErrorMessage();
 	}
 
 }

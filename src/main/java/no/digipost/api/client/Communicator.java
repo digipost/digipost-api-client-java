@@ -94,7 +94,7 @@ public abstract class Communicator {
 		try {
 			return response.readEntity(ErrorMessage.class);
 		} catch (ProcessingException | IllegalStateException | WebApplicationException e) {
-			return new ErrorMessage(SERVER, "Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.");
+			return new ErrorMessage(SERVER, ErrorCode.SERVER_ERROR.name(), "Det skjedde en feil på serveren, men klienten kunne ikke lese responsen.");
 		}
 	}
 

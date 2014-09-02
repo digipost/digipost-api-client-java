@@ -89,6 +89,10 @@ public class ErrorMessage extends Representation {
 		return errorCode;
 	}
 
+	public ErrorType getErrorType() {
+		return errorType;
+	}
+
 	@XmlElement(name = "link")
 	public List<Link> getLink() {
 		return links;

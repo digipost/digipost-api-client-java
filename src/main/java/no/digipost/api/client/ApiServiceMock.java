@@ -19,6 +19,7 @@ import no.digipost.api.client.DigipostClientMock.ValidatingMarshaller;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.util.MockfriendlyResponse.MockedResponseBuilder;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -110,8 +111,9 @@ public class ApiServiceMock implements ApiService {
 			String[] split = subject.split(":");
 			if (ErrorCode.isKnown(split[1])) {
 				ErrorCode errorCode = ErrorCode.resolve(split[1]);
+				ErrorType translated = EnumUtils.getEnum(ErrorType.class, errorCode.getOverriddenErrorType().name());
 				response = MockedResponseBuilder.create().status(parseInt(split[0]))
-						.entity(new ErrorMessage(errorCode.getErrorType(), errorCode.name(), "Generic error-message from digipost-api-client-mock")).build();
+						.entity(new ErrorMessage(translated != null ? translated : ErrorType.SERVER, errorCode.name(), "Generic error-message from digipost-api-client-mock")).build();
 			} else {
 				throw new IllegalArgumentException("ErrorCode " + split[1] + " is unknown");
 			}

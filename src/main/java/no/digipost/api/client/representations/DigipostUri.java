@@ -33,7 +33,7 @@ public class DigipostUri {
 		try {
 			this.uri = new URI(uri);
 		} catch (URISyntaxException e) {
-			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
+			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, e.getMessage());
 		}
 	}
 
