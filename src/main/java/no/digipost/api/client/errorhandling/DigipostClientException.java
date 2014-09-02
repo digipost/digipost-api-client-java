@@ -19,6 +19,8 @@ import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.ErrorType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import static java.util.Arrays.asList;
+
 public class DigipostClientException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
@@ -41,6 +43,19 @@ public class DigipostClientException extends RuntimeException {
 		super(code + ": " + message, cause);
 		this.errorCode = code;
 		this.errorMessage = message;
+	}
+
+	public boolean isOneOf(ErrorCode ... codes) {
+		return isOneOf(asList(codes));
+	}
+
+	public boolean isOneOf(Iterable<ErrorCode> codes) {
+		for (ErrorCode code : codes) {
+			if (code == errorCode) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public ErrorCode getErrorCode() {
