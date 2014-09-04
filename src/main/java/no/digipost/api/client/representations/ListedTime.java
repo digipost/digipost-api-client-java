@@ -15,56 +15,89 @@
  */
 package no.digipost.api.client.representations;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
+import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
+import org.joda.time.*;
+
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.DateTime;
+import java.util.Objects;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "listedTime")
-public class ListedTime {
+public final class ListedTime implements ReadableInstant {
 
     @XmlAttribute(name = "time")
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    protected DateTime time;
-
-	ListedTime() {
-
-	}
+    public final DateTime time;
 
 	public ListedTime(DateTime atTime) {
 		this.time = atTime;
 	}
 
-    /**
-     * Gets the value of the time property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public DateTime getTime() {
-        return time;
+    @Override
+    public final boolean equals(Object obj) {
+    	if (obj instanceof ListedTime) {
+    		return Objects.equals(this.time, ((ListedTime) obj).time);
+    	}
+    	return false;
     }
 
-    /**
-     * Sets the value of the time property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setTime(DateTime value) {
-        this.time = value;
+    @Override
+    public final int hashCode() {
+    	return Objects.hashCode(time);
+    }
+
+	@Override
+    public int compareTo(ReadableInstant o) {
+		return time.compareTo(o);
+    }
+
+	@Override
+    public long getMillis() {
+		return time.getMillis();
+    }
+
+	@Override
+    public Chronology getChronology() {
+		return time.getChronology();
+    }
+
+	@Override
+    public DateTimeZone getZone() {
+		return time.getZone();
+    }
+
+	@Override
+    public int get(DateTimeFieldType type) {
+		return time.get(type);
+    }
+
+	@Override
+    public boolean isSupported(DateTimeFieldType field) {
+		return time.isSupported(field);
+    }
+
+	@Override
+    public Instant toInstant() {
+		return time.toInstant();
+    }
+
+	@Override
+    public boolean isEqual(ReadableInstant instant) {
+		return time.isEqual(instant);
+    }
+
+	@Override
+    public boolean isAfter(ReadableInstant instant) {
+		return time.isAfter(instant);
+    }
+
+	@Override
+    public boolean isBefore(ReadableInstant instant) {
+		return time.isBefore(instant);
     }
 
 }
