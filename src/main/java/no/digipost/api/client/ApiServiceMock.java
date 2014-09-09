@@ -26,12 +26,12 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -39,42 +39,34 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.lang.Integer.parseInt;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
-import static no.digipost.api.client.util.MockfriendlyResponse.*;
+import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
+import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 
 public class ApiServiceMock implements ApiService {
 
-	private final Map<String, DigipostRequest> requests = initRequestMap(100);
-	private final Queue<DocumentEvents> expectedDocumentEvents = new ConcurrentLinkedQueue<>();
-	private final Queue<byte[]> expectedContent = new ConcurrentLinkedQueue<>();
+	public enum Method {
+		GET_CONTENT,
+		MULTIPART_MESSAGE,
+		GET_DOCUMENTS_EVENTS
+	}
 
+	final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
 	private final ValidatingMarshaller marshaller;
 
-	public ApiServiceMock() {
-		this(null);
-	}
 	public ApiServiceMock(ValidatingMarshaller validatingMarshaller) {
 		this.marshaller = validatingMarshaller;
+		init();
+	}
+
+	private void init() {
+		requestsAndResponsesMap.clear();
+		requestsAndResponsesMap.put(Method.GET_CONTENT, new RequestsAndResponses());
+		requestsAndResponsesMap.put(Method.GET_DOCUMENTS_EVENTS, new RequestsAndResponses());
+		requestsAndResponsesMap.put(Method.MULTIPART_MESSAGE, new RequestsAndResponses(new MultipartRequestMatcher()));
 	}
 
 	public void reset() {
-		requests.clear();
-		expectedDocumentEvents.clear();
-		expectedContent.clear();
-	}
-
-	public Map<String, DigipostRequest> getAllRequests() {
-		return requests;
-	}
-
-	public DigipostRequest getRequest(String messageId) {
-		return requests.get(messageId);
-	}
-
-	public void addExpectedDocumentEvents(DocumentEvents documentEvents) {
-		expectedDocumentEvents.offer(documentEvents);
-	}
-	public void addExpectedContent(byte[] content) {
-		expectedContent.offer(content);
+		init();
 	}
 
 	@Override
@@ -101,26 +93,11 @@ public class ApiServiceMock implements ApiService {
 			marshaller.marshal(message, new DefaultHandler());
 		}
 
-		Response response;
 		String subject = message.primaryDocument.subject;
-		if (responses.containsKey(subject)) {
-			response = responses.get(subject);
-		} else if (errors.containsKey(subject)) {
-			throw errors.get(subject);
-		} else if (subject.matches("^[0-9]{3}:(.)+")) {
-			String[] split = subject.split(":");
-			if (ErrorCode.isKnown(split[1])) {
-				ErrorCode errorCode = ErrorCode.resolve(split[1]);
-				ErrorType translated = EnumUtils.getEnum(ErrorType.class, errorCode.getOverriddenErrorType().name());
-				response = MockedResponseBuilder.create().status(parseInt(split[0]))
-						.entity(new ErrorMessage(translated != null ? translated : ErrorType.SERVER, errorCode.name(), "Generic error-message from digipost-api-client-mock")).build();
-			} else {
-				throw new IllegalArgumentException("ErrorCode " + split[1] + " is unknown");
-			}
-		} else {
-			response = DEFAULT_RESPONSE;
-		}
-		requests.put(message.messageId, new DigipostRequest(message, contentParts));
+		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
+		Response response = requestsAndResponses.getResponse(subject);
+
+		requestsAndResponses.addRequest(new DigipostRequest(message, contentParts));
 		return response;
 	}
 
@@ -171,45 +148,141 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public Response getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
-		DocumentEvents next = expectedDocumentEvents.poll();
-		if (next == null) {
-			next = new DocumentEvents();
+		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.GET_DOCUMENTS_EVENTS);
+		Response response = requestsAndResponses.getResponse();
+
+		if (response != null) {
+			return response;
+		} else {
+			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new DocumentEvents()).build();
 		}
-		return MockedResponseBuilder.create()
-				.status(OK.getStatusCode())
-				.entity(next)
-				.build();
 	}
 
 	@Override
 	public Response getContent(String path) {
-		byte[] content = expectedContent.poll();
-		if (content != null) {
-			return MockedResponseBuilder.create()
-					.status(OK.getStatusCode())
-					.entity(new ByteArrayInputStream(content))
-					.build();
+		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.GET_CONTENT);
+		Response response = requestsAndResponses.getResponse();
+		if (response != null) {
+			return response;
 		} else {
 			return MockedResponseBuilder.create().status(NOT_FOUND.getStatusCode()).build();
 		}
-
 	}
 
-	private Map<String, DigipostRequest> initRequestMap(final int maxSize) {
-		return Collections.synchronizedMap(new LinkedHashMap<String, DigipostRequest>() {
-			@Override
-            protected boolean removeEldestEntry(Map.Entry<String, DigipostRequest> eldest) {
-				return size() > maxSize;
+	public static class RequestMatcher {
+		public Response findResponse(String requestString) {
+			return null;
+		}
+	}
+
+	public static class RequestsAndResponses {
+		private final Queue<Response> responseQueue = new ConcurrentLinkedQueue<>();
+		private final RequestMatcher requestMatcher;
+		private final Map<String, MockRequest> requestMap;
+
+		RequestsAndResponses() {
+			this(new RequestMatcher());
+		}
+
+		RequestsAndResponses(RequestMatcher requestMatcher) {
+			this.requestMatcher = requestMatcher;
+			this.requestMap = Collections.synchronizedMap(new LinkedHashMap<String, MockRequest>() {
+				@Override
+				protected boolean removeEldestEntry(Map.Entry<String, MockRequest> eldest) {
+					return size() > 100;
+				}
+			});
+		}
+
+		public void addExpectedResponse(Response response) {
+			responseQueue.add(response);
+		}
+
+		public Response getResponse() {
+			return getResponse("default");
+		}
+
+		public Response getResponse(String requestString) {
+			Response response = responseQueue.poll();
+			if (response != null) {
+				return response;
 			}
-		});
+
+			return requestMatcher.findResponse(requestString);
+		}
+
+		public void addRequest(MockRequest request) {
+			requestMap.put(request.getKey(), request);
+		}
+
+		public MockRequest getRequest(String requestKey) {
+			return requestMap.get(requestKey);
+		}
+
+		public Map<String, MockRequest> getRequests() {
+			return requestMap;
+		}
 	}
 
-	public static class DigipostRequest {
+	public static class MockRequest {
+		private final String key;
+
+		public MockRequest(String key) {
+			this.key = key;
+		}
+
+		public String getKey() {
+			return key;
+		}
+	}
+
+	public static class MultipartRequestMatcher extends RequestMatcher {
+
+		public static Response DEFAULT_RESPONSE = MockedResponseBuilder.create()
+				.status(OK.getStatusCode())
+				.entity(new MessageDelivery(UUID.randomUUID().toString(), DIGIPOST, COMPLETE, DateTime.now()))
+				.build();
+		public static ProcessingException CONNECTION_REFUSED = new ProcessingException(new ConnectException("Connection refused"));
+
+		public static final Map<String, Response> responses = new HashMap<>();
+		public static final Map<String, RuntimeException> errors = new HashMap<>();
+
+		static {
+			responses.put("200:OK", DEFAULT_RESPONSE);
+			errors.put("CONNECTION_REFUSED", CONNECTION_REFUSED);
+		}
+
+		@Override
+		public Response findResponse(String requestString) {
+
+			if (responses.containsKey(requestString)) {
+				return responses.get(requestString);
+			} else if (errors.containsKey(requestString)) {
+				throw errors.get(requestString);
+			} else if (requestString.matches("^[0-9]{3}:(.)+")) {
+				String[] split = requestString.split(":");
+				if (ErrorCode.isKnown(split[1])) {
+					ErrorCode errorCode = ErrorCode.resolve(split[1]);
+					ErrorType translated = EnumUtils.getEnum(ErrorType.class, errorCode.getOverriddenErrorType().name());
+					return MockedResponseBuilder.create().status(parseInt(split[0]))
+							.entity(new ErrorMessage(translated != null ? translated : ErrorType.SERVER, errorCode.name(), "Generic error-message from digipost-api-client-mock")).build();
+				} else {
+					throw new IllegalArgumentException("ErrorCode " + split[1] + " is unknown");
+				}
+			} else {
+				return DEFAULT_RESPONSE;
+			}
+
+		}
+	}
+
+	public static class DigipostRequest extends MockRequest {
 
 		public final Message message;
 		public final List<ContentPart> contentParts;
 
 		public DigipostRequest(Message message, List<ContentPart> contentParts) {
+			super(message.messageId);
 			this.message = message;
 			this.contentParts = contentParts;
 		}

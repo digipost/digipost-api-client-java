@@ -18,20 +18,21 @@ package no.digipost.api.client;
 import no.digipost.api.client.delivery.DeliveryMethod;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.DocumentEvents;
 import no.digipost.api.client.security.Signer;
 import org.xml.sax.ContentHandler;
 
+import javax.ws.rs.core.Response;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
+
+import static no.digipost.api.client.ApiServiceMock.MockRequest;
 
 /**
  * Instansierer en DigipostClient som ikke går mot faktiskt Digipost REST-api endepunkt og
@@ -60,20 +61,18 @@ public class DigipostClientMock {
 		return client;
 	}
 
-	public Map<String, ApiServiceMock.DigipostRequest> getAllRequests() {
-		return apiService.getAllRequests();
+	public Map<String, MockRequest> getAllRequests(ApiServiceMock.Method method) {
+		return apiService.requestsAndResponsesMap.get(method).getRequests();
 	}
 
-	public ApiServiceMock.DigipostRequest getRequest(String messageId) {
-		return apiService.getRequest(messageId);
+	public MockRequest getRequest(ApiServiceMock.Method method, String requestKey) {
+		return apiService.requestsAndResponsesMap.get(method).getRequest(requestKey);
 	}
 
-	public void addExpectedDocumentEvents(DocumentEvents documentEvents) {
-		apiService.addExpectedDocumentEvents(documentEvents);
-	}
+	public void addExpectedResponse(ApiServiceMock.Method method, Response response) {
+		ApiServiceMock.RequestsAndResponses requestsAndResponses = apiService.requestsAndResponsesMap.get(method);
 
-	public void addExpectedContent(byte[] content) {
-		apiService.addExpectedContent(content);
+		requestsAndResponses.addExpectedResponse(response);
 	}
 
 	public void reset() {
@@ -94,17 +93,17 @@ public class DigipostClientMock {
 
 		public void marshal(Object jaxbElement, ContentHandler handler) {
 			Marshaller marshaller;
-            try {
-	            marshaller = jaxbContext.createMarshaller();
-	            marshaller.setSchema(schema);
-	            marshaller.marshal(jaxbElement, handler);
-            } catch (JAXBException e) {
-            	StringWriter w = new StringWriter();
-    			PrintWriter printWriter = new PrintWriter(w);
-    			e.printStackTrace(printWriter);
-    			throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, "DigipostClientMock failed to marshall the " + jaxbElement.getClass().getSimpleName() + " to xml.\n\n" + w.toString());
-            }
-        }
+			try {
+				marshaller = jaxbContext.createMarshaller();
+				marshaller.setSchema(schema);
+				marshaller.marshal(jaxbElement, handler);
+			} catch (JAXBException e) {
+				StringWriter w = new StringWriter();
+				PrintWriter printWriter = new PrintWriter(w);
+				e.printStackTrace(printWriter);
+				throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, "DigipostClientMock failed to marshall the " + jaxbElement.getClass().getSimpleName() + " to xml.\n\n" + w.toString());
+			}
+		}
 
 	}
 
