@@ -30,11 +30,12 @@ import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.MultiPart;
 
 import javax.ws.rs.core.MediaType;
-
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 /**
  * Implementasjon av {@link SendableDelivery#send() selve sendingen} av
@@ -69,7 +70,7 @@ class MultipartSendMessage implements SendableDelivery {
 	    	for (Entry<Document, InputStream> document : documents.entrySet()) {
 	    		Document metadata = document.getKey();
 	    		InputStream content = document.getValue();
-	    		BodyPart bodyPart = new BodyPart(content, new MediaType("application", metadata.getDigipostFileType()));
+	    		BodyPart bodyPart = new BodyPart(content, new MediaType("application", defaultIfBlank(metadata.getDigipostFileType(), "octet-stream")));
 	    		ContentDisposition documentPart = ContentDisposition.type("attachment").fileName(metadata.uuid).build();
 	    		bodyPart.setContentDisposition(documentPart);
 	    		multiPart.bodyPart(bodyPart);
