@@ -15,14 +15,18 @@
  */
 package no.digipost.api.client.errorhandling;
 
+import static java.util.Arrays.asList;
+import static no.digipost.api.client.errorhandling.ErrorType.CLIENT_DATA;
+import static no.digipost.api.client.errorhandling.ErrorType.CLIENT_TECHNICAL;
+import static no.digipost.api.client.errorhandling.ErrorType.CONFIGURATION;
+import static no.digipost.api.client.errorhandling.ErrorType.SERVER;
+import static no.digipost.api.client.errorhandling.ErrorType.UNKNOWN;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCause;
+
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static java.util.Arrays.asList;
-import static no.digipost.api.client.errorhandling.ErrorType.*;
-import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCause;
 
 public enum ErrorCode {
 
@@ -36,6 +40,7 @@ public enum ErrorCode {
 
 	SERVER_SIGNATURE_ERROR(SERVER),
 
+
 	// Configuration errors
 	NOT_APPROVED_FOR_REST_API_USAGE(CONFIGURATION),
 	NOT_APPROVED_FOR_PRINT(CONFIGURATION),
@@ -48,6 +53,8 @@ public enum ErrorCode {
 	BROKER_NOT_AUTHORIZED(CONFIGURATION),
 	NOTIFICATION_ADDRESSES_NOT_ALLOWED(CONFIGURATION),
 	ORGANISATION_LETTERS_PER_MONTH_EXCEEDED(CONFIGURATION),
+	DELIVERY_DATE_HISTORICAL(CONFIGURATION),
+
 
 	// Client technical
 	CANNOT_PREENCRYPT(CLIENT_TECHNICAL),
@@ -120,7 +127,7 @@ public enum ErrorCode {
 	private final List<Class<? extends Throwable>> fittingThrowables;
 
 	@SafeVarargs
-	ErrorCode(ErrorType errorType, Class<? extends Throwable>... fittingThrowables) {
+	ErrorCode(final ErrorType errorType, final Class<? extends Throwable>... fittingThrowables) {
 		this.errorType = errorType;
 		this.fittingThrowables = asList(fittingThrowables);
 	}
@@ -134,12 +141,12 @@ public enum ErrorCode {
 	 *         back to {@link ErrorCode#GENERAL_ERROR GENERAL_ERROR} if no such <code>ErrorCode</code>
 	 *         is found.
 	 */
-	public static ErrorCode resolve(String errorCode) {
+	public static ErrorCode resolve(final String errorCode) {
 		ErrorCode resolved = errorByName.get(errorCode);
 		return resolved != null ? resolved : GENERAL_ERROR;
 	}
 
-	public static boolean isKnown(String errorCode) {
+	public static boolean isKnown(final String errorCode) {
 		return errorByName.containsKey(errorCode);
 	}
 
@@ -150,7 +157,7 @@ public enum ErrorCode {
 	 *         the root cause is unknown, {@link ErrorCode#GENERAL_ERROR GENERAL_ERROR} is
 	 *         returned.
 	 */
-	public static ErrorCode resolve(Throwable t) {
+	public static ErrorCode resolve(final Throwable t) {
 		Throwable rootCause = getRootCause(t);
 		Class<? extends Throwable> throwableType = (rootCause != null ? rootCause : t).getClass();
 		for (ErrorCode error : values()) {
