@@ -125,18 +125,13 @@ public class XsdValidationTest {
 					new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL))
 				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
 				.attachments(Collections.singleton(Document.technicalAttachment("tech-type", PDF)))
-				.standardNotification(StandardNotification.NONE)
 				.build();
 
 
-		Message unmarshalled = marshallValidateAndUnmarshall(messageWithDigipostAddress);
-		assertThat("Does not include standard-notification element in XML when not set", unmarshalled.standardNotification, nullValue());
-
+		marshallValidateAndUnmarshall(messageWithDigipostAddress);
 		marshallValidateAndUnmarshall(messageWithPersonalIdentificationNumber);
 		marshallValidateAndUnmarshall(messageWithPreEncryptAndSenderId);
-
-		unmarshalled = marshallValidateAndUnmarshall(messageWithTechnicalAttachment);
-		assertThat(unmarshalled.standardNotification, is(StandardNotification.NONE));
+		marshallValidateAndUnmarshall(messageWithTechnicalAttachment);
 	}
 
 	@Test

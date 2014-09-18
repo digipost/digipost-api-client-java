@@ -35,7 +35,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 		"recipient",
 		"deliveryTime",
 		"invoiceReference",
-		"standardNotification",
 		"primaryDocument",
 		"attachments" })
 @XmlRootElement(name = "message")
@@ -55,8 +54,6 @@ public class Message {
 	public final DateTime deliveryTime;
 	@XmlElement(name = "invoice-reference")
 	public final String invoiceReference;
-	@XmlElement(name = "standard-notification", defaultValue = "DEFAULT", nillable = false)
-    public final StandardNotification standardNotification;
 	@XmlElement(name = "primary-document", required = true)
 	public final Document primaryDocument;
 	@XmlElement(name = "attachment")
@@ -141,11 +138,6 @@ public class Message {
 			return this;
 		}
 
-		public MessageBuilder standardNotification(StandardNotification standardNotification) {
-			this.standardNotification = standardNotification;
-			return this;
-		}
-
 		public MessageBuilder attachments(Iterable<? extends Document> attachments) {
 			for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 				this.attachments.add(attachment);
@@ -175,7 +167,6 @@ public class Message {
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
 		this.invoiceReference = invoiceReference;
-		this.standardNotification = standardNotification;
 		this.attachments = new ArrayList<>();
 		this.deliveryTime = deliveryTime;
 		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
