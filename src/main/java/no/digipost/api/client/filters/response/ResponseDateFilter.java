@@ -15,45 +15,51 @@
  */
 package no.digipost.api.client.filters.response;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
+import java.io.IOException;
+import java.util.Date;
 
-import no.digipost.api.client.Headers;
-import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.ErrorCode;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static no.digipost.api.client.Headers.Date;
+import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.http.client.utils.DateUtils.parseDate;
+import static org.joda.time.DateTime.now;
 
 public class ResponseDateFilter implements ClientResponseFilter {
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseDateFilter.class);
 	private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
 
 	private boolean shouldThrow = true;
+
 	public void setThrowOnError(final boolean shouldThrow) {
 		this.shouldThrow = shouldThrow;
 	}
 
 	@Override
 	public void filter(final ClientRequestContext clientRequestContext, final ClientResponseContext clientResponseContext) throws IOException {
-		String dateHeader = clientResponseContext.getHeaders().getFirst(Headers.Date);
+		String dateHeader = clientResponseContext.getHeaders().getFirst(Date);
 		try {
-			if(!StringUtils.isBlank(dateHeader)) {
+			if (isNotBlank(dateHeader)) {
 				sjekkDato(dateHeader);
 			} else {
-				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
-						"Mangler dato-header, så server-signatur kunne ikke sjekkes");
+				throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+						"Mangler Date-header - server-signatur kunne ikke sjekkes");
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if (shouldThrow) {
-				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk: " + e.getMessage());
+				if (e instanceof DigipostClientException) {
+					throw (DigipostClientException) e;
+				} else {
+					throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+							"Det skjedde en feil under signatursjekk: " + e.getMessage());
+				}
 			} else {
 				LOG.warn("Feil under validering av server signatur", e);
 			}
@@ -62,31 +68,26 @@ public class ResponseDateFilter implements ClientResponseFilter {
 
 
 	private void sjekkDato(final String dateOnRFC1123Format) {
-		Date date = DateUtils.parseDate(dateOnRFC1123Format);
+		Date date = parseDate(dateOnRFC1123Format);
 		if (date == null) {
-			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
-					"Dato-header kunne ikke parses, så server-signatur kunne ikke sjekkes");
+			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+					"Date-header kunne ikke parses - server-signatur kunne ikke sjekkes");
 		}
-		sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date);
-		sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date);
+		sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, new DateTime(date));
+		sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, new DateTime(date));
 
 	}
 
-	private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final Date parsedDate) {
-		int akseptabelTidsdifferanse = AKSEPTABEL_TIDSDIFFERANSE_MINUTTER;
-		Calendar tidligsteTillatteTidspunkt = Calendar.getInstance();
-		tidligsteTillatteTidspunkt.add(Calendar.MINUTE, -akseptabelTidsdifferanse);
-		if (parsedDate.before(tidligsteTillatteTidspunkt.getTime())) {
-			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Dato-header fra server er for gammel: " + headerDate);
+	private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final DateTime parsedDate) {
+		if (parsedDate.isBefore(now().minusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
+			throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for gammel: " + headerDate);
 		}
 	}
 
-	private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final Date parsedDate) {
-		int akseptabelTidsdifferanse = AKSEPTABEL_TIDSDIFFERANSE_MINUTTER;
-		Calendar senesteTillatteTidspunkt = Calendar.getInstance();
-		senesteTillatteTidspunkt.add(Calendar.MINUTE, akseptabelTidsdifferanse);
-		if (parsedDate.after(senesteTillatteTidspunkt.getTime())) {
-			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, "Dato-header fra server er for ny: " + headerDate);
+	private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final DateTime parsedDate) {
+		if (parsedDate.isAfter(now().plusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
+			throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for ny: " + headerDate);
 		}
 	}
+
 }
