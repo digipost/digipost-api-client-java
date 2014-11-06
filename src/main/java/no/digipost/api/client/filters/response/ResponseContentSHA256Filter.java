@@ -15,29 +15,29 @@
  */
 package no.digipost.api.client.filters.response;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.client.ClientResponseFilter;
-
-import no.digipost.api.client.Headers;
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.ErrorCode;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
+import javax.ws.rs.client.ClientResponseFilter;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import static no.digipost.api.client.Headers.X_Content_SHA256;
+import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 
 public class ResponseContentSHA256Filter implements ClientResponseFilter {
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseContentSHA256Filter.class);
 
 	private boolean shouldThrow = true;
+
 	public void setThrowOnError(final boolean shouldThrow) {
 		this.shouldThrow = shouldThrow;
 	}
@@ -48,7 +48,7 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 		if (clientResponseContext.hasEntity()) {
 			try {
 				validerContentHash(clientResponseContext);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				logOrThrow("Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
 			}
 		}
@@ -56,16 +56,16 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 
 	private void validerContentHash(final ClientResponseContext response) {
 		try {
-			String hashHeader = response.getHeaders().getFirst(Headers.X_Content_SHA256);
-			if (StringUtils.isBlank(hashHeader)) {
-				throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
+			String hashHeader = response.getHeaders().getFirst(X_Content_SHA256);
+			if (isBlank(hashHeader)) {
+				throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
 						"Ikke definert X-Content-SHA256-header, så server-signatur kunne ikke sjekkes");
 			}
 			byte[] entityBytes = IOUtils.toByteArray(response.getEntityStream());
 			validerBytesMotHashHeader(hashHeader, entityBytes);
 			response.setEntityStream(new ByteArrayInputStream(entityBytes));
 		} catch (IOException e) {
-			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR,
+			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
 					"Det skjedde en feil under uthenting av innhold for validering av X-Content-SHA256-header, så server-signatur kunne ikke sjekkes");
 		}
 	}
@@ -81,9 +81,14 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 			logOrThrow("X-Content-SHA256-header matchet ikke innholdet, så server-signatur er feil.", null);
 		}
 	}
+
 	private void logOrThrow(final String message, final Exception e) {
 		if (shouldThrow) {
-			throw new DigipostClientException(ErrorCode.SERVER_SIGNATURE_ERROR, message);
+			if (e instanceof DigipostClientException) {
+				throw (DigipostClientException) e;
+			} else {
+				throw new DigipostClientException(SERVER_SIGNATURE_ERROR, message);
+			}
 		} else {
 			LOG.warn("Feil under validering av server signatur", e);
 		}
