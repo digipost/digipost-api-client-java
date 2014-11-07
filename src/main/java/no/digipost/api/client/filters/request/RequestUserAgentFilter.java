@@ -15,20 +15,21 @@
  */
 package no.digipost.api.client.filters.request;
 
-import no.digipost.api.client.Headers;
-
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import java.io.IOException;
 
+import static no.digipost.api.client.Headers.User_Agent;
+import static no.digipost.api.client.util.UserAgent.DIGIPOST_USER_AGENT;
+
 @Priority(Priorities.HEADER_DECORATOR)
 public class RequestUserAgentFilter implements ClientRequestFilter {
 
+
 	@Override
 	public void filter(ClientRequestContext clientRequestContext) throws IOException {
-		//TODO:Versjon bør vel settes på en mer fancy måte.
-		clientRequestContext.getHeaders().add(Headers.User_Agent, "Digipost API Client v.5.0.1");
+		clientRequestContext.getHeaders().add(User_Agent, DIGIPOST_USER_AGENT);
 	}
 }
