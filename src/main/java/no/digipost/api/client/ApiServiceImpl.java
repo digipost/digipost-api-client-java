@@ -38,8 +38,6 @@ import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_T
 
 public class ApiServiceImpl implements ApiService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
-
 	private static final String ENTRY_POINT = "/";
 	private final WebTarget webResource;
 	private final long senderAccountId;
