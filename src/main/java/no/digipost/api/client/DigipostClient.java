@@ -28,6 +28,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
 import no.digipost.api.client.delivery.DeliveryMethod;
@@ -83,8 +84,8 @@ public class DigipostClient {
 	private final DocumentCommunicator documentCommunicator;
 
 	private final ResponseSignatureFilter responseSignatureFilter;
-	private final ResponseContentSHA256Filter responseHashFilter;
-	private final ResponseDateFilter responseDateFilter;
+	private final ResponseContentSHA256Filter responseHashFilter = new ResponseContentSHA256Filter();
+	private final ResponseDateFilter responseDateFilter = new ResponseDateFilter();
 
 	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
 		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
@@ -106,12 +107,13 @@ public class DigipostClient {
 		this(deliveryType, digipostUrl, senderAccountId, signer, eventLogger, null, apiService);
 	}
 
-	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String sertifikatPassord, final EventLogger eventLogger, final Client jerseyClient) {
-		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, sertifikatPassord), eventLogger, jerseyClient, null);
+	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword, final EventLogger eventLogger, final Client jerseyClient) {
+		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), eventLogger, jerseyClient, null);
 	}
 
 	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final Client jerseyClient, final ApiService overriddenApiService) {
-		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
+		ClientBuilder.newClient();
+			Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
 		client.register(new GZipEncoder());
 		WebTarget webTarget = client.target(digipostUrl);
 		apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : overriddenApiService;
@@ -126,9 +128,7 @@ public class DigipostClient {
 		webTarget.register(new RequestUserAgentFilter());
 		webTarget.register(new RequestSignatureFilter(signer, eventLogger));
 
-		responseDateFilter = new ResponseDateFilter();
 		webTarget.register(responseDateFilter);
-		responseHashFilter = new ResponseContentSHA256Filter();
 		webTarget.register(responseHashFilter);
 		responseSignatureFilter = new ResponseSignatureFilter(apiService);
 		webTarget.register(responseSignatureFilter);

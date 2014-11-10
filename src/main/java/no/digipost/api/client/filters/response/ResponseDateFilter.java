@@ -16,6 +16,7 @@
 package no.digipost.api.client.filters.response;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.util.DateUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,10 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 import java.io.IOException;
-import java.util.Date;
 
 import static no.digipost.api.client.Headers.Date;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.http.client.utils.DateUtils.parseDate;
 import static org.joda.time.DateTime.now;
 
 public class ResponseDateFilter implements ClientResponseFilter {
@@ -68,14 +67,15 @@ public class ResponseDateFilter implements ClientResponseFilter {
 
 
 	private void sjekkDato(final String dateOnRFC1123Format) {
-		Date date = parseDate(dateOnRFC1123Format);
-		if (date == null) {
+		try {
+			DateTime date = DateUtils.parseDate(dateOnRFC1123Format);
+			sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date);
+			sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date);
+		} catch (IllegalArgumentException e) {
 			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
 					"Date-header kunne ikke parses - server-signatur kunne ikke sjekkes");
-		}
-		sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, new DateTime(date));
-		sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, new DateTime(date));
 
+		}
 	}
 
 	private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final DateTime parsedDate) {

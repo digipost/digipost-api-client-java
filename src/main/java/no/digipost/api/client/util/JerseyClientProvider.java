@@ -18,20 +18,15 @@ package no.digipost.api.client.util;
 
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.JerseyClient;
-import org.glassfish.jersey.client.spi.Connector;
-import org.glassfish.jersey.client.spi.ConnectorProvider;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Configuration;
 
 public class JerseyClientProvider {
 
-	private static final Integer THREADPOOL_SIZE = 100;
-	private static final Integer CONNECTION_TIMEOUT = 60000;
-	private static final Integer READ_TIMEOUT = 60000;
+	private static final Integer CONNECTION_TIMEOUT = 10000;
+	private static final Integer READ_TIMEOUT = 10000;
 
 	public static Client newClient() {
 		return newClient(CONNECTION_TIMEOUT, READ_TIMEOUT);
@@ -40,12 +35,20 @@ public class JerseyClientProvider {
 	public static Client newClient(final int connectionTimeout, final int readTimout) {
 		ClientConfig config = new ClientConfig();
 		config.register(MultiPartFeature.class);
+		config.property(ClientProperties.CONNECT_TIMEOUT, connectionTimeout);
+		config.property(ClientProperties.READ_TIMEOUT, readTimout);
 
-		Client client = ClientBuilder.newClient(config);
-		client.property(ClientProperties.ASYNC_THREADPOOL_SIZE, THREADPOOL_SIZE);
-		client.property(ClientProperties.CONNECT_TIMEOUT, connectionTimeout);
-		client.property(ClientProperties.READ_TIMEOUT, readTimout);
-		return client;
+		// TODO Ready to use Apache HTTP client whenever the HTTP header related issue in Jersey/Jax-RS is fixed
+		// Apache HTTP client
+		//config.connectorProvider(new ApacheConnectorProvider());
+		//PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+		//connectionManager.setDefaultMaxPerRoute(100);
+		//connectionManager.setMaxTotal(100);
+		//config.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
+		//config.property(ApacheClientProperties.DISABLE_COOKIES, true);
+		//config.property(ClientProperties.PROXY_URI, "http://some.proxy.example.com:3128");
+
+		return ClientBuilder.newClient(config);
 	}
 }	
 

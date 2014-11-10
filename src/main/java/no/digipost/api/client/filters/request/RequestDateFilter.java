@@ -15,16 +15,10 @@
  */
 package no.digipost.api.client.filters.request;
 
-import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
-import static no.digipost.api.client.Headers.Date;
-
-import java.io.IOException;
-import java.util.Date;
-
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.Headers;
-
-import org.apache.http.client.utils.DateUtils;
+import no.digipost.api.client.util.DateUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +26,10 @@ import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
+import java.io.IOException;
 
+import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
+import static no.digipost.api.client.Headers.Date;
 
 @Priority(Priorities.HEADER_DECORATOR)
 public class RequestDateFilter implements ClientRequestFilter {
@@ -54,7 +51,7 @@ public class RequestDateFilter implements ClientRequestFilter {
 	}
 
 	private ClientRequestContext modifyRequest(final ClientRequestContext cr) {
-		String dateOnRFC1123Format = DateUtils.formatDate(new Date());
+		String dateOnRFC1123Format = DateUtils.formatDate(DateTime.now());
 		cr.getHeaders().add(Date, dateOnRFC1123Format);
 		log(getClass().getSimpleName() + " satt headeren " + Headers.Date + "=" + dateOnRFC1123Format);
 		return cr;

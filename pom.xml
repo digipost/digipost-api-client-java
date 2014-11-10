@@ -20,12 +20,10 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jersey.version>2.12</jersey.version>
+		<jersey.version>2.13</jersey.version>
 		<joda-time.version>2.3</joda-time.version>
 		<bouncycastle.version>1.50</bouncycastle.version>
 		<commons-lang.version>3.3.1</commons-lang.version>
-		<httpclient.version>4.3.5</httpclient.version>
-		<httpcomponents.version>4.3.2</httpcomponents.version>
 		<slf4j.version>1.7.7</slf4j.version>
 		<logback.version>1.1.2</logback.version>
 		<commons-io.version>2.4</commons-io.version>
@@ -54,11 +52,6 @@
 			<version>${logback.version}</version>
 			<scope>runtime</scope>
 			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>${httpclient.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
@@ -329,13 +322,10 @@
 									<includes>
 										<include>org.bouncycastle:bcprov-jdk15on:${bouncycastle.version}:jar:compile</include>
 										<include>org.bouncycastle:bcpkix-jdk15on:${bouncycastle.version}:jar:compile</include>
-										<include>commons-codec:commons-codec:${commons-codec.version}:jar:compile</include>
 										<include>commons-io:commons-io:${commons-io.version}:jar:compile</include>
 										<include>org.apache.commons:commons-lang3:${commons-lang.version}:jar:compile</include>
 										<include>commons-logging:commons-logging:${commons-logging.version}:jar:compile</include>
 										<include>com.sun.xml.fastinfoset:FastInfoset:${FastInfoset.version}:jar:compile</include>
-										<include>org.apache.httpcomponents:httpclient:${httpclient.version}:jar:compile</include>
-										<include>org.apache.httpcomponents:httpcore:${httpcomponents.version}:jar:compile</include>
 										<include>com.sun.istack:istack-commons-runtime:${istack-commons.version}:jar:compile</include>
 										<include>javax.xml.bind:jaxb-api:${jaxb.version}:jar:compile</include>
 										<include>com.sun.xml.bind:jaxb-core:${jaxb.version}:jar:compile</include>
@@ -358,10 +348,7 @@
 										<include>org.slf4j:slf4j-api:${slf4j.version}:jar:compile</include>
 									</includes>
 									<searchTransitive>true</searchTransitive>
-									<message>Maven-avhengigheter har forandret seg. Sjekk at alle
-										lisenser er OK før distribusjon. Husk også å oppdatere fila
-										«NOTICE».
-									</message>
+									<message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før distribusjon. Husk også å oppdatere fila «NOTICE».</message>
 								</bannedDependencies>
 							</rules>
 						</configuration>
