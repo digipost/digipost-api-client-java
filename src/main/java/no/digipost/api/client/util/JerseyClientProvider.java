@@ -25,8 +25,8 @@ import javax.ws.rs.client.ClientBuilder;
 
 public class JerseyClientProvider {
 
-	private static final Integer CONNECTION_TIMEOUT = 10000;
-	private static final Integer READ_TIMEOUT = 10000;
+	private static final Integer CONNECTION_TIMEOUT = 60000;
+	private static final Integer READ_TIMEOUT = 60000;
 
 	public static Client newClient() {
 		return newClient(CONNECTION_TIMEOUT, READ_TIMEOUT);
