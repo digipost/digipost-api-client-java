@@ -22,9 +22,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
 import java.util.List;
 
+import static java.lang.String.format;
 import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -41,8 +41,7 @@ public class ErrorMessage extends Representation {
 	private ErrorType errorType;
 
 
-
-	public ErrorMessage(ErrorType errorType, String errorMessage, Link ... linker) {
+	public ErrorMessage(ErrorType errorType, String errorMessage, Link... linker) {
 		this(errorType, GENERAL_ERROR.name(), errorMessage, linker);
 	}
 
@@ -78,7 +77,7 @@ public class ErrorMessage extends Representation {
 
 	@Override
 	public String toString() {
-		return String.format(errorCode + ": " + errorMessage);
+		return format("%s: %s", errorCode, errorMessage);
 	}
 
 	public String getErrorMessage() {

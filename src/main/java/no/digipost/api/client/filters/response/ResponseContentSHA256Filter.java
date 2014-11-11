@@ -34,6 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 
 public class ResponseContentSHA256Filter implements ClientResponseFilter {
+
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseContentSHA256Filter.class);
 
 	private boolean shouldThrow = true;
@@ -59,14 +60,14 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 			String hashHeader = response.getHeaders().getFirst(X_Content_SHA256);
 			if (isBlank(hashHeader)) {
 				throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-						"Ikke definert X-Content-SHA256-header, så server-signatur kunne ikke sjekkes");
+						"Ikke definert X-Content-SHA256-header - server-signatur kunne ikke valideres");
 			}
 			byte[] entityBytes = IOUtils.toByteArray(response.getEntityStream());
 			validerBytesMotHashHeader(hashHeader, entityBytes);
 			response.setEntityStream(new ByteArrayInputStream(entityBytes));
 		} catch (IOException e) {
 			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-					"Det skjedde en feil under uthenting av innhold for validering av X-Content-SHA256-header, så server-signatur kunne ikke sjekkes");
+					"Det skjedde en feil under uthenting av innhold for validering av X-Content-SHA256-header - server-signatur kunne ikke valideres");
 		}
 	}
 
@@ -78,7 +79,8 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 		digest.doFinal(result, 0);
 		String ourHash = new String(Base64.encode(result));
 		if (!serverHash.equals(ourHash)) {
-			logOrThrow("X-Content-SHA256-header matchet ikke innholdet, så server-signatur er feil.", null);
+			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+					"X-Content-SHA256-header matchet ikke innholdet - server-signatur er feil.");
 		}
 	}
 

@@ -26,7 +26,7 @@ import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 import java.io.IOException;
 
-import static no.digipost.api.client.Headers.Date;
+import static javax.ws.rs.core.HttpHeaders.DATE;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.joda.time.DateTime.now;
@@ -43,7 +43,7 @@ public class ResponseDateFilter implements ClientResponseFilter {
 
 	@Override
 	public void filter(final ClientRequestContext clientRequestContext, final ClientResponseContext clientResponseContext) throws IOException {
-		String dateHeader = clientResponseContext.getHeaders().getFirst(Date);
+		String dateHeader = clientResponseContext.getHeaders().getFirst(DATE);
 		try {
 			if (isNotBlank(dateHeader)) {
 				sjekkDato(dateHeader);
@@ -60,7 +60,7 @@ public class ResponseDateFilter implements ClientResponseFilter {
 							"Det skjedde en feil under signatursjekk: " + e.getMessage());
 				}
 			} else {
-				LOG.warn("Feil under validering av server signatur", e);
+				LOG.warn("Feil under validering av server-signatur", e);
 			}
 		}
 	}

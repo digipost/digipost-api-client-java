@@ -64,6 +64,8 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 
 	@Override
 	public void filter(final ClientRequestContext clientRequestContext, final ClientResponseContext clientResponseContext) throws IOException {
+
+		// TODO configure this on relevant WebTarget instead
 		if ("/".equals(clientRequestContext.getUri().getPath())) {
 			eventLogger.log("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
 			return;
@@ -121,7 +123,7 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 			return sertifikat;
 		} catch (GeneralSecurityException e) {
 			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-					"Kunne ikke laste Digipost's public key - server-signatur kunne ikke sjekkes");
+					"Kunne ikke laste Digiposts public key - server-signatur kunne ikke sjekkes");
 		}
 	}
 }

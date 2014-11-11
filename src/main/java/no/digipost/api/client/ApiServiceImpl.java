@@ -33,7 +33,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
+import static java.lang.System.currentTimeMillis;
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
+import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
+import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
 
 public class ApiServiceImpl implements ApiService {
@@ -54,12 +58,12 @@ public class ApiServiceImpl implements ApiService {
 	public EntryPoint getEntryPoint() {
 		if (cachedEntryPoint == null || entryPointCacheExpired()) {
 			Response response = getEntryPointFromServer();
-			if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+			if (response.getStatus() != OK.getStatusCode()) {
 				ErrorMessage error = response.readEntity(ErrorMessage.class);
 				throw new DigipostClientException(error);
 			} else {
 				cachedEntryPoint = response.readEntity(EntryPoint.class);
-				entryPointLastCached = System.currentTimeMillis();
+				entryPointLastCached = currentTimeMillis();
 			}
 		}
 		return cachedEntryPoint;
@@ -120,7 +124,7 @@ public class ApiServiceImpl implements ApiService {
 				.path(addContentLink.getUri().getPath())
 				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
-				.post(Entity.entity(content, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+				.post(Entity.entity(content, APPLICATION_OCTET_STREAM_TYPE));
 	}
 
 	@Override
@@ -137,7 +141,7 @@ public class ApiServiceImpl implements ApiService {
 	private Link fetchAddContentLink(final Document document) {
 		Link addContentLink = document.getAddContentLink();
 		if (addContentLink == null) {
-			throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST,
+			throw new DigipostClientException(PROBLEM_WITH_REQUEST,
 					"Kan ikke legge til innhold til et dokument som ikke har en link for å gjøre dette.");
 		}
 		return addContentLink;
@@ -146,7 +150,7 @@ public class ApiServiceImpl implements ApiService {
 	private Link fetchSendLink(final MessageDelivery delivery) {
 		Link sendLink = delivery.getSendLink();
 		if (sendLink == null) {
-			throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST,
+			throw new DigipostClientException(PROBLEM_WITH_REQUEST,
 					"Kan ikke sende en forsendelse som ikke har en link for å gjøre dette.");
 		}
 		return sendLink;
@@ -215,7 +219,7 @@ public class ApiServiceImpl implements ApiService {
 
 	private boolean entryPointCacheExpired() {
 		int fiveMinutes = 300000;
-		return (System.currentTimeMillis() - entryPointLastCached) > fiveMinutes;
+		return (currentTimeMillis() - entryPointLastCached) > fiveMinutes;
 	}
 
 	@Override

@@ -15,22 +15,6 @@
  */
 package no.digipost.api.client;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
-import java.io.InputStream;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-
 import no.digipost.api.client.delivery.DeliveryMethod;
 import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery;
@@ -50,7 +34,6 @@ import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
-
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
@@ -60,6 +43,21 @@ import org.glassfish.jersey.message.GZipEncoder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import java.io.InputStream;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 
 /**
@@ -113,7 +111,7 @@ public class DigipostClient {
 
 	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final Client jerseyClient, final ApiService overriddenApiService) {
 		ClientBuilder.newClient();
-			Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
+		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
 		client.register(new GZipEncoder());
 		WebTarget webTarget = client.target(digipostUrl);
 		apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : overriddenApiService;
@@ -135,9 +133,11 @@ public class DigipostClient {
 
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
 	}
+
 	/**
 	 * Bestemmer klienten skal kaste exception ved feil under validering av serversignatur, eller
 	 * om den heller skal logge med log level warn.
+	 *
 	 * @param throwOnError true hvis den skal kaste exception, false for warn logging
 	 */
 	public void setThrowOnResponseValidationError(final boolean throwOnError) {

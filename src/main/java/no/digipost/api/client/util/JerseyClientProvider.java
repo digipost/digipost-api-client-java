@@ -16,6 +16,7 @@
 package no.digipost.api.client.util;
 
 
+import no.digipost.api.client.readers.TextErrorMessageBodyReader;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -35,6 +36,7 @@ public class JerseyClientProvider {
 	public static Client newClient(final int connectionTimeout, final int readTimout) {
 		ClientConfig config = new ClientConfig();
 		config.register(MultiPartFeature.class);
+		config.register(TextErrorMessageBodyReader.class);
 		config.property(ClientProperties.CONNECT_TIMEOUT, connectionTimeout);
 		config.property(ClientProperties.READ_TIMEOUT, readTimout);
 

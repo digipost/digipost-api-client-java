@@ -21,7 +21,7 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import java.io.IOException;
 
-import static no.digipost.api.client.Headers.User_Agent;
+import static javax.ws.rs.core.HttpHeaders.USER_AGENT;
 import static no.digipost.api.client.util.UserAgent.DIGIPOST_USER_AGENT;
 
 @Priority(Priorities.HEADER_DECORATOR)
@@ -30,6 +30,6 @@ public class RequestUserAgentFilter implements ClientRequestFilter {
 
 	@Override
 	public void filter(ClientRequestContext clientRequestContext) throws IOException {
-		clientRequestContext.getHeaders().add(User_Agent, DIGIPOST_USER_AGENT);
+		clientRequestContext.getHeaders().add(USER_AGENT, DIGIPOST_USER_AGENT);
 	}
 }
