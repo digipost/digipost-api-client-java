@@ -19,10 +19,12 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.tz.FixedDateTimeZone;
 
+import java.util.Locale;
+
 public class DateUtils {
 
 	public static final String RFC_1123_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
-	private static final DateTimeFormatter fmt = DateTimeFormat.forPattern(RFC_1123_DATE_FORMAT).withZone(FixedDateTimeZone.forID("GMT"));
+	private static final DateTimeFormatter fmt = DateTimeFormat.forPattern(RFC_1123_DATE_FORMAT).withZone(FixedDateTimeZone.forID("GMT")).withLocale(Locale.ENGLISH);
 
 	/**
 	 * Returns an RFC 1123 date format used in HTTP
