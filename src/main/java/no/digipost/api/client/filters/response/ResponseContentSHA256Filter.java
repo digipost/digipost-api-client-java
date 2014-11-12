@@ -16,6 +16,7 @@
 package no.digipost.api.client.filters.response;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.util.LoggingUtil;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Base64;
@@ -50,6 +51,7 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 			try {
 				validerContentHash(clientResponseContext);
 			} catch (Exception e) {
+				LoggingUtil.logResponse(clientResponseContext);
 				logOrThrow("Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
 			}
 		}
@@ -60,7 +62,7 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 			String hashHeader = response.getHeaders().getFirst(X_Content_SHA256);
 			if (isBlank(hashHeader)) {
 				throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-						"Ikke definert X-Content-SHA256-header - server-signatur kunne ikke valideres");
+						"Mangler X-Content-SHA256-header - server-signatur kunne ikke valideres");
 			}
 			byte[] entityBytes = IOUtils.toByteArray(response.getEntityStream());
 			validerBytesMotHashHeader(hashHeader, entityBytes);

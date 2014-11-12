@@ -17,6 +17,7 @@ package no.digipost.api.client.filters.response;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.util.DateUtils;
+import no.digipost.api.client.util.LoggingUtil;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ public class ResponseDateFilter implements ClientResponseFilter {
 						"Mangler Date-header - server-signatur kunne ikke sjekkes");
 			}
 		} catch (Exception e) {
+			LoggingUtil.logResponse(clientResponseContext);
 			if (shouldThrow) {
 				if (e instanceof DigipostClientException) {
 					throw (DigipostClientException) e;

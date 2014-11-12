@@ -20,6 +20,7 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.security.ClientResponseToVerify;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil;
+import no.digipost.api.client.util.LoggingUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.glassfish.jersey.internal.util.Base64;
 import org.slf4j.Logger;
@@ -88,6 +89,7 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 						+ " var OK: " + serverSignaturBase64);
 			}
 		} catch (Exception e) {
+			LoggingUtil.logResponse(clientResponseContext);
 			if (shouldThrow) {
 				if (e instanceof DigipostClientException) {
 					throw (DigipostClientException) e;

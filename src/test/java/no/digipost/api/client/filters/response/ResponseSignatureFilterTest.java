@@ -55,6 +55,7 @@ public class ResponseSignatureFilterTest {
 		responseSignatureFilter = new ResponseSignatureFilter(apiServiceMock);
 		responseSignatureFilter.setThrowOnError(true);
 		when(clientRequestMock.getUri()).thenReturn(new URI("/some/resource"));
+		when(clientResponseMock.getHeaders()).thenReturn(new MultivaluedHashMap<String, String>());
 	}
 
 	@Test
@@ -65,7 +66,6 @@ public class ResponseSignatureFilterTest {
 
 	@Test
 	public void skal_kaste_feil_om_server_signatur_mangler() throws IOException {
-		when(clientResponseMock.getHeaders()).thenReturn(new MultivaluedHashMap<String, String>());
 		try {
 			responseSignatureFilter.filter(clientRequestMock, clientResponseMock);
 			fail("Skulle kastet feil grunnet manglende signatur header");
