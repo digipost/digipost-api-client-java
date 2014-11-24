@@ -176,7 +176,8 @@
     <xsd:complexType name="norwegian-address">
         <xsd:sequence>
             <xsd:element name="addressline1" type="addressline" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="addressline2" type="addressline" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="addressline2" type="addressline" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="addressline3" type="addressline" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="zip-code" type="zip-code" minOccurs="1" maxOccurs="1" />
             <xsd:element name="city" type="city" minOccurs="1" maxOccurs="1" />
         </xsd:sequence>
@@ -488,8 +489,24 @@
                     </xsd:restriction>
                 </xsd:simpleType>
             </xsd:element>
+            <xsd:element name="color" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="nondeliverable-handling" type="nondeliverable-handling" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
     </xsd:complexType>
+
+
+    <xsd:simpleType name="nondeliverable-handling">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:typesafeEnumClass/>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SHRED" />
+            <xsd:enumeration value="RETURN_TO_SENDER" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
 
     <xsd:complexType name="content-hash">
         <xsd:simpleContent>
@@ -614,14 +631,14 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-			<xsd:element name="invoice-reference" minOccurs="0" maxOccurs="1">
-				<xsd:simpleType>
-					<xsd:restriction base="xsd:string">
-						<xsd:maxLength value="100"/>
-					</xsd:restriction>
-				</xsd:simpleType>
-			</xsd:element>
-			<xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <xsd:element name="invoice-reference" minOccurs="0" maxOccurs="1">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:maxLength value="100"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
         </xsd:sequence>
     </xsd:complexType>

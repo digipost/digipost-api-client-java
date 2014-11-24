@@ -26,14 +26,14 @@ public class PrintRecipientTest {
 
 	@Test
 	public void testSameRecipientAsWithNorwegianAddress() {
-		assertTrue(newNorwegianRecipient("Name", "Address1", "Address2", "Zip", "City").isSameRecipientAs(
-				newNorwegianRecipient("Name", "Address1", "Address2", "Zip", "City")));
+		assertTrue(newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City").isSameRecipientAs(
+				newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City")));
 
 		assertTrue(newNorwegianRecipient("Name", "Zip", "City").isSameRecipientAs(
-				newNorwegianRecipient("Name", "Address1", "Address2", "Zip", "City")));
+				newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City")));
 
 		assertTrue(newNorwegianRecipient("Name ", " Zip", " City ").isSameRecipientAs(
-				newNorwegianRecipient("Name", "Address1", "Address2", "Zip", "City")));
+				newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City")));
 
 		assertFalse(newNorwegianRecipient("Other name", "Zip", "City").isSameRecipientAs(newNorwegianRecipient("Name", "Zip", "City")));
 

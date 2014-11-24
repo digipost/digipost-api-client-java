@@ -25,12 +25,19 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "print-details", propOrder = {
     "recipient",
     "returnAddress",
-    "postType"
+    "postType",
+	"color",
+	"nondeliverableHandling"
 })
 public class PrintDetails {
 
 	public static enum PostType {
 		B
+	}
+
+	public static enum NondeliverableHandling {
+		RETURN_TO_SENDER,
+		SHRED
 	}
 
     @XmlElement(required = true)
@@ -39,13 +46,26 @@ public class PrintDetails {
     protected PrintRecipient returnAddress;
     @XmlElement(name = "post-type", required = true)
     protected String postType;
+	@XmlElement(name = "color")
+	protected Boolean color;
+	@XmlElement(name ="nondeliverable-handling")
+	protected String nondeliverableHandling;
+
 
 	public PrintDetails() {}
 
 	public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final PostType postType) {
+		this(recipient, returnAddress, postType, null, null);
+	}
+
+	public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final PostType postType, final Boolean color, final NondeliverableHandling nondeliverableHandling) {
 		this.recipient = recipient;
 		this.returnAddress = returnAddress;
 		this.postType = postType.name();
+		this.color = color;
+		if(nondeliverableHandling != null) {
+			this.nondeliverableHandling = nondeliverableHandling.name();
+		}
 	}
 
 	public PrintRecipient getRecipient() {
@@ -58,5 +78,13 @@ public class PrintDetails {
 
 	public PostType getPostType() {
 		return PostType.valueOf(postType);
+	}
+
+	public boolean getColor() {
+		return color;
+	}
+
+	public String getNondeliverableHandling() {
+		return nondeliverableHandling;
 	}
 }
