@@ -30,6 +30,7 @@ import java.util.UUID;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
+import static no.digipost.api.client.representations.PrintDetails.NondeliverableHandling.*;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
@@ -66,7 +67,7 @@ public class FallbackTilPrintEksempel {
 		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
 		PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer","Mottakers poststed")),
-				new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B);
+				new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B, false, RETURN_TO_SENDER);
 		String dinForsendelseId = UUID.randomUUID().toString();
 		Message message = newMessage(dinForsendelseId, primaryDocument)
 				.recipient(new MessageRecipient(pin, printDetails))
