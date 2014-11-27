@@ -476,37 +476,38 @@
         <xsd:sequence>
             <xsd:element name="recipient" type="print-recipient"  minOccurs="1" maxOccurs="1"  />
             <xsd:element name="return-address" type="print-recipient"  minOccurs="1" maxOccurs="1"  />
-            <xsd:element name="post-type"  minOccurs="1" maxOccurs="1" >
-                <xsd:annotation>
-                    <xsd:documentation>
-                        A or B for respectively A-Priority and B-Economy
-                    </xsd:documentation>
-                </xsd:annotation>
-                <xsd:simpleType>
-                    <xsd:restriction base="xsd:string">
-                        <xsd:enumeration value="A"/>
-                        <xsd:enumeration value="B"/>
-                    </xsd:restriction>
-                </xsd:simpleType>
-            </xsd:element>
-            <xsd:element name="color" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
-            <xsd:element name="nondeliverable-handling" type="nondeliverable-handling" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="post-type" type="post-type" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="color" type="print-colors" minOccurs="0" maxOccurs="1" default="MONOCHROME"/>
+            <xsd:element name="nondeliverable-handling" type="nondeliverable-handling" minOccurs="0" maxOccurs="1" default="RETURN_TO_SENDER"/>
         </xsd:sequence>
     </xsd:complexType>
 
+	<xsd:simpleType name="post-type">
+		<xsd:annotation>
+			<xsd:documentation>
+				A or B for respectively A-Priority and B-Economy
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="A" />
+			<xsd:enumeration value="B" />
+		</xsd:restriction>
+	</xsd:simpleType>
+    
+    <xsd:simpleType name="print-colors">
+    	<xsd:restriction base="xsd:string">
+    	    <xsd:enumeration value="MONOCHROME" />
+            <xsd:enumeration value="COLORS" />
+    	</xsd:restriction>
+    </xsd:simpleType>
 
     <xsd:simpleType name="nondeliverable-handling">
-        <xsd:annotation>
-            <xsd:appinfo>
-                <jaxb:typesafeEnumClass/>
-            </xsd:appinfo>
-        </xsd:annotation>
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="SHRED" />
             <xsd:enumeration value="RETURN_TO_SENDER" />
         </xsd:restriction>
     </xsd:simpleType>
-
+    
 
     <xsd:complexType name="content-hash">
         <xsd:simpleContent>
@@ -631,14 +632,14 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="invoice-reference" minOccurs="0" maxOccurs="1">
-                <xsd:simpleType>
-                    <xsd:restriction base="xsd:string">
-                        <xsd:maxLength value="100"/>
-                    </xsd:restriction>
-                </xsd:simpleType>
-            </xsd:element>
-            <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
+			<xsd:element name="invoice-reference" minOccurs="0" maxOccurs="1">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="100"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
         </xsd:sequence>
     </xsd:complexType>

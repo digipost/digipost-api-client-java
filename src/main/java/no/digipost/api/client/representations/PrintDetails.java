@@ -26,46 +26,40 @@ import javax.xml.bind.annotation.XmlType;
     "recipient",
     "returnAddress",
     "postType",
-	"color",
+	"printColors",
 	"nondeliverableHandling"
 })
 public class PrintDetails {
 
-	public static enum PostType {
-		B
-	}
+	public static enum PostType { A, B }
+	public static enum NondeliverableHandling {	RETURN_TO_SENDER, SHRED }
+	public static enum PrintColors { MONOCHROME, COLORS; }
 
-	public static enum NondeliverableHandling {
-		RETURN_TO_SENDER,
-		SHRED
-	}
 
     @XmlElement(required = true)
     protected PrintRecipient recipient;
     @XmlElement(name = "return-address", required = true)
     protected PrintRecipient returnAddress;
     @XmlElement(name = "post-type", required = true)
-    protected String postType;
+    protected PostType postType;
 	@XmlElement(name = "color")
-	protected Boolean color;
+	protected PrintColors printColors;
 	@XmlElement(name ="nondeliverable-handling")
-	protected String nondeliverableHandling;
+	protected NondeliverableHandling nondeliverableHandling;
 
 
-	public PrintDetails() {}
+	PrintDetails() {}
 
 	public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final PostType postType) {
 		this(recipient, returnAddress, postType, null, null);
 	}
 
-	public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final PostType postType, final Boolean color, final NondeliverableHandling nondeliverableHandling) {
+	public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final PostType postType, final PrintColors colors, final NondeliverableHandling nondeliverableHandling) {
 		this.recipient = recipient;
 		this.returnAddress = returnAddress;
-		this.postType = postType.name();
-		this.color = color;
-		if(nondeliverableHandling != null) {
-			this.nondeliverableHandling = nondeliverableHandling.name();
-		}
+		this.postType = postType;
+		this.printColors = colors;
+		this.nondeliverableHandling = nondeliverableHandling;
 	}
 
 	public PrintRecipient getRecipient() {
@@ -77,14 +71,14 @@ public class PrintDetails {
 	}
 
 	public PostType getPostType() {
-		return PostType.valueOf(postType);
+		return postType;
 	}
 
-	public boolean getColor() {
-		return color;
+	public PrintColors getPrintColors() {
+		return printColors;
 	}
 
-	public String getNondeliverableHandling() {
+	public NondeliverableHandling getNondeliverableHandling() {
 		return nondeliverableHandling;
 	}
 }
