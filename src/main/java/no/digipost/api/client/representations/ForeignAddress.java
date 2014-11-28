@@ -15,12 +15,15 @@
  */
 package no.digipost.api.client.representations;
 
-import static org.apache.commons.lang3.StringUtils.trimToEmpty;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "foreign-address", propOrder = { "addressline1", "addressline2", "addressline3", "addressline4", "country", "countryCode" })
@@ -39,25 +42,24 @@ public class ForeignAddress {
 	public ForeignAddress() {
 	}
 
-	public ForeignAddress(final String addressline1, final String country, final String counryCode) {
+	public ForeignAddress(String addressline1, String country, String counryCode) {
 		this(addressline1, null, null, null, country, counryCode);
 	}
 
-	public ForeignAddress(final String addressline1, final String addressline2, final String addressline3, final String addressline4, final String country,
-			final String counryCode) {
+	public ForeignAddress(String addressline1, String addressline2, String addressline3, String addressline4, String country, String countryCode) {
 		this.addressline1 = addressline1;
 		this.addressline2 = addressline2;
 		this.addressline3 = addressline3;
 		this.addressline4 = addressline4;
 		this.country = country;
-		countryCode = counryCode;
+		this.countryCode = countryCode;
 	}
 
 	public String getAddressline1() {
 		return addressline1;
 	}
 
-	public void setAddressline1(final String value) {
+	public void setAddressline1(String value) {
 		addressline1 = value;
 	}
 
@@ -65,7 +67,7 @@ public class ForeignAddress {
 		return addressline2;
 	}
 
-	public void setAddressline2(final String value) {
+	public void setAddressline2(String value) {
 		addressline2 = value;
 	}
 
@@ -73,7 +75,7 @@ public class ForeignAddress {
 		return addressline3;
 	}
 
-	public void setAddressline3(final String value) {
+	public void setAddressline3(String value) {
 		addressline3 = value;
 	}
 
@@ -81,15 +83,24 @@ public class ForeignAddress {
 		return addressline4;
 	}
 
-	public void setAddressline4(final String value) {
+	public void setAddressline4(String value) {
 		addressline4 = value;
+	}
+
+	public List<String> getAddresslines() {
+		List<String> lines = new ArrayList<>(3);
+		if (addressline1 != null) lines.add(addressline1);
+		if (addressline2 != null) lines.add(addressline2);
+		if (addressline3 != null) lines.add(addressline3);
+		if (addressline4 != null) lines.add(addressline4);
+		return lines;
 	}
 
 	public String getCountry() {
 		return country;
 	}
 
-	public void setCountry(final String value) {
+	public void setCountry(String value) {
 		country = value;
 	}
 
@@ -97,11 +108,11 @@ public class ForeignAddress {
 		return countryCode;
 	}
 
-	public void setCountryCode(final String countryCode) {
+	public void setCountryCode(String countryCode) {
 		this.countryCode = countryCode;
 	}
 
-	public boolean isSameAddressAs(final ForeignAddress other) {
+	public boolean isSameAddressAs(ForeignAddress other) {
 		return other != null && trimEquals(addressline1, other.addressline1) && trimEquals(country, other.country)
 				&& trimEquals(countryCode, other.countryCode);
 	}
