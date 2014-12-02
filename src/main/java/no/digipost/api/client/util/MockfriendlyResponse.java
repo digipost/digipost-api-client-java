@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client.util;
 
-import no.digipost.api.client.representations.DocumentEvents;
 import no.digipost.api.client.representations.MessageDelivery;
 import org.apache.commons.lang3.NotImplementedException;
 import org.joda.time.DateTime;

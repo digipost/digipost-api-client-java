@@ -15,19 +15,6 @@
  */
 package no.digipost.api.client.filters;
 
-import javax.ws.rs.core.MultivaluedMap;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 public class LoggingFilter { }
 
 /*
