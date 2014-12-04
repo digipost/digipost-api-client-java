@@ -60,7 +60,7 @@ public class Message {
 	public final List<Document> attachments;
 
 	Message() {
-		this(null, null, null, null, null, null, null, null, null);
+		this(null, null, null, null, null, null, null, null);
 	}
 
 	public static class MessageBuilder {
@@ -72,7 +72,6 @@ public class Message {
 		private Document primaryDocument;
 		private List<Document> attachments = new ArrayList<>();
 		private String invoiceReference;
-		private StandardNotification standardNotification;
 
 		private MessageBuilder(String messageId, Document primaryDocument) {
 			this.messageId = messageId;
@@ -153,14 +152,14 @@ public class Message {
 				throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
 			}
 			return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments,
-					deliveryTime, invoiceReference, standardNotification);
+					deliveryTime, invoiceReference);
 		}
 
 	}
 
 	private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
 	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryTime,
-					String invoiceReference, StandardNotification standardNotification) {
+					String invoiceReference) {
 		this.messageId = messageId;
 		this.senderId = senderId;
 		this.senderOrganization = senderOrganization;
