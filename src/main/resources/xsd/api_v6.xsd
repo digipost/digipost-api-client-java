@@ -915,34 +915,12 @@
 
     <xsd:simpleType name="event-type">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="EMAIL_NOTIFICATION_FAILED">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <jaxb:typesafeEnumMember name="EMAIL_NOTIFICATION_FAILED" />
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="SMS_NOTIFICATION_FAILED">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <jaxb:typesafeEnumMember name="SMS_NOTIFICATION_FAILED" />
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="OPENED">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <jaxb:typesafeEnumMember name="OPENED" />
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="MOVE_FILES_FROM_PUBLIC_SECTOR">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <jaxb:typesafeEnumMember name="MOVE_FILES_FROM_PUBLIC_SECTOR" />
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:enumeration>
+            <xsd:enumeration value="EMAIL_NOTIFICATION_FAILED" />
+            <xsd:enumeration value="SMS_NOTIFICATION_FAILED" />
+            <xsd:enumeration value="OPENED" />
+            <xsd:enumeration value="MOVE_FILES_FROM_PUBLIC_SECTOR" />
+            <xsd:enumeration value="POSTMARKED" />
+            <xsd:enumeration value="PRINT_FAILED" />
         </xsd:restriction>
     </xsd:simpleType>
 
