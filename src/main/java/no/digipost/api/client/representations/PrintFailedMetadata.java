@@ -18,17 +18,21 @@ package no.digipost.api.client.representations;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "event-metadata")
-@XmlSeeAlso({
-		MoveFilesFromPublicSectorMetadata.class,
-		EmailNotificationFailedMetadata.class,
-		SmsNotificationFailedMetadata.class,
-		PrintFailedMetadata.class,
-		PostmarkedMetadata.class
-})
-public abstract class EventMetadata {
+@XmlType(name = "print-failed-metadata")
+public class PrintFailedMetadata extends EventMetadata {
+
+	@XmlAttribute(name = "error-message")
+	public final String errorMessage;
+
+	public PrintFailedMetadata() {
+		this(null);
+	}
+
+	public PrintFailedMetadata(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
 }

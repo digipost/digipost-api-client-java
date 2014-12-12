@@ -16,19 +16,26 @@
 
 package no.digipost.api.client.representations;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
+import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
+import org.joda.time.DateTime;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "event-metadata")
-@XmlSeeAlso({
-		MoveFilesFromPublicSectorMetadata.class,
-		EmailNotificationFailedMetadata.class,
-		SmsNotificationFailedMetadata.class,
-		PrintFailedMetadata.class,
-		PostmarkedMetadata.class
-})
-public abstract class EventMetadata {
+@XmlType(name = "postmarked-metadata")
+public class PostmarkedMetadata extends EventMetadata {
+
+	@XmlAttribute(name = "postmarked-time", required = true)
+	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+	@XmlSchemaType(name = "dateTime")
+	public final DateTime postmarkedTime;
+
+	public PostmarkedMetadata() {
+		this(null);
+	}
+
+	public PostmarkedMetadata(DateTime postmarkedTime) {
+		this.postmarkedTime = postmarkedTime;
+	}
 }

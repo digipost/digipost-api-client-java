@@ -188,12 +188,19 @@ public class XsdValidationTest {
 		DocumentEvent failedSmsNotificationEvent = new DocumentEvent(UUID.randomUUID().toString(), SMS_NOTIFICATION_FAILED, DateTime.now(),
 				new SmsNotificationFailedMetadata("12345678", "ERROR_CODE"));
 
+		DocumentEvent printFailedEvent = new DocumentEvent(UUID.randomUUID().toString(), PRINT_FAILED, DateTime.now(),
+				new PrintFailedMetadata("Feil dimensjoner"));
+
+		DocumentEvent postmarkedEvent = new DocumentEvent(UUID.randomUUID().toString(), POSTMARKED, DateTime.now(),
+				new PostmarkedMetadata(DateTime.now()));
+
 		DocumentEvent movedFilesEvent = new DocumentEvent(UUID.randomUUID().toString(), MOVE_FILES_FROM_PUBLIC_SECTOR, DateTime.now(),
 				new MoveFilesFromPublicSectorMetadata(true, DateTime.now().minusDays(3), "Subject", NORMAL, IDPORTEN_3, "fake-cert",
 						"dest-mailbox", "dest-mailbox-address", asList(new DocumentMetadata(UUID.randomUUID().toString(), null)))
 		);
 
-		DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent, failedSmsNotificationEvent, movedFilesEvent));
+		DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent,
+				failedSmsNotificationEvent, printFailedEvent, movedFilesEvent, postmarkedEvent));
 		marshallValidateAndUnmarshall(documentEvents);
 	}
 
