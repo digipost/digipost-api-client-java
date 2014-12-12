@@ -896,6 +896,22 @@
         </xsd:complexContent>
     </xsd:complexType>
 
+	<xsd:complexType name="print-failed-metadata">
+		<xsd:complexContent>
+			<xsd:extension base="event-metadata">
+				<xsd:attribute name="error-message" type="xsd:string" use="required" />
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="postmarked-metadata">
+		<xsd:complexContent>
+			<xsd:extension base="event-metadata">
+				<xsd:attribute name="postmarked-time" type="xsd:dateTime" use="required" />
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
     <xsd:complexType name="sms-notification-failed-metadata">
         <xsd:complexContent>
             <xsd:extension base="event-metadata">
