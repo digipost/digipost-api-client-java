@@ -134,7 +134,10 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public Response getRecipientEncryptionKey(MessageRecipient recipient) {
-		return Response.ok(fakeEncryptionKey).build();
+		return MockedResponseBuilder.create()
+				.status(OK.getStatusCode())
+				.entity(fakeEncryptionKey)
+				.build();
 	}
 
 	@Override
