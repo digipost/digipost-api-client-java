@@ -47,10 +47,6 @@ final class AtomicPrintOnlyMessage extends MultipartSendMessage implements Ongoi
      */
     @Override
     public AtomicPrintOnlyMessage addContent(Document document, InputStream content) {
-		if(document.isPreEncrypt()) {
-			throw new UnsupportedOperationException(
-					"Pre-encrypt is not supported for " + DeliveryMethod.class.getSimpleName() + " " + DeliveryMethod.ATOMIC_REST);
-		}
     	add(document, content);
     	return this;
     }

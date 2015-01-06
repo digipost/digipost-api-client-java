@@ -45,10 +45,12 @@ class MultipartSendMessage implements SendableDelivery {
     private final Message message;
     private final Map<Document, InputStream> documents;
 	private final ApiService apiService;
+	private final EventLogger eventLogger;
 
 
 	MultipartSendMessage(Message message, ApiService apiService, EventLogger eventLogger) {
 		this.apiService = apiService;
+		this.eventLogger = eventLogger;
 		this.sender = new MessageSender(apiService, eventLogger);
 		this.message = message;
 		this.documents = new HashMap<>();
@@ -72,6 +74,7 @@ class MultipartSendMessage implements SendableDelivery {
 	    		Document metadata = document.getKey();
 	    		InputStream content = document.getValue();
 				if (metadata.isPreEncrypt()) {
+					eventLogger.log("Krypterer content for dokument med uuid " + metadata.uuid);
 					if (krypteringsnokkel == null) throw new IllegalStateException("Trying to preencrypt but have no encryption key.");
 					content = Encrypter.encryptContent(content, krypteringsnokkel);
 				}

@@ -15,10 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message-recipient", propOrder = {
@@ -28,6 +25,7 @@ import javax.xml.bind.annotation.XmlType;
     "organisationNumber",
     "printDetails"
 })
+@XmlRootElement(name = "message-recipient")
 public class MessageRecipient {
 
     @XmlElement(name = "name-and-address", nillable = false)

@@ -43,10 +43,6 @@ final class AtomicWithPrintFallback extends MultipartSendMessage implements Ongo
      */
     @Override
     public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
-		if(document.isPreEncrypt()) {
-			throw new UnsupportedOperationException(
-					"Pre-encrypt is not supported for " + DeliveryMethod.class.getSimpleName() + " " + DeliveryMethod.ATOMIC_REST);
-		}
     	add(document, content);
     	return this;
     }
