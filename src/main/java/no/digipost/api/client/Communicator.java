@@ -57,23 +57,6 @@ public abstract class Communicator {
 		this.eventLogger = eventLogger;
 	}
 
-	private static OutputEncryptor buildEncryptor() throws CMSException {
-		return new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
-	}
-
-	private byte[] preencrypt(final byte[] data, final String keyId, final String keyContent) throws Exception {
-		PEMParser pemParser = new PEMParser(new StringReader(keyContent));
-		SubjectPublicKeyInfo subjectPublicKeyInfo = (SubjectPublicKeyInfo) pemParser.readObject();
-		X509EncodedKeySpec spec = new X509EncodedKeySpec(subjectPublicKeyInfo.getEncoded());
-		IOUtils.closeQuietly(pemParser);
-		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
-
-		CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
-		gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(keyId.getBytes(), publicKey));
-		CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(data), buildEncryptor());
-		return d.getEncoded();
-	}
-
 	protected void checkResponse(final Response response) {
 		Status status = Status.fromStatusCode(response.getStatus());
 		if (!responseOk(status)) {
@@ -133,37 +116,6 @@ public abstract class Communicator {
 			String errorMessage = "Forsendelse med id [" + message.messageId + "] finnes fra før med annen spesifikasjon.";
 			log(errorMessage);
 			throw new DigipostClientException(ErrorCode.DUPLICATE_MESSAGE, errorMessage);
-		}
-	}
-
-	protected void checkThatMessageCanBePreEncrypted(final Document document) {
-		Link encryptionKeyLink = document.getEncryptionKeyLink();
-		if (encryptionKeyLink == null) {
-			String errorMessage = "Document med id [" + document.getUuid() + "] kan ikke prekrypteres.";
-			log(errorMessage);
-			throw new DigipostClientException(ErrorCode.CANNOT_PREENCRYPT, errorMessage);
-		}
-	}
-
-	/**
-	 * Henter brukers public nøkkel fra serveren og krypterer brevet som skal
-	 * sendes med denne.
-	 */
-	public InputStream fetchKeyAndEncrypt(final Document document, final InputStream content) {
-		checkThatMessageCanBePreEncrypted(document);
-
-		Response encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri());
-
-		checkResponse(encryptionKeyResponse);
-
-		EncryptionKey key = encryptionKeyResponse.readEntity(EncryptionKey.class);
-
-		try {
-			byte[] encryptedContent = preencrypt(IOUtils.toByteArray(content), key.getKeyId(), key.getValue());
-			return new ByteArrayInputStream(encryptedContent);
-		} catch (Exception e) {
-			logThrowable(e);
-			throw new DigipostClientException(ErrorCode.FAILED_PREENCRYPTION, "Inneholdet kunne ikke prekrypteres.");
 		}
 	}
 

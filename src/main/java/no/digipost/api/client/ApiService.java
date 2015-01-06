@@ -63,6 +63,13 @@ public interface ApiService {
 	Response multipartMessage(MultiPart multiPart);
 
 	/**
+	 * Henter publik del av krypteringsnøkkel for spesifisert mottaker.
+	 * Nøkkelen brukes for å kryptere dokument-innhold for dokumenter som
+	 * skal prekrypteres.
+	 */
+	Response getRecipientEncryptionKey(MessageRecipient recipient);
+
+	/**
 	 * Oppretter en ny forsendelsesressurs på serveren ved å sende en
 	 * POST-forespørsel.
 	 */

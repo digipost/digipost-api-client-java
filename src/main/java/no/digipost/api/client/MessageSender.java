@@ -18,9 +18,11 @@ package no.digipost.api.client;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.util.Encrypter;
 import org.glassfish.jersey.media.multipart.MultiPart;
 
 import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 public class MessageSender extends Communicator {
@@ -117,6 +119,45 @@ public class MessageSender extends Communicator {
 			delivery = uploadContent(message, document, unencryptetContent);
 		}
 		return delivery;
+	}
+
+	protected void checkThatMessageCanBePreEncrypted(final Document document) {
+		Link encryptionKeyLink = document.getEncryptionKeyLink();
+		if (encryptionKeyLink == null) {
+			String errorMessage = "Document med id [" + document.getUuid() + "] kan ikke prekrypteres.";
+			log(errorMessage);
+			throw new DigipostClientException(ErrorCode.CANNOT_PREENCRYPT, errorMessage);
+		}
+	}
+
+	/**
+	 * Henter brukers public nøkkel fra serveren og krypterer brevet som skal
+	 * sendes med denne.
+	 */
+	public InputStream fetchKeyAndEncrypt(final Document document, final InputStream content) {
+		checkThatMessageCanBePreEncrypted(document);
+
+		Response encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri());
+
+		checkResponse(encryptionKeyResponse);
+
+		EncryptionKey key = encryptionKeyResponse.readEntity(EncryptionKey.class);
+
+		try {
+			return Encrypter.encryptContent(content, key);
+		} catch (Exception e) {
+			logThrowable(e);
+			throw new DigipostClientException(ErrorCode.FAILED_PREENCRYPTION, "Inneholdet kunne ikke prekrypteres.");
+		}
+	}
+
+	public EncryptionKey getRecipientEncryptionKey(MessageRecipient recipient) {
+		Response response = apiService.getRecipientEncryptionKey(recipient);
+		checkResponse(response);
+
+		log("Hentet krypteringsnøkkel.");
+		return response.readEntity(EncryptionKey.class);
+
 	}
 
 	/**

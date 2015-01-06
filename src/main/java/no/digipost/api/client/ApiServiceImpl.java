@@ -87,6 +87,16 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
+	public Response getRecipientEncryptionKey(final MessageRecipient recipient) {
+		EntryPoint entryPoint = getEntryPoint();
+		return webResource
+				.path(entryPoint.getRecipientEncryptionKey().getPath())
+				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.header(X_Digipost_UserId, senderAccountId)
+				.post(Entity.entity(recipient, DIGIPOST_MEDIA_TYPE_V6));
+	}
+
+	@Override
 	public Response createMessage(final Message message) {
 		EntryPoint entryPoint = getEntryPoint();
 		return webResource

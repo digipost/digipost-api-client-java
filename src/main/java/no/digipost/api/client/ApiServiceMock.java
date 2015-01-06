@@ -21,6 +21,7 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.util.MockfriendlyResponse.MockedResponseBuilder;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.NotImplementedException;
+import org.bouncycastle.openssl.PEMWriter;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
@@ -30,9 +31,14 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.ConnectException;
 import java.net.URI;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -43,6 +49,8 @@ import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 
 public class ApiServiceMock implements ApiService {
+
+	private final EncryptionKey fakeEncryptionKey;
 
 	public enum Method {
 		GET_CONTENT,
@@ -55,7 +63,30 @@ public class ApiServiceMock implements ApiService {
 
 	public ApiServiceMock(ValidatingMarshaller validatingMarshaller) {
 		this.marshaller = validatingMarshaller;
+		this.fakeEncryptionKey = createFakeEncryptionKey();
 		init();
+	}
+
+	private EncryptionKey createFakeEncryptionKey() {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (Writer osWriter = new OutputStreamWriter(baos);
+				PEMWriter writer = new PEMWriter(osWriter)) {
+
+			KeyPairGenerator factory = KeyPairGenerator.getInstance("RSA");
+			factory.initialize(2048);
+			KeyPair keyPair = factory.generateKeyPair();
+
+			writer.writeObject(keyPair.getPublic());
+
+		} catch (Exception e) {
+			throw new RuntimeException("Failed creation of fake encryption key.", e);
+		}
+
+		EncryptionKey fakeKey = new EncryptionKey();
+		fakeKey.setKeyId("fake-hash");
+		fakeKey.setValue(new String(baos.toByteArray()));
+
+		return fakeKey;
 	}
 
 	private void init() {
@@ -99,6 +130,11 @@ public class ApiServiceMock implements ApiService {
 
 		requestsAndResponses.addRequest(new DigipostRequest(message, contentParts));
 		return response;
+	}
+
+	@Override
+	public Response getRecipientEncryptionKey(MessageRecipient recipient) {
+		return Response.ok(fakeEncryptionKey).build();
 	}
 
 	@Override

@@ -21,10 +21,8 @@ import no.digipost.api.client.MessageSender;
 import no.digipost.api.client.delivery.OngoingDelivery.SendableDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.MediaTypes;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.*;
+import no.digipost.api.client.util.Encrypter;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -46,9 +44,11 @@ class MultipartSendMessage implements SendableDelivery {
 	private final MessageSender sender;
     private final Message message;
     private final Map<Document, InputStream> documents;
+	private final ApiService apiService;
 
 
-    MultipartSendMessage(Message message, ApiService apiService, EventLogger eventLogger) {
+	MultipartSendMessage(Message message, ApiService apiService, EventLogger eventLogger) {
+		this.apiService = apiService;
 		this.sender = new MessageSender(apiService, eventLogger);
 		this.message = message;
 		this.documents = new HashMap<>();
@@ -58,9 +58,10 @@ class MultipartSendMessage implements SendableDelivery {
     	documents.put(document, content);
     }
 
-
     @Override
     public final MessageDelivery send() {
+		EncryptionKey krypteringsnokkel = fetchEncryptionKeyForRecipientIfNecessary();
+
 	    try (MultiPart multiPart = new MultiPart()) {
 	    	BodyPart messageBodyPart = new BodyPart(message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
 	    	ContentDisposition messagePart = ContentDisposition.type("attachment").fileName("message").build();
@@ -70,6 +71,10 @@ class MultipartSendMessage implements SendableDelivery {
 	    	for (Entry<Document, InputStream> document : documents.entrySet()) {
 	    		Document metadata = document.getKey();
 	    		InputStream content = document.getValue();
+				if (metadata.isPreEncrypt()) {
+					if (krypteringsnokkel == null) throw new IllegalStateException("Trying to preencrypt but have no encryption key.");
+					content = Encrypter.encryptContent(content, krypteringsnokkel);
+				}
 	    		BodyPart bodyPart = new BodyPart(content, new MediaType("application", defaultIfBlank(metadata.getDigipostFileType(), "octet-stream")));
 	    		ContentDisposition documentPart = ContentDisposition.type("attachment").fileName(metadata.uuid).build();
 	    		bodyPart.setContentDisposition(documentPart);
@@ -83,4 +88,20 @@ class MultipartSendMessage implements SendableDelivery {
 	    	throw new DigipostClientException(ErrorCode.resolve(e), e);
         }
     }
+
+	private EncryptionKey fetchEncryptionKeyForRecipientIfNecessary() {
+		boolean someDocumentShouldBePreencrypted = false;
+		for (Document document : documents.keySet()) {
+			if (document.isPreEncrypt()) {
+				someDocumentShouldBePreencrypted = true;
+				break;
+			}
+		}
+
+		EncryptionKey krypteringsnokkel = null;
+		if (someDocumentShouldBePreencrypted) {
+			krypteringsnokkel = sender.getRecipientEncryptionKey(message.recipient);
+		}
+		return krypteringsnokkel;
+	}
 }
