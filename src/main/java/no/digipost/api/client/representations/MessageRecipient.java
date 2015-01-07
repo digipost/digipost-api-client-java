@@ -15,6 +15,9 @@
  */
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
+
 import javax.xml.bind.annotation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -93,11 +96,33 @@ public class MessageRecipient {
 		return personalIdentificationNumber;
 	}
 
+	public String getOrganisationNumber() {
+		return organisationNumber;
+	}
+
 	public PrintDetails getPrintDetails() {
 		return printDetails;
 	}
 
 	public boolean isDirectPrint() {
 		return printDetails != null && digipostAddress == null && personalIdentificationNumber == null && nameAndAddress == null;
+	}
+
+	public Identification toIdentification() {
+		if (isDirectPrint()) {
+			throw new IllegalStateException("MessageRecipient mangler identifikasjonsdetaljer.");
+		}
+
+		if (digipostAddress != null) {
+			return new Identification(new DigipostAddress(digipostAddress));
+		} else if (nameAndAddress != null) {
+			return new Identification(nameAndAddress);
+		} else if (organisationNumber != null) {
+			return new Identification(new OrganisationNumber(organisationNumber));
+		} else if (personalIdentificationNumber != null) {
+			return new Identification(new PersonalIdentificationNumber(personalIdentificationNumber));
+		} else {
+			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, "Ukjent identifikationstype.");
+		}
 	}
 }

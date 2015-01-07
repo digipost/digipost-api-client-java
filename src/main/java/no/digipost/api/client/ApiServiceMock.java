@@ -67,7 +67,7 @@ public class ApiServiceMock implements ApiService {
 		init();
 	}
 
-	private EncryptionKey createFakeEncryptionKey() {
+	static EncryptionKey createFakeEncryptionKey() {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (Writer osWriter = new OutputStreamWriter(baos);
 				PEMWriter writer = new PEMWriter(osWriter)) {
@@ -133,7 +133,19 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	@Override
-	public Response getRecipientEncryptionKey(MessageRecipient recipient) {
+	public Response identifyAndGetEncryptionKey(Identification identification) {
+		IdentificationResultWithEncryptionKey mockEntity = new IdentificationResultWithEncryptionKey(
+				IdentificationResult.digipost("fake.address#1234"),
+				fakeEncryptionKey
+		);
+		return MockedResponseBuilder.create()
+				.status(OK.getStatusCode())
+				.entity(mockEntity)
+				.build();
+	}
+
+	@Override
+	public Response getEncryptionKeyForPrint() {
 		return MockedResponseBuilder.create()
 				.status(OK.getStatusCode())
 				.entity(fakeEncryptionKey)
@@ -207,6 +219,7 @@ public class ApiServiceMock implements ApiService {
 			return MockedResponseBuilder.create().status(NOT_FOUND.getStatusCode()).build();
 		}
 	}
+
 
 	public static class RequestMatcher {
 		public Response findResponse(String requestString) {

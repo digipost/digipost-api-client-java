@@ -180,4 +180,5 @@ public class Message {
 	public boolean isSameMessageAs(final Message message) {
 		return this.messageId != null && this.messageId.equals(message.messageId);
 	}
+
 }

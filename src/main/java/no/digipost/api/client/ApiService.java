@@ -63,13 +63,6 @@ public interface ApiService {
 	Response multipartMessage(MultiPart multiPart);
 
 	/**
-	 * Henter publik del av krypteringsnøkkel for spesifisert mottaker.
-	 * Nøkkelen brukes for å kryptere dokument-innhold for dokumenter som
-	 * skal prekrypteres.
-	 */
-	Response getRecipientEncryptionKey(MessageRecipient recipient);
-
-	/**
 	 * Oppretter en ny forsendelsesressurs på serveren ved å sende en
 	 * POST-forespørsel.
 	 */
@@ -111,6 +104,15 @@ public interface ApiService {
 	IdentificationResult identifyRecipient(Identification identification);
 
 	/**
+	 * Sjekker hvis spesifisert mottaker er Digipost-bruker.
+	 * Returnerer då også publik del av krypteringsnøkkel for Digipost-bruker.
+	 * Nøkkelen brukes for å kryptere dokument-innhold for dokumenter som
+	 * skal prekrypteres.
+	 * @param identification
+	 */
+	Response identifyAndGetEncryptionKey(Identification identification);
+
+	/**
 	 * Henter hendelser knyttet til tidligere sendte brev.
 	 *
 	 * @param organisation Organisasjonsnummer
@@ -120,4 +122,9 @@ public interface ApiService {
 	Response getDocumentEvents(String organisation, String partId, DateTime from, DateTime to, int offset, int maxResults);
 
 	Response getContent(String path);
+
+	/**
+	 * Henter publik krypteringsnøkkel for forsendelser som skal sendes til print.
+	 */
+	Response getEncryptionKeyForPrint();
 }

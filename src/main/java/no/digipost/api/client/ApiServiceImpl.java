@@ -16,18 +16,14 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
@@ -87,13 +83,13 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
-	public Response getRecipientEncryptionKey(final MessageRecipient recipient) {
+	public Response identifyAndGetEncryptionKey(final Identification identification) {
 		EntryPoint entryPoint = getEntryPoint();
 		return webResource
-				.path(entryPoint.getRecipientEncryptionKey().getPath())
+				.path(entryPoint.getIdentificationWithEncryptionKeyUri().getPath())
 				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
-				.post(Entity.entity(recipient, DIGIPOST_MEDIA_TYPE_V6));
+				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V6));
 	}
 
 	@Override
@@ -119,6 +115,16 @@ public class ApiServiceImpl implements ApiService {
 	public Response getEncryptionKey(final URI location) {
 		return webResource
 				.path(location.getPath())
+				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.header(X_Digipost_UserId, senderAccountId)
+				.get();
+	}
+
+	@Override
+	public Response getEncryptionKeyForPrint() {
+		EntryPoint entryPoint = getEntryPoint();
+		return webResource
+				.path(entryPoint.getPrintEncryptionKey().getPath())
 				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get();
@@ -166,6 +172,7 @@ public class ApiServiceImpl implements ApiService {
 		return sendLink;
 	}
 
+
 	byte[] readLetterContent(final InputStream letterContent) {
 		try {
 			return IOUtils.toByteArray(letterContent);
@@ -173,7 +180,6 @@ public class ApiServiceImpl implements ApiService {
 			throw new RuntimeException(e);
 		}
 	}
-
 
 	@Override
 	public Response getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {

@@ -19,13 +19,18 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.util.Encrypter;
+import no.digipost.api.client.util.DigipostPublicKey;
 import org.glassfish.jersey.media.multipart.MultiPart;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 import javax.ws.rs.core.Response;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 public class MessageSender extends Communicator {
+
+	private DateTime printKeyCachedTime = null;
+	private DigipostPublicKey cachedPrintKey;
 
 	public MessageSender(final ApiService apiService, final EventLogger eventLogger) {
 		super(apiService, eventLogger);
@@ -143,21 +148,38 @@ public class MessageSender extends Communicator {
 
 		EncryptionKey key = encryptionKeyResponse.readEntity(EncryptionKey.class);
 
-		try {
-			return Encrypter.encryptContent(content, key);
-		} catch (Exception e) {
-			logThrowable(e);
-			throw new DigipostClientException(ErrorCode.FAILED_PREENCRYPTION, "Inneholdet kunne ikke prekrypteres.");
-		}
+		return Encrypter.encryptContent(content, new DigipostPublicKey(key));
 	}
 
-	public EncryptionKey getRecipientEncryptionKey(MessageRecipient recipient) {
-		Response response = apiService.getRecipientEncryptionKey(recipient);
+	public IdentificationResultWithEncryptionKey identifyAndGetEncryptionKey(Identification identification) {
+		Response response = apiService.identifyAndGetEncryptionKey(identification);
 		checkResponse(response);
 
-		log("Hentet krypteringsnøkkel.");
-		return response.readEntity(EncryptionKey.class);
+		IdentificationResultWithEncryptionKey result = response.readEntity(IdentificationResultWithEncryptionKey.class);
+		if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
+			if (result.getEncryptionKey() == null) {
+				throw new DigipostClientException(ErrorCode.SERVER_ERROR, "Server identifisert mottaker som Digipost-bruker, men sendte ikke med krypteringsnøkkel. Indikerer en feil hos Digipost.");
+			}
+			log("Mottaker er Digipost-bruker. Hentet krypteringsnøkkel.");
+		} else {
+			log("Mottaker er ikke Digipost-bruker.");
+		}
+		return result;
+	}
 
+	public DigipostPublicKey getEncryptionKeyForPrint() {
+		DateTime now = DateTime.now();
+
+		if (printKeyCachedTime == null || new Duration(printKeyCachedTime, now).isLongerThan(Duration.standardMinutes(5))) {
+			Response response = apiService.getEncryptionKeyForPrint();
+			checkResponse(response);
+			EncryptionKey encryptionKey = response.readEntity(EncryptionKey.class);
+			cachedPrintKey = new DigipostPublicKey(encryptionKey);
+			printKeyCachedTime = now;
+			return cachedPrintKey;
+		} else {
+			return cachedPrintKey;
+		}
 	}
 
 	/**

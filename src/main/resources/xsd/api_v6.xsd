@@ -213,15 +213,15 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:element name="encryption-key">
-        <xsd:complexType>
-            <xsd:simpleContent>
-                <xsd:extension base="xsd:string">
-                    <xsd:attribute name="key-id" type="xsd:string" />
-                </xsd:extension>
-            </xsd:simpleContent>
-        </xsd:complexType>
-    </xsd:element>
+    <xsd:complexType name="encryption-key">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="key-id" type="xsd:string" />
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:element name="encryption-key" type="encryption-key"/>
 
     <xsd:simpleType name="message-status">
         <xsd:annotation>
@@ -309,6 +309,15 @@
                 <xsd:element name="unidentified-reason" type="unidentified-reason" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="invalid-reason" type="invalid-reason" minOccurs="1" maxOccurs="1"/>
             </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="identification-result-with-encryption-key" type="identification-result-with-encryption-key" />
+
+    <xsd:complexType name="identification-result-with-encryption-key">
+        <xsd:sequence>
+            <xsd:element name="identification-result" type="identification-result" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="encryption-key" type="encryption-key" minOccurs="0" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
 

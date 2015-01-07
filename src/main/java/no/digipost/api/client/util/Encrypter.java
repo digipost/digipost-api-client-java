@@ -15,40 +15,38 @@
  */
 package no.digipost.api.client.util;
 
-import no.digipost.api.client.representations.EncryptionKey;
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.operator.OutputEncryptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringReader;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
 
 public class Encrypter {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Encrypter.class);
 
 	private static OutputEncryptor buildEncryptor() throws CMSException {
 		return new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
 	}
 
-	public static InputStream encryptContent(InputStream content, EncryptionKey key) throws Exception {
-		PEMParser pemParser = new PEMParser(new StringReader(key.getValue()));
-		SubjectPublicKeyInfo subjectPublicKeyInfo = (SubjectPublicKeyInfo) pemParser.readObject();
-		X509EncodedKeySpec spec = new X509EncodedKeySpec(subjectPublicKeyInfo.getEncoded());
-		IOUtils.closeQuietly(pemParser);
-		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
-
-		CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
-		gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(key.getKeyId().getBytes(), publicKey));
-		CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(IOUtils.toByteArray(content)), buildEncryptor());
-		return new ByteArrayInputStream(d.getEncoded());
+	public static InputStream encryptContent(InputStream content, DigipostPublicKey key) {
+		try {
+			CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
+			gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(key.publicKeyHash.getBytes(), key.publicKey));
+			CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(IOUtils.toByteArray(content)), buildEncryptor());
+			return new ByteArrayInputStream(d.getEncoded());
+		} catch (Exception e) {
+			LOG.error("Feil ved kryptering av innhold.", e);
+			throw new DigipostClientException(ErrorCode.FAILED_PREENCRYPTION, "Feil ved kryptering av innhold.");
+		}
 	}
 
 }
