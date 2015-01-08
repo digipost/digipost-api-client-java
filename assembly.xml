@@ -18,6 +18,7 @@
 			<excludes>
 				<exclude>bin</exclude>
 			</excludes>
+			<outputDirectory></outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/</directory>
@@ -25,12 +26,14 @@
 				<include>${project.artifactId}-${project.version}-javadoc.jar</include>
 				<include>${project.artifactId}-${project.version}-sources.jar</include>
 			</includes>
+			<outputDirectory></outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/classes/xsd</directory>
 			<includes>
 				<include>*.xsd</include>
 			</includes>
+			<outputDirectory></outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>${basedir}</directory>
@@ -38,6 +41,7 @@
 				<include>LICENSE*</include>
 				<include>NOTICE</include>
 			</includes>
+			<outputDirectory></outputDirectory>
 		</fileSet>
 	</fileSets>
 </assembly>

@@ -394,7 +394,7 @@
 							<programs>
 								<program>
 									<mainClass>no.digipost.api.client.swing.DigipostSwingClient</mainClass>
-									<name>digipost-api-client</name>
+									<id>digipost-api-client</id>
 									<platforms>
 										<platform>windows</platform>
 										<platform>unix</platform>
