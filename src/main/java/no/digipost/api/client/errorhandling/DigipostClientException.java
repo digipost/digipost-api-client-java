@@ -40,6 +40,10 @@ public class DigipostClientException extends RuntimeException {
 		this(code, NONE, message, null);
 	}
 
+	public DigipostClientException(ErrorCode code, String message, Throwable cause) {
+		this(code, NONE, message, cause);
+	}
+
 	private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, Throwable cause) {
 		super(code + ": " + message, cause);
 		this.errorCode = code;

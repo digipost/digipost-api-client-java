@@ -468,8 +468,6 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:element name="message-recipient" type="message-recipient" />
-
     <xsd:complexType name="name-and-address">
         <xsd:sequence>
             <xsd:element name="fullname" type="name" minOccurs="1" maxOccurs="1" />

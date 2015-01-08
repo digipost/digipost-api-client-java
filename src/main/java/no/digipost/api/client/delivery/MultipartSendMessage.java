@@ -74,8 +74,9 @@ class MultipartSendMessage implements SendableDelivery {
 				InputStream content = document.getValue();
 				if (metadata.isPreEncrypt()) {
 					eventLogger.log("Krypterer content for dokument med uuid " + metadata.uuid);
-					if (krypteringsnokkel == null)
+					if (krypteringsnokkel == null) {
 						throw new IllegalStateException("Trying to preencrypt but have no encryption key.");
+					}
 					content = Encrypter.encryptContent(content, krypteringsnokkel);
 				}
 				BodyPart bodyPart = new BodyPart(content, new MediaType("application", defaultIfBlank(metadata.getDigipostFileType(), "octet-stream")));
@@ -105,9 +106,12 @@ class MultipartSendMessage implements SendableDelivery {
 					eventLogger.log("Mottaker er Digipost-bruker. Bruker brukers krypteringsnøkkel.");
 					return new DigipostPublicKey(result.getEncryptionKey());
 
-				} else {
+				} else if (message.recipient.hasPrintDetails()) {
 					eventLogger.log("Mottaker er ikke Digipost-bruker. Bruker krypteringsnøkkel for print.");
 					return sender.getEncryptionKeyForPrint();
+
+				} else {
+					throw new DigipostClientException(ErrorCode.UNKNOWN_RECIPIENT, "Mottaker er ikke Digipost-bruker og forsendelse mangler print-fallback.");
 
 				}
 			}
@@ -117,13 +121,11 @@ class MultipartSendMessage implements SendableDelivery {
 	}
 
 	private boolean hasDocumentToBePreencrypted() {
-		boolean someDocumentShouldBePreencrypted = false;
 		for (Document document : documents.keySet()) {
 			if (document.isPreEncrypt()) {
-				someDocumentShouldBePreencrypted = true;
-				break;
+				return true;
 			}
 		}
-		return someDocumentShouldBePreencrypted;
+		return false;
 	}
 }

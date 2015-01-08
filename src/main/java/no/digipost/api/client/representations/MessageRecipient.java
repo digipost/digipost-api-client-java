@@ -18,31 +18,34 @@ package no.digipost.api.client.representations;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message-recipient", propOrder = {
-    "nameAndAddress",
-    "digipostAddress",
-    "personalIdentificationNumber",
-    "organisationNumber",
-    "printDetails"
+		"nameAndAddress",
+		"digipostAddress",
+		"personalIdentificationNumber",
+		"organisationNumber",
+		"printDetails"
 })
-@XmlRootElement(name = "message-recipient")
 public class MessageRecipient {
 
-    @XmlElement(name = "name-and-address", nillable = false)
-    protected NameAndAddress nameAndAddress;
-    @XmlElement(name = "digipost-address", nillable = false)
-    protected String digipostAddress;
-    @XmlElement(name = "personal-identification-number", nillable = false)
-    protected String personalIdentificationNumber;
-    @XmlElement(name = "organisation-number", nillable = false)
-    protected String organisationNumber;
-    @XmlElement(name = "print-details", nillable = false)
-    protected PrintDetails printDetails;
+	@XmlElement(name = "name-and-address", nillable = false)
+	protected NameAndAddress nameAndAddress;
+	@XmlElement(name = "digipost-address", nillable = false)
+	protected String digipostAddress;
+	@XmlElement(name = "personal-identification-number", nillable = false)
+	protected String personalIdentificationNumber;
+	@XmlElement(name = "organisation-number", nillable = false)
+	protected String organisationNumber;
+	@XmlElement(name = "print-details", nillable = false)
+	protected PrintDetails printDetails;
 
-	public MessageRecipient() {}
+	public MessageRecipient() {
+	}
 
 	public MessageRecipient(final PersonalIdentificationNumber id) {
 		this.personalIdentificationNumber = id.asString();
@@ -75,10 +78,10 @@ public class MessageRecipient {
 		this.printDetails = printDetails;
 	}
 
-    public MessageRecipient(final OrganisationNumber organisationNumber, final PrintDetails printDetails) {
-        this(organisationNumber);
-        this.printDetails = printDetails;
-    }
+	public MessageRecipient(final OrganisationNumber organisationNumber, final PrintDetails printDetails) {
+		this(organisationNumber);
+		this.printDetails = printDetails;
+	}
 
 	public MessageRecipient(final PrintDetails printDetails) {
 		this.printDetails = printDetails;
@@ -105,7 +108,15 @@ public class MessageRecipient {
 	}
 
 	public boolean isDirectPrint() {
-		return printDetails != null && digipostAddress == null && personalIdentificationNumber == null && nameAndAddress == null;
+		return hasPrintDetails() && !hasDigipostIdentification();
+	}
+
+	public boolean hasPrintDetails() {
+		return printDetails != null;
+	}
+
+	public boolean hasDigipostIdentification() {
+		return digipostAddress != null || personalIdentificationNumber != null || nameAndAddress != null || organisationNumber != null;
 	}
 
 	public Identification toIdentification() {

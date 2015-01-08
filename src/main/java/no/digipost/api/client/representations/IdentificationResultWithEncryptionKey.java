@@ -28,7 +28,7 @@ public class IdentificationResultWithEncryptionKey {
 
 	@XmlElement(name="identification-result", required = true)
 	protected IdentificationResult result;
-	@XmlElement(name = "encryption-key", nillable = false)
+	@XmlElement(name = "encryption-key")
 	protected EncryptionKey encryptionKey;
 
 	public IdentificationResultWithEncryptionKey() {

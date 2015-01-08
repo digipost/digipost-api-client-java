@@ -27,11 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 public class Encrypter {
-
-	private static final Logger LOG = LoggerFactory.getLogger(Encrypter.class);
 
 	private static OutputEncryptor buildEncryptor() throws CMSException {
 		return new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
@@ -43,9 +42,9 @@ public class Encrypter {
 			gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(key.publicKeyHash.getBytes(), key.publicKey));
 			CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(IOUtils.toByteArray(content)), buildEncryptor());
 			return new ByteArrayInputStream(d.getEncoded());
+
 		} catch (Exception e) {
-			LOG.error("Feil ved kryptering av innhold.", e);
-			throw new DigipostClientException(ErrorCode.FAILED_PREENCRYPTION, "Feil ved kryptering av innhold.");
+			throw new DigipostClientException(ErrorCode.FAILED_PREENCRYPTION, "Feil ved kryptering av innhold.", e);
 		}
 	}
 
