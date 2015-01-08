@@ -22,17 +22,17 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "print-failed-metadata")
-public class PrintFailedMetadata extends EventMetadata {
+@XmlType(name = "failed-print-metadata")
+public class FailedPrintMetadata extends EventMetadata {
 
-	@XmlAttribute(name = "error-message")
-	public final String errorMessage;
+	@XmlAttribute(name = "error-code")
+	public final String errorCode;
 
-	public PrintFailedMetadata() {
+	public FailedPrintMetadata() {
 		this(null);
 	}
 
-	public PrintFailedMetadata(String errorMessage) {
-		this.errorMessage = errorMessage;
+	public FailedPrintMetadata(String errorCode) {
+		this.errorCode = errorCode;
 	}
 }

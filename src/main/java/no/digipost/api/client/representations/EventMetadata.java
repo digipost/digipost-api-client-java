@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 		MoveFilesFromPublicSectorMetadata.class,
 		EmailNotificationFailedMetadata.class,
 		SmsNotificationFailedMetadata.class,
-		PrintFailedMetadata.class,
+		FailedPrintMetadata.class,
 		PostmarkedMetadata.class
 })
 public abstract class EventMetadata {

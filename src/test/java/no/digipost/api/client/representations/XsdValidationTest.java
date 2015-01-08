@@ -189,7 +189,7 @@ public class XsdValidationTest {
 				new SmsNotificationFailedMetadata("12345678", "ERROR_CODE"));
 
 		DocumentEvent printFailedEvent = new DocumentEvent(UUID.randomUUID().toString(), PRINT_FAILED, DateTime.now(),
-				new PrintFailedMetadata("Feil dimensjoner"));
+				new FailedPrintMetadata("Feil dimensjoner"));
 
 		DocumentEvent postmarkedEvent = new DocumentEvent(UUID.randomUUID().toString(), POSTMARKED, DateTime.now(),
 				new PostmarkedMetadata(DateTime.now()));
