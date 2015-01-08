@@ -25,14 +25,8 @@ public enum DocumentEventType {
 	EMAIL_NOTIFICATION_FAILED,
 	SMS_NOTIFICATION_FAILED,
 	OPENED,
-	MOVE_FILES_FROM_PUBLIC_SECTOR;
-
-	public String value() {
-		return name();
-	}
-
-	public static DocumentEventType fromValue(String v) {
-		return valueOf(v);
-	}
+	MOVE_FILES_FROM_PUBLIC_SECTOR,
+	POSTMARKED,
+	PRINT_FAILED;
 
 }

@@ -110,7 +110,7 @@ public class DigipostClientMock {
 	/**
 	 * Used to validate that requests are according to XSD
 	 */
-	private static ValidatingMarshaller initMarshaller() {
+	public static ValidatingMarshaller initMarshaller() {
 		try {
 			SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 			Schema schema = schemaFactory.newSchema(DigipostClient.class.getResource("/xsd/api_v6.xsd"));

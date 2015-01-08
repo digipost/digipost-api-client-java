@@ -35,14 +35,17 @@ public class IdentificationResult {
 
 	@XmlElement(required = true)
 	protected IdentificationResultCode result;
-	@XmlElement(name = "invalid-reason", nillable = false)
+	@XmlElement(name = "invalid-reason")
 	protected InvalidReason invalidReason;
-	@XmlElement(name = "unidentified-reason", nillable = false)
+	@XmlElement(name = "unidentified-reason")
 	protected UnidentifiedReason unidentifiedReason;
-	@XmlElement(name = "person-alias", nillable = false)
+	@XmlElement(name = "person-alias")
 	protected String personAlias;
-	@XmlElement(name = "digipost-address", nillable = false)
+	@XmlElement(name = "digipost-address")
 	protected String digipostAddress;
+
+	public IdentificationResult() {
+	}
 
 	public IdentificationResultCode getResult() {
 		return result;
@@ -62,6 +65,13 @@ public class IdentificationResult {
 
 	public String getDigipostAddress() {
 		return digipostAddress;
+	}
+
+	public static IdentificationResult digipost(String digipostAddress) {
+		IdentificationResult result = new IdentificationResult();
+		result.result = IdentificationResultCode.DIGIPOST;
+		result.digipostAddress = digipostAddress;
+		return result;
 	}
 
 	@Override

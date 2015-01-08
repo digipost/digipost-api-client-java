@@ -18,7 +18,11 @@ package no.digipost.api.client;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.util.MockfriendlyResponse;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeUtils;
+import org.joda.time.Duration;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -27,6 +31,7 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.UUID;
 
+import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -46,6 +51,10 @@ public class MessageSenderTest {
 		initMocks(this);
 	}
 
+	@After
+	public void tearDown() {
+		DateTimeUtils.setCurrentMillisSystem();
+	}
 	@Test
 	public void skalHenteEksisterendeForsendelseHvisDenFinnesFraForr() {
 		ApiService api = mock(ApiService.class);
@@ -117,6 +126,28 @@ public class MessageSenderTest {
 			assertEquals(ErrorCode.PRINT_MESSAGE_ALREADY_DELIVERED, e.getErrorCode());
 		}
 
+	}
+
+	@Test
+	public void skal_bruke_cached_print_encryption_key() {
+		MockfriendlyResponse response = MockfriendlyResponse.MockedResponseBuilder.create()
+				.status(OK.getStatusCode())
+				.entity(ApiServiceMock.createFakeEncryptionKey())
+				.build();
+
+		ApiService api = mock(ApiService.class);
+		when(api.getEncryptionKeyForPrint()).thenReturn(response);
+
+		MessageSender sender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER);
+		sender.getEncryptionKeyForPrint();
+		verify(api, times(1)).getEncryptionKeyForPrint();
+
+		sender.getEncryptionKeyForPrint();
+		verify(api, times(1)).getEncryptionKeyForPrint();
+
+		DateTimeUtils.setCurrentMillisOffset(Duration.standardMinutes(10).getMillis());
+		sender.getEncryptionKeyForPrint();
+		verify(api, times(2)).getEncryptionKeyForPrint();
 	}
 
 	private Message lagDefaultForsendelse() {

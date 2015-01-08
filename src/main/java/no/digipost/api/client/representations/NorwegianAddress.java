@@ -15,15 +15,18 @@
  */
 package no.digipost.api.client.representations;
 
-import static org.apache.commons.lang3.StringUtils.trimToEmpty;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
+
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "norwegian-address", propOrder = { "addressline1", "addressline2", "zipCode", "city" })
+@XmlType(name = "norwegian-address", propOrder = { "addressline1", "addressline2", "addressline3", "zipCode", "city" })
 public class NorwegianAddress {
 
 	public NorwegianAddress() {
@@ -39,14 +42,20 @@ public class NorwegianAddress {
 	}
 
 	public NorwegianAddress(final String addressline1, final String addressline2, final String zipCode, final String city) {
+		this(addressline1, addressline2, null, zipCode, city);
+	}
+
+	public NorwegianAddress(final String addressline1, final String addressline2, final String addressline3, final String zipCode, final String city) {
 		this.addressline1 = addressline1;
 		this.addressline2 = addressline2;
+		this.addressline3 = addressline3;
 		this.zipCode = zipCode;
 		this.city = city;
 	}
 
 	protected String addressline1;
 	protected String addressline2;
+	protected String addressline3;
 	@XmlElement(name = "zip-code", required = true)
 	protected String zipCode;
 	@XmlElement(required = true)
@@ -66,6 +75,22 @@ public class NorwegianAddress {
 
 	public void setAddressline2(final String value) {
 		addressline2 = value;
+	}
+
+	public String getAddressline3() {
+		return addressline3;
+	}
+
+	public void setAddressline3(String value) {
+		addressline3 = value;
+	}
+
+	public List<String> getAddresslines() {
+		List<String> lines = new ArrayList<>(3);
+		if (addressline1 != null) lines.add(addressline1);
+		if (addressline2 != null) lines.add(addressline2);
+		if (addressline3 != null) lines.add(addressline3);
+		return lines;
 	}
 
 	public String getZipCode() {

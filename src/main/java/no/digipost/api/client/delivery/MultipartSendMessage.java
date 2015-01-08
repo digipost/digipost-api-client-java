@@ -21,10 +21,9 @@ import no.digipost.api.client.MessageSender;
 import no.digipost.api.client.delivery.OngoingDelivery.SendableDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.MediaTypes;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.*;
+import no.digipost.api.client.util.Encrypter;
+import no.digipost.api.client.util.DigipostPublicKey;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -44,43 +43,89 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 class MultipartSendMessage implements SendableDelivery {
 
 	private final MessageSender sender;
-    private final Message message;
-    private final Map<Document, InputStream> documents;
+	private final Message message;
+	private final Map<Document, InputStream> documents;
+	private final EventLogger eventLogger;
 
 
-    MultipartSendMessage(Message message, ApiService apiService, EventLogger eventLogger) {
+	MultipartSendMessage(Message message, ApiService apiService, EventLogger eventLogger) {
+		this.eventLogger = eventLogger;
 		this.sender = new MessageSender(apiService, eventLogger);
 		this.message = message;
 		this.documents = new HashMap<>();
-    }
+	}
 
-    public final void add(Document document, InputStream content) {
-    	documents.put(document, content);
-    }
+	public final void add(Document document, InputStream content) {
+		documents.put(document, content);
+	}
 
+	@Override
+	public final MessageDelivery send() {
+		DigipostPublicKey krypteringsnokkel = fetchEncryptionKeyForRecipientIfNecessary();
 
-    @Override
-    public final MessageDelivery send() {
-	    try (MultiPart multiPart = new MultiPart()) {
-	    	BodyPart messageBodyPart = new BodyPart(message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
-	    	ContentDisposition messagePart = ContentDisposition.type("attachment").fileName("message").build();
-	    	messageBodyPart.setContentDisposition(messagePart);
-	    	multiPart.bodyPart(messageBodyPart);
+		try (MultiPart multiPart = new MultiPart()) {
+			BodyPart messageBodyPart = new BodyPart(message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
+			ContentDisposition messagePart = ContentDisposition.type("attachment").fileName("message").build();
+			messageBodyPart.setContentDisposition(messagePart);
+			multiPart.bodyPart(messageBodyPart);
 
-	    	for (Entry<Document, InputStream> document : documents.entrySet()) {
-	    		Document metadata = document.getKey();
-	    		InputStream content = document.getValue();
-	    		BodyPart bodyPart = new BodyPart(content, new MediaType("application", defaultIfBlank(metadata.getDigipostFileType(), "octet-stream")));
-	    		ContentDisposition documentPart = ContentDisposition.type("attachment").fileName(metadata.uuid).build();
-	    		bodyPart.setContentDisposition(documentPart);
-	    		multiPart.bodyPart(bodyPart);
-	    	}
-    		return sender.createMultipartMessage(multiPart);
+			for (Entry<Document, InputStream> document : documents.entrySet()) {
+				Document metadata = document.getKey();
+				InputStream content = document.getValue();
+				if (metadata.isPreEncrypt()) {
+					eventLogger.log("Krypterer content for dokument med uuid " + metadata.uuid);
+					if (krypteringsnokkel == null) {
+						throw new IllegalStateException("Trying to preencrypt but have no encryption key.");
+					}
+					content = Encrypter.encryptContent(content, krypteringsnokkel);
+				}
+				BodyPart bodyPart = new BodyPart(content, new MediaType("application", defaultIfBlank(metadata.getDigipostFileType(), "octet-stream")));
+				ContentDisposition documentPart = ContentDisposition.type("attachment").fileName(metadata.uuid).build();
+				bodyPart.setContentDisposition(documentPart);
+				multiPart.bodyPart(bodyPart);
+			}
+			return sender.createMultipartMessage(multiPart);
 
-	    } catch (DigipostClientException e) {
-	    	throw e;
-	    } catch (Exception e) {
-	    	throw new DigipostClientException(ErrorCode.resolve(e), e);
-        }
-    }
+		} catch (DigipostClientException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new DigipostClientException(ErrorCode.resolve(e), e);
+		}
+	}
+
+	private DigipostPublicKey fetchEncryptionKeyForRecipientIfNecessary() {
+
+		if (hasDocumentToBePreencrypted()) {
+			if (message.isDirectPrint()) {
+				eventLogger.log("Direkte print. Bruker krypteringsnøkkel for print.");
+				return sender.getEncryptionKeyForPrint();
+
+			} else {
+				IdentificationResultWithEncryptionKey result = sender.identifyAndGetEncryptionKey(message.recipient.toIdentification());
+				if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
+					eventLogger.log("Mottaker er Digipost-bruker. Bruker brukers krypteringsnøkkel.");
+					return new DigipostPublicKey(result.getEncryptionKey());
+
+				} else if (message.recipient.hasPrintDetails()) {
+					eventLogger.log("Mottaker er ikke Digipost-bruker. Bruker krypteringsnøkkel for print.");
+					return sender.getEncryptionKeyForPrint();
+
+				} else {
+					throw new DigipostClientException(ErrorCode.UNKNOWN_RECIPIENT, "Mottaker er ikke Digipost-bruker og forsendelse mangler print-fallback.");
+
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private boolean hasDocumentToBePreencrypted() {
+		for (Document document : documents.keySet()) {
+			if (document.isPreEncrypt()) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

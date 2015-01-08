@@ -21,21 +21,24 @@ import java.util.UUID;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
+import static no.digipost.api.client.representations.PrintDetails.NondeliverableHandling.RETURN_TO_SENDER;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
+import static no.digipost.api.client.representations.PrintDetails.PrintColors.MONOCHROME;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 public class ObjectBuilder {
 
 	public static PrintRecipient newNorwegianRecipient(final String name, final String zip, final String city) {
-		return newNorwegianRecipient(name, null, null, zip, city);
+		return newNorwegianRecipient(name, null, null, null, zip, city);
 	}
 
-	public static PrintRecipient newNorwegianRecipient(final String name, final String address1, final String address2, final String zip,
+	public static PrintRecipient newNorwegianRecipient(final String name, final String address1, final String address2, final String address3, final String zip,
 			final String city) {
 		NorwegianAddress norwegianAddress = new NorwegianAddress(zip, city);
 		PrintRecipient printRecipient = new PrintRecipient(name, norwegianAddress);
 		norwegianAddress.setAddressline1(address1);
 		norwegianAddress.setAddressline2(address2);
+		norwegianAddress.setAddressline3(address3);
 		return printRecipient;
 	}
 
@@ -46,7 +49,7 @@ public class ObjectBuilder {
 
 	public static Message newPrintMessage(final String messageId, final PrintRecipient recipient, final PrintRecipient returnAddress) {
 		return newMessage(messageId, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-				.recipient(new MessageRecipient(new PrintDetails(recipient, returnAddress, B)))
+				.recipient(new MessageRecipient(new PrintDetails(recipient, returnAddress, B, MONOCHROME, RETURN_TO_SENDER)))
 				.build();
 	}
 

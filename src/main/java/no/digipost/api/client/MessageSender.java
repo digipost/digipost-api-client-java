@@ -18,12 +18,19 @@ package no.digipost.api.client;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.util.Encrypter;
+import no.digipost.api.client.util.DigipostPublicKey;
 import org.glassfish.jersey.media.multipart.MultiPart;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 
 public class MessageSender extends Communicator {
+
+	private DateTime printKeyCachedTime = null;
+	private DigipostPublicKey cachedPrintKey;
 
 	public MessageSender(final ApiService apiService, final EventLogger eventLogger) {
 		super(apiService, eventLogger);
@@ -117,6 +124,62 @@ public class MessageSender extends Communicator {
 			delivery = uploadContent(message, document, unencryptetContent);
 		}
 		return delivery;
+	}
+
+	protected void checkThatMessageCanBePreEncrypted(final Document document) {
+		Link encryptionKeyLink = document.getEncryptionKeyLink();
+		if (encryptionKeyLink == null) {
+			String errorMessage = "Document med id [" + document.getUuid() + "] kan ikke prekrypteres.";
+			log(errorMessage);
+			throw new DigipostClientException(ErrorCode.CANNOT_PREENCRYPT, errorMessage);
+		}
+	}
+
+	/**
+	 * Henter brukers public nøkkel fra serveren og krypterer brevet som skal
+	 * sendes med denne.
+	 */
+	public InputStream fetchKeyAndEncrypt(final Document document, final InputStream content) {
+		checkThatMessageCanBePreEncrypted(document);
+
+		Response encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri());
+
+		checkResponse(encryptionKeyResponse);
+
+		EncryptionKey key = encryptionKeyResponse.readEntity(EncryptionKey.class);
+
+		return Encrypter.encryptContent(content, new DigipostPublicKey(key));
+	}
+
+	public IdentificationResultWithEncryptionKey identifyAndGetEncryptionKey(Identification identification) {
+		Response response = apiService.identifyAndGetEncryptionKey(identification);
+		checkResponse(response);
+
+		IdentificationResultWithEncryptionKey result = response.readEntity(IdentificationResultWithEncryptionKey.class);
+		if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
+			if (result.getEncryptionKey() == null) {
+				throw new DigipostClientException(ErrorCode.SERVER_ERROR, "Server identifisert mottaker som Digipost-bruker, men sendte ikke med krypteringsnøkkel. Indikerer en feil hos Digipost.");
+			}
+			log("Mottaker er Digipost-bruker. Hentet krypteringsnøkkel.");
+		} else {
+			log("Mottaker er ikke Digipost-bruker.");
+		}
+		return result;
+	}
+
+	public DigipostPublicKey getEncryptionKeyForPrint() {
+		DateTime now = DateTime.now();
+
+		if (printKeyCachedTime == null || new Duration(printKeyCachedTime, now).isLongerThan(Duration.standardMinutes(5))) {
+			Response response = apiService.getEncryptionKeyForPrint();
+			checkResponse(response);
+			EncryptionKey encryptionKey = response.readEntity(EncryptionKey.class);
+			cachedPrintKey = new DigipostPublicKey(encryptionKey);
+			printKeyCachedTime = now;
+			return cachedPrintKey;
+		} else {
+			return cachedPrintKey;
+		}
 	}
 
 	/**

@@ -13,21 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package no.digipost.api.client.representations;
 
-public enum Relation {
-	SELF,
-	ADD_CONTENT,
-	SEND,
-	SEARCH,
-	AUTOCOMPLETE,
-	CREATE_MESSAGE,
-	API_DOCUMENTATION,
-	GET_ENCRYPTION_KEY,
-	GET_PRINT_ENCRYPTION_KEY,
-	IDENTIFY_RECIPIENT,
-	IDENTIFY_RECIPIENT_WITH_ENCRYPTION_KEY,
-	DOCUMENT_EVENTS,
-	UNSUPPORTED,
-	GET_DOCUMENT_CONTENT
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "print-failed-metadata")
+public class PrintFailedMetadata extends EventMetadata {
+
+	@XmlAttribute(name = "error-message")
+	public final String errorMessage;
+
+	public PrintFailedMetadata() {
+		this(null);
+	}
+
+	public PrintFailedMetadata(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
 }

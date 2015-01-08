@@ -176,7 +176,8 @@
     <xsd:complexType name="norwegian-address">
         <xsd:sequence>
             <xsd:element name="addressline1" type="addressline" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="addressline2" type="addressline" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="addressline2" type="addressline" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="addressline3" type="addressline" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="zip-code" type="zip-code" minOccurs="1" maxOccurs="1" />
             <xsd:element name="city" type="city" minOccurs="1" maxOccurs="1" />
         </xsd:sequence>
@@ -212,15 +213,15 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:element name="encryption-key">
-        <xsd:complexType>
-            <xsd:simpleContent>
-                <xsd:extension base="xsd:string">
-                    <xsd:attribute name="key-id" type="xsd:string" />
-                </xsd:extension>
-            </xsd:simpleContent>
-        </xsd:complexType>
-    </xsd:element>
+    <xsd:complexType name="encryption-key">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="key-id" type="xsd:string" />
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:element name="encryption-key" type="encryption-key"/>
 
     <xsd:simpleType name="message-status">
         <xsd:annotation>
@@ -308,6 +309,15 @@
                 <xsd:element name="unidentified-reason" type="unidentified-reason" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="invalid-reason" type="invalid-reason" minOccurs="1" maxOccurs="1"/>
             </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="identification-result-with-encryption-key" type="identification-result-with-encryption-key" />
+
+    <xsd:complexType name="identification-result-with-encryption-key">
+        <xsd:sequence>
+            <xsd:element name="identification-result" type="identification-result" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="encryption-key" type="encryption-key" minOccurs="0" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -475,21 +485,38 @@
         <xsd:sequence>
             <xsd:element name="recipient" type="print-recipient"  minOccurs="1" maxOccurs="1"  />
             <xsd:element name="return-address" type="print-recipient"  minOccurs="1" maxOccurs="1"  />
-            <xsd:element name="post-type"  minOccurs="1" maxOccurs="1" >
-                <xsd:annotation>
-                    <xsd:documentation>
-                        A or B for respectively A-Priority and B-Economy
-                    </xsd:documentation>
-                </xsd:annotation>
-                <xsd:simpleType>
-                    <xsd:restriction base="xsd:string">
-                        <xsd:enumeration value="A"/>
-                        <xsd:enumeration value="B"/>
-                    </xsd:restriction>
-                </xsd:simpleType>
-            </xsd:element>
+            <xsd:element name="post-type" type="post-type" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="color" type="print-colors" minOccurs="0" maxOccurs="1" default="MONOCHROME"/>
+            <xsd:element name="nondeliverable-handling" type="nondeliverable-handling" minOccurs="0" maxOccurs="1" default="RETURN_TO_SENDER"/>
         </xsd:sequence>
     </xsd:complexType>
+
+	<xsd:simpleType name="post-type">
+		<xsd:annotation>
+			<xsd:documentation>
+				A or B for respectively A-Priority and B-Economy
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="A" />
+			<xsd:enumeration value="B" />
+		</xsd:restriction>
+	</xsd:simpleType>
+    
+    <xsd:simpleType name="print-colors">
+    	<xsd:restriction base="xsd:string">
+    	    <xsd:enumeration value="MONOCHROME" />
+            <xsd:enumeration value="COLORS" />
+    	</xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="nondeliverable-handling">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SHRED" />
+            <xsd:enumeration value="RETURN_TO_SENDER" />
+        </xsd:restriction>
+    </xsd:simpleType>
+    
 
     <xsd:complexType name="content-hash">
         <xsd:simpleContent>
@@ -887,6 +914,22 @@
         </xsd:complexContent>
     </xsd:complexType>
 
+    <xsd:complexType name="print-failed-metadata">
+		<xsd:complexContent>
+			<xsd:extension base="event-metadata">
+				<xsd:attribute name="error-message" type="xsd:string" use="required" />
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="postmarked-metadata">
+		<xsd:complexContent>
+			<xsd:extension base="event-metadata">
+				<xsd:attribute name="postmarked-time" type="xsd:dateTime" use="required" />
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
     <xsd:complexType name="document-metadata">
         <xsd:sequence>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
@@ -897,34 +940,12 @@
 
     <xsd:simpleType name="event-type">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="EMAIL_NOTIFICATION_FAILED">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <jaxb:typesafeEnumMember name="EMAIL_NOTIFICATION_FAILED" />
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="SMS_NOTIFICATION_FAILED">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <jaxb:typesafeEnumMember name="SMS_NOTIFICATION_FAILED" />
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="OPENED">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <jaxb:typesafeEnumMember name="OPENED" />
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="MOVE_FILES_FROM_PUBLIC_SECTOR">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <jaxb:typesafeEnumMember name="MOVE_FILES_FROM_PUBLIC_SECTOR" />
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:enumeration>
+            <xsd:enumeration value="EMAIL_NOTIFICATION_FAILED" />
+            <xsd:enumeration value="SMS_NOTIFICATION_FAILED" />
+            <xsd:enumeration value="OPENED" />
+            <xsd:enumeration value="MOVE_FILES_FROM_PUBLIC_SECTOR" />
+            <xsd:enumeration value="POSTMARKED" />
+            <xsd:enumeration value="PRINT_FAILED" />
         </xsd:restriction>
     </xsd:simpleType>
 
