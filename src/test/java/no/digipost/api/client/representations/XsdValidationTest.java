@@ -189,7 +189,7 @@ public class XsdValidationTest {
 				new SmsNotificationFailedMetadata("12345678", "ERROR_CODE"));
 
 		DocumentEvent printFailedEvent = new DocumentEvent(UUID.randomUUID().toString(), PRINT_FAILED, DateTime.now(),
-				new PrintFailedMetadata("Feil dimensjoner"));
+				new FailedPrintMetadata("Feil dimensjoner"));
 
 		DocumentEvent postmarkedEvent = new DocumentEvent(UUID.randomUUID().toString(), POSTMARKED, DateTime.now(),
 				new PostmarkedMetadata(DateTime.now()));
@@ -199,8 +199,10 @@ public class XsdValidationTest {
 						"dest-mailbox", "dest-mailbox-address", asList(new DocumentMetadata(UUID.randomUUID().toString(), null)))
 		);
 
+		DocumentEvent shreddedEvent = new DocumentEvent(UUID.randomUUID().toString(), SHREDDED, DateTime.now());
+
 		DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent,
-				failedSmsNotificationEvent, printFailedEvent, movedFilesEvent, postmarkedEvent));
+				failedSmsNotificationEvent, printFailedEvent, movedFilesEvent, postmarkedEvent, shreddedEvent));
 		marshallValidateAndUnmarshall(documentEvents);
 	}
 

@@ -468,6 +468,8 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:element name="message-recipient" type="message-recipient" />
+
     <xsd:complexType name="name-and-address">
         <xsd:sequence>
             <xsd:element name="fullname" type="name" minOccurs="1" maxOccurs="1" />
@@ -491,23 +493,23 @@
         </xsd:sequence>
     </xsd:complexType>
 
-	<xsd:simpleType name="post-type">
-		<xsd:annotation>
-			<xsd:documentation>
-				A or B for respectively A-Priority and B-Economy
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="A" />
-			<xsd:enumeration value="B" />
-		</xsd:restriction>
-	</xsd:simpleType>
-    
+    <xsd:simpleType name="post-type">
+        <xsd:annotation>
+            <xsd:documentation>
+                A or B for respectively A-Priority and B-Economy
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="A" />
+            <xsd:enumeration value="B" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <xsd:simpleType name="print-colors">
-    	<xsd:restriction base="xsd:string">
-    	    <xsd:enumeration value="MONOCHROME" />
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="MONOCHROME" />
             <xsd:enumeration value="COLORS" />
-    	</xsd:restriction>
+        </xsd:restriction>
     </xsd:simpleType>
 
     <xsd:simpleType name="nondeliverable-handling">
@@ -516,7 +518,7 @@
             <xsd:enumeration value="RETURN_TO_SENDER" />
         </xsd:restriction>
     </xsd:simpleType>
-    
+
 
     <xsd:complexType name="content-hash">
         <xsd:simpleContent>
@@ -641,14 +643,14 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-			<xsd:element name="invoice-reference" minOccurs="0" maxOccurs="1">
-				<xsd:simpleType>
-					<xsd:restriction base="xsd:string">
-						<xsd:maxLength value="100"/>
-					</xsd:restriction>
-				</xsd:simpleType>
-			</xsd:element>
-			<xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <xsd:element name="invoice-reference" minOccurs="0" maxOccurs="1">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:maxLength value="100"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
         </xsd:sequence>
     </xsd:complexType>
@@ -686,7 +688,7 @@
         <xsd:complexContent>
             <xsd:extension base="document">
                 <xsd:sequence>
-                    <xsd:element name="kid" minOccurs="1" maxOccurs="1" nillable="false">
+                    <xsd:element name="kid" minOccurs="0" maxOccurs="1" nillable="false">
                         <xsd:simpleType>
                             <xsd:restriction base="xsd:string">
                                 <xsd:pattern value="[0-9]{2,24}[0-9\-]{1}" />
@@ -914,21 +916,21 @@
         </xsd:complexContent>
     </xsd:complexType>
 
-    <xsd:complexType name="print-failed-metadata">
-		<xsd:complexContent>
-			<xsd:extension base="event-metadata">
-				<xsd:attribute name="error-message" type="xsd:string" use="required" />
-			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
+    <xsd:complexType name="failed-print-metadata">
+        <xsd:complexContent>
+            <xsd:extension base="event-metadata">
+                <xsd:attribute name="error-code" type="xsd:string" use="required" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
 
-	<xsd:complexType name="postmarked-metadata">
-		<xsd:complexContent>
-			<xsd:extension base="event-metadata">
-				<xsd:attribute name="postmarked-time" type="xsd:dateTime" use="required" />
-			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
+    <xsd:complexType name="postmarked-metadata">
+        <xsd:complexContent>
+            <xsd:extension base="event-metadata">
+                <xsd:attribute name="postmarked-date" type="xsd:dateTime" use="required" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
 
     <xsd:complexType name="document-metadata">
         <xsd:sequence>
@@ -946,6 +948,7 @@
             <xsd:enumeration value="MOVE_FILES_FROM_PUBLIC_SECTOR" />
             <xsd:enumeration value="POSTMARKED" />
             <xsd:enumeration value="PRINT_FAILED" />
+            <xsd:enumeration value="SHREDDED" />
         </xsd:restriction>
     </xsd:simpleType>
 
