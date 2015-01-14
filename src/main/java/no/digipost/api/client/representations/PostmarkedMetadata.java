@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "postmarked-metadata")
 public class PostmarkedMetadata extends EventMetadata {
 
-	@XmlAttribute(name = "postmarked-time", required = true)
+	@XmlAttribute(name = "postmarked-date", required = true)
 	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
 	@XmlSchemaType(name = "dateTime")
 	public final DateTime postmarkedTime;
