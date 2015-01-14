@@ -468,6 +468,8 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:element name="message-recipient" type="message-recipient" />
+
     <xsd:complexType name="name-and-address">
         <xsd:sequence>
             <xsd:element name="fullname" type="name" minOccurs="1" maxOccurs="1" />
@@ -946,6 +948,7 @@
             <xsd:enumeration value="MOVE_FILES_FROM_PUBLIC_SECTOR" />
             <xsd:enumeration value="POSTMARKED" />
             <xsd:enumeration value="PRINT_FAILED" />
+            <xsd:enumeration value="SHREDDED" />
         </xsd:restriction>
     </xsd:simpleType>
 
