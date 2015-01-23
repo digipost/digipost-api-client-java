@@ -33,6 +33,7 @@ This software includes third party software subject to the following licenses:
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   MIME streaming extension under CDDL 1.1 or GPL2 w/ CPE
   Mockito under The MIT License
+  Motif under Apache License 2.0
   Objenesis under Apache 2
   OSGi resource locator bundle - used by various API providers that rely on META-INF/services mechanism to locate providers. under CDDL + GPLv2 with classpath exception
   ServiceLocator Default Implementation under CDDL + GPLv2 with classpath exception

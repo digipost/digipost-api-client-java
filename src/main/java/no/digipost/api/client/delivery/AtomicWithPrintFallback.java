@@ -15,12 +15,14 @@
  */
 package no.digipost.api.client.delivery;
 
-import no.digipost.api.client.ApiService;
-import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.MessageSender;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Sender en forsendelse gjennom Digipost i ett kall. Dersom mottaker ikke er
@@ -28,11 +30,15 @@ import java.io.InputStream;
  * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
  * til print.)
  */
-final class AtomicWithPrintFallback extends MultipartSendMessage implements OngoingDelivery.SendableWithPrintFallback {
+final class AtomicWithPrintFallback implements OngoingDelivery.SendableWithPrintFallback {
 
+	private final MessageSender sender;
+	private final Message message;
+	private final Map<Document, InputStream> documents = new HashMap<>();
 
-    AtomicWithPrintFallback(Message message, ApiService apiService, EventLogger eventLogger) {
-    	super(message, apiService, eventLogger);
+    AtomicWithPrintFallback(Message message, MessageSender sender) {
+    	this.message = message;
+    	this.sender = sender;
     }
 
 
@@ -43,7 +49,7 @@ final class AtomicWithPrintFallback extends MultipartSendMessage implements Ongo
      */
     @Override
     public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
-    	add(document, content);
+    	documents.put(document, content);
     	return this;
     }
 
@@ -57,6 +63,12 @@ final class AtomicWithPrintFallback extends MultipartSendMessage implements Ongo
     				"Adding separate content for print is not supported for " +
 					DeliveryMethod.class.getSimpleName() + " " + DeliveryMethod.ATOMIC_REST);
     	}
+    }
+
+
+	@Override
+    public MessageDelivery send() {
+		return sender.sendMultipartMessage(message, documents);
     }
 
 }

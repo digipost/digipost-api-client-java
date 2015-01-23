@@ -39,6 +39,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.github.runeflobakk</groupId>
+			<artifactId>motif</artifactId>
+			<version>0.7</version>
+		</dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
@@ -216,6 +221,9 @@
 					<header>src/main/resources/header.txt</header>
 					<strictCheck>true</strictCheck>
 					<excludes>
+						<exclude>NOTICE</exclude>
+						<exclude>**/NOTICE.template</exclude>
+						<exclude>LICENSE*</exclude>
 						<exclude>**/*.pdf</exclude>
 						<exclude>**/*.p12</exclude>
 						<exclude>**/*.txt</exclude>
@@ -364,6 +372,7 @@
 										<include>ch.qos.logback:logback-classic:${logback.version}:jar:compile</include>
 										<include>ch.qos.logback:logback-core:${logback.version}:jar:compile</include>
 										<include>org.slf4j:slf4j-api:${slf4j.version}:jar:compile</include>
+										<include>com.github.runeflobakk:motif</include>
 									</includes>
 									<searchTransitive>true</searchTransitive>
 									<message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før distribusjon. Husk også å oppdatere fila «NOTICE».</message>

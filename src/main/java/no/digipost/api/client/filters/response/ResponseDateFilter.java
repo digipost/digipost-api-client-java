@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
+
 import java.io.IOException;
 
 import static javax.ws.rs.core.HttpHeaders.DATE;
@@ -62,7 +63,9 @@ public class ResponseDateFilter implements ClientResponseFilter {
 							"Det skjedde en feil under signatursjekk: " + e.getMessage());
 				}
 			} else {
-				LOG.warn("Feil under validering av server-signatur", e);
+				LOG.warn("Feil under validering av server-signatur: '" + e.getMessage() + "'. " +
+						(LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));
+				LOG.debug(e.getMessage(), e);
 			}
 		}
 	}

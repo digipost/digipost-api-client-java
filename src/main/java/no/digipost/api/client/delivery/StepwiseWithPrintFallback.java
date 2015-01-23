@@ -15,8 +15,6 @@
  */
 package no.digipost.api.client.delivery;
 
-import no.digipost.api.client.ApiService;
-import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.MessageSender;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
@@ -29,8 +27,8 @@ final class StepwiseWithPrintFallback implements OngoingDelivery.SendableWithPri
     private MessageDelivery delivery;
 
 
-    StepwiseWithPrintFallback(Message message, ApiService apiService, EventLogger eventLogger) {
-		this.sender = new MessageSender(apiService, eventLogger);
+    StepwiseWithPrintFallback(Message message, MessageSender sender) {
+		this.sender = sender;
 	    this.delivery = sender.createOrFetchMessage(message);
     }
 

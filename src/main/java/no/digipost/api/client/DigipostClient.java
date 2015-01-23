@@ -25,12 +25,7 @@ import no.digipost.api.client.filters.request.RequestUserAgentFilter;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Filter;
 import no.digipost.api.client.filters.response.ResponseDateFilter;
 import no.digipost.api.client.filters.response.ResponseSignatureFilter;
-import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.DocumentEvents;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.IdentificationResult;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
@@ -44,14 +39,11 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+
 import java.io.InputStream;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -116,7 +108,7 @@ public class DigipostClient {
 		WebTarget webTarget = client.target(digipostUrl);
 		apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : overriddenApiService;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
-		deliverer = new MessageDeliverer(deliveryType, apiService, eventLogger);
+		deliverer = new MessageDeliverer(deliveryType, new MessageSender(apiService, eventLogger));
 		documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
 
 

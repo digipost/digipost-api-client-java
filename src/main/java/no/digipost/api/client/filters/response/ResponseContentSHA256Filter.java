@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -94,7 +95,9 @@ public class ResponseContentSHA256Filter implements ClientResponseFilter {
 				throw new DigipostClientException(SERVER_SIGNATURE_ERROR, message);
 			}
 		} else {
-			LOG.warn("Feil under validering av server signatur", e);
+			LOG.warn("Feil under validering av server signatur: '" + e.getMessage() + "'. " +
+					(LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));
+			LOG.debug(e.getMessage(), e);
 		}
 	}
 }

@@ -15,28 +15,33 @@
  */
 package no.digipost.api.client.delivery;
 
-import no.digipost.api.client.ApiService;
-import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.MessageSender;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Sender en forsendelse gjennom Digipost i ett kall. Dersom mottaker ikke er
- * digipostbruker og det ligger printdetaljer på forsendelsen bestiller vi
- * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
- * til print.)
+ * Sender en forsendelse direkte til print gjennom Digipost i ett kall.
+ * (Krever at avsender har fått tilgang til print.)
  */
-final class AtomicPrintOnlyMessage extends MultipartSendMessage implements OngoingDelivery.SendableForPrintOnly {
+final class AtomicPrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
+
+	private final MessageSender sender;
+	private final Message printMessage;
+	private final Map<Document, InputStream> documents = new HashMap<>();
 
 
-    AtomicPrintOnlyMessage(Message printMessage, ApiService apiService, EventLogger eventLogger) {
-    	super(printMessage, apiService, eventLogger);
+    AtomicPrintOnlyMessage(Message printMessage, MessageSender sender) {
     	if (!printMessage.isDirectPrint()) {
     		throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
     				+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
     	}
+    	this.printMessage = printMessage;
+    	this.sender = sender;
     }
 
 
@@ -47,8 +52,14 @@ final class AtomicPrintOnlyMessage extends MultipartSendMessage implements Ongoi
      */
     @Override
     public AtomicPrintOnlyMessage addContent(Document document, InputStream content) {
-    	add(document, content);
+    	documents.put(document, content);
     	return this;
+    }
+
+
+	@Override
+    public MessageDelivery send() {
+		return sender.sendMultipartMessage(printMessage, documents);
     }
 
 }

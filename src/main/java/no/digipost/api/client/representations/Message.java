@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static no.motif.Singular.the;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -166,8 +167,8 @@ public class Message {
 		this.recipient = recipient;
 		this.primaryDocument = primaryDocument;
 		this.invoiceReference = invoiceReference;
-		this.attachments = new ArrayList<>();
 		this.deliveryTime = deliveryTime;
+		this.attachments = new ArrayList<>();
 		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
 	        this.attachments.add(attachment);
         }
@@ -179,6 +180,10 @@ public class Message {
 
 	public boolean isSameMessageAs(final Message message) {
 		return this.messageId != null && this.messageId.equals(message.messageId);
+	}
+
+	public boolean hasAnyDocumentRequiringPreEncryption() {
+		return the(primaryDocument).append(attachments).exists(Document.isPreEncrypt);
 	}
 
 }

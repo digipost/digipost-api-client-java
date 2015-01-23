@@ -15,8 +15,6 @@
  */
 package no.digipost.api.client.delivery;
 
-import no.digipost.api.client.ApiService;
-import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.MessageSender;
 import no.digipost.api.client.representations.DeliveryMethod;
 import no.digipost.api.client.representations.Document;
@@ -31,12 +29,12 @@ final class StepwisePrintOnlyMessage implements OngoingDelivery.SendableForPrint
     private MessageDelivery delivery;
 
 
-    StepwisePrintOnlyMessage(Message printMessage, ApiService apiService, EventLogger eventLogger) {
+    StepwisePrintOnlyMessage(Message printMessage, MessageSender sender) {
     	if (!printMessage.isDirectPrint()) {
     		throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
     				+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
     	}
-    	this.sender = new MessageSender(apiService, eventLogger);
+    	this.sender = sender;
     	this.delivery = sender.createOrFetchMessage(printMessage);
     }
 

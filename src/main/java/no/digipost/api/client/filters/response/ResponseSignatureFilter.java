@@ -19,7 +19,6 @@ import no.digipost.api.client.ApiService;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.security.ClientResponseToVerify;
-import no.digipost.api.client.security.ResponseMessageSignatureUtil;
 import no.digipost.api.client.util.LoggingUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.glassfish.jersey.internal.util.Base64;
@@ -29,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,7 +98,9 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 							"Det skjedde en feil under signatursjekk: " + e.getMessage());
 				}
 			} else {
-				LOG.warn("Feil under validering av server signatur", e);
+				LOG.warn("Feil under validering av server signatur: '" + e.getMessage() + "'. " +
+						(LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));
+				LOG.debug(e.getMessage(), e);
 			}
 		}
 	}

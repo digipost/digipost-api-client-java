@@ -15,35 +15,32 @@
  */
 package no.digipost.api.client.delivery;
 
-import no.digipost.api.client.ApiService;
-import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.MessageSender;
 import no.digipost.api.client.representations.Message;
 
 public class MessageDeliverer {
 
 	private final DeliveryMethod type;
-	private final EventLogger eventLogger;
-	private final ApiService apiService;
+	private final MessageSender sender;
 
-	public MessageDeliverer(DeliveryMethod type, ApiService apiService, EventLogger eventLogger) {
+	public MessageDeliverer(DeliveryMethod type, MessageSender sender) {
 		this.type = type;
-		this.apiService = apiService;
-		this.eventLogger = eventLogger;
+		this.sender = sender;
 	}
 
 
 	public OngoingDelivery.WithPrintFallback createMessage(Message message) {
 		switch (type) {
-			case STEPWISE_REST: return new StepwiseWithPrintFallback(message, apiService, eventLogger);
-			case ATOMIC_REST: return new AtomicWithPrintFallback(message, apiService, eventLogger);
+			case STEPWISE_REST: return new StepwiseWithPrintFallback(message, sender);
+			case ATOMIC_REST: return new AtomicWithPrintFallback(message, sender);
 			default: throw new UnsupportedOperationException(DeliveryMethod.class.getSimpleName() + " " + type + " is not supported");
 		}
 	}
 
 	public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
 		switch (type) {
-    		case STEPWISE_REST: return new StepwisePrintOnlyMessage(printMessage, apiService, eventLogger);
-    		case ATOMIC_REST: return new AtomicPrintOnlyMessage(printMessage, apiService, eventLogger);
+    		case STEPWISE_REST: return new StepwisePrintOnlyMessage(printMessage, sender);
+    		case ATOMIC_REST: return new AtomicPrintOnlyMessage(printMessage, sender);
     		default: throw new UnsupportedOperationException(DeliveryMethod.class.getSimpleName() + " " + type + " is not supported");
     	}
 	}

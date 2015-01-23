@@ -16,6 +16,8 @@
 
 package no.digipost.api.client.representations;
 
+import no.motif.f.Predicate;
+
 import javax.xml.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -143,6 +145,10 @@ public class Document extends Representation {
 	public void setPreEncrypt() {
 		this.preEncrypt = true;
 	}
+
+	public static final Predicate<Document> isPreEncrypt = new Predicate<Document>() { @Override public boolean $(Document document) {
+		return document.isPreEncrypt();
+    }};
 
 	public boolean isPreEncrypt() {
 		return preEncrypt != null && preEncrypt;
