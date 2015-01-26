@@ -16,15 +16,15 @@
 package no.digipost.api.client.representations;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.io.FilenameUtils.getExtension;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
-public class FileType {
-	private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[a-zA-Z0-9\\-_]+$");
+public final class FileType {
+	private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[a-z0-9\\-_]+$");
 
 	public static final FileType PDF = new FileType("pdf");
 	public static final FileType HTM = new FileType("htm");
@@ -40,43 +40,40 @@ public class FileType {
 	private final String fileType;
 
 	public FileType(final String fileType) {
-		if (fileType == null || fileType.length() >= 30 || !ALLOWED_CHARACTERS.matcher(fileType).matches()) {
+		String normalized = trimToEmpty(fileType).toLowerCase();
+		if (normalized.length() >= 30 || !ALLOWED_CHARACTERS.matcher(normalized).matches()) {
 			this.fileType = "";
 		} else {
-			this.fileType = fileType.toLowerCase();
+			this.fileType = normalized;
 		}
 	}
 
 	@Override
 	public String toString() {
-		return isBlank() ? "" : fileType;
+		return fileType;
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder().append(fileType).toHashCode();
+		return Objects.hashCode(fileType);
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		} else if (obj == null || !(obj instanceof FileType)) {
 			return false;
 		}
 		FileType other = (FileType) obj;
-		return new EqualsBuilder().append(fileType, other.fileType).isEquals();
+		return Objects.equals(other.fileType, this.fileType);
 	}
 
 	public boolean isBlank() {
 		return StringUtils.isBlank(fileType);
 	}
 
-	public static FileType fromFilename(final String filename) {
+	public static FileType fromFilename(String filename) {
 		return new FileType(getExtension(filename));
 	}
 }
