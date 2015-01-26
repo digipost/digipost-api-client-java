@@ -8,6 +8,7 @@ Licensed under Apache 2 - http://www.apache.org/licenses/LICENSE-2.0.html
 
 This software includes third party software subject to the following licenses:
 
+  Antlr 3 Runtime under BSD licence
   aopalliance version 1.0 repackaged as a module under CDDL + GPLv2 with classpath exception
   Apache Commons Lang under The Apache Software License, Version 2.0
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
@@ -19,7 +20,8 @@ This software includes third party software subject to the following licenses:
   Hamcrest library under New BSD License
   HK2 API module under CDDL + GPLv2 with classpath exception
   HK2 Implementation Utilities under CDDL + GPLv2 with classpath exception
-  Javassist under MPL 1.1 or LGPL 2.1 or Apache License 2.0
+  javaruntype under The Apache Software License, Version 2.0
+  Javassist under Mozilla Public License 1.1
   javax.annotation API under CDDL + GPLv2 with classpath exception
   javax.inject:1 as OSGi bundle under CDDL + GPLv2 with classpath exception
   javax.ws.rs-api under CDDL 1.1 or GPL2 w/ CPE
@@ -29,12 +31,16 @@ This software includes third party software subject to the following licenses:
   jersey-repackaged-guava under CDDL+GPL License
   Joda-Time under Apache 2
   JUnit under Eclipse Public License 1.0
+  junit-quickcheck-core under The MIT License
+  junit-quickcheck-generators under The MIT License
+  junit-theories under Eclipse Public License v 1.0
   Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   MIME streaming extension under CDDL 1.1 or GPL2 w/ CPE
   Mockito under The MIT License
   Motif under Apache License 2.0
   Objenesis under Apache 2
+  OGNL - Object Graph Navigation Library under The Apache Software License, Version 2.0
   OSGi resource locator bundle - used by various API providers that rely on META-INF/services mechanism to locate providers. under CDDL + GPLv2 with classpath exception
   ServiceLocator Default Implementation under CDDL + GPLv2 with classpath exception
   SLF4J API Module under MIT License

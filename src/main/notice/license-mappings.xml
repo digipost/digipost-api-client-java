@@ -9,4 +9,16 @@
         <artifactId>jsr173_api</artifactId>
         <license>Unknown license. (http://google.com/search?q=jsr173_api+license)</license>
     </artifact>
+    <artifact>
+        <groupId>javassist</groupId>
+        <artifactId>javassist</artifactId>
+        <version>3.11.0.GA</version>
+        <license>Mozilla Public License 1.1</license>
+    </artifact>
+    <artifact>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr-runtime</artifactId>
+        <version>3.1.2</version>
+        <license>BSD licence</license>
+    </artifact>    
 </license-lookup>

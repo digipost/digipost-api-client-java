@@ -132,9 +132,27 @@
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>
 			<artifactId>equalsverifier</artifactId>
-			<version>1.5.1</version>
+			<version>1.6</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.contrib</groupId>
+			<artifactId>junit-theories</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+	        <groupId>com.pholser</groupId>
+	        <artifactId>junit-quickcheck-core</artifactId>
+	        <version>0.4</version>
+	        <scope>test</scope>
+		</dependency>
+	    <dependency>
+	        <groupId>com.pholser</groupId>
+	        <artifactId>junit-quickcheck-generators</artifactId>
+	        <version>0.4</version>
+	        <scope>test</scope>
+	    </dependency>		
 	</dependencies>
 
 	<build>
