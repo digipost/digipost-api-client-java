@@ -62,6 +62,7 @@ public class DigipostSwingClient {
 	private JTextField recipientBirthDateField;
 	private JTextField recipientPhoneNumberField;
 	private JTextField recipientEmailAddressField;
+	private JTextField recipientOrganizationNumberField;
 	private JCheckBox fallbackToPrintCheckBox;
 	private JCheckBox directToPrintCheckBox;
 	private JTextField attachmentSubjectField;
@@ -193,17 +194,34 @@ public class DigipostSwingClient {
 				enablePersonalIdentificationNumberFields();
 			}
 		});
+		
+		JLabel recipientOrganizationNumerLabel = new JLabel("Mottakers org.nummer");
+		brevMainPanel.add(recipientOrganizationNumerLabel, createGridBagConstraintsForLabel(0, 3));
+
+		recipientOrganizationNumberField = new JTextField();
+		recipientOrganizationNumberField.setEnabled(false);
+		brevMainPanel.add(recipientOrganizationNumberField, createGridBagConstraintsForField(1, 3));
+		recipientOrganizationNumberField.setColumns(9);
+
+		final JRadioButton identifyOnOrganizationNumber = new JRadioButton();
+		brevMainPanel.add(identifyOnOrganizationNumber, createGridBagConstraintsForRadioButton(5, 3));
+		identifyOnOrganizationNumber.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				enableOrganizationNumberFields();
+			}
+		});
 
 		JLabel mottakerNavnLabel = new JLabel("Mottakers navn");
-		brevMainPanel.add(mottakerNavnLabel, createGridBagConstraintsForLabel(0, 3));
+		brevMainPanel.add(mottakerNavnLabel, createGridBagConstraintsForLabel(0, 4));
 
 		recipientNameField = new JTextField();
 		recipientNameField.setEnabled(false);
-		brevMainPanel.add(recipientNameField, createGridBagConstraintsForField(1, 3));
+		brevMainPanel.add(recipientNameField, createGridBagConstraintsForField(1, 4));
 		recipientNameField.setColumns(10);
 
 		JRadioButton identifyOnNameAndAddress = new JRadioButton();
-		brevMainPanel.add(identifyOnNameAndAddress, createGridBagConstraintsForField(5, 3));
+		brevMainPanel.add(identifyOnNameAndAddress, createGridBagConstraintsForField(5, 4));
 		identifyOnNameAndAddress.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent arg0) {
@@ -215,82 +233,83 @@ public class DigipostSwingClient {
 		identifierGroup.add(identifyOnDigipostAddress);
 		identifierGroup.add(identifyOnNameAndAddress);
 		identifierGroup.add(identifyOnPersonalIdentificationNumber);
+		identifierGroup.add(identifyOnOrganizationNumber);
 
 		JLabel mottakerAdresse1Label = new JLabel("Adresselinje 1");
-		brevMainPanel.add(mottakerAdresse1Label, createGridBagConstraintsForLabel(0, 4));
+		brevMainPanel.add(mottakerAdresse1Label, createGridBagConstraintsForLabel(0, 5));
 
 		recipientAddress1Field = new JTextField();
 		recipientAddress1Field.setEnabled(false);
-		brevMainPanel.add(recipientAddress1Field, createGridBagConstraintsForField(1, 4));
+		brevMainPanel.add(recipientAddress1Field, createGridBagConstraintsForField(1, 5));
 		recipientAddress1Field.setColumns(10);
 
 		JLabel mottakerAdresse2Label = new JLabel("Adresselinje 2");
-		brevMainPanel.add(mottakerAdresse2Label, createGridBagConstraintsForLabel(0, 5));
+		brevMainPanel.add(mottakerAdresse2Label, createGridBagConstraintsForLabel(0, 6));
 
 		recipientAddress2Field = new JTextField();
 		recipientAddress2Field.setEnabled(false);
-		brevMainPanel.add(recipientAddress2Field, createGridBagConstraintsForField(1, 5));
+		brevMainPanel.add(recipientAddress2Field, createGridBagConstraintsForField(1, 6));
 		recipientAddress2Field.setColumns(10);
 
 		JLabel mottakerPostnummerLabel = new JLabel("Postnummer");
-		brevMainPanel.add(mottakerPostnummerLabel, createGridBagConstraintsForLabel(0, 6));
+		brevMainPanel.add(mottakerPostnummerLabel, createGridBagConstraintsForLabel(0, 7));
 
 		recipientPostalcodeField = new JTextField();
 		recipientPostalcodeField.setEnabled(false);
-		brevMainPanel.add(recipientPostalcodeField, createGridBagConstraintsForField(1, 6, 1));
+		brevMainPanel.add(recipientPostalcodeField, createGridBagConstraintsForField(1, 7, 1));
 		recipientPostalcodeField.setColumns(10);
 
 		JLabel mottakerPoststedLabel = new JLabel("Poststed");
-		brevMainPanel.add(mottakerPoststedLabel, createGridBagConstraintsForLabel(2, 6));
+		brevMainPanel.add(mottakerPoststedLabel, createGridBagConstraintsForLabel(2, 7));
 
 		recipientCityField = new JTextField();
 		recipientCityField.setEnabled(false);
-		brevMainPanel.add(recipientCityField, createGridBagConstraintsForField(3, 6, 1));
+		brevMainPanel.add(recipientCityField, createGridBagConstraintsForField(3, 7, 1));
 		recipientCityField.setColumns(10);
 
 		JLabel mottakerFoedselsdatoLabel = new JLabel("Fødselsdato (DD.MM.YYYY)");
-		brevMainPanel.add(mottakerFoedselsdatoLabel, createGridBagConstraintsForLabel(0, 7));
+		brevMainPanel.add(mottakerFoedselsdatoLabel, createGridBagConstraintsForLabel(0, 8));
 
 		recipientBirthDateField = new JTextField();
 		recipientBirthDateField.setEnabled(false);
-		brevMainPanel.add(recipientBirthDateField, createGridBagConstraintsForField(1, 7, 1));
+		brevMainPanel.add(recipientBirthDateField, createGridBagConstraintsForField(1, 8, 1));
 		recipientBirthDateField.setColumns(10);
 
 		JLabel mottakerTelefonnummerLabel = new JLabel("Telefonnummer");
-		brevMainPanel.add(mottakerTelefonnummerLabel, createGridBagConstraintsForLabel(2, 7));
+		brevMainPanel.add(mottakerTelefonnummerLabel, createGridBagConstraintsForLabel(2, 8));
 
 		recipientPhoneNumberField = new JTextField();
 		recipientPhoneNumberField.setEnabled(false);
-		brevMainPanel.add(recipientPhoneNumberField, createGridBagConstraintsForField(3, 7, 1));
+		brevMainPanel.add(recipientPhoneNumberField, createGridBagConstraintsForField(3, 8, 1));
 		recipientPhoneNumberField.setColumns(10);
 
 		JLabel mottakerEpostadresseLabel = new JLabel("Epost-adresse");
-		brevMainPanel.add(mottakerEpostadresseLabel, createGridBagConstraintsForLabel(0, 8));
+		brevMainPanel.add(mottakerEpostadresseLabel, createGridBagConstraintsForLabel(0, 9));
 
 		recipientEmailAddressField = new JTextField();
 		recipientEmailAddressField.setEnabled(false);
-		brevMainPanel.add(recipientEmailAddressField, createGridBagConstraintsForField(1, 8));
+		brevMainPanel.add(recipientEmailAddressField, createGridBagConstraintsForField(1, 9));
 		recipientEmailAddressField.setColumns(10);
 
 		JLabel fallbackToPrintLabel = new JLabel("Fallback til print");
-		brevMainPanel.add(fallbackToPrintLabel, createGridBagConstraintsForLabel(0, 9));
+		brevMainPanel.add(fallbackToPrintLabel, createGridBagConstraintsForLabel(0, 10));
 
 		fallbackToPrintCheckBox = new JCheckBox();
 		fallbackToPrintCheckBox.setEnabled(false);
-		brevMainPanel.add(fallbackToPrintCheckBox, createGridBagConstraintsForField(1, 9, 1));
+		brevMainPanel.add(fallbackToPrintCheckBox, createGridBagConstraintsForField(1, 10, 1));
 
 		JLabel directToPrintLabel = new JLabel("Direkte til print");
-		brevMainPanel.add(directToPrintLabel, createGridBagConstraintsForLabel(2, 9));
+		brevMainPanel.add(directToPrintLabel, createGridBagConstraintsForLabel(2, 10));
 
 		directToPrintCheckBox = new JCheckBox();
 		directToPrintCheckBox.setEnabled(false);
-		brevMainPanel.add(directToPrintCheckBox, createGridBagConstraintsForField(3, 9, 1));
+		brevMainPanel.add(directToPrintCheckBox, createGridBagConstraintsForField(3, 10, 1));
 
 		JLabel innholdLabel = new JLabel("Brevets innhold");
-		brevMainPanel.add(innholdLabel, createGridBagConstraintsForLabel(0, 10));
+		brevMainPanel.add(innholdLabel, createGridBagConstraintsForLabel(0, 11));
 
 		contentField = new JTextField();
-		brevMainPanel.add(contentField, createGridBagConstraintsForField(1, 10));
+		brevMainPanel.add(contentField, createGridBagConstraintsForField(1, 11));
 		contentField.setColumns(10);
 
 		final JFileChooser filChooser = new JFileChooser();
@@ -308,22 +327,22 @@ public class DigipostSwingClient {
 				}
 			}
 		});
-		brevMainPanel.add(velgInnholdButton, createGridBagConstraints(GridBagConstraints.WEST, 5, 10));
+		brevMainPanel.add(velgInnholdButton, createGridBagConstraints(GridBagConstraints.WEST, 5, 11));
 
 		JLabel vedleggTittelLabel = new JLabel("Vedlegg-emne");
-		brevMainPanel.add(vedleggTittelLabel, createGridBagConstraintsForLabel(0, 11));
+		brevMainPanel.add(vedleggTittelLabel, createGridBagConstraintsForLabel(0, 12));
 
 		attachmentSubjectField = new JTextField();
 		attachmentSubjectField.setEnabled(false);
-		brevMainPanel.add(attachmentSubjectField, createGridBagConstraintsForField(1, 11, 1));
+		brevMainPanel.add(attachmentSubjectField, createGridBagConstraintsForField(1, 12, 1));
 		attachmentSubjectField.setColumns(10);
 
 		JLabel vedleggInnholdLabel = new JLabel("Vedlegg-innhold");
-		brevMainPanel.add(vedleggInnholdLabel, createGridBagConstraintsForLabel(2, 11));
+		brevMainPanel.add(vedleggInnholdLabel, createGridBagConstraintsForLabel(2, 12));
 
 		attachmentContentField = new JTextField();
 		attachmentContentField.setEnabled(false);
-		brevMainPanel.add(attachmentContentField, createGridBagConstraintsForField(3, 11, 1));
+		brevMainPanel.add(attachmentContentField, createGridBagConstraintsForField(3, 12, 1));
 		attachmentContentField.setColumns(10);
 
 		addAttachmentContentButton = new JButton("Velg...");
@@ -340,7 +359,7 @@ public class DigipostSwingClient {
 //				}
 			}
 		});
-		brevMainPanel.add(addAttachmentContentButton, createGridBagConstraints(GridBagConstraints.WEST, 5, 11));
+		brevMainPanel.add(addAttachmentContentButton, createGridBagConstraints(GridBagConstraints.WEST, 5, 12));
 
 		JButton btnBack = new JButton("Tilbake");
 		btnBack.addActionListener(new ActionListener() {
@@ -353,7 +372,7 @@ public class DigipostSwingClient {
 		});
 		GridBagConstraints gbc_btnBack = new GridBagConstraints();
 		gbc_btnBack.gridx = 0;
-		gbc_btnBack.gridy = 12;
+		gbc_btnBack.gridy = 13;
 		brevMainPanel.add(btnBack, gbc_btnBack);
 
 		btnAddAttachment = new JButton("Legg til vedlegg");
@@ -382,7 +401,7 @@ public class DigipostSwingClient {
 
 		GridBagConstraints gbc_btnAddAttachment = new GridBagConstraints();
 		gbc_btnAddAttachment.gridx = 1;
-		gbc_btnAddAttachment.gridy = 12;
+		gbc_btnAddAttachment.gridy = 13;
 		brevMainPanel.add(btnAddAttachment, gbc_btnAddAttachment);
 
 		JButton btnAddContent = new JButton("Opprett og last opp brev");
@@ -404,6 +423,11 @@ public class DigipostSwingClient {
 						String personalIdentificationNumber = recipientPersonalIdentificationNumberField.getText();
 						message = newMessage(UUID.randomUUID().toString(), primaryDocument)
 								.personalIdentificationNumber(new PersonalIdentificationNumber(personalIdentificationNumber))
+								.build();
+					} else if(identifyOnOrganizationNumber.isSelected()){
+						String orgnizationNumber = recipientOrganizationNumberField.getText();
+						message = newMessage(UUID.randomUUID().toString(),primaryDocument)
+								.organisationNumber(new OrganisationNumber(orgnizationNumber))
 								.build();
 					} else {
 						String name = recipientNameField.getText();
@@ -455,7 +479,7 @@ public class DigipostSwingClient {
 
 		GridBagConstraints gbc_btnAddContent = new GridBagConstraints();
 		gbc_btnAddContent.gridx = 2;
-		gbc_btnAddContent.gridy = 12;
+		gbc_btnAddContent.gridy = 13;
 		gbc_btnAddContent.gridwidth = 2;
 		brevMainPanel.add(btnAddContent, gbc_btnAddContent);
 
@@ -476,7 +500,7 @@ public class DigipostSwingClient {
 		});
 		GridBagConstraints gbc_sendButton = new GridBagConstraints();
 		gbc_sendButton.gridx = 5;
-		gbc_sendButton.gridy = 12;
+		gbc_sendButton.gridy = 13;
 		brevMainPanel.add(sendButton, gbc_sendButton);
 
 		JPanel logPanel = new JPanel();
@@ -625,18 +649,22 @@ public class DigipostSwingClient {
 	}
 
 	private void enableDigipostAddressFields() {
-		enableFields(true, false, false);
+		enableFields(true, false, false,false);
 	}
 
 	private void enablePersonalIdentificationNumberFields() {
-		enableFields(false, true, false);
+		enableFields(false, true, false,false);
+	}
+	
+	private void enableOrganizationNumberFields() {
+		enableFields(false, false, false,true);
 	}
 
 	private void enableNameAndAddressFields() {
-		enableFields(false, false, true);
+		enableFields(false, false, true,false);
 	}
 
-	private void enableFields(final boolean digipostAddress, final boolean personalIdentificationNumber, final boolean nameAndAddress) {
+	private void enableFields(final boolean digipostAddress, final boolean personalIdentificationNumber, final boolean nameAndAddress, final boolean organizationNumber) {
 		recipientDigipostAddressField.setEnabled(digipostAddress);
 		recipientPersonalIdentificationNumberField.setEnabled(personalIdentificationNumber);
 		recipientNameField.setEnabled(nameAndAddress);
@@ -649,6 +677,7 @@ public class DigipostSwingClient {
 		recipientEmailAddressField.setEnabled(nameAndAddress);
 		fallbackToPrintCheckBox.setEnabled(nameAndAddress);
 		directToPrintCheckBox.setEnabled(nameAndAddress);
+		recipientOrganizationNumberField.setEnabled(organizationNumber);
 	}
 
 	private GridBagConstraints createGridBagConstraintsForField(final int gridx, final int gridy) {
