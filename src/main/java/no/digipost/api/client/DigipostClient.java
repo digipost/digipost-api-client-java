@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.delivery.DeliveryMethod;
+import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
@@ -29,6 +29,7 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
+import no.digipost.print.validate.PdfValidator;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
@@ -77,38 +78,38 @@ public class DigipostClient {
 	private final ResponseContentSHA256Filter responseHashFilter = new ResponseContentSHA256Filter();
 	private final ResponseDateFilter responseDateFilter = new ResponseDateFilter();
 
-	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
+	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
 		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
 	}
 
-	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer) {
+	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer) {
 		this(deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, null);
 	}
 
-	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final ApiService apiService) {
+	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final ApiService apiService) {
 		this(deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, apiService);
 	}
 
-	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final Client jerseyClient) {
+	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final Client jerseyClient) {
 		this(deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, jerseyClient, null);
 	}
 
-	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final ApiService apiService) {
+	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final ApiService apiService) {
 		this(deliveryType, digipostUrl, senderAccountId, signer, eventLogger, null, apiService);
 	}
 
-	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword, final EventLogger eventLogger, final Client jerseyClient) {
+	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword, final EventLogger eventLogger, final Client jerseyClient) {
 		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), eventLogger, jerseyClient, null);
 	}
 
-	public DigipostClient(final DeliveryMethod deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final Client jerseyClient, final ApiService overriddenApiService) {
+	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final Client jerseyClient, final ApiService overriddenApiService) {
 		ClientBuilder.newClient();
 		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
 		client.register(new GZipEncoder());
 		WebTarget webTarget = client.target(digipostUrl);
 		apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : overriddenApiService;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
-		deliverer = new MessageDeliverer(deliveryType, new MessageSender(apiService, eventLogger));
+		deliverer = new MessageDeliverer(deliveryType, new MessageSender(apiService, eventLogger, new PdfValidator()));
 		documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
 
 

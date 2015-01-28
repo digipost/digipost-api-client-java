@@ -61,7 +61,7 @@ final class AtomicWithPrintFallback implements OngoingDelivery.SendableWithPrint
     	} else {
     		throw new UnsupportedOperationException(
     				"Adding separate content for print is not supported for " +
-					DeliveryMethod.class.getSimpleName() + " " + DeliveryMethod.ATOMIC_REST);
+					ApiFlavor.class.getSimpleName() + " " + ApiFlavor.ATOMIC_REST);
     	}
     }
 

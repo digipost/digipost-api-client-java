@@ -20,10 +20,10 @@ import no.digipost.api.client.representations.Message;
 
 public class MessageDeliverer {
 
-	private final DeliveryMethod type;
+	private final ApiFlavor type;
 	private final MessageSender sender;
 
-	public MessageDeliverer(DeliveryMethod type, MessageSender sender) {
+	public MessageDeliverer(ApiFlavor type, MessageSender sender) {
 		this.type = type;
 		this.sender = sender;
 	}
@@ -33,7 +33,7 @@ public class MessageDeliverer {
 		switch (type) {
 			case STEPWISE_REST: return new StepwiseWithPrintFallback(message, sender);
 			case ATOMIC_REST: return new AtomicWithPrintFallback(message, sender);
-			default: throw new UnsupportedOperationException(DeliveryMethod.class.getSimpleName() + " " + type + " is not supported");
+			default: throw new UnsupportedOperationException(ApiFlavor.class.getSimpleName() + " " + type + " is not supported");
 		}
 	}
 
@@ -41,7 +41,7 @@ public class MessageDeliverer {
 		switch (type) {
     		case STEPWISE_REST: return new StepwisePrintOnlyMessage(printMessage, sender);
     		case ATOMIC_REST: return new AtomicPrintOnlyMessage(printMessage, sender);
-    		default: throw new UnsupportedOperationException(DeliveryMethod.class.getSimpleName() + " " + type + " is not supported");
+    		default: throw new UnsupportedOperationException(ApiFlavor.class.getSimpleName() + " " + type + " is not supported");
     	}
 	}
 

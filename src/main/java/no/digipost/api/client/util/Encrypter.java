@@ -16,36 +16,43 @@
 package no.digipost.api.client.util;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.ErrorCode;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OutputEncryptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
+
+import static no.digipost.api.client.errorhandling.ErrorCode.FAILED_PREENCRYPTION;
 
 public class Encrypter {
 
-	private static OutputEncryptor buildEncryptor() throws CMSException {
-		return new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+	public static InputStream encryptContent(InputStream content, DigipostPublicKey key) {
+		try {
+			return encryptContent(IOUtils.toByteArray(content), key);
+		} catch (Exception e) {
+			throw new DigipostClientException(FAILED_PREENCRYPTION, "Feil ved kryptering av innhold: " + e.getMessage(), e);
+		}
 	}
 
-	public static InputStream encryptContent(InputStream content, DigipostPublicKey key) {
+	public static InputStream encryptContent(byte[] content, DigipostPublicKey key) {
 		try {
 			CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
 			gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(key.publicKeyHash.getBytes(), key.publicKey));
-			CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(IOUtils.toByteArray(content)), buildEncryptor());
+			CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(content), buildEncryptor());
 			return new ByteArrayInputStream(d.getEncoded());
 
 		} catch (Exception e) {
-			throw new DigipostClientException(ErrorCode.FAILED_PREENCRYPTION, "Feil ved kryptering av innhold.", e);
+			throw new DigipostClientException(FAILED_PREENCRYPTION, "Feil ved kryptering av innhold: " + e.getMessage(), e);
 		}
+	}
+
+
+	private static OutputEncryptor buildEncryptor() throws CMSException {
+		return new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
 	}
 
 }

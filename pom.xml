@@ -39,6 +39,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>no.digipost</groupId>
+			<artifactId>printability-validator</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.runeflobakk</groupId>
 			<artifactId>motif</artifactId>
 			<version>0.7</version>
@@ -391,6 +396,10 @@
 										<include>ch.qos.logback:logback-core:${logback.version}:jar:compile</include>
 										<include>org.slf4j:slf4j-api:${slf4j.version}:jar:compile</include>
 										<include>com.github.runeflobakk:motif</include>
+										<include>org.apache.pdfbox:fontbox</include>
+										<include>org.apache.pdfbox:pdfbox</include>
+										<include>org.apache.pdfbox:jempbox</include>
+										<include>no.digipost:printability-validator</include>
 									</includes>
 									<searchTransitive>true</searchTransitive>
 									<message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før distribusjon. Husk også å oppdatere fila «NOTICE».</message>

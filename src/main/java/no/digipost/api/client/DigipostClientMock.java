@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.delivery.DeliveryMethod;
+import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.security.Signer;
@@ -43,12 +43,12 @@ public class DigipostClientMock {
 	private final DigipostClient client;
 	private final ApiServiceMock apiService;
 
-	public DigipostClientMock(DeliveryMethod deliveryMethod) {
-		if (deliveryMethod == DeliveryMethod.STEPWISE_REST) {
+	public DigipostClientMock(ApiFlavor apiFlavor) {
+		if (apiFlavor == ApiFlavor.STEPWISE_REST) {
 			throw new RuntimeException("Stepwise REST is not yet supported by " + DigipostClientMock.class.getName());
 		}
 		apiService = new ApiServiceMock(initMarshaller());
-		client = new DigipostClient(deliveryMethod, "digipostmock-url", 1, new Signer() {
+		client = new DigipostClient(apiFlavor, "digipostmock-url", 1, new Signer() {
 
 			@Override
 			public byte[] sign(String dataToSign) {

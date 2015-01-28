@@ -142,8 +142,13 @@ public class Document extends Representation {
 		return digipostFileType;
 	}
 
-	public void setPreEncrypt() {
+	public boolean is(FileType fileType) {
+		return fileType.equals(new FileType(digipostFileType));
+	}
+
+	public Document setPreEncrypt() {
 		this.preEncrypt = true;
+		return this;
 	}
 
 	public static final Predicate<Document> isPreEncrypt = new Predicate<Document>() { @Override public boolean $(Document document) {

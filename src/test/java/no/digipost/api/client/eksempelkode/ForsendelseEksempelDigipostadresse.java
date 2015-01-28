@@ -16,7 +16,7 @@
 package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.delivery.DeliveryMethod;
+import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
@@ -51,7 +51,7 @@ public class ForsendelseEksempelDigipostadresse {
 		InputStream sertifikatInputStream = lesInnSertifikat();
 
 		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient(DeliveryMethod.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+		DigipostClient client = new DigipostClient(ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
 		// 3. Vi oppretter et digipostadresseobjekt
 		DigipostAddress address = new DigipostAddress("fornavn.etternavn#6789");

@@ -17,7 +17,7 @@ package no.digipost.api.client.delivery;
 
 import no.digipost.api.client.delivery.OngoingDelivery.SendableDelivery;
 
-public enum DeliveryMethod {
+public enum ApiFlavor {
 	/**
 	 * This will deliver messages using a stepwise
 	 * variant of the REST-API, using several HTTP requests to build the message,
