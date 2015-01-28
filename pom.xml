@@ -28,8 +28,6 @@
 		<logback.version>1.1.2</logback.version>
 		<commons-io.version>2.4</commons-io.version>
 		<jaxb.version>2.2.7</jaxb.version>
-		<FastInfoset.version>1.2.12</FastInfoset.version>
-		<istack-commons.version>2.16</istack-commons.version>
 		<jsr173_api.version>1.0</jsr173_api.version>
 		<junit.version>4.12</junit.version>
 		<hamcrest.version>1.3</hamcrest.version>
@@ -374,8 +372,6 @@
 										<include>commons-io:commons-io:${commons-io.version}:jar:compile</include>
 										<include>org.apache.commons:commons-lang3:${commons-lang.version}:jar:compile</include>
 										<include>commons-logging:commons-logging:${commons-logging.version}:jar:compile</include>
-										<include>com.sun.xml.fastinfoset:FastInfoset:${FastInfoset.version}:jar:compile</include>
-										<include>com.sun.istack:istack-commons-runtime:${istack-commons.version}:jar:compile</include>
 										<include>javax.xml.bind:jaxb-api:${jaxb.version}:jar:compile</include>
 										<include>com.sun.xml.bind:jaxb-core:${jaxb.version}:jar:compile</include>
 										<include>com.sun.xml.bind:jaxb-impl:${jaxb.version}:jar:compile</include>
