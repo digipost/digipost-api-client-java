@@ -21,6 +21,7 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
 import no.digipost.print.validate.PdfValidationResult;
+import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import no.motif.single.Optional;
 import org.apache.commons.io.IOUtils;
@@ -51,6 +52,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 public class MessageSender extends Communicator {
 
 	private final PdfValidator pdfValidator;
+	private PdfValidationSettings pdfValidationSettings;
 
 	private DateTime printKeyCachedTime = null;
 	private DigipostPublicKey cachedPrintKey;
@@ -58,6 +60,12 @@ public class MessageSender extends Communicator {
 	public MessageSender(ApiService apiService, EventLogger eventLogger, PdfValidator pdfValidator) {
 		super(apiService, eventLogger);
 		this.pdfValidator = pdfValidator;
+		this.pdfValidationSettings = SJEKK_ALLE;
+	}
+
+
+	public void setPdfValidationSettings(PdfValidationSettings settings) {
+		this.pdfValidationSettings = settings;
 	}
 
 
@@ -260,7 +268,7 @@ public class MessageSender extends Communicator {
 		PdfValidationResult validation;
 		if (document.is(PDF)) {
 			eventLogger.log("Validerer PDF-dokument med uuid " + document.uuid);
-			validation = pdfValidator.validate(content, SJEKK_ALLE);
+			validation = pdfValidator.validate(content, pdfValidationSettings);
 		} else {
 			validation = EVERYTHING_OK;
 		}

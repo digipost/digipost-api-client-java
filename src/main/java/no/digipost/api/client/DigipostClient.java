@@ -29,6 +29,7 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
+import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
@@ -42,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
 import java.io.InputStream;
@@ -71,12 +71,14 @@ public class DigipostClient {
 
 	private final EventLogger eventLogger;
 	private final ApiService apiService;
+	private final MessageSender messageSender;
 	private final MessageDeliverer deliverer;
 	private final DocumentCommunicator documentCommunicator;
 
 	private final ResponseSignatureFilter responseSignatureFilter;
 	private final ResponseContentSHA256Filter responseHashFilter = new ResponseContentSHA256Filter();
 	private final ResponseDateFilter responseDateFilter = new ResponseDateFilter();
+
 
 	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
 		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
@@ -103,14 +105,15 @@ public class DigipostClient {
 	}
 
 	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final Client jerseyClient, final ApiService overriddenApiService) {
-		ClientBuilder.newClient();
-		Client client = jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient;
-		client.register(new GZipEncoder());
-		WebTarget webTarget = client.target(digipostUrl);
-		apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : overriddenApiService;
+
+		WebTarget webTarget = (jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient).register(new GZipEncoder()).target(digipostUrl);
+
+		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : overriddenApiService;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
-		deliverer = new MessageDeliverer(deliveryType, new MessageSender(apiService, eventLogger, new PdfValidator()));
-		documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
+		this.messageSender = new MessageSender(apiService, eventLogger, new PdfValidator());
+		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
+		this.documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
+		this.responseSignatureFilter = new ResponseSignatureFilter(apiService);
 
 
 		webTarget.register(new LoggingFilter());
@@ -118,10 +121,8 @@ public class DigipostClient {
 		webTarget.register(new RequestDateFilter(eventLogger));
 		webTarget.register(new RequestUserAgentFilter());
 		webTarget.register(new RequestSignatureFilter(signer, eventLogger));
-
 		webTarget.register(responseDateFilter);
 		webTarget.register(responseHashFilter);
-		responseSignatureFilter = new ResponseSignatureFilter(apiService);
 		webTarget.register(responseSignatureFilter);
 
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
@@ -133,10 +134,24 @@ public class DigipostClient {
 	 *
 	 * @param throwOnError true hvis den skal kaste exception, false for warn logging
 	 */
-	public void setThrowOnResponseValidationError(final boolean throwOnError) {
+	public DigipostClient setThrowOnResponseValidationError(final boolean throwOnError) {
 		responseDateFilter.setThrowOnError(throwOnError);
 		responseHashFilter.setThrowOnError(throwOnError);
 		responseSignatureFilter.setThrowOnError(throwOnError);
+		return this;
+	}
+
+	/**
+	 * You can use this method to bypass some of the PDF-validation rules. Note, as this is only used
+	 * for client side validation before sending to Digipost, for the documents to pass validation when
+	 * arriving in Digipost, you <em>must</em> have made proper agreements to bypass the PDF-validation rules.
+	 * This method is only applicable for the rare occasion where a client has already made such an agreement.
+	 *
+	 * @param settings The settings to use for validating PDFs before sending them to Digipost.
+	 */
+	public DigipostClient setPdfValidationSettings(PdfValidationSettings settings) {
+		messageSender.setPdfValidationSettings(settings);
+		return this;
 	}
 
 
