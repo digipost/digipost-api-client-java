@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
+import static no.digipost.api.client.representations.DeliveryMethod.PRINT;
 import static no.motif.Singular.the;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -109,23 +111,23 @@ public class Message {
 		}
 
 		public MessageBuilder digipostAddress(DigipostAddress digipostAddress) {
-			this.recipient = new MessageRecipient(digipostAddress);
-			return this;
+			return recipient(new MessageRecipient(digipostAddress));
 		}
 
 		public MessageBuilder personalIdentificationNumber(PersonalIdentificationNumber personalIdentificationNumber) {
-			this.recipient = new MessageRecipient(personalIdentificationNumber);
-			return this;
+			return recipient(new MessageRecipient(personalIdentificationNumber));
 		}
 
 		public MessageBuilder organisationNumber(OrganisationNumber organisationNumber) {
-			this.recipient = new MessageRecipient(organisationNumber);
-			return this;
+			return recipient(new MessageRecipient(organisationNumber));
 		}
 
 		public MessageBuilder nameAndAddress(NameAndAddress nameAndAddress) {
-			this.recipient = new MessageRecipient(nameAndAddress);
-			return this;
+			return recipient(new MessageRecipient(nameAndAddress));
+		}
+
+		public MessageBuilder printDetails(PrintDetails printDetails) {
+			return recipient(new MessageRecipient(printDetails));
 		}
 
 		public MessageBuilder deliveryTime(DateTime deliveryTime) {
@@ -185,5 +187,9 @@ public class Message {
 	public boolean hasAnyDocumentRequiringPreEncryption() {
 		return the(primaryDocument).append(attachments).exists(Document.isPreEncrypt);
 	}
+
+    public DeliveryMethod getDeliveryMethod() {
+		return recipient.isDirectPrint() ? PRINT : DIGIPOST;
+    }
 
 }
