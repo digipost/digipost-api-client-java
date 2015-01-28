@@ -54,8 +54,10 @@ final class StepwisePrintOnlyMessage implements OngoingDelivery.SendableForPrint
     @Override
     public MessageDelivery send() {
     	if (delivery.getDeliveryMethod() != DeliveryMethod.PRINT) {
-    		throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
-    				+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
+    		throw new IllegalStateException(
+    				"Response from Digipost does not indicate that the message with id " + delivery.getMessageId() +
+    				", status '" + delivery.getStatus() + "' will be delivered to print, " +
+					"although this has been requested by the client. Cannot continue.");
     	}
     	return sender.sendMessage(delivery);
     }
