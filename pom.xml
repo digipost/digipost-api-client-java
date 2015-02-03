@@ -15,9 +15,8 @@
 
 	<artifactId>digipost-api-client-java</artifactId>
 	<version>6.4-SNAPSHOT</version>
-	<name>${project.artifactId}</name>
-	<description>${project.artifactId}</description>
-
+	<name>Digipost API Client</name>
+	<description>Java library for interacting with the Digipost REST API</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jersey.version>2.15</jersey.version>
