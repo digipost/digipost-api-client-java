@@ -22,6 +22,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.util.MockfriendlyResponse;
+import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
@@ -56,12 +57,10 @@ import static no.digipost.api.client.representations.PrintDetails.PostType.A;
 import static no.digipost.api.client.representations.Relation.GET_ENCRYPTION_KEY;
 import static no.digipost.api.client.representations.Relation.SEND;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-import static no.digipost.print.validate.PdfValidationSettings.SJEKK_ALLE;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -202,17 +201,17 @@ public class MessageSenderTest {
 		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
 		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-
+		sender.setPdfValidationSettings(new PdfValidationSettings(true, true, false, true));
 		for (ApiFlavor apiFlavor : asList(STEPWISE_REST, ATOMIC_REST)) {
 			MessageDeliverer deliverer = new MessageDeliverer(apiFlavor, sender);
     		Message message = newMessage(messageId, printDocument).printDetails(new PrintDetails(recipient, returnAddress, A)).build();
 
     		MessageDelivery delivery = deliverer
     				.createPrintOnlyMessage(message)
-    				.addContent(message.primaryDocument, printvennligPdf())
+    				.addContent(message.primaryDocument, pdfMedMangeSider())
     				.send();
     		assertThat(delivery.getStatus(), is(DELIVERED_TO_PRINT));
-    		verify(pdfValidator, times(1)).validate(any(byte[].class), eq(SJEKK_ALLE));
+    		verify(pdfValidator, times(1)).validate(any(byte[].class), any(PdfValidationSettings.class));
     		reset(pdfValidator);
 		}
 	}
@@ -229,6 +228,10 @@ public class MessageSenderTest {
 
 	private InputStream printvennligPdf() {
 		return notNull(MessageSenderTest.class.getResourceAsStream("/pdf/a4-left-margin-20mm.pdf"), "not found");
+	}
+
+	private InputStream pdfMedMangeSider() {
+		return notNull(MessageSenderTest.class.getResourceAsStream("/pdf/a4-20pages.pdf"), "not found");
 	}
 
 

@@ -9,6 +9,9 @@
 			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
+	
+	<logger name="no.digipost" level="DEBUG" />
+	
 	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 	</root>
