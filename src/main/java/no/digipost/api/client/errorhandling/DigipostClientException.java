@@ -28,6 +28,10 @@ public class DigipostClientException extends RuntimeException {
 	private final ErrorType errorType;
 	private final String errorMessage;
 
+	public static DigipostClientException from(Throwable e) {
+		return e instanceof DigipostClientException ? (DigipostClientException) e : new DigipostClientException(ErrorCode.resolve(e), e);
+	}
+
 	public DigipostClientException(ErrorMessage error) {
 		this(ErrorCode.resolve(error.getErrorCode()), resolve(error.getErrorType()), getMessage(error), null);
 	}

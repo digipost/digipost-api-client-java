@@ -36,6 +36,7 @@ import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -83,21 +84,10 @@ public class MessageSender extends Communicator {
 			messageBodyPart.setContentDisposition(messagePart);
 			multiPart.bodyPart(messageBodyPart);
 
-			for (Entry<Document, InputStream> documentAndContent : documentsAndContent.entrySet()) {
+
+			for (Entry<Document, InputStream> documentAndContent : prepare(documentsAndContent, message.getDeliveryMethod(), krypteringsnokkel).entrySet()) {
 				Document document = documentAndContent.getKey();
-				InputStream content;
-				if (document.isPreEncrypt()) {
-					if (!krypteringsnokkel.isSome()) {
-						throw new DigipostClientException(ENCRYPTION_KEY_NOT_FOUND, "Trying to preencrypt but have no encryption key.");
-					}
-					byte[] byteContent = IOUtils.toByteArray(documentAndContent.getValue());
-					log("Validerer melding '" + message.messageId + "' før prekryptering");
-					validate(message.getDeliveryMethod(), document, byteContent);
-					eventLogger.log("Krypterer innhold for dokument med uuid " + document.uuid);
-					content = Encrypter.encryptContent(byteContent, krypteringsnokkel.get());
-				} else {
-					content = documentAndContent.getValue();
-				}
+				InputStream content = documentAndContent.getValue();
 				BodyPart bodyPart = new BodyPart(content, new MediaType("application", defaultIfBlank(document.getDigipostFileType(), "octet-stream")));
 				ContentDisposition documentPart = ContentDisposition.type("attachment").fileName(document.uuid).build();
 				bodyPart.setContentDisposition(documentPart);
@@ -109,11 +99,35 @@ public class MessageSender extends Communicator {
 			log("Brevet ble sendt. Status: [" + response + "]");
 			return response.readEntity(MessageDelivery.class);
 
-		} catch (DigipostClientException e) {
-			throw e;
 		} catch (Exception e) {
-			throw new DigipostClientException(ErrorCode.resolve(e), e);
+			throw DigipostClientException.from(e);
 		}
+	}
+
+
+	private Map<Document, InputStream> prepare(
+			Map<Document, InputStream> documentsAndContent,
+			DeliveryMethod deliveryMethod, Optional<DigipostPublicKey> krypteringsnokkel) throws IOException {
+
+		Map<Document, InputStream> prepared = new LinkedHashMap<>();
+		for (Entry<Document, InputStream> documentAndContent : documentsAndContent.entrySet()) {
+			Document document = documentAndContent.getKey();
+			InputStream content;
+			if (document.isPreEncrypt()) {
+				if (!krypteringsnokkel.isSome()) {
+					throw new DigipostClientException(ENCRYPTION_KEY_NOT_FOUND, "Trying to preencrypt but have no encryption key.");
+				}
+				byte[] byteContent = IOUtils.toByteArray(documentAndContent.getValue());
+				log("Validerer dokument med uuid '" + document.uuid + "' før prekryptering");
+				validate(deliveryMethod, document, byteContent);
+				eventLogger.log("Krypterer innhold for dokument med uuid '" + document.uuid + "'");
+			    content = Encrypter.encryptContent(byteContent, krypteringsnokkel.get());
+			} else {
+				content = documentAndContent.getValue();
+			}
+			prepared.put(document, content);
+		}
+		return prepared;
 	}
 
 
@@ -258,7 +272,7 @@ public class MessageSender extends Communicator {
 	}
 
 
-	private void validate(DeliveryMethod deliveryMethod, Document document, byte[] content) {
+	private PdfValidationResult validate(DeliveryMethod deliveryMethod, Document document, byte[] content) {
 
 		if (deliveryMethod == PRINT && !document.is(PDF)) {
 	    	throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT,
@@ -276,6 +290,7 @@ public class MessageSender extends Communicator {
 	    if ((deliveryMethod == PRINT && !validation.okForPrint) || (document.is(PDF) && !validation.okForWeb)) {
 	    	throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT, validation.toString());
 	    }
+	    return validation;
     }
 
 
