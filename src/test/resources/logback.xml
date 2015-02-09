@@ -10,7 +10,7 @@
 		</encoder>
 	</appender>
 	
-	<logger name="no.digipost" level="DEBUG" />
+	<logger name="no.digipost" level="INFO" />
 	
 	<root level="INFO">
 		<appender-ref ref="STDOUT" />
