@@ -332,7 +332,7 @@ public class MessageSender extends Communicator {
 	private void checkThatMessageCanBePreEncrypted(final Document document) {
 		Link encryptionKeyLink = document.getEncryptionKeyLink();
 		if (encryptionKeyLink == null) {
-			String errorMessage = "Document med id [" + document.getUuid() + "] kan ikke prekrypteres.";
+			String errorMessage = "Document med id [" + document.uuid + "] kan ikke prekrypteres.";
 			log(errorMessage);
 			throw new DigipostClientException(ErrorCode.CANNOT_PREENCRYPT, errorMessage);
 		}

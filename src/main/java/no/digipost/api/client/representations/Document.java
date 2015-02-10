@@ -16,6 +16,7 @@
 
 package no.digipost.api.client.representations;
 
+import no.motif.f.Fn;
 import no.motif.f.Predicate;
 
 import javax.xml.bind.annotation.*;
@@ -26,6 +27,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import static no.motif.Singular.optional;
+import static no.motif.Strings.inBetween;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -84,8 +87,8 @@ public class Document extends Representation {
 	/**
 	 * Constructor for just the required fields of a document.
 	 */
-	public Document(String id, String subject, FileType fileType) {
-		this(id, subject, fileType, null, null, null, null, null, null, null);
+	public Document(String uuid, String subject, FileType fileType) {
+		this(uuid, subject, fileType, null, null, null, null, null, null, null);
 	}
 
 	public Document(String uuid, String subject, FileType fileType, String openingReceipt,
@@ -165,9 +168,14 @@ public class Document extends Representation {
 
 	public Link getEncryptionKeyLink() { return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY); }
 
-	public String getUuid() {
-		return uuid;
-	}
+
+	public static final Fn<Document, String> getUuid = new Fn<Document, String>() { @Override public String $(Document doc) {
+		return doc.uuid;
+    }};
+
+    public static final Fn<Document, FileType> getFileType = new Fn<Document, FileType>() { @Override public FileType $(Document doc) {
+    	return new FileType(doc.digipostFileType);
+    }};
 
 	public String getTechnicalType() {
 		return technicalType;
@@ -175,5 +183,12 @@ public class Document extends Representation {
 
 	public boolean isOpened() {
 		return opened != null && opened;
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + " with uuid '" + uuid + "'" +
+				optional(technicalType).map(inBetween(", technicalType '", "'")).orElse("") +
+				(preEncrypt != Boolean.TRUE ? optional(subject).map(inBetween(", subject '", "'")).orElse(", no subject") : ", encrypted");
 	}
 }

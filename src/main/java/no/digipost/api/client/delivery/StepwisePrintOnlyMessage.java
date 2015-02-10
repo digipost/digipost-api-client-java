@@ -46,7 +46,7 @@ final class StepwisePrintOnlyMessage implements OngoingDelivery.SendableForPrint
      */
     @Override
     public OngoingDelivery.SendableForPrintOnly addContent(Document document, InputStream printContent) {
-    	this.delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.getUuid()), null, printContent);
+    	this.delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.uuid), null, printContent);
     	return this;
     }
 

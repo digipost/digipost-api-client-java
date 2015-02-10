@@ -15,20 +15,17 @@
  */
 package no.digipost.api.client.representations;
 
+import org.junit.Test;
+
+import java.util.UUID;
+
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.MessageStatus.NOT_COMPLETE;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
-import java.util.UUID;
-
-import org.junit.Test;
 
 public class MessageDeliveryTest {
 
@@ -62,8 +59,8 @@ public class MessageDeliveryTest {
 		delivery.primaryDocument = primary;
 		delivery.attachments = asList(att1);
 
-		assertThat(delivery.getDocumentByUuid(primary.getUuid()), is(primary));
-		assertThat(delivery.getDocumentByUuid(att1.getUuid()), is(att1));
+		assertThat(delivery.getDocumentByUuid(primary.uuid), is(primary));
+		assertThat(delivery.getDocumentByUuid(att1.uuid), is(att1));
 
 		try {
 			delivery.getDocumentByUuid(UUID.randomUUID().toString());

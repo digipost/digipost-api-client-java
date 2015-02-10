@@ -46,7 +46,7 @@ final class StepwiseWithPrintFallback implements OngoingDelivery.SendableWithPri
 
     @Override
     public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
-    	this.delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.getUuid()), content, printContent);
+    	this.delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.uuid), content, printContent);
     	return this;
     }
 
