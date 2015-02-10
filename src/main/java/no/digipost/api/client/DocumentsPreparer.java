@@ -21,12 +21,10 @@ import no.digipost.api.client.pdf.BlankPdf;
 import no.digipost.api.client.representations.DeliveryMethod;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
 import no.digipost.print.validate.PdfValidationResult;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
-import no.motif.Singular;
 import no.motif.single.Elem;
 import no.motif.single.Optional;
 import no.motif.types.Elements;
@@ -38,7 +36,6 @@ import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static no.digipost.api.client.errorhandling.ErrorCode.ENCRYPTION_KEY_NOT_FOUND;
 import static no.digipost.api.client.representations.DeliveryMethod.PRINT;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.print.validate.PdfValidationResult.EVERYTHING_OK;
@@ -69,18 +66,13 @@ class DocumentsPreparer {
 
 
 
-	Map<Document, InputStream> prepare(
-			Map<Document, InputStream> documentsAndContent,
-			Message message, Optional<DigipostPublicKey> krypteringsnokkel) throws IOException {
+	Map<Document, InputStream> prepare(Map<Document, InputStream> documentsAndContent, Message message, Encrypter encrypter) throws IOException {
 
-		if (krypteringsnokkel == Singular.<DigipostPublicKey>none() && message.hasAnyDocumentRequiringPreEncryption()) {
-			throw new DigipostClientException(ENCRYPTION_KEY_NOT_FOUND, "Trying to preencrypt but have no encryption key.");
-		}
-
-		final Map<Document, InputStream> prepared = new LinkedHashMap<>();
 		final int documentAmount = documentsAndContent.size();
 		final Elements<Document> allDocuments = on(documentsAndContent.keySet());
 		final boolean multipleDocumentsOnlyPdf = documentAmount > 1 && !allDocuments.exists(where(Document.getFileType, not(PDF)));
+
+		final Map<Document, InputStream> prepared = new LinkedHashMap<>();
 
 		for (Elem<Document> i : on(allDocuments.sorted(message.documentOrder())).indexed()) {
 			Document document = i.value;
@@ -88,7 +80,7 @@ class DocumentsPreparer {
 				byte[] byteContent = toByteArray(documentsAndContent.get(document));
 				Optional<PdfInfo> pdfInfo = validate(message.getDeliveryMethod(), document, byteContent);
 				LOG.debug("Krypterer innhold for dokument med uuid '{}'", document.uuid);
-				prepared.put(document, Encrypter.encryptContent(byteContent, krypteringsnokkel.get()));
+				prepared.put(document, encrypter.encrypt(byteContent));
 
 				if (multipleDocumentsOnlyPdf && i.index < documentAmount - 1 && pdfInfo.get().hasOddNumberOfPages) {
 					Document blankPageDocument = Document.technicalAttachment(BlankPdf.TECHNICAL_TYPE, PDF);
@@ -97,7 +89,7 @@ class DocumentsPreparer {
 							"(uuid '{}') for å sikre at alle dokumenter begynner på nytt ark.",
 							document.uuid, pdfInfo.get().pages, blankPageDocument.uuid);
 					message.attachments.add(i.index, blankPageDocument);
-					prepared.put(blankPageDocument, BlankPdf.onePage());
+					prepared.put(blankPageDocument, encrypter.encrypt(BlankPdf.onePage()));
 				}
 			} else {
 				prepared.put(document, documentsAndContent.get(document));

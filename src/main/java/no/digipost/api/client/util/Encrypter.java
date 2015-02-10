@@ -16,43 +16,81 @@
 package no.digipost.api.client.util;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.motif.Exceptions;
+import no.motif.f.Fn;
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.cms.*;
+import org.bouncycastle.cms.CMSAlgorithm;
+import org.bouncycastle.cms.CMSEnvelopedData;
+import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.OutputEncryptor;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
+import static no.digipost.api.client.errorhandling.ErrorCode.ENCRYPTION_KEY_NOT_FOUND;
 import static no.digipost.api.client.errorhandling.ErrorCode.FAILED_PREENCRYPTION;
 
-public class Encrypter {
+public final class Encrypter {
 
-	public static InputStream encryptContent(InputStream content, DigipostPublicKey key) {
-		try {
-			return encryptContent(IOUtils.toByteArray(content), key);
-		} catch (Exception e) {
-			throw new DigipostClientException(FAILED_PREENCRYPTION, "Feil ved kryptering av innhold: " + e.getMessage(), e);
-		}
+	/**
+	 * Encrypter with no key, i.e. it will throw an appropriate exception if trying
+	 * to encrypt anything with it.
+	 */
+	public static final Encrypter FAIL_IF_TRYING_TO_ENCRYPT = new Encrypter(null);
+
+	public static final Fn<DigipostPublicKey, Encrypter> keyToEncrypter = new Fn<DigipostPublicKey, Encrypter>() {
+		@Override
+        public Encrypter $(DigipostPublicKey key) {
+			return Encrypter.using(key);
+        }
+	};
+
+
+	public static Encrypter using(DigipostPublicKey digipostPublicKey) {
+		return new Encrypter(digipostPublicKey);
 	}
 
-	public static InputStream encryptContent(byte[] content, DigipostPublicKey key) {
+
+
+
+
+	private final DigipostPublicKey key;
+	private final JceCMSContentEncryptorBuilder encryptorBuilder;
+
+	private Encrypter(DigipostPublicKey key) {
+		this.key = key;
+		this.encryptorBuilder = new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME);
+	}
+
+
+	public InputStream encrypt(InputStream content) {
+		byte[] bytes;
+        try {
+	        bytes = IOUtils.toByteArray(content);
+        } catch (IOException e) {
+	        throw Exceptions.asRuntimeException(e);
+        }
+		return encrypt(bytes);
+	}
+
+	public InputStream encrypt(byte[] content) {
+		if (key == null) {
+			throw new DigipostClientException(ENCRYPTION_KEY_NOT_FOUND, "Trying to preencrypt but have no encryption key.");
+		}
 		try {
 			CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
 			gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(key.publicKeyHash.getBytes(), key.publicKey));
-			CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(content), buildEncryptor());
+			CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(content), encryptorBuilder.build());
 			return new ByteArrayInputStream(d.getEncoded());
-
 		} catch (Exception e) {
 			throw new DigipostClientException(FAILED_PREENCRYPTION, "Feil ved kryptering av innhold: " + e.getMessage(), e);
 		}
 	}
 
 
-	private static OutputEncryptor buildEncryptor() throws CMSException {
-		return new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
-	}
 
 }

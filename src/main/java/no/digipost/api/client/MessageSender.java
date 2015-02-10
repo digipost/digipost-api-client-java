@@ -39,8 +39,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
-import static no.motif.Singular.none;
-import static no.motif.Singular.optional;
+import static no.digipost.api.client.util.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
+import static no.digipost.api.client.util.Encrypter.keyToEncrypter;
+import static no.motif.Singular.*;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class MessageSender extends Communicator {
@@ -68,7 +69,7 @@ public class MessageSender extends Communicator {
 	 * krypteringsnøkkel.
 	 */
 	public MessageDelivery sendMultipartMessage(Message message, Map<Document, InputStream> documentsAndContent) {
-		Optional<DigipostPublicKey> krypteringsnokkel = fetchEncryptionKeyForRecipientIfNecessary(message);
+		Encrypter encrypter = fetchEncryptionKeyForRecipientIfNecessary(message).map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT);
 
 		try (MultiPart multiPart = new MultiPart()) {
 			BodyPart messageBodyPart = new BodyPart(message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
@@ -77,7 +78,7 @@ public class MessageSender extends Communicator {
 			multiPart.bodyPart(messageBodyPart);
 
 
-			for (Entry<Document, InputStream> documentAndContent : documentsPreparer.prepare(documentsAndContent, message, krypteringsnokkel).entrySet()) {
+			for (Entry<Document, InputStream> documentAndContent : documentsPreparer.prepare(documentsAndContent, message, encrypter).entrySet()) {
 				Document document = documentAndContent.getKey();
 				InputStream content = documentAndContent.getValue();
 				BodyPart bodyPart = new BodyPart(content, new MediaType("application", defaultIfBlank(document.getDigipostFileType(), "octet-stream")));
@@ -191,7 +192,7 @@ public class MessageSender extends Communicator {
 
 		EncryptionKey key = encryptionKeyResponse.readEntity(EncryptionKey.class);
 
-		return Encrypter.encryptContent(content, new DigipostPublicKey(key));
+		return the(new DigipostPublicKey(key)).map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT).encrypt(content);
 	}
 
 	public IdentificationResultWithEncryptionKey identifyAndGetEncryptionKey(Identification identification) {
