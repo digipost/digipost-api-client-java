@@ -15,23 +15,30 @@
  */
 package no.digipost.api.client.representations;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.Document.technicalAttachment;
+import static no.digipost.api.client.representations.FileType.*;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
+import static no.motif.Iterate.on;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 
 public class MessageTest {
+
+	@Rule
+	public final ExpectedException expectedException = ExpectedException.none();
 
 	@Test
 	public void shouldBeDirectPrintWhenMessageContainsOnlyPrintDetails() {
@@ -83,4 +90,28 @@ public class MessageTest {
 		assertThat(attachments, empty());
 		assertThat(message.attachments, hasSize(2));
     }
+
+	@Test
+	public void sortsDocumentsByTheSameOrderAsTheyAppearInTheMessage() {
+		Document hoved = new Document(UUID.randomUUID().toString(), "hoved", GIF);
+		Document a1 = new Document(UUID.randomUUID().toString(), "a1", PDF);
+		Document a2 = technicalAttachment("uhu, så teknisk!", ZIP);
+		Document a3 = new Document(UUID.randomUUID().toString(), "a3", HTML);
+		Message message = newMessage("id", hoved).attachments(asList(a1, a2, a3)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
+
+		assertThat(on(a2, hoved, a3, a1).sorted(message.documentOrder()), contains(hoved, a1, a2, a3));
+	}
+
+	@Test
+	public void sortingDocumentsNotInMessageByOrderInMessageThrowsException() {
+		Document hoved = new Document(UUID.randomUUID().toString(), "hoved", GIF);
+		Document a1 = new Document(UUID.randomUUID().toString(), "a1", PDF);
+		Document a2 = technicalAttachment("uhu, så teknisk!", ZIP);
+		Document notInMessage = new Document(UUID.randomUUID().toString(), "a3", HTML);
+		Message message = newMessage("id", hoved).attachments(asList(a1, a2)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
+
+		expectedException.expect(Message.CannotSortDocumentsUsingMessageOrder.class);
+		expectedException.expectMessage("ikke sortere Document med uuid '" + notInMessage.uuid);
+		Collections.sort(asList(a2, hoved, notInMessage, a1), message.documentOrder());
+	}
 }

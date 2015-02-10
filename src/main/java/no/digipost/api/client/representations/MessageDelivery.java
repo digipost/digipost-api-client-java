@@ -22,10 +22,13 @@ import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import static java.util.Collections.unmodifiableList;
+import static no.motif.Base.is;
+import static no.motif.Base.where;
+import static no.motif.Iterate.on;
+import static no.motif.Singular.the;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveryTime", "primaryDocument",
@@ -123,16 +126,12 @@ public class MessageDelivery extends Representation {
 	 *         MessageDelivery.
 	 */
 	public List<Document> getAllDocuments() {
-		LinkedList<Document> all = new LinkedList<Document>(getAttachments());
-		if (primaryDocument != null) {
-			all.addFirst(primaryDocument);
-		}
-		return unmodifiableList(all);
+		return the(primaryDocument).append(getAttachments()).collect();
 	}
 
 	public Document getDocumentByUuid(String uuid) {
-		for (Document document : getAllDocuments()) {
-			if (uuid.equals(document.getUuid())) return document;
+		for (Document document : on(getAllDocuments()).filter(where(Document.getUuid, is(uuid)))) {
+			return document;
 		}
 		throw new IllegalArgumentException("Document with UUID '" + uuid + "' was not found in this " + getClass().getSimpleName() + ".");
     }

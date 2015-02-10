@@ -23,12 +23,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
 import static no.digipost.api.client.representations.DeliveryMethod.PRINT;
 import static no.motif.Singular.the;
+import static org.apache.commons.lang3.ArrayUtils.INDEX_NOT_FOUND;
+import static org.apache.commons.lang3.ArrayUtils.indexOf;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.join;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message", propOrder = {
@@ -176,6 +180,17 @@ public class Message {
         }
 	}
 
+	/**
+	 * @return a list containing every {@link Document} in this delivery.
+	 *         The primary document will be the first element of the list,
+	 *         with the attachments following. The list is immutable and
+	 *         can not be used to change which documents are in this
+	 *         MessageDelivery.
+	 */
+	public List<Document> getAllDocuments() {
+		return the(primaryDocument).append(attachments).collect();
+	}
+
 	public boolean isDirectPrint() {
 		return recipient.isDirectPrint();
 	}
@@ -191,5 +206,37 @@ public class Message {
     public DeliveryMethod getDeliveryMethod() {
 		return recipient.isDirectPrint() ? PRINT : DIGIPOST;
     }
+
+
+    /**
+     * @return {@link Comparator} which order documents by the same order as they are contained in
+     *         this message. If a document
+     */
+	public Comparator<? super Document> documentOrder() {
+		return new Comparator<Document>() {
+			final String[] uuids = the(primaryDocument).append(attachments).map(Document.getUuid).collect().toArray(new String[attachments.size() + 1]);
+			@Override
+            public int compare(Document d1, Document d2) {
+				int d1Index = indexOf(uuids, d1.uuid);
+				if (d1Index == INDEX_NOT_FOUND) {
+					throw new CannotSortDocumentsUsingMessageOrder(d1.uuid, uuids);
+				}
+
+				int d2Index = indexOf(uuids, d2.uuid);
+				if (d2Index == INDEX_NOT_FOUND) {
+					throw new CannotSortDocumentsUsingMessageOrder(d2.uuid, uuids);
+				}
+				return d1Index - d2Index;
+            }};
+    }
+
+	public class CannotSortDocumentsUsingMessageOrder extends IllegalStateException {
+		private CannotSortDocumentsUsingMessageOrder(String uuid, String[] validUuids) {
+			super(
+					"Kan ikke sortere Document med uuid '" + uuid + "' etter rekkefølgen i Message med id '" + messageId +
+					"' da dokumentet ikke eksisterer i meldingen.\nMeldingen har følgende dokumenter:\n  - " +
+					join(validUuids, "\n  - "));
+		}
+	}
 
 }

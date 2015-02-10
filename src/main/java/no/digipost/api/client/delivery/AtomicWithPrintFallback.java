@@ -21,7 +21,7 @@ import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -34,7 +34,7 @@ final class AtomicWithPrintFallback implements OngoingDelivery.SendableWithPrint
 
 	private final MessageSender sender;
 	private final Message message;
-	private final Map<Document, InputStream> documents = new HashMap<>();
+	private final Map<Document, InputStream> documents = new LinkedHashMap<>();
 
     AtomicWithPrintFallback(Message message, MessageSender sender) {
     	this.message = message;

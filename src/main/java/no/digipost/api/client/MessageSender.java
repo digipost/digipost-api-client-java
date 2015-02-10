@@ -20,7 +20,6 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
-import no.digipost.print.validate.PdfValidationResult;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import no.motif.single.Optional;
@@ -36,37 +35,30 @@ import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static no.digipost.api.client.errorhandling.ErrorCode.ENCRYPTION_KEY_NOT_FOUND;
 import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
-import static no.digipost.api.client.representations.DeliveryMethod.PRINT;
-import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.print.validate.PdfValidationResult.EVERYTHING_OK;
-import static no.digipost.print.validate.PdfValidationSettings.SJEKK_ALLE;
 import static no.motif.Singular.none;
 import static no.motif.Singular.optional;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class MessageSender extends Communicator {
 
-	private final PdfValidator pdfValidator;
-	private PdfValidationSettings pdfValidationSettings;
+	private final DocumentsPreparer documentsPreparer;
 
 	private DateTime printKeyCachedTime = null;
 	private DigipostPublicKey cachedPrintKey;
 
+
 	public MessageSender(ApiService apiService, EventLogger eventLogger, PdfValidator pdfValidator) {
 		super(apiService, eventLogger);
-		this.pdfValidator = pdfValidator;
-		this.pdfValidationSettings = SJEKK_ALLE;
+		this.documentsPreparer = new DocumentsPreparer(pdfValidator);
 	}
 
 
 	public void setPdfValidationSettings(PdfValidationSettings settings) {
-		this.pdfValidationSettings = settings;
+		this.documentsPreparer.setPdfValidationSettings(settings);
 	}
 
 
@@ -85,7 +77,7 @@ public class MessageSender extends Communicator {
 			multiPart.bodyPart(messageBodyPart);
 
 
-			for (Entry<Document, InputStream> documentAndContent : prepare(documentsAndContent, message.getDeliveryMethod(), krypteringsnokkel).entrySet()) {
+			for (Entry<Document, InputStream> documentAndContent : documentsPreparer.prepare(documentsAndContent, message, krypteringsnokkel).entrySet()) {
 				Document document = documentAndContent.getKey();
 				InputStream content = documentAndContent.getValue();
 				BodyPart bodyPart = new BodyPart(content, new MediaType("application", defaultIfBlank(document.getDigipostFileType(), "octet-stream")));
@@ -93,6 +85,7 @@ public class MessageSender extends Communicator {
 				bodyPart.setContentDisposition(documentPart);
 				multiPart.bodyPart(bodyPart);
 			}
+			log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + message.messageId + " ***");
 			Response response = apiService.multipartMessage(multiPart);
 			checkResponse(response);
 
@@ -103,33 +96,6 @@ public class MessageSender extends Communicator {
 			throw DigipostClientException.from(e);
 		}
 	}
-
-
-	private Map<Document, InputStream> prepare(
-			Map<Document, InputStream> documentsAndContent,
-			DeliveryMethod deliveryMethod, Optional<DigipostPublicKey> krypteringsnokkel) throws IOException {
-
-		Map<Document, InputStream> prepared = new LinkedHashMap<>();
-		for (Entry<Document, InputStream> documentAndContent : documentsAndContent.entrySet()) {
-			Document document = documentAndContent.getKey();
-			InputStream content;
-			if (document.isPreEncrypt()) {
-				if (!krypteringsnokkel.isSome()) {
-					throw new DigipostClientException(ENCRYPTION_KEY_NOT_FOUND, "Trying to preencrypt but have no encryption key.");
-				}
-				byte[] byteContent = IOUtils.toByteArray(documentAndContent.getValue());
-				log("Validerer dokument med uuid '" + document.uuid + "' før prekryptering");
-				validate(deliveryMethod, document, byteContent);
-				eventLogger.log("Krypterer innhold for dokument med uuid '" + document.uuid + "'");
-			    content = Encrypter.encryptContent(byteContent, krypteringsnokkel.get());
-			} else {
-				content = documentAndContent.getValue();
-			}
-			prepared.put(document, content);
-		}
-		return prepared;
-	}
-
 
 
 	/**
@@ -181,14 +147,14 @@ public class MessageSender extends Communicator {
 
 		MessageDelivery delivery;
 		if (document.isPreEncrypt()) {
-			log("\n\n---DOKUMENTET SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY---");
+			log("*** DOKUMENTET SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY ***");
 			byte[] byteContent;
             try {
 	            byteContent = IOUtils.toByteArray(unencryptetContent);
             } catch (IOException e) {
 	            throw new DigipostClientException(GENERAL_ERROR, "Unable to read content of document with uuid " + document.uuid, e);
             }
-			validate(message.getDeliveryMethod(), document, byteContent);
+			documentsPreparer.validate(message.getDeliveryMethod(), document, byteContent);
 			InputStream encryptetContent = fetchKeyAndEncrypt(document, unencryptetContent);
 			delivery = uploadContent(message, document, encryptetContent);
 		} else {
@@ -248,6 +214,7 @@ public class MessageSender extends Communicator {
 		DateTime now = DateTime.now();
 
 		if (printKeyCachedTime == null || new Duration(printKeyCachedTime, now).isLongerThan(Duration.standardMinutes(5))) {
+			log("*** STARTER INTERAKSJON MED API: HENT KRYPTERINGSNØKKEL FOR PRINT ***");
 			Response response = apiService.getEncryptionKeyForPrint();
 			checkResponse(response);
 			EncryptionKey encryptionKey = response.readEntity(EncryptionKey.class);
@@ -255,13 +222,14 @@ public class MessageSender extends Communicator {
 			printKeyCachedTime = now;
 			return cachedPrintKey;
 		} else {
+			log("Bruker cachet krypteringsnøkkel for print");
 			return cachedPrintKey;
 		}
 	}
 
 
 	private MessageDelivery uploadContent(MessageDelivery createdMessage, Document document, InputStream documentContent) {
-        log("\n\n---STARTER INTERAKSJON MED API: LEGGE TIL FIL---");
+        log("*** STARTER INTERAKSJON MED API: LEGGE TIL FIL ***");
 
         Response response = apiService.addContent(document, documentContent);
 
@@ -272,34 +240,13 @@ public class MessageSender extends Communicator {
 	}
 
 
-	private PdfValidationResult validate(DeliveryMethod deliveryMethod, Document document, byte[] content) {
-
-		if (deliveryMethod == PRINT && !document.is(PDF)) {
-	    	throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT,
-	    			"PDF is required for direct-to-print messages. Document with uuid " + document.uuid + " had filetype " + document.getDigipostFileType());
-	    }
-
-		PdfValidationResult validation;
-		if (document.is(PDF)) {
-			eventLogger.log("Validerer PDF-dokument med uuid " + document.uuid);
-			validation = pdfValidator.validate(content, pdfValidationSettings);
-		} else {
-			validation = EVERYTHING_OK;
-		}
-
-	    if ((deliveryMethod == PRINT && !validation.okForPrint) || (document.is(PDF) && !validation.okForWeb)) {
-	    	throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT, validation.toString());
-	    }
-	    return validation;
-    }
-
-
 
 	/**
 	 * Sender en forsendelse. For at denne metoden skal kunne kalles, må man
 	 * først ha lagt innhold til forsendelsen med {@code addContent}.
 	 */
 	private MessageDelivery send(final MessageDelivery delivery) {
+		log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + delivery.getMessageId() + " ***");
 		Response response = apiService.send(delivery);
 
 		checkResponse(response);

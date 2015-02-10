@@ -17,6 +17,7 @@ package no.digipost.api.client;
 
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.MessageDeliverer;
+import no.digipost.api.client.delivery.OngoingDelivery.SendableForPrintOnly;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
@@ -35,12 +36,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
@@ -48,6 +52,8 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.delivery.ApiFlavor.ATOMIC_REST;
 import static no.digipost.api.client.delivery.ApiFlavor.STEPWISE_REST;
+import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
+import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.DeliveryMethod.PRINT;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
@@ -57,14 +63,17 @@ import static no.digipost.api.client.representations.PrintDetails.PostType.A;
 import static no.digipost.api.client.representations.Relation.GET_ENCRYPTION_KEY;
 import static no.digipost.api.client.representations.Relation.SEND;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-import static org.apache.commons.lang3.Validate.notNull;
+import static no.motif.Singular.the;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageSenderTest {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MessageSenderTest.class);
 
 	static {
 		CryptoUtil.verifyJCE();
@@ -110,10 +119,10 @@ public class MessageSenderTest {
 		when(mockClientResponse2.readEntity(MessageDelivery.class)).thenReturn(eksisterendeForsendelse);
 		when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
 
-		MessageDelivery forsendelse = sender.createOrFetchMessage(forsendelseIn);
+		MessageDelivery delivery = sender.createOrFetchMessage(forsendelseIn);
+		then(api).should().fetchExistingMessage(any(URI.class));
 
-		verify(api).fetchExistingMessage((URI) any());
-		assertTrue(forsendelse.isSameMessageAs(forsendelseIn));
+		assertTrue(delivery.isSameMessageAs(forsendelseIn));
 	}
 
 	@Test
@@ -166,14 +175,14 @@ public class MessageSenderTest {
 		when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
 
 		sender.getEncryptionKeyForPrint();
-		verify(api, times(1)).getEncryptionKeyForPrint();
+		then(api).should(times(1)).getEncryptionKeyForPrint();
 
 		sender.getEncryptionKeyForPrint();
-		verify(api, times(1)).getEncryptionKeyForPrint();
+		then(api).should(times(1)).getEncryptionKeyForPrint();
 
 		DateTimeUtils.setCurrentMillisOffset(Duration.standardMinutes(10).getMillis());
 		sender.getEncryptionKeyForPrint();
-		verify(api, times(2)).getEncryptionKeyForPrint();
+		then(api).should(times(2)).getEncryptionKeyForPrint();
 	}
 
 	@Test
@@ -189,13 +198,20 @@ public class MessageSenderTest {
 		when(mockClientResponse.getStatus()).thenReturn(Status.OK.getStatusCode());
 
 		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).setPreEncrypt();
-		printDocument.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt")));
+		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).setPreEncrypt());
 		MessageDelivery incompleteDelivery = new MessageDelivery(messageId, DeliveryMethod.PRINT, NOT_COMPLETE, DateTime.now()) {{
 			primaryDocument = printDocument;
+			attachments = printAttachments;
 			addLink(new Link(SEND, new DigipostUri("/send")));
 		}};
+		final List<Document> allDocuments = the(printDocument).append(printAttachments).collect();
+
+		for (Document document : allDocuments) {
+			document.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt")));
+		}
+
 		when(mockClientResponse.readEntity(MessageDelivery.class))
-			.thenReturn(incompleteDelivery, incompleteDelivery)
+			.thenReturn(incompleteDelivery, incompleteDelivery, incompleteDelivery)
 			.thenReturn(new MessageDelivery(messageId, DeliveryMethod.PRINT, DELIVERED_TO_PRINT, DateTime.now()));
 
 		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
@@ -203,15 +219,19 @@ public class MessageSenderTest {
 
 		sender.setPdfValidationSettings(new PdfValidationSettings(true, true, false, true));
 		for (ApiFlavor apiFlavor : asList(STEPWISE_REST, ATOMIC_REST)) {
+			LOG.debug("Tester direkte til print med " + apiFlavor);
 			MessageDeliverer deliverer = new MessageDeliverer(apiFlavor, sender);
-    		Message message = newMessage(messageId, printDocument).printDetails(new PrintDetails(recipient, returnAddress, A)).build();
+    		Message message = newMessage(messageId, printDocument).attachments(printAttachments).printDetails(new PrintDetails(recipient, returnAddress, A)).build();
 
-    		MessageDelivery delivery = deliverer
+    		SendableForPrintOnly sendable = deliverer
     				.createPrintOnlyMessage(message)
-    				.addContent(message.primaryDocument, pdfMedMangeSider())
-    				.send();
-    		assertThat(delivery.getStatus(), is(DELIVERED_TO_PRINT));
-    		verify(pdfValidator, times(1)).validate(any(byte[].class), any(PdfValidationSettings.class));
+    				.addContent(message.primaryDocument, pdf20Pages());
+    		for (Document attachment : printAttachments) {
+				sendable.addContent(attachment, printablePdf1Page());
+			}
+    		MessageDelivery delivery = sendable.send();
+			assertThat(delivery.getStatus(), is(DELIVERED_TO_PRINT));
+			then(pdfValidator).should(times(2)).validate(any(byte[].class), any(PdfValidationSettings.class));
     		reset(pdfValidator);
 		}
 	}
@@ -226,13 +246,7 @@ public class MessageSenderTest {
 				.build();
 	}
 
-	private InputStream printvennligPdf() {
-		return notNull(MessageSenderTest.class.getResourceAsStream("/pdf/a4-left-margin-20mm.pdf"), "not found");
-	}
 
-	private InputStream pdfMedMangeSider() {
-		return notNull(MessageSenderTest.class.getResourceAsStream("/pdf/a4-20pages.pdf"), "not found");
-	}
 
 
 
