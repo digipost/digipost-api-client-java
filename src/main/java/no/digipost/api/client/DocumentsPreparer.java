@@ -78,7 +78,7 @@ class DocumentsPreparer {
 				prepared.put(document, encrypter.encrypt(byteContent));
 
 				if (message.getDeliveryMethod() == PRINT && i.index < documentAmount - 1 && pdfInfo.get().hasOddNumberOfPages) {
-					Document blankPageDocument = new Document(UUID.randomUUID().toString(), null, PDF);
+					Document blankPageDocument = new Document(UUID.randomUUID().toString(), null, PDF).setPreEncrypt();
 					LOG.debug(
 							"Dokument med uuid '{}' har {} sider. Legger til ekstra blank side " +
 							"(uuid '{}') for å sikre at alle dokumenter begynner på nytt ark.",

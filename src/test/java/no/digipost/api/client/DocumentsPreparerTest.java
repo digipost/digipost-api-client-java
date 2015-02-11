@@ -24,6 +24,7 @@ import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
 import no.digipost.print.validate.PdfValidator;
 import org.hamcrest.CustomTypeSafeMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
@@ -185,8 +186,18 @@ public class DocumentsPreparerTest {
 	private static final Matcher<Document> blankPdf = new CustomTypeSafeMatcher<Document>(Document.class.getSimpleName() + " for padding with a blank page") {
 		@Override
         protected boolean matchesSafely(Document doc) {
-			return doc.subject == null;
+			return doc.subject == null && doc.isPreEncrypt();
         }
+
+		@Override
+        protected void describeMismatchSafely(Document doc, Description mismatchDescription) {
+			if (doc.subject != null) {
+				mismatchDescription.appendText("has subject '").appendText(doc.subject).appendText("' (should be null) ");
+			}
+			if (!doc.isPreEncrypt()) {
+				mismatchDescription.appendText("not marked as preencrypted");
+			}
+		};
 	};
 
 
