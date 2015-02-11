@@ -16,7 +16,6 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.pdf.BlankPdf;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.Message.MessageBuilder;
 import no.digipost.api.client.representations.PrintDetails.PostType;
@@ -24,7 +23,6 @@ import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
 import no.digipost.print.validate.PdfValidator;
-import org.apache.commons.io.IOUtils;
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
 import org.junit.Rule;
@@ -85,13 +83,11 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void cannotSendNonPdfFilesToPrint() throws IOException {
-		Document gif = new Document(UUID.randomUUID().toString(), "funny animated gif", GIF).setPreEncrypt();
-		documents.put(gif, toInputStream("content doesn't matter"));
-		Message message = messageBuilder.attachments(asList(gif)).build();
+		addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter")).setPreEncrypt();
 
 		expectedException.expect(DigipostClientException.class);
 		expectedException.expectMessage("filetype gif");
-		preparer.prepare(documents, message, encrypter);
+		preparer.prepare(documents, messageBuilder.build(), encrypter);
 	}
 
 	@Test
@@ -126,24 +122,26 @@ public class DocumentsPreparerTest {
 	}
 
 	@Test
-	public void validatesAndEncryptsWithNoChanges() throws IOException {
+	public void validatesAndEncryptsWithNoBlankPageInsertedAfterOddNumberOfPagesPrimaryDocument() throws IOException {
 		primaryDocument.setPreEncrypt();
-		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), encrypter);
+		Message message = messageBuilder.build();
+		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter);
 
-		assertThat(documents.keySet(), is(preparedDocuments.keySet()));
+		assertThat(message.getAllDocuments(), hasSize(1));
+		assertThat(message.getAllDocuments(), contains(primaryDocument));
+		assertThat(preparedDocuments.keySet(), contains(primaryDocument));
 		assertThat(toByteArray(preparedDocuments.get(primaryDocument)), not(toByteArray(printablePdf1Page())));
 	}
 
 	@Test
 	public void insertsBlankPageAfterPrimaryDocumentForPreEncryptedDocuments() throws IOException {
 		primaryDocument.setPreEncrypt();
-		Document attachment = new Document(UUID.randomUUID().toString(), "attachment", PDF).setPreEncrypt();
-		documents.put(attachment, printablePdf2Pages());
-		Message message = messageBuilder.attachments(asList(attachment)).build();
+		Document attachment = addAttachment("attachment", PDF, printablePdf2Pages()).setPreEncrypt();
+		Message message = messageBuilder.build();
 		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter);
 
 		@SuppressWarnings("unchecked")
-        Matcher<Iterable<? extends Document>> primaryDocThenBlankPageThenAttachment = contains(is(primaryDocument), blankPage, is(attachment));
+        Matcher<Iterable<? extends Document>> primaryDocThenBlankPageThenAttachment = contains(is(primaryDocument), blankPdf, is(attachment));
 		assertThat(preparedDocuments.keySet(), primaryDocThenBlankPageThenAttachment);
 		assertThat(message.getAllDocuments(), primaryDocThenBlankPageThenAttachment);
 	}
@@ -151,16 +149,14 @@ public class DocumentsPreparerTest {
 	@Test
 	public void neverInsertsBlankPageAfterLastAttachment() throws IOException {
 		primaryDocument.setPreEncrypt();
-		Document a1 = new Document(UUID.randomUUID().toString(), "attachment", PDF).setPreEncrypt();
-		Document a2 = new Document(UUID.randomUUID().toString(), "attachment", PDF).setPreEncrypt();
 		documents.put(primaryDocument, printablePdf2Pages());
-		documents.put(a1, printablePdf1Page());
-		documents.put(a2, printablePdf1Page());
-		Message message = messageBuilder.attachments(asList(a1, a2)).build();
+		Document a1 = addAttachment("attachment", PDF, printablePdf1Page()).setPreEncrypt();
+		Document a2 = addAttachment("attachment", PDF, printablePdf1Page()).setPreEncrypt();
+		Message message = messageBuilder.build();
 		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter);
 
 		@SuppressWarnings("unchecked")
-        Matcher<Iterable<? extends Document>> blankPageOnlyAfterFirstAttachment = contains(is(primaryDocument), is(a1), blankPage, is(a2));
+        Matcher<Iterable<? extends Document>> blankPageOnlyAfterFirstAttachment = contains(is(primaryDocument), is(a1), blankPdf, is(a2));
 		assertThat(preparedDocuments.keySet(), blankPageOnlyAfterFirstAttachment);
 		assertThat(message.getAllDocuments(), blankPageOnlyAfterFirstAttachment);
 	}
@@ -168,25 +164,28 @@ public class DocumentsPreparerTest {
 	@Test
 	public void nonPdfContentNeverInsertsBlankPage() throws IOException {
 		primaryDocument.setPreEncrypt();
-		Document a1 = new Document(UUID.randomUUID().toString(), "attachment", HTML).setPreEncrypt();
-		Document a2 = new Document(UUID.randomUUID().toString(), "attachment", JPG).setPreEncrypt();
-		documents.put(primaryDocument, printablePdf1Page());
-		documents.put(a1, IOUtils.toInputStream("content doesn't matter"));
-		documents.put(a2, IOUtils.toInputStream("content doesn't matter"));
-		Message message = messageBuilder.digipostAddress(new DigipostAddress("test#ABCD")).attachments(asList(a1, a2)).build();
+		Document a1 = addAttachment("attachment 1", HTML, toInputStream("content doesn't matter")).setPreEncrypt();
+		Document a2 = addAttachment("attachment 2", JPG, toInputStream("content doesn't matter")).setPreEncrypt();
+		Message message = messageBuilder.digipostAddress(new DigipostAddress("test#ABCD")).build();
 		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter);
 
-		@SuppressWarnings("unchecked")
-        Matcher<Iterable<? extends Document>> blankPageAfterPrimaryDocument = contains(is(primaryDocument), is(a1), is(a2));
-		assertThat(preparedDocuments.keySet(), blankPageAfterPrimaryDocument);
-		assertThat(message.getAllDocuments(), blankPageAfterPrimaryDocument);
+		assertThat(preparedDocuments.keySet(), contains(primaryDocument, a1, a2));
+		assertThat(message.getAllDocuments(), contains(primaryDocument, a1, a2));
 	}
 
 
-	private static final Matcher<Document> blankPage = new CustomTypeSafeMatcher<Document>(Document.class.getSimpleName() + " for padding with a blank page") {
+	private Document addAttachment(String subject, FileType fileType, InputStream content) {
+		Document document = new Document(UUID.randomUUID().toString(), subject, fileType);
+		documents.put(document, content);
+		messageBuilder.attachments(asList(document));
+		return document;
+	}
+
+
+	private static final Matcher<Document> blankPdf = new CustomTypeSafeMatcher<Document>(Document.class.getSimpleName() + " for padding with a blank page") {
 		@Override
         protected boolean matchesSafely(Document doc) {
-			return BlankPdf.TECHNICAL_TYPE.equals(doc.getTechnicalType());
+			return doc.subject == null;
         }
 	};
 

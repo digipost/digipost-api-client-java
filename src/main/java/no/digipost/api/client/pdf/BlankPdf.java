@@ -23,8 +23,6 @@ import java.io.InputStream;
 
 public class BlankPdf {
 
-	public static final String TECHNICAL_TYPE = "BLANK_PDF_PADDING";
-
 	private static final byte[] BLANK_ONE_PAGE_PDF;
 
 	static {

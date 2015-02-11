@@ -27,7 +27,6 @@ import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import no.motif.single.Elem;
 import no.motif.single.Optional;
-import no.motif.types.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +34,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static no.digipost.api.client.representations.DeliveryMethod.PRINT;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.print.validate.PdfValidationResult.EVERYTHING_OK;
 import static no.digipost.print.validate.PdfValidationSettings.SJEKK_ALLE;
-import static no.motif.Base.not;
-import static no.motif.Base.where;
 import static no.motif.Iterate.on;
 import static no.motif.Singular.none;
 import static no.motif.Singular.optional;
@@ -69,12 +67,9 @@ class DocumentsPreparer {
 	Map<Document, InputStream> prepare(Map<Document, InputStream> documentsAndContent, Message message, Encrypter encrypter) throws IOException {
 
 		final int documentAmount = documentsAndContent.size();
-		final Elements<Document> allDocuments = on(documentsAndContent.keySet());
-		final boolean multipleDocumentsOnlyPdf = documentAmount > 1 && !allDocuments.exists(where(Document.getFileType, not(PDF)));
-
 		final Map<Document, InputStream> prepared = new LinkedHashMap<>();
 
-		for (Elem<Document> i : on(allDocuments.sorted(message.documentOrder())).indexed()) {
+		for (Elem<Document> i : on(on(documentsAndContent.keySet()).sorted(message.documentOrder())).indexed()) {
 			Document document = i.value;
 			if (document.isPreEncrypt()) {
 				byte[] byteContent = toByteArray(documentsAndContent.get(document));
@@ -82,8 +77,8 @@ class DocumentsPreparer {
 				LOG.debug("Krypterer innhold for dokument med uuid '{}'", document.uuid);
 				prepared.put(document, encrypter.encrypt(byteContent));
 
-				if (multipleDocumentsOnlyPdf && i.index < documentAmount - 1 && pdfInfo.get().hasOddNumberOfPages) {
-					Document blankPageDocument = Document.technicalAttachment(BlankPdf.TECHNICAL_TYPE, PDF);
+				if (message.getDeliveryMethod() == PRINT && i.index < documentAmount - 1 && pdfInfo.get().hasOddNumberOfPages) {
+					Document blankPageDocument = new Document(UUID.randomUUID().toString(), null, PDF);
 					LOG.debug(
 							"Dokument med uuid '{}' har {} sider. Legger til ekstra blank side " +
 							"(uuid '{}') for å sikre at alle dokumenter begynner på nytt ark.",
