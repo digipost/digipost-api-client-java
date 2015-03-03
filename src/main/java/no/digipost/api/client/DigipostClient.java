@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 import java.io.InputStream;
 import java.security.SecureRandom;
@@ -174,9 +175,10 @@ public class DigipostClient {
 		return deliverer.createPrintOnlyMessage(printMessage);
 	}
 
-
 	public IdentificationResult identifyRecipient(final Identification identification) {
-		return apiService.identifyRecipient(identification);
+		Response response = apiService.identifyRecipient(identification);
+		Communicator.checkResponse(response, eventLogger);
+		return response.readEntity(IdentificationResult.class);
 	}
 
 	public Recipients search(final String searchString) {

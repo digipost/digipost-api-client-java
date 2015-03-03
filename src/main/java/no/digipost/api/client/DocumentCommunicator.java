@@ -29,13 +29,13 @@ public class DocumentCommunicator extends Communicator {
 
 	public DocumentEvents getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
 		Response response = apiService.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
-		checkResponse(response);
+		checkResponse(response, eventLogger);
 		return response.readEntity(DocumentEvents.class);
 	}
 
 	public InputStream getContent(String path) {
 		Response response = apiService.getContent(path);
-		checkResponse(response);
+		checkResponse(response, eventLogger);
 		return response.readEntity(InputStream.class);
 	}
 }

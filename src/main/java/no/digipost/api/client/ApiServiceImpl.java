@@ -240,10 +240,10 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
-	public IdentificationResult identifyRecipient(final Identification identification) {
+	public Response identifyRecipient(final Identification identification) {
 		return webResource.path(getEntryPoint().getIdentificationUri().getPath())
 				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
-				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V6), IdentificationResult.class);
+				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V6));
 	}
 }

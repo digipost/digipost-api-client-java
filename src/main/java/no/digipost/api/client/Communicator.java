@@ -37,6 +37,7 @@ import java.io.*;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.function.Consumer;
 
 import static no.digipost.api.client.representations.ErrorType.SERVER;
 
@@ -57,11 +58,15 @@ public abstract class Communicator {
 		this.eventLogger = eventLogger;
 	}
 
-	protected void checkResponse(final Response response) {
+	protected void checkResponse(Response response) {
+		checkResponse(response, eventLogger);
+	}
+
+	public static void checkResponse(final Response response, EventLogger eventLogger) {
 		Status status = Status.fromStatusCode(response.getStatus());
 		if (!responseOk(status)) {
 			ErrorMessage error = fetchErrorMessageString(response);
-			log(error.toString());
+			log(error.toString(), eventLogger);
 			switch (status) {
 			case INTERNAL_SERVER_ERROR:
 				throw new DigipostClientException(ErrorCode.SERVER_ERROR, error.getErrorMessage());
@@ -73,7 +78,7 @@ public abstract class Communicator {
 		}
 	}
 
-	protected ErrorMessage fetchErrorMessageString(final Response response) {
+	protected static ErrorMessage fetchErrorMessageString(final Response response) {
 		try {
 			return response.readEntity(ErrorMessage.class);
 		} catch (ProcessingException | IllegalStateException | WebApplicationException e) {
@@ -81,7 +86,7 @@ public abstract class Communicator {
 		}
 	}
 
-	private boolean responseOk(final Status status) {
+	private static boolean responseOk(final Status status) {
 		if (status == null) {
 			return false;
 		}
@@ -95,8 +100,12 @@ public abstract class Communicator {
 	}
 
 	protected void log(final String message) {
+		log(message, eventLogger);
+	}
+
+	protected static void log(final String message, EventLogger logger) {
 		LOG.debug(message);
-		eventLogger.log(message);
+		logger.log(message);
 	}
 
 	protected void logThrowable(final Throwable t) {
@@ -114,7 +123,7 @@ public abstract class Communicator {
 	protected void checkThatExistingMessageIsIdenticalToNewMessage(final MessageDelivery exisitingMessage, final Message message) {
 		if (!exisitingMessage.isSameMessageAs(message)) {
 			String errorMessage = "Forsendelse med id [" + message.messageId + "] finnes fra før med annen spesifikasjon.";
-			log(errorMessage);
+			log(errorMessage, eventLogger);
 			throw new DigipostClientException(ErrorCode.DUPLICATE_MESSAGE, errorMessage);
 		}
 	}

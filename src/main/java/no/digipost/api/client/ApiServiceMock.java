@@ -193,7 +193,7 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	@Override
-	public IdentificationResult identifyRecipient(final Identification identification) {
+	public Response identifyRecipient(final Identification identification) {
 		throw new NotImplementedException("This is a mock");
 	}
 

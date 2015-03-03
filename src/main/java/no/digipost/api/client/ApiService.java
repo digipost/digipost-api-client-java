@@ -101,7 +101,7 @@ public interface ApiService {
 
 	void addFilter(ClientRequestFilter filter);
 
-	IdentificationResult identifyRecipient(Identification identification);
+	Response identifyRecipient(Identification identification);
 
 	/**
 	 * Sjekker hvis spesifisert mottaker er Digipost-bruker.

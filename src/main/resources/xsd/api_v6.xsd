@@ -300,7 +300,10 @@
         <xsd:sequence>
             <xsd:element name="result" type="identification-result-code" minOccurs="1" maxOccurs="1"/>
             <xsd:choice minOccurs="0" maxOccurs="1">
-                <xsd:element name="digipost-address" type="xsd:string" minOccurs="1" maxOccurs="1" />
+                <xsd:sequence>
+                    <xsd:element name="digipost-address" type="xsd:string" minOccurs="1" maxOccurs="1" />
+                    <xsd:element name="person-alias" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+                </xsd:sequence>
                 <xsd:element name="person-alias" type="xsd:string" minOccurs="1" maxOccurs="1">
                     <xsd:annotation>
                         <xsd:documentation>Used as identifier for matching recipients that does not have a Digipost account</xsd:documentation>
@@ -432,6 +435,7 @@
                 <xsd:element name="name-and-address" minOccurs="0" maxOccurs="1" type="name-and-address" nillable="false" />
             </xsd:choice>
         </xsd:sequence>
+        <xsd:attribute name="include-personalias-for-digipost-user" type="xsd:boolean" default="false" />
     </xsd:complexType>
 
     <xsd:complexType name="message-recipient">

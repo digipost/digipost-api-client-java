@@ -15,11 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -32,6 +28,9 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "identification")
 public class Identification {
 
+	@XmlAttribute(name = "include-personalias-for-digipost-user")
+	protected boolean includePersonaliasForDigipostUser;
+
 	@XmlElement(name = "name-and-address", nillable = false)
 	protected NameAndAddress nameAndAddress;
 	@XmlElement(name = "digipost-address", nillable = false)
@@ -42,18 +41,35 @@ public class Identification {
 	protected String organisationNumber;
 
 	public Identification(final NameAndAddress nameAndAddress) {
+		this(nameAndAddress, false);
+	}
+
+	public Identification(final NameAndAddress nameAndAddress, boolean includePersonaliasForDigipostUser) {
 		this.nameAndAddress = nameAndAddress;
+		this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
 	}
 
 	public Identification(final DigipostAddress digipostAddress) {
+		this(digipostAddress, false);
+	}
+	public Identification(final DigipostAddress digipostAddress, boolean includePersonaliasForDigipostUser) {
+		this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
 		this.digipostAddress = digipostAddress.asString();
 	}
 
 	public Identification(final PersonalIdentificationNumber personalIdentificationNumber) {
+		this(personalIdentificationNumber, false);
+	}
+	public Identification(final PersonalIdentificationNumber personalIdentificationNumber, boolean includePersonaliasForDigipostUser) {
+		this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
 		this.personalIdentificationNumber = personalIdentificationNumber.asString();
 	}
 
 	public Identification(final OrganisationNumber organisationNumber) {
+		this(organisationNumber, false);
+	}
+	public Identification(final OrganisationNumber organisationNumber, boolean includePersonaliasForDigipostUser) {
+		this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
 		this.organisationNumber = organisationNumber.asString();
 	}
 
