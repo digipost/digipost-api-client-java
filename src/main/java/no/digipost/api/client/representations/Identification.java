@@ -66,10 +66,7 @@ public class Identification {
 	}
 
 	public Identification(final OrganisationNumber organisationNumber) {
-		this(organisationNumber, false);
-	}
-	public Identification(final OrganisationNumber organisationNumber, boolean includePersonaliasForDigipostUser) {
-		this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
+		this.includePersonaliasForDigipostUser = false;
 		this.organisationNumber = organisationNumber.asString();
 	}
 
