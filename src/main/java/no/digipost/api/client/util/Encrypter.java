@@ -19,10 +19,7 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.motif.Exceptions;
 import no.motif.f.Fn;
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.cms.CMSAlgorithm;
-import org.bouncycastle.cms.CMSEnvelopedData;
-import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
-import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -30,9 +27,11 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
 
 import static no.digipost.api.client.errorhandling.ErrorCode.ENCRYPTION_KEY_NOT_FOUND;
 import static no.digipost.api.client.errorhandling.ErrorCode.FAILED_PREENCRYPTION;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCause;
 
 public final class Encrypter {
 
@@ -87,7 +86,15 @@ public final class Encrypter {
 			CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(content), encryptorBuilder.build());
 			return new ByteArrayInputStream(d.getEncoded());
 		} catch (Exception e) {
-			throw new DigipostClientException(FAILED_PREENCRYPTION, "Feil ved kryptering av innhold: " + e.getMessage(), e);
+			if (e instanceof CMSException && getRootCause(e) instanceof InvalidKeyException) {
+				throw new DigipostClientException(FAILED_PREENCRYPTION,
+						"Ugyldig krypteringsnøkkel. (" + InvalidKeyException.class.getName() + ") Er Java Cryptographic Extensions (JCE) " +
+						"Unlimited Strength Jurisdiction Policy Files installert? " +
+						"Dette kan lastes ned fra http://www.oracle.com/technetwork/java/javase/downloads/ under \"Additional Resources\". " +
+						"Plasser filene US_export_policy.jar og local_policy.jar i ${JAVA_HOME}/jre/lib/security (overskriv eksisterende).", e);
+			} else {
+				throw new DigipostClientException(FAILED_PREENCRYPTION, "Feil ved kryptering av innhold: " + e.getClass().getSimpleName() + " '" + e.getMessage() + "'", e);
+			}
 		}
 	}
 
