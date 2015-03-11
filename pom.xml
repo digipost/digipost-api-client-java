@@ -17,7 +17,7 @@
 	<version>6.6-SNAPSHOT</version>
 	<name>Digipost API Client</name>
 	<description>Java library for interacting with the Digipost REST API</description>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jersey.version>2.15</jersey.version>
@@ -113,7 +113,7 @@
 			<artifactId>junit-theories</artifactId>
 			<version>4.12</version>
 			<scope>test</scope>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>
@@ -149,7 +149,7 @@
 	        <artifactId>junit-quickcheck-generators</artifactId>
 	        <version>0.4</version>
 	        <scope>test</scope>
-	    </dependency>		
+	    </dependency>
 	</dependencies>
 
 	<build>
@@ -225,6 +225,18 @@
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.4</version>
 				</plugin>
+				<plugin>
+	            	<groupId>org.codehaus.mojo</groupId>
+	            	<artifactId>animal-sniffer-maven-plugin</artifactId>
+	            	<version>1.14</version>
+           			<configuration>
+           				<signature>
+           					<groupId>org.codehaus.mojo.signature</groupId>
+               				<artifactId>java17</artifactId>
+               				<version>1.0</version>
+           				</signature>
+           			</configuration>
+	            </plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -260,7 +272,6 @@
 			<plugin>
             	<groupId>org.codehaus.mojo</groupId>
             	<artifactId>animal-sniffer-maven-plugin</artifactId>
-            	<version>1.13</version>
             	<executions>
             		<execution>
             			<id>ensure-java7-compatible</id>
@@ -268,13 +279,6 @@
             			<goals>
             				<goal>check</goal>
             			</goals>
-            			<configuration>
-            				<signature>
-            					<groupId>org.codehaus.mojo.signature</groupId>
-                				<artifactId>java17</artifactId>
-                				<version>1.0</version>
-            				</signature>
-            			</configuration>
             		</execution>
             	</executions>
             </plugin>
