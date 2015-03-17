@@ -88,7 +88,7 @@ public class DigipostClientException extends RuntimeException {
 	private static String getMessage(ErrorMessage error) {
 		String prefix = "";
 		if (!ErrorCode.isKnown(error.getErrorCode())) {
-			prefix = String.format("(unknown errorcode: %s with errorType: %s) ", error.getErrorCode(), error.getErrorType().name());
+			prefix = String.format("(Server errorcode %s:%s) ", error.getErrorType(), error.getErrorCode());
 		}
 		return prefix + error.getErrorMessage();
 	}

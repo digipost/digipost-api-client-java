@@ -113,6 +113,7 @@ public enum ErrorCode {
 	INVALID_SMS_NOTIFICATION_TIME(CLIENT_DATA),
 	INVALID_PHONE_NUMBER(CLIENT_DATA),
 	INVALID_RECIPIENT_PRINT_ADDRESS(CLIENT_DATA),
+	INVALID_RETURN_ADDRESS(CLIENT_DATA),
 	INVALID_PDF_CONTENT(CLIENT_DATA),
 	INVALID_MONETARY_AMOUNT(CLIENT_DATA),
 	AUTHENTICATION_LEVEL_TOO_LOW(CLIENT_DATA)
@@ -124,7 +125,7 @@ public enum ErrorCode {
         }
 	}
 
-	private final ErrorType errorType;
+	public final ErrorType errorType;
 	private final List<Class<? extends Throwable>> fittingThrowables;
 
 	@SafeVarargs
