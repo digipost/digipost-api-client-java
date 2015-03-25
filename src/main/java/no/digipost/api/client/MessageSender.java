@@ -33,6 +33,7 @@ import org.joda.time.Duration;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -156,7 +157,7 @@ public class MessageSender extends Communicator {
 	            throw new DigipostClientException(GENERAL_ERROR, "Unable to read content of document with uuid " + document.uuid, e);
             }
 			documentsPreparer.validate(message.getDeliveryMethod(), document, byteContent);
-			InputStream encryptetContent = fetchKeyAndEncrypt(document, unencryptetContent);
+			InputStream encryptetContent = fetchKeyAndEncrypt(document, new ByteArrayInputStream(byteContent));
 			delivery = uploadContent(message, document, encryptetContent);
 		} else {
 			delivery = uploadContent(message, document, unencryptetContent);
