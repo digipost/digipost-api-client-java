@@ -16,6 +16,8 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.representations.DocumentEvents;
+import no.digipost.api.client.representations.DocumentStatus;
+import no.digipost.api.client.representations.Link;
 import org.joda.time.DateTime;
 
 import javax.ws.rs.core.Response;
@@ -37,5 +39,17 @@ public class DocumentCommunicator extends Communicator {
 		Response response = apiService.getContent(path);
 		checkResponse(response, eventLogger);
 		return response.readEntity(InputStream.class);
+	}
+
+	public DocumentStatus getDocumentStatus(Link linkToDocumentStatus) {
+		Response response = apiService.getDocumentStatus(linkToDocumentStatus);
+		checkResponse(response, eventLogger);
+		return response.readEntity(DocumentStatus.class);
+	}
+
+	public DocumentStatus getDocumentStatus(long senderId, String uuid) {
+		Response response = apiService.getDocumentStatus(senderId, uuid);
+		checkResponse(response, eventLogger);
+		return response.readEntity(DocumentStatus.class);
 	}
 }

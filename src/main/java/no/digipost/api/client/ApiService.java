@@ -121,10 +121,18 @@ public interface ApiService {
 	 */
 	Response getDocumentEvents(String organisation, String partId, DateTime from, DateTime to, int offset, int maxResults);
 
+	/**
+	 * Henter status på dokumeter som tidligere blitt sendt i Digipost, både via digital og print-kanal.
+	 * @param linkToDocumentStatus
+	 */
+	Response getDocumentStatus(Link linkToDocumentStatus);
+	Response getDocumentStatus(long senderId, String uuid);
+
 	Response getContent(String path);
 
 	/**
 	 * Henter publik krypteringsnøkkel for forsendelser som skal sendes til print.
 	 */
 	Response getEncryptionKeyForPrint();
+
 }

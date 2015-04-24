@@ -75,6 +75,12 @@ public class DigipostClientMock {
 		requestsAndResponses.addExpectedResponse(response);
 	}
 
+	public void addExpectedException(ApiServiceMock.Method method, RuntimeException exception) {
+		ApiServiceMock.RequestsAndResponses requestsAndResponses = apiService.requestsAndResponsesMap.get(method);
+
+		requestsAndResponses.addExpectedException(exception);
+	}
+
 	public void reset() {
 		apiService.reset();
 	}

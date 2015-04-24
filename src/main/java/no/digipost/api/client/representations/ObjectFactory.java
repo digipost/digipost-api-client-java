@@ -54,4 +54,8 @@ public class ObjectFactory {
 	public DocumentEvents createDocumentEvents() {
 		return new DocumentEvents();
 	}
+
+	public DocumentStatus createDocumentStatus() {
+		return new DocumentStatus();
+	}
 }
