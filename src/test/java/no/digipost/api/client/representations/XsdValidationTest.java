@@ -34,10 +34,7 @@ import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.representations.AuthenticationLevel.*;
@@ -204,6 +201,27 @@ public class XsdValidationTest {
 		DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent,
 				failedSmsNotificationEvent, printFailedEvent, movedFilesEvent, postmarkedEvent, shreddedEvent));
 		marshallValidateAndUnmarshall(documentEvents);
+	}
+
+	@Test
+	public void validate_document_status_simple() {
+		DocumentStatus primaryDoc = new DocumentStatus(UUID.randomUUID().toString(), DeliveryStatus.NOT_DELIVERED, DateTime.now(), null, null, Channel.WEB, true,
+				null, HashAlgorithm.NONE, null, null);
+		marshallValidateAndUnmarshall(primaryDoc);
+	}
+
+	@Test
+	public void validate_document_status_with_attachments() {
+		DocumentStatus attachment1 = createDocumentStatus(false);
+		DocumentStatus attachment2 = createDocumentStatus(false);
+		DocumentStatus primaryDoc = createDocumentStatus(true, attachment1, attachment2);
+
+		marshallValidateAndUnmarshall(primaryDoc);
+	}
+
+	private DocumentStatus createDocumentStatus(boolean isPrimaryDocument, DocumentStatus ... attachments) {
+		return new DocumentStatus(UUID.randomUUID().toString(), DeliveryStatus.DELIVERED, DateTime.now(), DateTime.now(), Read.Y, Channel.PRINT, isPrimaryDocument,
+				"asdf", HashAlgorithm.SHA256, Arrays.asList(attachments), null);
 	}
 
 	@Test

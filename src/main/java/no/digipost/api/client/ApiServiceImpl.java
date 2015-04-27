@@ -203,6 +203,24 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
+	public Response getDocumentStatus(Link linkToDocumentStatus) {
+		return getDocumentStatus(linkToDocumentStatus.getUri().getPath());
+	}
+
+	@Override
+	public Response getDocumentStatus(long senderId, String uuid) {
+		return getDocumentStatus(String.format("/documents/%s/%s/status", senderId, uuid));
+	}
+
+	private Response getDocumentStatus(String path) {
+		return webResource
+				.path(path)
+				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.header(X_Digipost_UserId, senderAccountId)
+				.get();
+	}
+
+	@Override
 	public Response getContent(String path) {
 		return webResource
 				.path(path)

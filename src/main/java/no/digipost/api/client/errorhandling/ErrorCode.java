@@ -138,6 +138,8 @@ public enum ErrorCode {
 		return errorType;
 	}
 
+
+
 	/**
 	 * @return <code>ErrorCode</code> with the same name as the given <code>errorCode</code>, or falls
 	 *         back to {@link ErrorCode#GENERAL_ERROR GENERAL_ERROR} if no such <code>ErrorCode</code>

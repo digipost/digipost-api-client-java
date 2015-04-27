@@ -16,7 +16,12 @@
 package no.digipost.api.client.errorhandling;
 
 import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.Relation;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import javax.swing.text.html.Option;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.errorhandling.ErrorType.*;
@@ -25,6 +30,7 @@ public class DigipostClientException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	private final ErrorCode errorCode;
+	private final List<Link> links;
 	private final ErrorType errorType;
 	private final String errorMessage;
 
@@ -33,7 +39,7 @@ public class DigipostClientException extends RuntimeException {
 	}
 
 	public DigipostClientException(ErrorMessage error) {
-		this(ErrorCode.resolve(error.getErrorCode()), resolve(error.getErrorType()), getMessage(error), null);
+		this(ErrorCode.resolve(error.getErrorCode()), resolve(error.getErrorType()), getMessage(error), error.getLink(), null);
 	}
 
 	public DigipostClientException(ErrorCode code, Throwable cause) {
@@ -48,9 +54,12 @@ public class DigipostClientException extends RuntimeException {
 		this(code, NONE, message, cause);
 	}
 
-	private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, Throwable cause) {
+	private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, Throwable cause) { this(code, errorTypeFromServer, message, null, cause); }
+
+	private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, List<Link> links, Throwable cause) {
 		super(code + ": " + message, cause);
 		this.errorCode = code;
+		this.links = links;
 		this.errorType = code.getOverriddenErrorType() == UNKNOWN ? errorTypeFromServer : code.getOverriddenErrorType();
 		this.errorMessage = message;
 	}
@@ -78,6 +87,15 @@ public class DigipostClientException extends RuntimeException {
 
 	public ErrorType getErrorType() {
 		return errorType;
+	}
+
+	public Link getLink(Relation relation) {
+		for (Link link : links) {
+			if (link.equalsRelation(relation)) {
+				return link;
+			}
+		}
+		return null;
 	}
 
 	private static String getMessage(Throwable t) {
