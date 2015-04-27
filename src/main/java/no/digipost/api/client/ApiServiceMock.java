@@ -36,13 +36,11 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.ConnectException;
-import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Supplier;
 
 import static java.lang.Integer.parseInt;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
