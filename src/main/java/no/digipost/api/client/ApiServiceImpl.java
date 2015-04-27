@@ -213,10 +213,8 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	private Response getDocumentStatus(String path) {
-		WebTarget target = webResource
+		return webResource
 				.path(path)
-				.queryParam("includeHashAndAttachments", "true");
-		return target
 				.request(DIGIPOST_MEDIA_TYPE_V6)
 				.header(X_Digipost_UserId, senderAccountId)
 				.get();
