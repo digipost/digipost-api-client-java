@@ -17,10 +17,12 @@ package no.digipost.api.client.filters.request;
 
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.Headers;
-
 import org.bouncycastle.crypto.digests.MD5Digest;
 
+import javax.ws.rs.ext.Provider;
 
+
+@Provider
 public class RequestContentMD5Filter extends RequestContentHashFilter {
 
 	public RequestContentMD5Filter(final EventLogger eventListener) {

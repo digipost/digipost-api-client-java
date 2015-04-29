@@ -25,11 +25,13 @@ import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
 import static javax.ws.rs.core.HttpHeaders.DATE;
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
+@Provider
 @Priority(Priorities.HEADER_DECORATOR)
 public class RequestDateFilter implements ClientRequestFilter {
 	private static final Logger LOG = LoggerFactory.getLogger(RequestDateFilter.class);

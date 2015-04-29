@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
-
+import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
 import static javax.ws.rs.core.HttpHeaders.DATE;
@@ -33,7 +33,9 @@ import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ER
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.joda.time.DateTime.now;
 
+@Provider
 public class ResponseDateFilter implements ClientResponseFilter {
+
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseDateFilter.class);
 	private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
 

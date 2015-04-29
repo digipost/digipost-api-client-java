@@ -15,21 +15,12 @@
  */
 package no.digipost.api.client.filters.request;
 
-import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.Security;
-
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.Headers;
 import no.digipost.api.client.security.ClientRequestToSign;
 import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
-
 import org.apache.commons.io.IOUtils;
-
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +29,15 @@ import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.ext.Provider;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.Security;
 
+import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
+
+@Provider
 @Priority(Priorities.USER)
 public class RequestSignatureFilter implements ClientRequestFilter {
 
@@ -59,7 +58,7 @@ public class RequestSignatureFilter implements ClientRequestFilter {
 
 	@Override
 	public void filter(ClientRequestContext clientRequestContext) throws IOException {
-		if(clientRequestContext.getEntity() == null) {
+		if (clientRequestContext.getEntity() == null) {
 			setSignatureHeader(clientRequestContext);
 		} else {
 			clientRequestContext.setEntityStream(new SecurityAdapterOutputStream(clientRequestContext, clientRequestContext.getEntityStream()));
