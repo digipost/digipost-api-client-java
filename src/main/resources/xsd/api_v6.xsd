@@ -537,7 +537,7 @@
     <xsd:complexType name="message-delivery">
         <xsd:sequence>
             <xsd:element name="message-id" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="delivery-method" type="delivery-method"  minOccurs="1" maxOccurs="1" />
+            <xsd:element name="delivery-method" type="channel"  minOccurs="1" maxOccurs="1" />
             <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1" />
             <xsd:element name="delivery-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" />
@@ -545,18 +545,6 @@
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
-
-    <xsd:simpleType name="delivery-method">
-        <xsd:annotation>
-            <xsd:appinfo>
-                <jaxb:typesafeEnumClass/>
-            </xsd:appinfo>
-        </xsd:annotation>
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="PRINT" />
-            <xsd:enumeration value="DIGIPOST" />
-        </xsd:restriction>
-    </xsd:simpleType>
 
     <xsd:element name="document" type="document" />
 
@@ -871,8 +859,8 @@
 
     <xsd:simpleType name="channel">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="WEB" />
             <xsd:enumeration value="PRINT" />
+            <xsd:enumeration value="DIGIPOST" />
         </xsd:restriction>
     </xsd:simpleType>
 

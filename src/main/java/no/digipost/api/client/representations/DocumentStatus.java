@@ -21,6 +21,7 @@ import org.joda.time.DateTime;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -59,7 +60,7 @@ public class DocumentStatus {
 	public HashAlgorithm contentHashAlgorithm;
 
 	@XmlElement(name = "attachments")
-	public List<DocumentStatus> attachments = new ArrayList<>();
+	private List<DocumentStatus> attachments = new ArrayList<>();
 
 	@XmlElement(name = "link")
 	public List<Link> links = new ArrayList<>();
@@ -84,7 +85,7 @@ public class DocumentStatus {
 		this.links = links;
 	}
 
-	public List<DocumentStatus> getNullsafeAttachments() {
-		return attachments == null ? new ArrayList<DocumentStatus>() : attachments;
+	public List<DocumentStatus> getAttachments() {
+		return Collections.unmodifiableList(attachments == null ? new ArrayList<DocumentStatus>() : attachments);
 	}
 }

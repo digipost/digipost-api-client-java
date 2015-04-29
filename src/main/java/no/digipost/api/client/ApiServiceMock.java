@@ -45,7 +45,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.lang.Integer.parseInt;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
-import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 
 public class ApiServiceMock implements ApiService {
@@ -338,7 +337,7 @@ public class ApiServiceMock implements ApiService {
 
 		public static Response DEFAULT_RESPONSE = MockedResponseBuilder.create()
 				.status(OK.getStatusCode())
-				.entity(new MessageDelivery(UUID.randomUUID().toString(), DIGIPOST, COMPLETE, DateTime.now()))
+				.entity(new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, COMPLETE, DateTime.now()))
 				.build();
 		public static ProcessingException CONNECTION_REFUSED = new ProcessingException(new ConnectException("Connection refused"));
 

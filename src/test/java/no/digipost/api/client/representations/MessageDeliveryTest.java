@@ -20,7 +20,7 @@ import org.junit.Test;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
-import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
+import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.MessageStatus.NOT_COMPLETE;
 import static org.hamcrest.Matchers.*;

@@ -26,8 +26,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
-import static no.digipost.api.client.representations.DeliveryMethod.PRINT;
+import static no.digipost.api.client.representations.Channel.DIGIPOST;
+import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.motif.Singular.the;
 import static org.apache.commons.lang3.ArrayUtils.INDEX_NOT_FOUND;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
@@ -203,7 +203,7 @@ public class Message {
 		return the(primaryDocument).append(attachments).exists(Document.isPreEncrypt);
 	}
 
-    public DeliveryMethod getDeliveryMethod() {
+    public Channel getChannel() {
 		return recipient.isDirectPrint() ? PRINT : DIGIPOST;
     }
 

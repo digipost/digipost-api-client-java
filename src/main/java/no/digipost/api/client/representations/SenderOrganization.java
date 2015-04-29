@@ -46,4 +46,9 @@ public class SenderOrganization {
 	public String getPartId() {
 		return partId;
 	}
+
+	@Override
+	public String toString() {
+		return organizationId + (partId == null ? "" : ":" + partId);
+	}
 }

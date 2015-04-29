@@ -205,7 +205,7 @@ public class XsdValidationTest {
 
 	@Test
 	public void validate_document_status_simple() {
-		DocumentStatus primaryDoc = new DocumentStatus(UUID.randomUUID().toString(), DeliveryStatus.NOT_DELIVERED, DateTime.now(), null, null, Channel.WEB, true,
+		DocumentStatus primaryDoc = new DocumentStatus(UUID.randomUUID().toString(), DeliveryStatus.NOT_DELIVERED, DateTime.now(), null, null, Channel.DIGIPOST, true,
 				null, HashAlgorithm.NONE, null, null);
 		marshallValidateAndUnmarshall(primaryDoc);
 	}
@@ -227,7 +227,7 @@ public class XsdValidationTest {
 	@Test
     public void validateMessageDelivery() {
 		DateTime deliveryTime = DateTime.now();
-		MessageDelivery delivery = new MessageDelivery(UUID.randomUUID().toString(), DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED, deliveryTime);
+		MessageDelivery delivery = new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, MessageStatus.DELIVERED, deliveryTime);
 		delivery.primaryDocument = new Document(UUID.randomUUID().toString(), "primary", FileType.PDF);
 		MessageDelivery unmarshalled = marshallValidateAndUnmarshall(delivery);
 		assertThat(unmarshalled, not(sameInstance(delivery)));

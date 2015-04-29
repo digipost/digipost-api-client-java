@@ -18,7 +18,7 @@ package no.digipost.api.client;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.pdf.BlankPdf;
-import no.digipost.api.client.representations.DeliveryMethod;
+import no.digipost.api.client.representations.Channel;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.util.Encrypter;
@@ -36,7 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static no.digipost.api.client.representations.DeliveryMethod.PRINT;
+import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.print.validate.PdfValidationResult.EVERYTHING_OK;
 import static no.digipost.print.validate.PdfValidationSettings.SJEKK_ALLE;
@@ -73,11 +73,11 @@ class DocumentsPreparer {
 			Document document = i.value;
 			if (document.isPreEncrypt()) {
 				byte[] byteContent = toByteArray(documentsAndContent.get(document));
-				Optional<PdfInfo> pdfInfo = validate(message.getDeliveryMethod(), document, byteContent);
+				Optional<PdfInfo> pdfInfo = validate(message.getChannel(), document, byteContent);
 				LOG.debug("Krypterer innhold for dokument med uuid '{}'", document.uuid);
 				prepared.put(document, encrypter.encrypt(byteContent));
 
-				if (message.getDeliveryMethod() == PRINT && i.index < documentAmount - 1 && pdfInfo.get().hasOddNumberOfPages) {
+				if (message.getChannel() == PRINT && i.index < documentAmount - 1 && pdfInfo.get().hasOddNumberOfPages) {
 					Document blankPageDocument = new Document(UUID.randomUUID().toString(), null, PDF).setPreEncrypt();
 					LOG.debug(
 							"Dokument med uuid '{}' har {} sider. Legger til ekstra blank side " +
@@ -95,8 +95,8 @@ class DocumentsPreparer {
 
 
 
-	Optional<PdfInfo> validate(DeliveryMethod deliveryMethod, Document document, byte[] content) {
-		if (deliveryMethod == PRINT && !document.is(PDF)) {
+	Optional<PdfInfo> validate(Channel channel, Document document, byte[] content) {
+		if (channel == PRINT && !document.is(PDF)) {
 	    	throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT,
 	    			"PDF is required for direct-to-print messages. Document with uuid " + document.uuid + " had filetype " + document.getDigipostFileType());
 	    }
@@ -112,7 +112,7 @@ class DocumentsPreparer {
 			pdfInfo = none();
 		}
 
-	    if ((deliveryMethod == PRINT && !pdfValidation.okForPrint) || !pdfValidation.okForWeb) {
+	    if ((channel == PRINT && !pdfValidation.okForPrint) || !pdfValidation.okForWeb) {
 	    	throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT, pdfValidation.toString());
 	    }
 	    return pdfInfo;

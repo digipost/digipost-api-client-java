@@ -27,7 +27,7 @@ import java.net.URI;
 import java.util.*;
 
 import static javax.ws.rs.core.Response.Status.OK;
-import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
+import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 
 public class MockfriendlyResponse extends Response {

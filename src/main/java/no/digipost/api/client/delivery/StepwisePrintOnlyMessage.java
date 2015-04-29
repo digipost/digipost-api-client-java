@@ -16,7 +16,7 @@
 package no.digipost.api.client.delivery;
 
 import no.digipost.api.client.MessageSender;
-import no.digipost.api.client.representations.DeliveryMethod;
+import no.digipost.api.client.representations.Channel;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
@@ -53,7 +53,7 @@ final class StepwisePrintOnlyMessage implements OngoingDelivery.SendableForPrint
 
     @Override
     public MessageDelivery send() {
-    	if (delivery.getDeliveryMethod() != DeliveryMethod.PRINT) {
+    	if (delivery.getChannel() != Channel.PRINT) {
     		throw new IllegalStateException(
     				"Response from Digipost does not indicate that the message with id " + delivery.getMessageId() +
     				", status '" + delivery.getStatus() + "' will be delivered to print, " +
