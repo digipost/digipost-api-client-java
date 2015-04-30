@@ -10,7 +10,7 @@
 		<groupId>no.digipost</groupId>
 		<artifactId>digipost-open-super-pom</artifactId>
 		<version>0.3</version>
-		<relativePath />
+		<relativePath/>
 	</parent>
 
 	<artifactId>digipost-api-client-java</artifactId>
@@ -20,8 +20,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
 		<jersey.version>2.15</jersey.version>
 		<bouncycastle.version>1.51</bouncycastle.version>
 		<slf4j.version>1.7.12</slf4j.version>
@@ -70,11 +70,11 @@
 			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
@@ -141,17 +141,17 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-	        <groupId>com.pholser</groupId>
-	        <artifactId>junit-quickcheck-core</artifactId>
-	        <version>0.4</version>
-	        <scope>test</scope>
+			<groupId>com.pholser</groupId>
+			<artifactId>junit-quickcheck-core</artifactId>
+			<version>0.4</version>
+			<scope>test</scope>
 		</dependency>
-	    <dependency>
-	        <groupId>com.pholser</groupId>
-	        <artifactId>junit-quickcheck-generators</artifactId>
-	        <version>0.4</version>
-	        <scope>test</scope>
-	    </dependency>
+		<dependency>
+			<groupId>com.pholser</groupId>
+			<artifactId>junit-quickcheck-generators</artifactId>
+			<version>0.4</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -224,17 +224,17 @@
 					<version>3.4</version>
 				</plugin>
 				<plugin>
-	            	<groupId>org.codehaus.mojo</groupId>
-	            	<artifactId>animal-sniffer-maven-plugin</artifactId>
-	            	<version>1.14</version>
-           			<configuration>
-           				<signature>
-           					<groupId>org.codehaus.mojo.signature</groupId>
-               				<artifactId>java17</artifactId>
-               				<version>1.0</version>
-           				</signature>
-           			</configuration>
-	            </plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>animal-sniffer-maven-plugin</artifactId>
+					<version>1.14</version>
+					<configuration>
+						<signature>
+							<groupId>org.codehaus.mojo.signature</groupId>
+							<artifactId>java17</artifactId>
+							<version>1.0</version>
+						</signature>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -268,18 +268,18 @@
 				</executions>
 			</plugin>
 			<plugin>
-            	<groupId>org.codehaus.mojo</groupId>
-            	<artifactId>animal-sniffer-maven-plugin</artifactId>
-            	<executions>
-            		<execution>
-            			<id>ensure-java7-compatible</id>
-            			<phase>verify</phase>
-            			<goals>
-            				<goal>check</goal>
-            			</goals>
-            		</execution>
-            	</executions>
-            </plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>ensure-java7-compatible</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.6</version>
