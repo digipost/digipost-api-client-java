@@ -160,14 +160,14 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
-					<include>user-agent.properties</include>
+					<include>**/user-agent.properties</include>
 				</includes>
 			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>false</filtering>
 				<excludes>
-					<exclude>user-agent.properties</exclude>
+					<exclude>**/user-agent.properties</exclude>
 				</excludes>
 			</resource>
 		</resources>

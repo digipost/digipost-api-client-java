@@ -28,7 +28,7 @@ public class UserAgent {
 
 		String userAgentTmp;
 
-		try (InputStream in = UserAgent.class.getResourceAsStream("/user-agent.properties")) {
+		try (InputStream in = UserAgent.class.getResourceAsStream("user-agent.properties")) {
 			Properties properties = new Properties();
 			properties.load(in);
 			userAgentTmp = properties.getProperty("user-agent", DIGIPOST_USER_AGENT_FALLBACK);
