@@ -17,7 +17,6 @@ package no.digipost.api.client.cache;
 
 import com.google.common.base.Ticker;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalCause;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import org.joda.time.DateTime;
@@ -97,7 +96,7 @@ public abstract class CacheConfig implements ConfiguresGuavaCache {
 			return builder.removalListener(new RemovalListener<Object, Object>() {
 				@Override
                 public void onRemoval(RemovalNotification<Object, Object> notification) {
-					Cache.LOG.info("Removing '{}' from cache, because {}.{}. (key='{}')", notification.getValue(), RemovalCause.class.getName(), notification.getCause(), notification.getKey());
+					Cache.LOG.info("Removing '{}' from cache (key={}). Cause: {}.", notification.getValue(), notification.getKey(), notification.getCause());
                 }
 			});
 		}

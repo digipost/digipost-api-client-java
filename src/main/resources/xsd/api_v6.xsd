@@ -828,6 +828,62 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+
+    <xsd:element name="sender-information" type="sender-information" />
+
+    <xsd:complexType name="sender-information">
+        <xsd:sequence>
+            <xsd:element name="sender-id" type="xsd:long" minOccurs="0" />
+            <xsd:element name="status" type="sender-status" />
+            <xsd:element name="supported-features" type="features" minOccurs="0" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:simpleType name="sender-status">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="NO_INFO_AVAILABLE" >
+                <xsd:annotation>
+                    <xsd:documentation>
+                        No information about the requested sender could be retrieved. This may either be
+                        because the sender does not exist, or the broker is not authorized to send on behalf
+                        of the sender.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="VALID_SENDER" >
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The sender exists in Digipost, and the broker is authorized to act on behalf of the sender
+                        (typically send messages).
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="features">
+        <xsd:annotation>
+            <xsd:documentation>
+                A non-exhaustive list of features. The possible reported features may be expanded at any time,
+                and clients must as such be built to discard values which are unknown. The elements should
+                be regarded as means to query "is [some feature] available?".
+
+                Please consult <![CDATA[<a href="https://www.digipost.no/plattform/enkeltutsendelser/">the documentation</a>]]>
+                for possible values and their semantics.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="feature" maxOccurs="unbounded">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:pattern value="no\.digipost\.feature\.[a-zA-Z0-9_\.\-]+" />
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
     <xsd:element name="document-status" type="document-status" />
 
     <xsd:complexType name="document-status">

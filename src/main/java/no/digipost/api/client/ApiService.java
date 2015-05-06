@@ -16,11 +16,13 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.sender.SenderInformation;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
 
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.Response;
+
 import java.io.InputStream;
 import java.net.URI;
 
@@ -127,4 +129,21 @@ public interface ApiService {
 	 * Henter publik krypteringsnøkkel for forsendelser som skal sendes til print.
 	 */
 	Response getEncryptionKeyForPrint();
+
+
+	/**
+	 * Henter informasjon om en avsender.
+	 *
+	 * @param senderId id-en til avsenderen.
+	 */
+	SenderInformation getSenderInformation(long senderId);
+
+	/**
+	 * Henter informasjon om en avsender. Avsender må ha godtatt å identifiseres med
+	 * organisasjonsnummer og ev. underenhet.
+	 *
+	 * @param orgnr organisasjonsnummeret til avsenderen.
+	 * @param avsenderenhet underenhet for et organisasjonsnummer.
+	 */
+	SenderInformation getSenderInformation(String orgnr, String avsenderenhet);
 }

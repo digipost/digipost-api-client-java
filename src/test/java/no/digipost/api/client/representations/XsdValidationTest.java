@@ -15,25 +15,10 @@
  */
 package no.digipost.api.client.representations;
 
+
 import org.joda.time.DateTime;
-import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,29 +32,15 @@ import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import static no.digipost.api.client.representations.XmlTestHelper.marshallValidateAndUnmarshall;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class XsdValidationTest {
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(XsdValidationTest.class);
-    private final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+	private Link link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V6);
 
-    private Schema schema;
-    private JAXBContext jaxbContext;
-
-	private Link link;
-
-
-	@Before
-	public void setUp() throws SAXException, JAXBException {
-		schema = schemaFactory.newSchema(getClass().getResource("/xsd/api_v6.xsd"));
-		jaxbContext = JAXBContext.newInstance("no.digipost.api.client.representations");
-
-		link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V6);
-	}
 
 	@Test
 	public void validateRecipients() {
@@ -221,33 +192,4 @@ public class XsdValidationTest {
 		assertThat(unmarshalled.status, is(delivery.status));
     }
 
-	public <T> T marshallValidateAndUnmarshall(T element) {
-		return marshallValidateAndUnmarshall(element, false);
-	}
-
-	public <T> T marshallValidateAndUnmarshall(T element, boolean log) {
-		InputStream in = null;
-		try (ByteArrayOutputStream resultXml = new ByteArrayOutputStream()) {
-			Marshaller marshaller = jaxbContext.createMarshaller();
-			marshaller.setSchema(schema);
-			marshaller.setProperty("jaxb.formatted.output", true);
-			marshaller.marshal(element, new StreamResult(resultXml));
-			resultXml.flush();
-			byte[] xml = resultXml.toByteArray();
-			if (log) {
-				LOG.info("Marshalled XML:\n{}", new String(xml));
-			}
-			in = new ByteArrayInputStream(xml);
-
-			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-			unmarshaller.setSchema(schema);
-			@SuppressWarnings("unchecked")
-            T unmarshalled = (T) unmarshaller.unmarshal(in);
-			return unmarshalled;
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		} finally {
-			closeQuietly(in);
-		}
-	}
 }

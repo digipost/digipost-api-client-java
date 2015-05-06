@@ -69,7 +69,9 @@ public class CacheTest {
 			Callable<Integer> valueWhenIncreased = new Callable<Integer>() {
 				@Override
                 public Integer call() throws Exception {
-					while (value.get() == 0);
+					while (value.get() == 0) {
+						Thread.sleep(5);
+					}
 					return value.get();
                 }
 			};

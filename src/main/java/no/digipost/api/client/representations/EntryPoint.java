@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
 import java.net.URI;
 import java.util.List;
 
@@ -65,6 +66,10 @@ public class EntryPoint extends Representation {
 
 	public URI getDocumentEventsUri() {
 		return getLinkByRelationName(DOCUMENT_EVENTS).getUri();
+	}
+
+	public URI getSenderInformationUri() {
+		return getLinkByRelationName(GET_SENDER_INFORMATION).getUri();
 	}
 
 	public String getCertificate() {

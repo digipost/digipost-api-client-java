@@ -26,6 +26,7 @@ import no.digipost.api.client.filters.response.ResponseContentSHA256Filter;
 import no.digipost.api.client.filters.response.ResponseDateFilter;
 import no.digipost.api.client.filters.response.ResponseSignatureFilter;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
@@ -109,7 +110,7 @@ public class DigipostClient {
 
 		WebTarget webTarget = (jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient).register(new GZipEncoder()).target(digipostUrl);
 
-		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId) : overriddenApiService;
+		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId, eventLogger) : overriddenApiService;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 		this.messageSender = new MessageSender(apiService, eventLogger, new PdfValidator());
 		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
@@ -197,6 +198,44 @@ public class DigipostClient {
 	public DocumentEvents getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to,
 	                                        final int offset, final int maxResults) {
 		return documentCommunicator.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
+	}
+
+
+	/**
+	 * Hent informasjon om en gitt avsender. Kan enten be om informasjon om
+	 * "deg selv", eller en avsender du har fullmakt til å sende post for.
+	 *
+	 * @param senderId avsender-IDen til avsenderen du vil ha informasjon om.
+	 *
+	 * @return informasjon om avsenderen, dersom den finnes, og du har tilgang
+	 *         til å informasjon om avsenderen. Det er ikke mulig å skille på
+	 *         om avsenderen ikke finnes, eller man ikke har tilgang til
+	 *         informasjonen.
+	 *
+	 * @see SenderInformation
+	 */
+	public SenderInformation getSenderInformation(long senderId) {
+		return apiService.getSenderInformation(senderId);
+	}
+
+	/**
+	 * Hent informasjon om en gitt avsender. Kan enten be om informasjon om
+	 * "deg selv", eller en avsender du har fullmakt til å sende post for.
+	 *
+	 * @param orgnr organisasjonsnummeret til avsenderen (påkrevet).
+	 * @param avsenderenhet underenhet for gitt <code>orgnr</code>, dersom
+	 *                      aktuelt, eller <code>null</code>.
+	 *
+	 *
+	 * @return informasjon om avsenderen, dersom den finnes, og du har tilgang
+	 *         til å informasjon om avsenderen. Det er ikke mulig å skille på
+	 *         om avsenderen ikke finnes, eller man ikke har tilgang til
+	 *         informasjonen.
+	 *
+	 * @see SenderInformation
+	 */
+	public SenderInformation getSenderInformation(String orgnr, String avsenderenhet) {
+		return apiService.getSenderInformation(orgnr, avsenderenhet);
 	}
 
 	private void log(final String stringToSignMsg) {

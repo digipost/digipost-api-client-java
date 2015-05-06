@@ -18,10 +18,13 @@ package no.digipost.api.client;
 import no.digipost.api.client.DigipostClientMock.ValidatingMarshaller;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.sender.SenderFeature;
+import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.api.client.representations.sender.SenderStatus;
 import no.digipost.api.client.util.MockfriendlyResponse.MockedResponseBuilder;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.NotImplementedException;
-import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
@@ -31,6 +34,7 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -43,6 +47,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.lang.Integer.parseInt;
+import static java.util.Arrays.asList;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
@@ -69,8 +74,7 @@ public class ApiServiceMock implements ApiService {
 
 	static EncryptionKey createFakeEncryptionKey() {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (Writer osWriter = new OutputStreamWriter(baos);
-				PEMWriter writer = new PEMWriter(osWriter)) {
+		try (Writer osWriter = new OutputStreamWriter(baos); JcaPEMWriter writer = new JcaPEMWriter(osWriter)) {
 
 			KeyPairGenerator factory = KeyPairGenerator.getInstance("RSA");
 			factory.initialize(2048);
@@ -218,6 +222,16 @@ public class ApiServiceMock implements ApiService {
 		} else {
 			return MockedResponseBuilder.create().status(NOT_FOUND.getStatusCode()).build();
 		}
+	}
+
+	@Override
+	public SenderInformation getSenderInformation(long senderId) {
+		return new SenderInformation(senderId, SenderStatus.VALID_SENDER, asList(SenderFeature.DIGIPOST_DELIVERY));
+	}
+
+	@Override
+	public SenderInformation getSenderInformation(String orgnr, String avsenderenhet) {
+		return getSenderInformation(42);
 	}
 
 
