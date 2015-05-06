@@ -50,7 +50,6 @@ import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
-import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 
 public class ApiServiceMock implements ApiService {
@@ -60,7 +59,8 @@ public class ApiServiceMock implements ApiService {
 	public enum Method {
 		GET_CONTENT,
 		MULTIPART_MESSAGE,
-		GET_DOCUMENTS_EVENTS
+		GET_DOCUMENTS_EVENTS,
+		GET_DOCUMENT_STATUS
 	}
 
 	final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
@@ -97,6 +97,7 @@ public class ApiServiceMock implements ApiService {
 		requestsAndResponsesMap.clear();
 		requestsAndResponsesMap.put(Method.GET_CONTENT, new RequestsAndResponses());
 		requestsAndResponsesMap.put(Method.GET_DOCUMENTS_EVENTS, new RequestsAndResponses());
+		requestsAndResponsesMap.put(Method.GET_DOCUMENT_STATUS, new RequestsAndResponses());
 		requestsAndResponsesMap.put(Method.MULTIPART_MESSAGE, new RequestsAndResponses(new MultipartRequestMatcher()));
 	}
 
@@ -214,6 +215,23 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	@Override
+	public Response getDocumentStatus(Link linkToDocumentStatus) {
+		return getDocumentStatus(1, "uuid");
+	}
+
+	@Override
+	public Response getDocumentStatus(long senderId, String uuid) {
+		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.GET_DOCUMENT_STATUS);
+		Response response = requestsAndResponses.getResponse();
+
+		if (response != null) {
+			return response;
+		} else {
+			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new DocumentStatus()).build();
+		}
+	}
+
+	@Override
 	public Response getContent(String path) {
 		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.GET_CONTENT);
 		Response response = requestsAndResponses.getResponse();
@@ -242,7 +260,7 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	public static class RequestsAndResponses {
-		private final Queue<Response> responseQueue = new ConcurrentLinkedQueue<>();
+		private final Queue<ResponseProducer> responseQueue = new ConcurrentLinkedQueue<>();
 		private final RequestMatcher requestMatcher;
 		private final Map<String, MockRequest> requestMap;
 
@@ -261,7 +279,10 @@ public class ApiServiceMock implements ApiService {
 		}
 
 		public void addExpectedResponse(Response response) {
-			responseQueue.add(response);
+			responseQueue.add(new MockResponse(response));
+		}
+		public void addExpectedException(RuntimeException ex) {
+			responseQueue.add(new MockResponse(ex));
 		}
 
 		public Response getResponse() {
@@ -269,9 +290,9 @@ public class ApiServiceMock implements ApiService {
 		}
 
 		public Response getResponse(String requestString) {
-			Response response = responseQueue.poll();
+			ResponseProducer response = responseQueue.poll();
 			if (response != null) {
-				return response;
+				return response.getResponse();
 			}
 
 			return requestMatcher.findResponse(requestString);
@@ -287,6 +308,30 @@ public class ApiServiceMock implements ApiService {
 
 		public Map<String, MockRequest> getRequests() {
 			return requestMap;
+		}
+	}
+
+	public static interface ResponseProducer {
+		Response getResponse();
+	}
+	public static class MockResponse implements ResponseProducer {
+
+		private Response response;
+		private RuntimeException exception;
+
+		public MockResponse(Response response) {
+			this.response = response;
+		}
+		public MockResponse(RuntimeException ex) {
+			this.exception = ex;
+		}
+
+		@Override
+		public Response getResponse() {
+			if (exception != null) {
+				throw exception;
+			}
+			return response;
 		}
 	}
 
@@ -306,12 +351,13 @@ public class ApiServiceMock implements ApiService {
 
 		public static Response DEFAULT_RESPONSE = MockedResponseBuilder.create()
 				.status(OK.getStatusCode())
-				.entity(new MessageDelivery(UUID.randomUUID().toString(), DIGIPOST, COMPLETE, DateTime.now()))
+				.entity(new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, COMPLETE, DateTime.now()))
 				.build();
 		public static ProcessingException CONNECTION_REFUSED = new ProcessingException(new ConnectException("Connection refused"));
 
 		public static final Map<String, Response> responses = new HashMap<>();
 		public static final Map<String, RuntimeException> errors = new HashMap<>();
+
 
 		static {
 			responses.put("200:OK", DEFAULT_RESPONSE);

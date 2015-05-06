@@ -55,7 +55,7 @@ import static no.digipost.api.client.delivery.ApiFlavor.STEPWISE_REST;
 import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.DeliveryMethod.PRINT;
+import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.MessageStatus.DELIVERED_TO_PRINT;
 import static no.digipost.api.client.representations.MessageStatus.NOT_COMPLETE;
@@ -113,7 +113,7 @@ public class MessageSenderTest {
 		when(mockClientResponse.getStatus()).thenReturn(Response.Status.CONFLICT.getStatusCode());
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, DeliveryMethod.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, Channel.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
 
 		when(mockClientResponse2.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
 		when(mockClientResponse2.readEntity(MessageDelivery.class)).thenReturn(eksisterendeForsendelse);
@@ -132,7 +132,7 @@ public class MessageSenderTest {
 		when(mockClientResponse.getStatus()).thenReturn(Response.Status.CONFLICT.getStatusCode());
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED,
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, Channel.DIGIPOST, MessageStatus.DELIVERED,
 				DateTime.now());
 
 		when(mockClientResponse2.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
@@ -199,7 +199,7 @@ public class MessageSenderTest {
 
 		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).setPreEncrypt();
 		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).setPreEncrypt());
-		MessageDelivery incompleteDelivery = new MessageDelivery(messageId, DeliveryMethod.PRINT, NOT_COMPLETE, DateTime.now()) {{
+		MessageDelivery incompleteDelivery = new MessageDelivery(messageId, Channel.PRINT, NOT_COMPLETE, DateTime.now()) {{
 			primaryDocument = printDocument;
 			attachments = printAttachments;
 			addLink(new Link(SEND, new DigipostUri("/send")));
@@ -212,7 +212,7 @@ public class MessageSenderTest {
 
 		when(mockClientResponse.readEntity(MessageDelivery.class))
 			.thenReturn(incompleteDelivery, incompleteDelivery, incompleteDelivery)
-			.thenReturn(new MessageDelivery(messageId, DeliveryMethod.PRINT, DELIVERED_TO_PRINT, DateTime.now()));
+			.thenReturn(new MessageDelivery(messageId, Channel.PRINT, DELIVERED_TO_PRINT, DateTime.now()));
 
 		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
 		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));

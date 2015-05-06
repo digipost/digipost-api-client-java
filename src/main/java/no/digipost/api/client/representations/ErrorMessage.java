@@ -31,6 +31,7 @@ import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
 @XmlRootElement(name = "error")
 public class ErrorMessage extends Representation {
 
+	public static final ErrorMessage EMPTY = new ErrorMessage(ErrorType.NONE, "Empty error-message");
 	@XmlElement(name = "error-code", required = true)
 	private String errorCode;
 

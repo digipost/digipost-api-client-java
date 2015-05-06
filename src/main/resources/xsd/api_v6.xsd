@@ -537,7 +537,7 @@
     <xsd:complexType name="message-delivery">
         <xsd:sequence>
             <xsd:element name="message-id" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="delivery-method" type="delivery-method"  minOccurs="1" maxOccurs="1" />
+            <xsd:element name="delivery-method" type="channel"  minOccurs="1" maxOccurs="1" />
             <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1" />
             <xsd:element name="delivery-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" />
@@ -545,18 +545,6 @@
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
-
-    <xsd:simpleType name="delivery-method">
-        <xsd:annotation>
-            <xsd:appinfo>
-                <jaxb:typesafeEnumClass/>
-            </xsd:appinfo>
-        </xsd:annotation>
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="PRINT" />
-            <xsd:enumeration value="DIGIPOST" />
-        </xsd:restriction>
-    </xsd:simpleType>
 
     <xsd:element name="document" type="document" />
 
@@ -895,6 +883,7 @@
             </xsd:appinfo>
         </xsd:annotation>
         <xsd:sequence>
+            <xsd:element name="attachments" type="document-status" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="link" type="link"  minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
         <xsd:attribute name="uuid" type="uuid" />
@@ -907,12 +896,51 @@
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="status" type="xsd:string" />
+        <xsd:attribute name="status" type="delivery-status" />
         <xsd:attribute name="created" type="xsd:dateTime" />
         <xsd:attribute name="delivered" type="xsd:dateTime" />
-        <xsd:attribute name="read" type="xsd:string" />
-        <xsd:attribute name="channel" type="xsd:string" />
+        <xsd:attribute name="read" type="read">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Only relevant for the web-channel, i.e. . When an opening receipt is requested by the sender, this value indicates(Y/N) whether the receiver has
+                    read the letter or not. This attribute is empty if no opening receipt has been requested.
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="channel" type="channel" />
+        <xsd:attribute name="is-primary-document" type="xsd:boolean" />
+        <xsd:attribute name="content-hash" type="xsd:string" />
+        <xsd:attribute name="content-hash-algorithm" type="hash-algorithm" />
     </xsd:complexType>
+
+    <xsd:simpleType name="channel">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="PRINT" />
+            <xsd:enumeration value="DIGIPOST" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="delivery-status">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="DELIVERED" />
+            <xsd:enumeration value="NOT_DELIVERED" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="read">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Y" />
+            <xsd:enumeration value="N" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="hash-algorithm">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="NONE" />
+            <xsd:enumeration value="MD5" />
+            <xsd:enumeration value="SHA256" />
+        </xsd:restriction>
+    </xsd:simpleType>
 
     <xsd:element name="document-events" type="document-events" />
 

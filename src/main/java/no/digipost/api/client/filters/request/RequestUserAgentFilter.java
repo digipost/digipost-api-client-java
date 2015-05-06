@@ -19,11 +19,13 @@ import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
 import static javax.ws.rs.core.HttpHeaders.USER_AGENT;
 import static no.digipost.api.client.util.UserAgent.DIGIPOST_USER_AGENT;
 
+@Provider
 @Priority(Priorities.HEADER_DECORATOR)
 public class RequestUserAgentFilter implements ClientRequestFilter {
 

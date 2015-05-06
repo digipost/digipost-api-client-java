@@ -18,20 +18,9 @@ package no.digipost.api.client.representations;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-
-@XmlType(name = "delivery-method")
+@XmlType(name = "read")
 @XmlEnum
-public enum DeliveryMethod {
-
-    PRINT,
-    DIGIPOST;
-
-    public String value() {
-        return name();
-    }
-
-    public static DeliveryMethod fromValue(String v) {
-        return valueOf(v);
-    }
-
+public enum Read {
+	Y,
+	N;
 }

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
-
+import javax.ws.rs.ext.Provider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +43,7 @@ import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ER
 import static no.digipost.api.client.security.ResponseMessageSignatureUtil.getCanonicalResponseRepresentation;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+@Provider
 public class ResponseSignatureFilter implements ClientResponseFilter {
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseSignatureFilter.class);
 	private boolean shouldThrow = true;

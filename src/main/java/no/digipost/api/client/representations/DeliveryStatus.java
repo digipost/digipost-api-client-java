@@ -15,21 +15,12 @@
  */
 package no.digipost.api.client.representations;
 
-public enum Relation {
-	SELF,
-	ADD_CONTENT,
-	SEND,
-	SEARCH,
-	AUTOCOMPLETE,
-	CREATE_MESSAGE,
-	API_DOCUMENTATION,
-	GET_ENCRYPTION_KEY,
-	GET_PRINT_ENCRYPTION_KEY,
-	IDENTIFY_RECIPIENT,
-	IDENTIFY_RECIPIENT_WITH_ENCRYPTION_KEY,
-	DOCUMENT_EVENTS,
-	UNSUPPORTED,
-	GET_DOCUMENT_CONTENT,
-	GET_SENDER_INFORMATION,
-	DUPLICATE_DOCUMENT
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlType(name = "delivery-status")
+@XmlEnum
+public enum DeliveryStatus {
+	DELIVERED,
+	NOT_DELIVERED;
 }

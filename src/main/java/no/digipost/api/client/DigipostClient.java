@@ -238,6 +238,14 @@ public class DigipostClient {
 		return apiService.getSenderInformation(orgnr, avsenderenhet);
 	}
 
+	public DocumentStatus getDocumentStatus(final Link linkToDocumentStatus) {
+		return documentCommunicator.getDocumentStatus(linkToDocumentStatus);
+	}
+
+	public DocumentStatus getDocumentStatus(long senderId, String uuid) {
+		return documentCommunicator.getDocumentStatus(senderId, uuid);
+	}
+
 	private void log(final String stringToSignMsg) {
 		LOG.debug(stringToSignMsg);
 		eventLogger.log(stringToSignMsg);

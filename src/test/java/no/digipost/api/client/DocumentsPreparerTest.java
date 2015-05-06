@@ -38,8 +38,8 @@ import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.pdf.EksempelPdf.*;
-import static no.digipost.api.client.representations.DeliveryMethod.DIGIPOST;
-import static no.digipost.api.client.representations.DeliveryMethod.PRINT;
+import static no.digipost.api.client.representations.Channel.DIGIPOST;
+import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.FileType.*;
 import static no.digipost.api.client.util.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
 import static org.apache.commons.io.IOUtils.toByteArray;
@@ -93,14 +93,14 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void deniesNonValidatingPdfForBothPrintAndWeb() {
-		for (DeliveryMethod deliveryMethod : DeliveryMethod.values()) {
+		for (Channel deliveryMethod : Channel.values()) {
 			try {
 				preparer.validate(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[] {65, 65, 65, 65});
 			} catch (DigipostClientException e) {
 				assertThat(e.getMessage(), containsString("Kunne ikke parse"));
 				continue;
 			}
-			fail("Should fail validation for bogus PDF using " + DeliveryMethod.class.getSimpleName() + "." + deliveryMethod);
+			fail("Should fail validation for bogus PDF using " + Channel.class.getSimpleName() + "." + deliveryMethod);
 		}
 	}
 

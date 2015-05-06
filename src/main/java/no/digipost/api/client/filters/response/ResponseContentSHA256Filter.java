@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
-
+import javax.ws.rs.ext.Provider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -34,7 +34,7 @@ import static no.digipost.api.client.Headers.X_Content_SHA256;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-
+@Provider
 public class ResponseContentSHA256Filter implements ClientResponseFilter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResponseContentSHA256Filter.class);

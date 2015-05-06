@@ -72,7 +72,8 @@ public abstract class Communicator {
 
 	protected static ErrorMessage fetchErrorMessageString(final Response response) {
 		try {
-			return response.readEntity(ErrorMessage.class);
+			ErrorMessage errorMessage = response.readEntity(ErrorMessage.class);
+			return errorMessage != null ? errorMessage : ErrorMessage.EMPTY;
 		} catch (ProcessingException | IllegalStateException | WebApplicationException e) {
 			return new ErrorMessage(SERVER, ErrorCode.SERVER_ERROR.name(),
 					e.getClass().getSimpleName() + ": Det skjedde en feil på serveren (" + e.getMessage() +
@@ -121,5 +122,6 @@ public abstract class Communicator {
 			throw new DigipostClientException(ErrorCode.DUPLICATE_MESSAGE, errorMessage);
 		}
 	}
+
 
 }

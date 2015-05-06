@@ -19,10 +19,7 @@ package no.digipost.api.client.representations;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.representations.AuthenticationLevel.*;
@@ -178,9 +175,30 @@ public class XsdValidationTest {
 	}
 
 	@Test
+	public void validate_document_status_simple() {
+		DocumentStatus primaryDoc = new DocumentStatus(UUID.randomUUID().toString(), DeliveryStatus.NOT_DELIVERED, DateTime.now(), null, null, Channel.DIGIPOST, true,
+				null, HashAlgorithm.NONE, null, null);
+		marshallValidateAndUnmarshall(primaryDoc);
+	}
+
+	@Test
+	public void validate_document_status_with_attachments() {
+		DocumentStatus attachment1 = createDocumentStatus(false);
+		DocumentStatus attachment2 = createDocumentStatus(false);
+		DocumentStatus primaryDoc = createDocumentStatus(true, attachment1, attachment2);
+
+		marshallValidateAndUnmarshall(primaryDoc);
+	}
+
+	private DocumentStatus createDocumentStatus(boolean isPrimaryDocument, DocumentStatus ... attachments) {
+		return new DocumentStatus(UUID.randomUUID().toString(), DeliveryStatus.DELIVERED, DateTime.now(), DateTime.now(), Read.Y, Channel.PRINT, isPrimaryDocument,
+				"asdf", HashAlgorithm.SHA256, Arrays.asList(attachments), null);
+	}
+
+	@Test
     public void validateMessageDelivery() {
 		DateTime deliveryTime = DateTime.now();
-		MessageDelivery delivery = new MessageDelivery(UUID.randomUUID().toString(), DeliveryMethod.DIGIPOST, MessageStatus.DELIVERED, deliveryTime);
+		MessageDelivery delivery = new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, MessageStatus.DELIVERED, deliveryTime);
 		delivery.primaryDocument = new Document(UUID.randomUUID().toString(), "primary", FileType.PDF);
 		MessageDelivery unmarshalled = marshallValidateAndUnmarshall(delivery);
 		assertThat(unmarshalled, not(sameInstance(delivery)));
