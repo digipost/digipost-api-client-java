@@ -18,7 +18,6 @@ package no.digipost.api.client;
 import no.digipost.api.client.DigipostClientMock.ValidatingMarshaller;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
-import no.digipost.api.client.representations.sender.SenderFeature;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.representations.sender.SenderStatus;
 import no.digipost.api.client.util.MockfriendlyResponse.MockedResponseBuilder;
@@ -51,6 +50,8 @@ import static java.util.Arrays.asList;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
+import static no.digipost.api.client.representations.sender.SenderFeature.DELIVERY_DIRECT_TO_PRINT;
+import static no.digipost.api.client.representations.sender.SenderFeature.DIGIPOST_DELIVERY;
 
 public class ApiServiceMock implements ApiService {
 
@@ -244,7 +245,7 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public SenderInformation getSenderInformation(long senderId) {
-		return new SenderInformation(senderId, SenderStatus.VALID_SENDER, asList(SenderFeature.DIGIPOST_DELIVERY));
+		return new SenderInformation(senderId, SenderStatus.VALID_SENDER, asList(DIGIPOST_DELIVERY, DELIVERY_DIRECT_TO_PRINT));
 	}
 
 	@Override
