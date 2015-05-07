@@ -497,23 +497,23 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:simpleType name="post-type">
-        <xsd:annotation>
-            <xsd:documentation>
-                A or B for respectively A-Priority and B-Economy
-            </xsd:documentation>
-        </xsd:annotation>
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="A" />
-            <xsd:enumeration value="B" />
-        </xsd:restriction>
-    </xsd:simpleType>
+	<xsd:simpleType name="post-type">
+		<xsd:annotation>
+			<xsd:documentation>
+				A or B for respectively A-Priority and B-Economy
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="A" />
+			<xsd:enumeration value="B" />
+		</xsd:restriction>
+	</xsd:simpleType>
 
     <xsd:simpleType name="print-colors">
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="MONOCHROME" />
+    	<xsd:restriction base="xsd:string">
+    	    <xsd:enumeration value="MONOCHROME" />
             <xsd:enumeration value="COLORS" />
-        </xsd:restriction>
+    	</xsd:restriction>
     </xsd:simpleType>
 
     <xsd:simpleType name="nondeliverable-handling">
@@ -816,7 +816,6 @@
         </xsd:restriction>
     </xsd:simpleType>
 
-
     <xsd:element name="sender-information" type="sender-information" />
 
     <xsd:complexType name="sender-information">
@@ -902,7 +901,7 @@
         <xsd:attribute name="read" type="read">
             <xsd:annotation>
                 <xsd:documentation>
-                    Only relevant for the web-channel, i.e. . When an opening receipt is requested by the sender, this value indicates(Y/N) whether the receiver has
+                   Only relevant for the web-channel, i.e. . When an opening receipt is requested by the sender, this value indicates(Y/N) whether the receiver has
                     read the letter or not. This attribute is empty if no opening receipt has been requested.
                 </xsd:documentation>
             </xsd:annotation>
