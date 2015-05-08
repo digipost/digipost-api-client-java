@@ -15,11 +15,11 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.cache.Cache;
-import no.digipost.api.client.cache.SingleCached;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.cache.inmemory.Cache;
+import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
@@ -41,10 +41,10 @@ import java.util.concurrent.Callable;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
-import static no.digipost.api.client.cache.CacheConfig.expireAfterAccess;
-import static no.digipost.api.client.cache.CacheConfig.useSoftValues;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
+import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
+import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
 import static no.motif.Singular.optional;
 import static no.motif.Strings.prepend;
 import static org.joda.time.Duration.standardMinutes;
