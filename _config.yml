@@ -1,5 +1,5 @@
 # name of the software
-name: Digipost API client for .NET
+name: Java client library for Digipost API
 # current version of the software
 version: 1.0
 # url of the download button
@@ -16,8 +16,12 @@ collections:
 
 # list of additional links on the right of the top menu
 headerLinks:
+  - title: Download library
+    url: https://github.com/digipost/digipost-api-client-java
   - title: GitHub
-    url: https://github.com/digipost/digipost-api-client-dotnet
+    url: https://github.com/digipost/digipost-api-client-java
+  - title: Digipost
+    url: https://www.digipost.no
 
 # list if additional links on the footer
 footerLinks:
@@ -28,9 +32,9 @@ footerLinks:
 
 # header
 header:
-  color1: "#606369"
-  color2: "#4D4F53"
-  trianglify: true
+  color1: "#e32d22"
+  color2:
+  trianglify: false
 
 # github buttons
 githubButton:
