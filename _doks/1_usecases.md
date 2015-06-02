@@ -84,7 +84,22 @@ client.createMessage(message)
 
 {% highlight java %}
 
-Coming soon
+InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
+
+DigipostClient client = new DigipostClient(STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+
+PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+
+// An invoice requires four extra fields (KID, amount, account and due date). The use of the Invoice class will trigger payment functionality i Digipost.
+Invoice invoice = new Invoice(UUID1, "Invoice subject", PDF, null, null, null, PASSWORD, NORMAL, "704279604", new BigDecimal("1.20"), "82760100435", new LocalDate(2015, 5, 5));
+
+Message message = newMessage(UUID2, invoice)
+	.personalIdentificationNumber(pin)
+	.build();
+
+client.createMessage(message)
+	.addContent(invoice, new FileInputStream("invoice.pdf")
+	.send();
 
 {% endhighlight %}
 
@@ -99,7 +114,7 @@ DigipostClient client = new DigipostClient(STEPWISE_REST, "https://api.digipost.
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 // The time the SMS is sent out can also be based on time after letter is delivered. new SmsNotification(new DateTime(1) is one day after letter has been delivered
-Document primaryDocument = new Document(UUID1, "Document subject", PDF, null, new SmsNotification(new DateTime(2015, 05, 05, 12, 00, 00), null, null, null);
+Document primaryDocument = new Document(UUID1, "Document subject", PDF, null, new SmsNotification(new DateTime(2015, 5, 5, 12, 00, 00), null, PASSWORD, NORMAL);
 
 Message message = newMessage(UUID2, primaryDocument)
 	.personalIdentificationNumber(pin)
@@ -166,15 +181,40 @@ client.createMessage(message)
 
 {% highlight java %}
 
-Coming soon
+InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
+
+DigipostClient client = new DigipostClient(STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+
+PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+
+Identification identification = new Identification(pin);
+
+client.identifyRecipient(identification);
 
 {% endhighlight %}
 
 <h3 id="uc10">Send letter through Norsk Helsenett</h3>
 
+The Digipost API is accessible from both internet and Norsk Helsenett (NHN). Both entry points use the same API, the only difference is the base URL.
+
 {% highlight java %}
 
-Coming soon
+InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
+
+// API URL is different when request is sent from NHN
+DigipostClient client = new DigipostClient(STEPWISE_REST, "https://api.nhn.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+
+PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+
+Document primaryDocument = new Document(UUID1, "Document subject", PDF);
+
+Message message = newMessage(UUID2, primaryDocument)
+	.personalIdentificationNumber(pin)
+	.build();
+
+client.createMessage(message)
+	.addContent(primaryDocument, new FileInputStream("content.pdf")
+	.send();
 
 {% endhighlight %}
 
