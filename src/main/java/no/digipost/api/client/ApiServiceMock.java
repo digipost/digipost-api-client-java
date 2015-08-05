@@ -50,8 +50,7 @@ import static java.util.Arrays.asList;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
-import static no.digipost.api.client.representations.sender.SenderFeature.DELIVERY_DIRECT_TO_PRINT;
-import static no.digipost.api.client.representations.sender.SenderFeature.DIGIPOST_DELIVERY;
+import static no.digipost.api.client.representations.sender.SenderFeature.*;
 
 public class ApiServiceMock implements ApiService {
 
@@ -245,7 +244,7 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public SenderInformation getSenderInformation(long senderId) {
-		return new SenderInformation(senderId, SenderStatus.VALID_SENDER, asList(DIGIPOST_DELIVERY, DELIVERY_DIRECT_TO_PRINT));
+		return new SenderInformation(senderId, SenderStatus.VALID_SENDER, asList(DIGIPOST_DELIVERY, DELIVERY_DIRECT_TO_PRINT, PRINTVALIDATION_FONTS, PRINTVALIDATION_PDFVERSION));
 	}
 
 	@Override
