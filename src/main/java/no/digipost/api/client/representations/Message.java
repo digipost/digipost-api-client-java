@@ -45,7 +45,7 @@ import static org.apache.commons.lang3.StringUtils.join;
 		"primaryDocument",
 		"attachments" })
 @XmlRootElement(name = "message")
-public class Message {
+public class Message implements MayHaveSender {
 
 	@XmlElement(name = "message-id")
 	public final String messageId;
@@ -237,6 +237,16 @@ public class Message {
 					"' da dokumentet ikke eksisterer i meldingen.\nMeldingen har følgende dokumenter:\n  - " +
 					join(validUuids, "\n  - "));
 		}
+	}
+
+	@Override
+	public Long getSenderId() {
+		return senderId;
+	}
+
+	@Override
+	public SenderOrganization getSenderOrganization() {
+		return senderOrganization;
 	}
 
 }

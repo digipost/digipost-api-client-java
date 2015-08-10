@@ -31,15 +31,25 @@ import static no.motif.Iterate.on;
 import static no.motif.Singular.the;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "message-delivery", propOrder = { "messageId", "deliveryMethod", "status", "deliveryTime", "primaryDocument",
-		"attachments", "links" })
+@XmlType(name = "message-delivery", propOrder = {
+	    "messageId",
+	    "deliveryMethod",
+	    "authorialSenderId",
+	    "status",
+	    "deliveryTime",
+	    "primaryDocument",
+	    "attachments",
+	    "links"
+	})
 @XmlRootElement(name = "message-delivery")
-public class MessageDelivery extends Representation {
+public class MessageDelivery extends Representation implements MayHaveSender {
 
 	@XmlElement(name = "message-id")
 	protected String messageId;
 	@XmlElement(name = "delivery-method", required = true)
 	protected Channel deliveryMethod;
+	@XmlElement(name = "authorial-sender-id", nillable = false)
+    protected long authorialSenderId;
 	@XmlElement(required = true)
 	protected MessageStatus status;
 	@XmlElement(name = "delivery-time", type = String.class, nillable = false)
@@ -135,4 +145,14 @@ public class MessageDelivery extends Representation {
 		}
 		throw new IllegalArgumentException("Document with UUID '" + uuid + "' was not found in this " + getClass().getSimpleName() + ".");
     }
+
+	@Override
+	public Long getSenderId() {
+		return authorialSenderId;
+	}
+
+	@Override
+	public SenderOrganization getSenderOrganization() {
+		return null;
+	}
 }

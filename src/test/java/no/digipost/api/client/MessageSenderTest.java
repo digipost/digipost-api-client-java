@@ -21,12 +21,12 @@ import no.digipost.api.client.delivery.OngoingDelivery.SendableForPrintOnly;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.util.MockfriendlyResponse;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import org.glassfish.jersey.media.multipart.MultiPart;
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeUtils;
 import org.joda.time.Duration;
 import org.junit.After;
@@ -55,16 +55,19 @@ import static no.digipost.api.client.delivery.ApiFlavor.STEPWISE_REST;
 import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
-import static no.digipost.api.client.representations.MessageStatus.DELIVERED_TO_PRINT;
-import static no.digipost.api.client.representations.MessageStatus.NOT_COMPLETE;
+import static no.digipost.api.client.representations.MessageStatus.*;
 import static no.digipost.api.client.representations.PrintDetails.PostType.A;
 import static no.digipost.api.client.representations.Relation.GET_ENCRYPTION_KEY;
 import static no.digipost.api.client.representations.Relation.SEND;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
+import static no.digipost.api.client.representations.sender.SenderFeature.*;
+import static no.digipost.api.client.representations.sender.SenderStatus.VALID_SENDER;
 import static no.motif.Singular.the;
 import static org.hamcrest.Matchers.is;
+import static org.joda.time.DateTime.now;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
@@ -132,8 +135,7 @@ public class MessageSenderTest {
 		when(mockClientResponse.getStatus()).thenReturn(Response.Status.CONFLICT.getStatusCode());
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, Channel.DIGIPOST, MessageStatus.DELIVERED,
-				DateTime.now());
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, DIGIPOST, DELIVERED, now());
 
 		when(mockClientResponse2.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
 		when(mockClientResponse2.readEntity(MessageDelivery.class)).thenReturn(eksisterendeForsendelse);
@@ -155,7 +157,7 @@ public class MessageSenderTest {
 		when(mockClientResponse.getStatus()).thenReturn(CONFLICT.getStatusCode());
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, PRINT, DELIVERED_TO_PRINT, DateTime.now());
+		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, PRINT, DELIVERED_TO_PRINT, now());
 
 		when(mockClientResponse2.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
 		when(mockClientResponse2.readEntity(MessageDelivery.class)).thenReturn(eksisterendeForsendelse);
@@ -199,7 +201,7 @@ public class MessageSenderTest {
 
 		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).setPreEncrypt();
 		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).setPreEncrypt());
-		MessageDelivery incompleteDelivery = new MessageDelivery(messageId, Channel.PRINT, NOT_COMPLETE, DateTime.now()) {{
+		MessageDelivery incompleteDelivery = new MessageDelivery(messageId, PRINT, NOT_COMPLETE, now()) {{
 			primaryDocument = printDocument;
 			attachments = printAttachments;
 			addLink(new Link(SEND, new DigipostUri("/send")));
@@ -208,16 +210,19 @@ public class MessageSenderTest {
 
 		for (Document document : allDocuments) {
 			document.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt")));
+			document.setPreEncrypt();
 		}
 
 		when(mockClientResponse.readEntity(MessageDelivery.class))
 			.thenReturn(incompleteDelivery, incompleteDelivery, incompleteDelivery)
-			.thenReturn(new MessageDelivery(messageId, Channel.PRINT, DELIVERED_TO_PRINT, DateTime.now()));
+			.thenReturn(new MessageDelivery(messageId, PRINT, DELIVERED_TO_PRINT, now()));
 
 		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
 		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-		sender.setPdfValidationSettings(new PdfValidationSettings(true, true, false, true));
+		when(api.getSenderInformation(any(MayHaveSender.class))).thenReturn(new SenderInformation(1337L, VALID_SENDER,
+				asList(DIGIPOST_DELIVERY, DELIVERY_DIRECT_TO_PRINT, DELIVERY_DIRECT_TO_PRINT, PRINTVALIDATION_FONTS, PRINTVALIDATION_MARGINS_LEFT, PRINTVALIDATION_PDFVERSION)));
+
 		for (ApiFlavor apiFlavor : asList(STEPWISE_REST, ATOMIC_REST)) {
 			LOG.debug("Tester direkte til print med " + apiFlavor);
 			MessageDeliverer deliverer = new MessageDeliverer(apiFlavor, sender);

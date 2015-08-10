@@ -18,6 +18,8 @@ package no.digipost.api.client;
 import no.digipost.api.client.DigipostClientMock.ValidatingMarshaller;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.sender.AuthorialSender;
+import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.representations.sender.SenderStatus;
 import no.digipost.api.client.util.MockfriendlyResponse.MockedResponseBuilder;
@@ -65,10 +67,15 @@ public class ApiServiceMock implements ApiService {
 
 	final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
 	private final ValidatingMarshaller marshaller;
+	private final long brokerId;
 
 	public ApiServiceMock(ValidatingMarshaller validatingMarshaller) {
+		this(42, validatingMarshaller);
+	}
+	public ApiServiceMock(long brokerId, ValidatingMarshaller validatingMarshaller) {
 		this.marshaller = validatingMarshaller;
 		this.fakeEncryptionKey = createFakeEncryptionKey();
+		this.brokerId = brokerId;
 		init();
 	}
 
@@ -249,7 +256,17 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public SenderInformation getSenderInformation(String orgnr, String avsenderenhet) {
-		return getSenderInformation(42);
+		return getSenderInformation(brokerId);
+	}
+
+	@Override
+	public SenderInformation getSenderInformation(MayHaveSender mayHaveSender) {
+		AuthorialSender authorialSender = AuthorialSender.resolve(brokerId, mayHaveSender);
+		if (authorialSender.is(Type.ACCOUNT_ID)) {
+			return getSenderInformation(authorialSender.getAccountId());
+		} else {
+			return getSenderInformation(authorialSender.getOrganization().organizationId, authorialSender.getOrganization().partId);
+		}
 	}
 
 

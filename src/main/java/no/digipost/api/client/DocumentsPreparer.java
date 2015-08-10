@@ -25,6 +25,7 @@ import no.digipost.api.client.util.Encrypter;
 import no.digipost.print.validate.PdfValidationResult;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
+import no.motif.f.Fn0;
 import no.motif.single.Elem;
 import no.motif.single.Optional;
 import org.slf4j.Logger;
@@ -39,7 +40,6 @@ import java.util.UUID;
 import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.print.validate.PdfValidationResult.EVERYTHING_OK;
-import static no.digipost.print.validate.PdfValidationSettings.SJEKK_ALLE;
 import static no.motif.Iterate.on;
 import static no.motif.Singular.none;
 import static no.motif.Singular.optional;
@@ -51,20 +51,15 @@ class DocumentsPreparer {
 
 	private final PdfValidator pdfValidator;
 
-	private PdfValidationSettings pdfValidationSettings;
-
 	DocumentsPreparer(PdfValidator pdfValidator) {
 	    this.pdfValidator = pdfValidator;
-	    this.pdfValidationSettings = SJEKK_ALLE;
     }
 
-	void setPdfValidationSettings(PdfValidationSettings settings) {
-		this.pdfValidationSettings = settings;
-	}
 
 
-
-	Map<Document, InputStream> prepare(Map<Document, InputStream> documentsAndContent, Message message, Encrypter encrypter) throws IOException {
+	Map<Document, InputStream> prepare(
+			Map<Document, InputStream> documentsAndContent, Message message,
+			Encrypter encrypter, Fn0<PdfValidationSettings> pdfValidationSettings) throws IOException {
 
 		final int documentAmount = documentsAndContent.size();
 		final Map<Document, InputStream> prepared = new LinkedHashMap<>();
@@ -73,7 +68,8 @@ class DocumentsPreparer {
 			Document document = i.value;
 			if (document.isPreEncrypt()) {
 				byte[] byteContent = toByteArray(documentsAndContent.get(document));
-				Optional<PdfInfo> pdfInfo = validate(message.getChannel(), document, byteContent);
+				LOG.debug("Validerer dokument med uuid '{}' før kryptering", document.uuid);
+				Optional<PdfInfo> pdfInfo = validate(message.getChannel(), document, byteContent, pdfValidationSettings);
 				LOG.debug("Krypterer innhold for dokument med uuid '{}'", document.uuid);
 				prepared.put(document, encrypter.encrypt(byteContent));
 
@@ -95,7 +91,7 @@ class DocumentsPreparer {
 
 
 
-	Optional<PdfInfo> validate(Channel channel, Document document, byte[] content) {
+	Optional<PdfInfo> validate(Channel channel, Document document, byte[] content, Fn0<PdfValidationSettings> pdfValidationSettings) {
 		if (channel == PRINT && !document.is(PDF)) {
 	    	throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT,
 	    			"PDF is required for direct-to-print messages. Document with uuid " + document.uuid + " had filetype " + document.getDigipostFileType());
@@ -105,7 +101,7 @@ class DocumentsPreparer {
 		Optional<PdfInfo> pdfInfo;
 		if (document.is(PDF)) {
 			LOG.debug("Validerer PDF-dokument med uuid '{}'", document.uuid);
-			pdfValidation = pdfValidator.validate(content, pdfValidationSettings);
+			pdfValidation = pdfValidator.validate(content, pdfValidationSettings.$());
 			pdfInfo = optional(new PdfInfo(pdfValidation.pages));
 		} else {
 			pdfValidation = EVERYTHING_OK;
