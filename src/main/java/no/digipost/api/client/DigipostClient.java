@@ -30,7 +30,6 @@ import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
-import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
@@ -140,19 +139,6 @@ public class DigipostClient {
 		responseDateFilter.setThrowOnError(throwOnError);
 		responseHashFilter.setThrowOnError(throwOnError);
 		responseSignatureFilter.setThrowOnError(throwOnError);
-		return this;
-	}
-
-	/**
-	 * You can use this method to bypass some of the PDF-validation rules. Note, as this is only used
-	 * for client side validation before sending to Digipost, for the documents to pass validation when
-	 * arriving in Digipost, you <em>must</em> have made proper agreements to bypass the PDF-validation rules.
-	 * This method is only applicable for the rare occasion where a client has already made such an agreement.
-	 *
-	 * @param settings The settings to use for validating PDFs before sending them to Digipost.
-	 */
-	public DigipostClient setPdfValidationSettings(PdfValidationSettings settings) {
-		messageSender.setPdfValidationSettings(settings);
 		return this;
 	}
 

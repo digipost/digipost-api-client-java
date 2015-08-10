@@ -22,6 +22,8 @@ import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
+import no.motif.f.Apply;
+import no.motif.f.Fn;
 import no.motif.single.Optional;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.BodyPart;
@@ -47,6 +49,11 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class MessageSender extends Communicator {
 
+	private final Fn<MayHaveSender, PdfValidationSettings> resolvePdfValidationSettings = new Fn<MayHaveSender, PdfValidationSettings>() {
+		@Override public PdfValidationSettings $(MayHaveSender message) {
+			return apiService.getSenderInformation(message).getPdfValidationSettings();
+		}};
+
 	private final DocumentsPreparer documentsPreparer;
 
 	private DateTime printKeyCachedTime = null;
@@ -58,10 +65,6 @@ public class MessageSender extends Communicator {
 		this.documentsPreparer = new DocumentsPreparer(pdfValidator);
 	}
 
-
-	public void setPdfValidationSettings(PdfValidationSettings settings) {
-		this.documentsPreparer.setPdfValidationSettings(settings);
-	}
 
 
 	/**
@@ -79,7 +82,9 @@ public class MessageSender extends Communicator {
 			multiPart.bodyPart(messageBodyPart);
 
 
-			for (Entry<Document, InputStream> documentAndContent : documentsPreparer.prepare(documentsAndContent, message, encrypter).entrySet()) {
+			Map<Document, InputStream> preparedDocuments = documentsPreparer.prepare(
+					documentsAndContent, message, encrypter, Apply.partially(resolvePdfValidationSettings).of(message));
+			for (Entry<Document, InputStream> documentAndContent : preparedDocuments.entrySet()) {
 				Document document = documentAndContent.getKey();
 				InputStream content = documentAndContent.getValue();
 				BodyPart bodyPart = new BodyPart(content, new MediaType("application", defaultIfBlank(document.getDigipostFileType(), "octet-stream")));
@@ -149,14 +154,14 @@ public class MessageSender extends Communicator {
 
 		MessageDelivery delivery;
 		if (document.isPreEncrypt()) {
-			log("*** DOKUMENTET SKAL PREKRYPTERES, STARTER INTERAKSJON MED API: HENT PUBLIC KEY ***");
+			log("*** DOKUMENTET SKAL PREKRYPTERES. VALIDERES, OG HENTER PUBLIC KEY VIA API ***");
 			byte[] byteContent;
             try {
 	            byteContent = IOUtils.toByteArray(unencryptetContent);
             } catch (IOException e) {
 	            throw new DigipostClientException(GENERAL_ERROR, "Unable to read content of document with uuid " + document.uuid, e);
             }
-			documentsPreparer.validate(message.getChannel(), document, byteContent);
+			documentsPreparer.validate(message.getChannel(), document, byteContent, Apply.partially(resolvePdfValidationSettings).of(message));
 			InputStream encryptetContent = fetchKeyAndEncrypt(document, new ByteArrayInputStream(byteContent));
 			delivery = uploadContent(message, document, encryptetContent);
 		} else {

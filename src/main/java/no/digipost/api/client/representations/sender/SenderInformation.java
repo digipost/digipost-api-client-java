@@ -15,13 +15,14 @@
  */
 package no.digipost.api.client.representations.sender;
 
+import no.digipost.print.validate.PdfValidationSettings;
 import no.motif.types.Elements;
 
 import javax.xml.bind.annotation.*;
 
 import java.util.List;
 
-import static no.digipost.api.client.representations.sender.SenderFeature.getIdentificator;
+import static no.digipost.api.client.representations.sender.SenderFeature.*;
 import static no.motif.Base.equalTo;
 import static no.motif.Iterate.on;
 
@@ -89,5 +90,13 @@ public class SenderInformation
 			 .append(", supported features: ").append(on(supportedFeatures).join(", "));
     	}
     	return s.toString();
+    }
+
+    public PdfValidationSettings getPdfValidationSettings() {
+    	return new PdfValidationSettings(
+    			hasEnabled(PRINTVALIDATION_MARGINS_LEFT),
+    			hasEnabled(PRINTVALIDATION_FONTS),
+    			hasEnabled(PRINTVALIDATION_PAGEAMOUNT),
+    			hasEnabled(PRINTVALIDATION_PDFVERSION));
     }
 }

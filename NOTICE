@@ -16,6 +16,7 @@ This software includes third party software subject to the following licenses:
   Apache PDFBox under The Apache Software License, Version 2.0
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
+  Byte Buddy (without dependencies) under The Apache Software License, Version 2.0
   Commons IO under The Apache Software License, Version 2.0
   Digipost API Client under The Apache Software License, Version 2.0
   Digipost Caching under The Apache Software License, Version 2.0

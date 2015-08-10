@@ -139,6 +139,15 @@ public interface ApiService {
 
 
 	/**
+	 * Henter informasjon om en faktisk avsender av en melding, altså
+	 * det mottaker ser som avsender.
+	 *
+	 * @param message melding som skal sendes.
+	 */
+	SenderInformation getSenderInformation(MayHaveSender message);
+
+
+	/**
 	 * Henter informasjon om en avsender.
 	 *
 	 * @param senderId id-en til avsenderen.

@@ -73,6 +73,7 @@ public class XsdValidationTest {
 						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
 				)
 				.digipostAddress(new DigipostAddress("even.beinlaus#1234"))
+				.senderOrganization(new SenderOrganization("1337", "R&D"))
 				.build();
 
 		Message messageWithPersonalIdentificationNumber = newMessage(UUID.randomUUID().toString(),
