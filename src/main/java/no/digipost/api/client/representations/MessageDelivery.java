@@ -34,7 +34,7 @@ import static no.motif.Singular.the;
 @XmlType(name = "message-delivery", propOrder = {
 	    "messageId",
 	    "deliveryMethod",
-	    "authorialSenderId",
+	    "senderId",
 	    "status",
 	    "deliveryTime",
 	    "primaryDocument",
@@ -48,8 +48,8 @@ public class MessageDelivery extends Representation implements MayHaveSender {
 	protected String messageId;
 	@XmlElement(name = "delivery-method", required = true)
 	protected Channel deliveryMethod;
-	@XmlElement(name = "authorial-sender-id", nillable = false)
-    protected long authorialSenderId;
+	@XmlElement(name = "sender-id", nillable = false)
+    protected long senderId;
 	@XmlElement(required = true)
 	protected MessageStatus status;
 	@XmlElement(name = "delivery-time", type = String.class, nillable = false)
@@ -146,11 +146,23 @@ public class MessageDelivery extends Representation implements MayHaveSender {
 		throw new IllegalArgumentException("Document with UUID '" + uuid + "' was not found in this " + getClass().getSimpleName() + ".");
     }
 
+	/**
+	 * Always returns the resolved sender-id of the message, i.e. what the receiver
+	 * of the message sees as the sender of the message. If the originating {@link Message} has specified
+	 * no {@link Message#senderId sender-id} nor {@link Message#senderOrganization sender-organization},
+	 * it will be set to the broker-id which was specified in the X-Digipost-UserId header of the initiating request.
+	 *
+	 * @return always the sender-id, never {@code null}.
+	 */
 	@Override
 	public Long getSenderId() {
-		return authorialSenderId;
+		return senderId;
 	}
 
+	/**
+	 * @return always {@code null}.
+	 * @see MessageDelivery#getSenderId()
+	 */
 	@Override
 	public SenderOrganization getSenderOrganization() {
 		return null;

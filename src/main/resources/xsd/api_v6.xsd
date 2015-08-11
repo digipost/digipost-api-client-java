@@ -538,10 +538,10 @@
         <xsd:sequence>
             <xsd:element name="message-id" type="xsd:string" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="delivery-method" type="channel"  minOccurs="1" maxOccurs="1" />
-            <xsd:element name="authorial-sender-id" type="xsd:long" minOccurs="1" maxOccurs="1">
+            <xsd:element name="sender-id" type="xsd:long" minOccurs="1" maxOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The authorial sender of the message, i.e. what the receiver of the message sees as
+                        The sender of the message, i.e. what the receiver of the message sees as
                         the sender of the message. If the originating message has specified no sender-id nor
                         sender-organization, it will be set to the broker-id which was specified in the
                         X-Digipost-UserId header of the initiating request.
