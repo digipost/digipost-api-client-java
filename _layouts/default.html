@@ -6,6 +6,12 @@
 
   <title>{{site.name}}</title>
 
+  {% if page.url contains version %}
+    {% assign active = "active" %} 
+  {% else %}
+    {% assign active = "" %}
+  {% endif %}
+
   <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
@@ -91,8 +97,16 @@
       <!-- Content
       =========================================== -->
       <div class="col-md-9" role="main">
+        <!-- Info box notifying that you are using old documentation --> 
+        {% if page.url contains site.currentVersion %}    
+        {% else %}
+          <div class="alert alert-info">
+            You are viewing the documentation for Digipost API Client {{ page.url | replace: '/', '' | replace: 'v', ''}}, which is not the most recently released version. The newest version is {{ site.currentVersion}} and can be browsed <a href="{{ site.baseurl }}/">here</a>.
+          </div>
+        {% endif %}
         {{content}}
       </div>
+      
 
       <!-- Page navigation
       =========================================== -->
