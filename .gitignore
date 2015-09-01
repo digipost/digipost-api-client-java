@@ -17,4 +17,4 @@ coverage
 tmp/*
 .jekyll-metadata
 /vendor
-_site/*
+_site/
