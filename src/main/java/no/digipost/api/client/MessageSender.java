@@ -76,7 +76,7 @@ public class MessageSender extends Communicator {
 		Encrypter encrypter = fetchEncryptionKeyForRecipientIfNecessary(message).map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT);
 
 		try (MultiPart multiPart = new MultiPart()) {
-			BodyPart messageBodyPart = new BodyPart(message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
+			BodyPart messageBodyPart = new BodyPart(message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V7));
 			ContentDisposition messagePart = ContentDisposition.type("attachment").fileName("message").build();
 			messageBodyPart.setContentDisposition(messagePart);
 			multiPart.bodyPart(messageBodyPart);

@@ -44,7 +44,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
-import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
 import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
 import static no.motif.Singular.optional;
@@ -62,7 +62,7 @@ public class ApiServiceImpl implements ApiService {
 		@Override
         public EntryPoint call() throws Exception {
 			Response response = webResource.path(ENTRY_POINT)
-					.request(DIGIPOST_MEDIA_TYPE_V6)
+					.request(DIGIPOST_MEDIA_TYPE_V7)
 					.header(X_Digipost_UserId, brokerId)
 					.get();
 			if (response.getStatus() == OK.getStatusCode()) {
@@ -94,7 +94,7 @@ public class ApiServiceImpl implements ApiService {
 		EntryPoint entryPoint = getEntryPoint();
 		return webResource
 				.path(entryPoint.getCreateMessageUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
 				.post(Entity.entity(multiPart, "multipart/mixed"));
 	}
@@ -104,9 +104,9 @@ public class ApiServiceImpl implements ApiService {
 		EntryPoint entryPoint = getEntryPoint();
 		return webResource
 				.path(entryPoint.getIdentificationWithEncryptionKeyUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
-				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V6));
+				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V7));
 	}
 
 	@Override
@@ -114,16 +114,16 @@ public class ApiServiceImpl implements ApiService {
 		EntryPoint entryPoint = getEntryPoint();
 		return webResource
 				.path(entryPoint.getCreateMessageUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
-				.post(Entity.entity(message, DIGIPOST_MEDIA_TYPE_V6));
+				.post(Entity.entity(message, DIGIPOST_MEDIA_TYPE_V7));
 	}
 
 	@Override
 	public Response fetchExistingMessage(final URI location) {
 		return webResource
 				.path(location.getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
 				.get();
 	}
@@ -132,7 +132,7 @@ public class ApiServiceImpl implements ApiService {
 	public Response getEncryptionKey(final URI location) {
 		return webResource
 				.path(location.getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
 				.get();
 	}
@@ -142,7 +142,7 @@ public class ApiServiceImpl implements ApiService {
 		EntryPoint entryPoint = getEntryPoint();
 		return webResource
 				.path(entryPoint.getPrintEncryptionKey().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
 				.get();
 	}
@@ -155,7 +155,7 @@ public class ApiServiceImpl implements ApiService {
 
 		return webResource
 				.path(addContentLink.getUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
 				.post(Entity.entity(content, APPLICATION_OCTET_STREAM_TYPE));
 	}
@@ -166,7 +166,7 @@ public class ApiServiceImpl implements ApiService {
 
 		return webResource
 				.path(sendLink.getUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
 				.post(null);
 	}
@@ -213,7 +213,7 @@ public class ApiServiceImpl implements ApiService {
 			target = target.queryParam("part", partId);
 		}
 		return target
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
 				.get();
 	}
@@ -231,7 +231,7 @@ public class ApiServiceImpl implements ApiService {
 	private Response getDocumentStatus(String path) {
 		return webResource
 				.path(path)
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
 				.get();
 	}
@@ -249,7 +249,7 @@ public class ApiServiceImpl implements ApiService {
 	public Recipients search(final String searchString) {
 		return webResource
 				.path(getEntryPoint().getSearchUri().getPath() + "/" + searchString)
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
 				.get(Recipients.class);
 	}
@@ -258,7 +258,7 @@ public class ApiServiceImpl implements ApiService {
 	public Autocomplete searchSuggest(final String searchString) {
 		return webResource
 				.path(getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString)
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
 				.get(Autocomplete.class);
 	}
@@ -271,9 +271,9 @@ public class ApiServiceImpl implements ApiService {
 	@Override
 	public Response identifyRecipient(final Identification identification) {
 		return webResource.path(getEntryPoint().getIdentificationUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
+				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
-				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V6));
+				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V7));
 	}
 
 
@@ -318,7 +318,7 @@ public class ApiServiceImpl implements ApiService {
 				for (Entry<String, List<P>> param : queryParams.entrySet()) {
 					target = target.queryParam(param.getKey(), param.getValue().toArray());
 				}
-				Response response = target.request(DIGIPOST_MEDIA_TYPE_V6).header(X_Digipost_UserId, brokerId).get();
+				Response response = target.request(DIGIPOST_MEDIA_TYPE_V7).header(X_Digipost_UserId, brokerId).get();
 
 				Communicator.checkResponse(response, eventLogger);
 				return response.readEntity(entityType);

@@ -122,7 +122,7 @@ public class ApiServiceMock implements ApiService {
 		Message message = null;
 		List<ContentPart> contentParts = new ArrayList<>();
 		for (BodyPart bodyPart : multiPart.getBodyParts()) {
-			if (bodyPart.getMediaType().toString().equals(MediaTypes.DIGIPOST_MEDIA_TYPE_V6)) {
+			if (bodyPart.getMediaType().toString().equals(MediaTypes.DIGIPOST_MEDIA_TYPE_V7)) {
 				message = (Message) bodyPart.getEntity();
 			} else {
 				contentParts.add(new ContentPart(bodyPart.getMediaType()));
