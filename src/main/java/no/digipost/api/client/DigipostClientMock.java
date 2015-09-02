@@ -119,7 +119,7 @@ public class DigipostClientMock {
 	public static ValidatingMarshaller initMarshaller() {
 		try {
 			SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-			Schema schema = schemaFactory.newSchema(DigipostClient.class.getResource("/xsd/api_v6.xsd"));
+			Schema schema = schemaFactory.newSchema(DigipostClient.class.getResource("/xsd/api_v7.xsd"));
 			return new ValidatingMarshaller(JAXBContext.newInstance("no.digipost.api.client.representations"), schema);
 		} catch (Exception e) {
 			throw new RuntimeException(e);

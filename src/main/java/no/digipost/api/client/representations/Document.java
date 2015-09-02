@@ -42,7 +42,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 		"emailNotification",
 		"authenticationLevel",
 		"sensitivityLevel",
-		"preEncrypt",
+		"encrypted",
 		"contentHash",
 		"links"
 })
@@ -69,8 +69,12 @@ public class Document extends Representation {
 	public final AuthenticationLevel authenticationLevel;
 	@XmlElement(name = "sensitivity-level")
 	public final SensitivityLevel sensitivityLevel;
-	@XmlElement(name = "pre-encrypt")
+	@XmlElement()
+	protected Encrypted encrypted;
+	/*@XmlElement(name = "pre-encrypt")
 	protected Boolean preEncrypt;
+	@XmlElement(name = "number-of-pages")
+	protected Integer noEncryptedPages;*/
 	@XmlElement(name = "content-hash", nillable = false)
 	protected ContentHash contentHash;
 
@@ -150,8 +154,25 @@ public class Document extends Representation {
 	}
 
 	public Document setPreEncrypt() {
-		this.preEncrypt = true;
+		this.encrypted = new Encrypted();
 		return this;
+	}
+
+	public Document setNoEncryptedPages(int noEncryptedPages){
+		if(noEncryptedPages > 0){
+			this.encrypted = new Encrypted(noEncryptedPages);
+		} else {
+			this.encrypted = null;
+		}
+		return this;
+	}
+
+	public Integer getNoEncryptedPages(){
+		if(this.encrypted != null && this.encrypted.numberOfPages != null)
+			return this.encrypted.numberOfPages;
+		else{
+			return null;
+		}
 	}
 
 	public static final Predicate<Document> isPreEncrypt = new Predicate<Document>() { @Override public boolean $(Document document) {
@@ -159,7 +180,7 @@ public class Document extends Representation {
     }};
 
 	public boolean isPreEncrypt() {
-		return preEncrypt != null && preEncrypt;
+		return encrypted != null;
 	}
 
 	public Link getAddContentLink() {
@@ -189,6 +210,6 @@ public class Document extends Representation {
 	public String toString() {
 		return getClass().getSimpleName() + " with uuid '" + uuid + "'" +
 				optional(technicalType).map(inBetween(", technicalType '", "'")).orElse("") +
-				(preEncrypt != Boolean.TRUE ? optional(subject).map(inBetween(", subject '", "'")).orElse(", no subject") : ", encrypted");
+				(encrypted != null ? optional(subject).map(inBetween(", subject '", "'")).orElse(", no subject") : ", encrypted");
 	}
 }
