@@ -69,7 +69,7 @@ public class Document extends Representation {
 	public final AuthenticationLevel authenticationLevel;
 	@XmlElement(name = "sensitivity-level")
 	public final SensitivityLevel sensitivityLevel;
-	@XmlElement()
+	@XmlElement(name = "encrypted")
 	protected Encrypted encrypted;
 	/*@XmlElement(name = "pre-encrypt")
 	protected Boolean preEncrypt;

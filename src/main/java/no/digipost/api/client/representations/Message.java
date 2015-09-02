@@ -66,7 +66,7 @@ public class Message implements MayHaveSender {
 	@XmlElement(name = "attachment")
 	public final List<Document> attachments;
 
-	Message() {
+	public Message() {
 		this(null, null, null, null, null, null, null, null);
 	}
 

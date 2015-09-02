@@ -36,7 +36,7 @@ import static org.junit.Assert.assertThat;
 public class XsdValidationTest {
 
 
-	private Link link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V6);
+	private Link link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V7);
 
 
 	@Test
