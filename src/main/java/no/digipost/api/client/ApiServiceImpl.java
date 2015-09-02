@@ -45,6 +45,7 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTIPART_MEDIA_TYPE_V7;
 import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
 import static no.motif.Singular.optional;
@@ -96,7 +97,7 @@ public class ApiServiceImpl implements ApiService {
 				.path(entryPoint.getCreateMessageUri().getPath())
 				.request(DIGIPOST_MEDIA_TYPE_V7)
 				.header(X_Digipost_UserId, brokerId)
-				.post(Entity.entity(multiPart, "multipart/mixed"));
+				.post(Entity.entity(multiPart, DIGIPOST_MULTIPART_MEDIA_TYPE_V7));
 	}
 
 	@Override
