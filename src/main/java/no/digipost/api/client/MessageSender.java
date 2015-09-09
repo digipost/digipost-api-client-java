@@ -161,7 +161,7 @@ public class MessageSender extends Communicator {
             } catch (IOException e) {
 	            throw new DigipostClientException(GENERAL_ERROR, "Unable to read content of document with uuid " + document.uuid, e);
             }
-			documentsPreparer.validate(message.getChannel(), document, byteContent, Apply.partially(resolvePdfValidationSettings).of(message));
+			documentsPreparer.validateAndSetNrOfPages(message.getChannel(), document, byteContent, Apply.partially(resolvePdfValidationSettings).of(message));
 			InputStream encryptetContent = fetchKeyAndEncrypt(document, new ByteArrayInputStream(byteContent));
 			delivery = uploadContent(message, document, encryptetContent);
 		} else {

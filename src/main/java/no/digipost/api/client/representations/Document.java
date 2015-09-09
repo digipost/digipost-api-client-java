@@ -43,6 +43,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 		"authenticationLevel",
 		"sensitivityLevel",
 		"preEncrypt",
+		"preEncryptNoPages",
 		"contentHash",
 		"links"
 })
@@ -71,6 +72,8 @@ public class Document extends Representation {
 	public final SensitivityLevel sensitivityLevel;
 	@XmlElement(name = "pre-encrypt")
 	protected Boolean preEncrypt;
+	@XmlElement(name = "pre-encrypt-no-pages")
+	protected Integer preEncryptNoPages;
 	@XmlElement(name = "content-hash", nillable = false)
 	protected ContentHash contentHash;
 
@@ -154,12 +157,21 @@ public class Document extends Representation {
 		return this;
 	}
 
+	public Document setNoEncryptedPages(int noEncryptedPages){
+		this.preEncryptNoPages = noEncryptedPages;
+		return this;
+	}
+
 	public static final Predicate<Document> isPreEncrypt = new Predicate<Document>() { @Override public boolean $(Document document) {
 		return document.isPreEncrypt();
     }};
 
 	public boolean isPreEncrypt() {
 		return preEncrypt != null && preEncrypt;
+	}
+
+	public Integer getPreEncryptNoPages() {
+		return preEncryptNoPages;
 	}
 
 	public Link getAddContentLink() {

@@ -69,7 +69,7 @@ class DocumentsPreparer {
 			if (document.isPreEncrypt()) {
 				byte[] byteContent = toByteArray(documentsAndContent.get(document));
 				LOG.debug("Validerer dokument med uuid '{}' før kryptering", document.uuid);
-				Optional<PdfInfo> pdfInfo = validate(message.getChannel(), document, byteContent, pdfValidationSettings);
+				Optional<PdfInfo> pdfInfo = validateAndSetNrOfPages(message.getChannel(), document, byteContent, pdfValidationSettings);
 				LOG.debug("Krypterer innhold for dokument med uuid '{}'", document.uuid);
 				prepared.put(document, encrypter.encrypt(byteContent));
 
@@ -91,7 +91,7 @@ class DocumentsPreparer {
 
 
 
-	Optional<PdfInfo> validate(Channel channel, Document document, byte[] content, Fn0<PdfValidationSettings> pdfValidationSettings) {
+	Optional<PdfInfo> validateAndSetNrOfPages(Channel channel, Document document, byte[] content, Fn0<PdfValidationSettings> pdfValidationSettings) {
 		if (channel == PRINT && !document.is(PDF)) {
 	    	throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT,
 	    			"PDF is required for direct-to-print messages. Document with uuid " + document.uuid + " had filetype " + document.getDigipostFileType());
@@ -102,6 +102,7 @@ class DocumentsPreparer {
 		if (document.is(PDF)) {
 			LOG.debug("Validerer PDF-dokument med uuid '{}'", document.uuid);
 			pdfValidation = pdfValidator.validate(content, pdfValidationSettings.$());
+			document.setNoEncryptedPages(pdfValidation.pages);
 			pdfInfo = optional(new PdfInfo(pdfValidation.pages));
 		} else {
 			pdfValidation = EVERYTHING_OK;

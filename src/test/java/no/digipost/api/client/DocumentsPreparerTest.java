@@ -100,7 +100,7 @@ public class DocumentsPreparerTest {
 	public void deniesNonValidatingPdfForBothPrintAndWeb() {
 		for (Channel deliveryMethod : Channel.values()) {
 			try {
-				preparer.validate(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[] {65, 65, 65, 65}, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
+				preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[]{65, 65, 65, 65}, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
 			} catch (DigipostClientException e) {
 				assertThat(e.getMessage(), containsString("Kunne ikke parse"));
 				continue;
@@ -111,11 +111,11 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
-		preparer.validate(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
+		preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
 
 		expectedException.expect(DigipostClientException.class);
 		expectedException.expectMessage("for mange sider");
-		preparer.validate(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
+		preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
 	}
 
 
