@@ -6,6 +6,12 @@
 
   <title>{{site.name}}</title>
 
+  {% if page.url contains version %}
+    {% assign active = "active" %} 
+  {% else %}
+    {% assign active = "" %}
+  {% endif %}
+
   <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
@@ -65,34 +71,21 @@
 
   <!-- Header
   =========================================== -->
-<!--   {% if page.isHome %}
-  <div class="bs-docs-masthead" id="content">
-    <div class="container">
-      <h1 class="home-title">{{site.name}}</h1>
-      <p class="lead">{{page.description}}</p>
-      <p class="lead">
-        <a href="{{site.downloadUrl}}" class="btn btn-outline-inverse btn-lg">Download</a>
-      </p>
-      <p class="version">v{{site.version}}</p>
-    </div>
-  </div>
-
-  {% else %}
-  <div class="bs-docs-header" id="content">
-    <div class="container">
-      <h1>{{page.title}}</h1>
-      <p>{{page.description}}</p>
-    </div>
-  </div>
-  {% endif %} -->
-
   <div class="container bs-docs-container">
     <div class="row">
       <!-- Content
       =========================================== -->
       <div class="col-md-9" role="main">
+        <!-- Info box notifying that you are using old documentation --> 
+        {% if page.url contains site.currentVersion %}    
+        {% else %}
+          <div class="alert alert-info">
+            You are viewing the documentation for Digipost API Client {{ page.url | replace: '/', '' | replace: 'v', ''}}, which is not the most recently released version. The newest version is {{ site.currentVersion}} and can be browsed <a href="{{ site.baseurl }}/">here</a>.
+          </div>
+        {% endif %}
         {{content}}
       </div>
+      
 
       <!-- Page navigation
       =========================================== -->
@@ -103,6 +96,18 @@
           <a class="back-to-top" href="#top">
             <i class="glyphicon glyphicon-chevron-up"></i> Back to top
           </a>
+        </div>
+
+        <!-- List of documentation versions -->
+        <div class="list-group col-md-1 list-versions">
+          {% for version in site.versions %}
+            {% if page.url contains version %}
+              {% assign active = "active" %} 
+            {% else %}
+              {% assign active = "" %}
+            {% endif %}
+              <a href="{{site.baseurl}}/v{{version}}/" class="list-group-item {{ active }}"> v{{ version }}</a> 
+          {% endfor %}
         </div>
       </div>
     </div>

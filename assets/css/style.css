@@ -35,3 +35,24 @@ blockquote {
   font-size: 1em;
   border-left: 4px solid #e8e8e8;
 }
+
+.alert {
+  margin-top: 10px;
+}
+
+.list-group {
+  margin-top:10px ;
+}
+
+.list-versions {
+  position: fixed;
+  bottom: 0%;
+  width: 75px;
+}
+
+@media (max-width: 995px){
+  .list-versions{
+    right: 0%
+  }
+
+}
