@@ -61,7 +61,6 @@ class DocumentsPreparer {
 			Map<Document, InputStream> documentsAndContent, Message message,
 			Encrypter encrypter, Fn0<PdfValidationSettings> pdfValidationSettings) throws IOException {
 
-		final int documentAmount = documentsAndContent.size();
 		final Map<Document, InputStream> prepared = new LinkedHashMap<>();
 
 		for (Elem<Document> i : on(on(documentsAndContent.keySet()).sorted(message.documentOrder())).indexed()) {
@@ -69,19 +68,10 @@ class DocumentsPreparer {
 			if (document.isPreEncrypt()) {
 				byte[] byteContent = toByteArray(documentsAndContent.get(document));
 				LOG.debug("Validerer dokument med uuid '{}' før kryptering", document.uuid);
-				Optional<PdfInfo> pdfInfo = validateAndSetNrOfPages(message.getChannel(), document, byteContent, pdfValidationSettings);
+				validateAndSetNrOfPages(message.getChannel(), document, byteContent, pdfValidationSettings);
 				LOG.debug("Krypterer innhold for dokument med uuid '{}'", document.uuid);
 				prepared.put(document, encrypter.encrypt(byteContent));
 
-				if (message.getChannel() == PRINT && i.index < documentAmount - 1 && pdfInfo.get().hasOddNumberOfPages) {
-					Document blankPageDocument = new Document(UUID.randomUUID().toString(), null, PDF).setPreEncrypt();
-					LOG.debug(
-							"Dokument med uuid '{}' har {} sider. Legger til ekstra blank side " +
-							"(uuid '{}') for å sikre at alle dokumenter begynner på nytt ark.",
-							document.uuid, pdfInfo.get().pages, blankPageDocument.uuid);
-					message.attachments.add(i.index, blankPageDocument);
-					prepared.put(blankPageDocument, encrypter.encrypt(BlankPdf.onePage()));
-				}
 			} else {
 				prepared.put(document, documentsAndContent.get(document));
 			}
