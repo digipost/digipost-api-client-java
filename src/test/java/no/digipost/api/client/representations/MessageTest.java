@@ -15,10 +15,12 @@
  */
 package no.digipost.api.client.representations;
 
+import org.joda.time.DateTime;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +48,79 @@ public class MessageTest {
 				.recipient(new MessageRecipient(new PrintDetails()))
 				.build();
 		assertTrue(message.isDirectPrint());
+	}
+
+	@Test
+	public void assertThatClassesHaveNotBeenChangedWithoutChangingMessageCopyMethod() {
+		Field[] messageFields = Message.class.getDeclaredFields();
+		assertThat(messageFields.length, is(8));
+
+		String[] allFieldsThatAreUsedForCopyInMessage = new String[]{"messageId", "senderId", "senderOrganization",
+		"recipient", "deliveryTime", "invoiceReference", "primaryDocument", "attachments"};
+
+		for(int i = 0; i < messageFields.length; i++){
+			for(int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++){
+				if(messageFields[i].getName().equals(allFieldsThatAreUsedForCopyInMessage[n])){
+					allFieldsThatAreUsedForCopyInMessage[n] = "";
+				}
+			}
+		}
+
+		for(String shouldBeEmpty : allFieldsThatAreUsedForCopyInMessage){
+			assertThat(shouldBeEmpty, is(""));
+		}
+
+		Field[] recipientFields = MessageRecipient.class.getDeclaredFields();
+		assertThat(recipientFields.length, is(5));
+
+		String[] allFieldsThatAreUsedForCopyInMessageRecipient = new String[]{"nameAndAddress", "digipostAddress", "personalIdentificationNumber",
+				"organisationNumber", "printDetails"};
+
+		for(int i = 0; i < recipientFields.length; i++){
+			for(int n = 0; n < allFieldsThatAreUsedForCopyInMessageRecipient.length; n++){
+				if(recipientFields[i].getName().equals(allFieldsThatAreUsedForCopyInMessageRecipient[n])){
+					allFieldsThatAreUsedForCopyInMessageRecipient[n] = "";
+				}
+			}
+		}
+	}
+
+	@Test
+	public void copyOfMessageIsTheSameAsTheOriginalExceptPrintDetails() {
+		Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF))
+				.digipostAddress(new DigipostAddress("Test2"))
+				.senderId(1L).deliveryTime(DateTime.now()).invoiceReference("Invoice")
+				.recipient(new MessageRecipient(new DigipostAddress("TestAdress"), new PrintDetails(
+						new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop"))
+						, new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop")),
+						PrintDetails.PostType.A, PrintDetails.PrintColors.COLORS, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER))).build();
+
+		Message copyOfMessageWithoutDigipostDetails = Message.copyMessageWithOnlyPrintDetails(message);
+
+		assertThat(copyOfMessageWithoutDigipostDetails.deliveryTime, is(message.deliveryTime));
+		assertThat(copyOfMessageWithoutDigipostDetails.invoiceReference, is(message.invoiceReference));
+		assertThat(copyOfMessageWithoutDigipostDetails.messageId, is(message.messageId));
+		assertThat(copyOfMessageWithoutDigipostDetails.senderId, is(message.senderId));
+		assertNull(copyOfMessageWithoutDigipostDetails.recipient.digipostAddress);
+		assertNull(copyOfMessageWithoutDigipostDetails.recipient.nameAndAddress);
+		assertNull(copyOfMessageWithoutDigipostDetails.recipient.organisationNumber);
+		assertNull(copyOfMessageWithoutDigipostDetails.recipient.personalIdentificationNumber);
+		assertThat(copyOfMessageWithoutDigipostDetails.recipient.printDetails.nondeliverableHandling, is(message.recipient.printDetails.nondeliverableHandling));
+		assertThat(copyOfMessageWithoutDigipostDetails.recipient.printDetails.postType, is(message.recipient.printDetails.postType));
+		assertThat(copyOfMessageWithoutDigipostDetails.recipient.printDetails.printColors, is(message.recipient.printDetails.printColors));
+		assertThat(copyOfMessageWithoutDigipostDetails.recipient.printDetails.recipient.name, is(message.recipient.printDetails.recipient.name));
+		assertThat(copyOfMessageWithoutDigipostDetails.recipient.printDetails.recipient.norwegianAddress.addressline1, is(message.recipient.printDetails.recipient.norwegianAddress.addressline1));
+
+		Message copyOfMessageWithoutPrintDetails = Message.copyMessageWithOnlyDigipostDetails(message);
+
+		assertThat(copyOfMessageWithoutPrintDetails.deliveryTime, is(message.deliveryTime));
+		assertThat(copyOfMessageWithoutPrintDetails.invoiceReference, is(message.invoiceReference));
+		assertThat(copyOfMessageWithoutPrintDetails.messageId, is(message.messageId));
+		assertThat(copyOfMessageWithoutPrintDetails.senderId, is(message.senderId));
+		assertThat(copyOfMessageWithoutPrintDetails.recipient.digipostAddress, is(message.recipient.digipostAddress));
+		assertThat(copyOfMessageWithoutPrintDetails.recipient.organisationNumber, is(message.recipient.organisationNumber));
+		assertThat(copyOfMessageWithoutPrintDetails.recipient.personalIdentificationNumber, is(message.recipient.personalIdentificationNumber));
+		assertNull(copyOfMessageWithoutPrintDetails.recipient.printDetails);
 	}
 
 	@Test

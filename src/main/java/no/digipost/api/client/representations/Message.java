@@ -180,6 +180,37 @@ public class Message implements MayHaveSender {
         }
 	}
 
+	public static Message copyMessageWithOnlyPrintDetails(Message messageToCopy){
+		return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
+				null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
+				messageToCopy.attachments, messageToCopy.recipient.getPrintDetails());
+	}
+
+	public static Message copyMessageWithOnlyDigipostDetails(Message messageToCopy){
+		return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
+				messageToCopy.recipient.nameAndAddress, messageToCopy.recipient.digipostAddress,
+				messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber
+				, messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
+				messageToCopy.attachments, null);
+	}
+
+	private Message(final String messageId, final Long senderId, final SenderOrganization senderOrganization,
+					final NameAndAddress nameAndAddress, final String digipostAddress, String personalIdentificationNumber,
+					final String organisationNumber, final DateTime deliveryTime, final String invoiceReference,
+					final Document primaryDocument, final List<Document> attachments, final PrintDetails printDetails){
+		this.messageId = messageId;
+		this.senderId = senderId;
+		this.senderOrganization = senderOrganization;
+		MessageRecipient recipient = new MessageRecipient(nameAndAddress, digipostAddress,
+				personalIdentificationNumber, organisationNumber, printDetails);
+		this.recipient = recipient;
+		this.deliveryTime = deliveryTime;
+		this.invoiceReference = invoiceReference;
+		this.primaryDocument = primaryDocument;
+		this.attachments = attachments;
+	}
+
+
 	/**
 	 * @return a list containing every {@link Document} in this delivery.
 	 *         The primary document will be the first element of the list,
