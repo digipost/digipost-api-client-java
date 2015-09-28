@@ -18,6 +18,7 @@ package no.digipost.api.client.representations;
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 import org.joda.time.DateTime;
 
+import javax.print.Doc;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -181,16 +182,21 @@ public class Message implements MayHaveSender {
 	}
 
 	public static Message copyMessageWithOnlyPrintDetails(Message messageToCopy){
+		List<Document> tmpAttachments = new ArrayList<>();
+		for(Document attachment : messageToCopy.attachments){
+			tmpAttachments.add(copyDocumentAndSetFiletypeToPdf(attachment));
+		}
+
 		return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
-				null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
-				messageToCopy.attachments, messageToCopy.recipient.getPrintDetails());
+				null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference,
+				copyDocumentAndSetFiletypeToPdf(messageToCopy.primaryDocument), tmpAttachments, messageToCopy.recipient.getPrintDetails());
 	}
 
 	public static Message copyMessageWithOnlyDigipostDetails(Message messageToCopy){
 		return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
 				messageToCopy.recipient.nameAndAddress, messageToCopy.recipient.digipostAddress,
-				messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber
-				, messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
+				messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber,
+				messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
 				messageToCopy.attachments, null);
 	}
 
@@ -208,6 +214,12 @@ public class Message implements MayHaveSender {
 		this.invoiceReference = invoiceReference;
 		this.primaryDocument = primaryDocument;
 		this.attachments = attachments;
+	}
+
+	private static Document copyDocumentAndSetFiletypeToPdf(Document documentToCopy){
+		return new Document(documentToCopy.uuid, documentToCopy.subject, new FileType("PDF"), documentToCopy.openingReceipt,
+				documentToCopy.smsNotification, documentToCopy.emailNotification, documentToCopy.authenticationLevel,
+				documentToCopy.sensitivityLevel, documentToCopy.opened, documentToCopy.getTechnicalType());
 	}
 
 

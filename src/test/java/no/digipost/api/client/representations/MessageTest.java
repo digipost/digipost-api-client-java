@@ -87,7 +87,7 @@ public class MessageTest {
 
 	@Test
 	public void copyOfMessageIsTheSameAsTheOriginalExceptPrintDetails() {
-		Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF))
+		Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", HTML))
 				.digipostAddress(new DigipostAddress("Test2"))
 				.senderId(1L).deliveryTime(DateTime.now()).invoiceReference("Invoice")
 				.recipient(new MessageRecipient(new DigipostAddress("TestAdress"), new PrintDetails(
@@ -95,32 +95,44 @@ public class MessageTest {
 						, new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop")),
 						PrintDetails.PostType.A, PrintDetails.PrintColors.COLORS, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER))).build();
 
-		Message copyOfMessageWithoutDigipostDetails = Message.copyMessageWithOnlyPrintDetails(message);
+		Message copyOfMessageWithPrintDetailsOnly = Message.copyMessageWithOnlyPrintDetails(message);
 
-		assertThat(copyOfMessageWithoutDigipostDetails.deliveryTime, is(message.deliveryTime));
-		assertThat(copyOfMessageWithoutDigipostDetails.invoiceReference, is(message.invoiceReference));
-		assertThat(copyOfMessageWithoutDigipostDetails.messageId, is(message.messageId));
-		assertThat(copyOfMessageWithoutDigipostDetails.senderId, is(message.senderId));
-		assertNull(copyOfMessageWithoutDigipostDetails.recipient.digipostAddress);
-		assertNull(copyOfMessageWithoutDigipostDetails.recipient.nameAndAddress);
-		assertNull(copyOfMessageWithoutDigipostDetails.recipient.organisationNumber);
-		assertNull(copyOfMessageWithoutDigipostDetails.recipient.personalIdentificationNumber);
-		assertThat(copyOfMessageWithoutDigipostDetails.recipient.printDetails.nondeliverableHandling, is(message.recipient.printDetails.nondeliverableHandling));
-		assertThat(copyOfMessageWithoutDigipostDetails.recipient.printDetails.postType, is(message.recipient.printDetails.postType));
-		assertThat(copyOfMessageWithoutDigipostDetails.recipient.printDetails.printColors, is(message.recipient.printDetails.printColors));
-		assertThat(copyOfMessageWithoutDigipostDetails.recipient.printDetails.recipient.name, is(message.recipient.printDetails.recipient.name));
-		assertThat(copyOfMessageWithoutDigipostDetails.recipient.printDetails.recipient.norwegianAddress.addressline1, is(message.recipient.printDetails.recipient.norwegianAddress.addressline1));
+		assertThat(copyOfMessageWithPrintDetailsOnly.deliveryTime, is(message.deliveryTime));
+		assertThat(copyOfMessageWithPrintDetailsOnly.invoiceReference, is(message.invoiceReference));
+		assertThat(copyOfMessageWithPrintDetailsOnly.messageId, is(message.messageId));
+		assertThat(copyOfMessageWithPrintDetailsOnly.senderId, is(message.senderId));
+		assertNull(copyOfMessageWithPrintDetailsOnly.recipient.digipostAddress);
+		assertNull(copyOfMessageWithPrintDetailsOnly.recipient.nameAndAddress);
+		assertNull(copyOfMessageWithPrintDetailsOnly.recipient.organisationNumber);
+		assertNull(copyOfMessageWithPrintDetailsOnly.recipient.personalIdentificationNumber);
+		assertThat(copyOfMessageWithPrintDetailsOnly.recipient.printDetails.nondeliverableHandling, is(message.recipient.printDetails.nondeliverableHandling));
+		assertThat(copyOfMessageWithPrintDetailsOnly.recipient.printDetails.postType, is(message.recipient.printDetails.postType));
+		assertThat(copyOfMessageWithPrintDetailsOnly.recipient.printDetails.printColors, is(message.recipient.printDetails.printColors));
 
-		Message copyOfMessageWithoutPrintDetails = Message.copyMessageWithOnlyDigipostDetails(message);
+		assertThat("When copying to only print, the file type should be set to pdf",
+				copyOfMessageWithPrintDetailsOnly.primaryDocument.digipostFileType, is(PDF.toString()));
+		for(Document doc : copyOfMessageWithPrintDetailsOnly.getAllDocuments()){
+			assertThat("When copying to only print, the file type should be set to pdf", doc.digipostFileType, is(PDF.toString()));
+		}
 
-		assertThat(copyOfMessageWithoutPrintDetails.deliveryTime, is(message.deliveryTime));
-		assertThat(copyOfMessageWithoutPrintDetails.invoiceReference, is(message.invoiceReference));
-		assertThat(copyOfMessageWithoutPrintDetails.messageId, is(message.messageId));
-		assertThat(copyOfMessageWithoutPrintDetails.senderId, is(message.senderId));
-		assertThat(copyOfMessageWithoutPrintDetails.recipient.digipostAddress, is(message.recipient.digipostAddress));
-		assertThat(copyOfMessageWithoutPrintDetails.recipient.organisationNumber, is(message.recipient.organisationNumber));
-		assertThat(copyOfMessageWithoutPrintDetails.recipient.personalIdentificationNumber, is(message.recipient.personalIdentificationNumber));
-		assertNull(copyOfMessageWithoutPrintDetails.recipient.printDetails);
+		assertThat(copyOfMessageWithPrintDetailsOnly.recipient.printDetails.recipient.name, is(message.recipient.printDetails.recipient.name));
+		assertThat(copyOfMessageWithPrintDetailsOnly.recipient.printDetails.recipient.norwegianAddress.addressline1, is(message.recipient.printDetails.recipient.norwegianAddress.addressline1));
+
+		Message copyOfMessageWithDigipostDetailsOnly = Message.copyMessageWithOnlyDigipostDetails(message);
+
+		assertThat(copyOfMessageWithDigipostDetailsOnly.deliveryTime, is(message.deliveryTime));
+		assertThat(copyOfMessageWithDigipostDetailsOnly.invoiceReference, is(message.invoiceReference));
+		assertThat(copyOfMessageWithDigipostDetailsOnly.messageId, is(message.messageId));
+		assertThat(copyOfMessageWithDigipostDetailsOnly.senderId, is(message.senderId));
+		assertThat(copyOfMessageWithDigipostDetailsOnly.recipient.digipostAddress, is(message.recipient.digipostAddress));
+		assertThat(copyOfMessageWithDigipostDetailsOnly.recipient.organisationNumber, is(message.recipient.organisationNumber));
+		assertThat(copyOfMessageWithDigipostDetailsOnly.recipient.personalIdentificationNumber, is(message.recipient.personalIdentificationNumber));
+		assertNull(copyOfMessageWithDigipostDetailsOnly.recipient.printDetails);
+
+		assertThat(copyOfMessageWithDigipostDetailsOnly.primaryDocument.digipostFileType, is(HTML.toString()));
+		for(Document doc : copyOfMessageWithDigipostDetailsOnly.getAllDocuments()){
+			assertThat(doc.digipostFileType, is(HTML.toString()));
+		}
 	}
 
 	@Test

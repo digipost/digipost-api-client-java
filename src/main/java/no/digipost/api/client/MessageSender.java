@@ -312,7 +312,7 @@ public class MessageSender extends Communicator {
 		Message singleChannelMessage;
 
 			if (message.isDirectPrint()) {
-				singleChannelMessage = message;
+				singleChannelMessage = Message.copyMessageWithOnlyPrintDetails(message);
 				mapToPrintContent(documentsAndContent, documentsAndInputstream);
 
 				if (message.hasAnyDocumentRequiringPreEncryption()) {
@@ -347,7 +347,7 @@ public class MessageSender extends Communicator {
 	private static void mapToPrintContent(Map<Document, DocumentContent> documentsAndContent,
 										  Map<Document, InputStream> documentsAndInputstream){
 		for(Entry<Document, DocumentContent> entry : documentsAndContent.entrySet()) {
-			documentsAndInputstream.put(entry.getKey(), entry.getValue().getPrintContent());
+			documentsAndInputstream.put(Document.copyDocumentAndSetDigipostFileTypeToPdf(entry.getKey()), entry.getValue().getPrintContent());
 		}
 	}
 
