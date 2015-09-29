@@ -60,6 +60,7 @@ public class DocumentTest {
 				new EmailNotification("ny@gmail.com", "Detta", "Er", new ArrayList<ListedTime>()), AuthenticationLevel.IDPORTEN_3,
 				SensitivityLevel.NORMAL, false, "technicalType");
 
+
 		Document copyOfDoc = Document.copyDocumentAndSetDigipostFileTypeToPdf(originalDoc);
 
 		assertThat(originalDoc.digipostFileType, is(HTML.toString()));

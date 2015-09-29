@@ -40,6 +40,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -74,7 +75,7 @@ public class MessageSender extends Communicator {
 	 * Dersom dokumentene skal direkte til print og skal prekrypteres før sending kan det gjøres en ekstra request for å hente
 	 * krypteringsnøkkel.
 	 */
-	public MessageDelivery sendMultipartMessage(Message message, Map<Document, DocumentContent> documentsAndContent) {
+	public MessageDelivery sendMultipartMessage(Message message, Map<String, DocumentContent> documentsAndContent) {
 		EncryptionKeyAndDocsWithInputstream encryptionAndInputStream = fetchEncryptionKeyForRecipientIfNecessaryAndMapContentToInputstream(message, documentsAndContent);
 		Encrypter encrypter = encryptionAndInputStream.digipostPublicKeys.map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT);
 		Map<Document, InputStream> documentInputStream = encryptionAndInputStream.documentsAndInputstream;
@@ -306,14 +307,14 @@ public class MessageSender extends Communicator {
 
 
 	private EncryptionKeyAndDocsWithInputstream fetchEncryptionKeyForRecipientIfNecessaryAndMapContentToInputstream(Message message,
-																						Map<Document, DocumentContent> documentsAndContent) {
+																						Map<String, DocumentContent> documentsAndContent) {
 		final Map<Document, InputStream> documentsAndInputstream = new LinkedHashMap<>();
 		Optional<DigipostPublicKey> publicKeys = none();
 		Message singleChannelMessage;
 
 			if (message.isDirectPrint()) {
 				singleChannelMessage = Message.copyMessageWithOnlyPrintDetails(message);
-				mapToPrintContent(documentsAndContent, documentsAndInputstream);
+				setPrintContentToUUID(documentsAndContent, documentsAndInputstream, singleChannelMessage.getAllDocuments());
 
 				if (message.hasAnyDocumentRequiringPreEncryption()) {
 					eventLogger.log("Direkte print. Bruker krypteringsnøkkel for print.");
@@ -323,7 +324,7 @@ public class MessageSender extends Communicator {
 				IdentificationResultWithEncryptionKey result = identifyAndGetEncryptionKey(message.recipient.toIdentification());
 				if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
 					singleChannelMessage = Message.copyMessageWithOnlyDigipostDetails(message);
-					mapToDigipostContent(documentsAndContent, documentsAndInputstream);
+					setDigipostContentToUUID(documentsAndContent, documentsAndInputstream, singleChannelMessage.getAllDocuments());
 
 					if (message.hasAnyDocumentRequiringPreEncryption()) {
 						eventLogger.log("Mottaker er Digipost-bruker. Bruker brukers krypteringsnøkkel.");
@@ -331,7 +332,7 @@ public class MessageSender extends Communicator {
 					}
 				} else if (message.recipient.hasPrintDetails()) {
 					singleChannelMessage = Message.copyMessageWithOnlyPrintDetails(message);
-					mapToPrintContent(documentsAndContent, documentsAndInputstream);
+					setPrintContentToUUID(documentsAndContent, documentsAndInputstream, singleChannelMessage.getAllDocuments());
 
 					if (message.hasAnyDocumentRequiringPreEncryption()) {
 						eventLogger.log("Mottaker er ikke Digipost-bruker. Bruker krypteringsnøkkel for print.");
@@ -344,17 +345,15 @@ public class MessageSender extends Communicator {
 		return new EncryptionKeyAndDocsWithInputstream(publicKeys, documentsAndInputstream, singleChannelMessage);
 	}
 
-	private static void mapToPrintContent(Map<Document, DocumentContent> documentsAndContent,
-										  Map<Document, InputStream> documentsAndInputstream){
-		for(Entry<Document, DocumentContent> entry : documentsAndContent.entrySet()) {
-			documentsAndInputstream.put(Document.copyDocumentAndSetDigipostFileTypeToPdf(entry.getKey()), entry.getValue().getPrintContent());
+	static void setDigipostContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, List<Document> allDocuments) {
+		for(Document doc : allDocuments) {
+			documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getDigipostContent());
 		}
 	}
 
-	private static void mapToDigipostContent(Map<Document, DocumentContent> documentsAndContent,
-											 Map<Document, InputStream> documentsAndInputstream){
-		for(Entry<Document, DocumentContent> entry : documentsAndContent.entrySet()) {
-			documentsAndInputstream.put(entry.getKey(), entry.getValue().getDigipostContent());
+	static void setPrintContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, List<Document> allDocuments) {
+		for(Document doc : allDocuments) {
+			documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getPrintContent());
 		}
 	}
 

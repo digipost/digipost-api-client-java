@@ -32,7 +32,7 @@ final class AtomicPrintOnlyMessage implements OngoingDelivery.SendableForPrintOn
 
 	private final MessageSender sender;
 	private final Message printMessage;
-	private final Map<Document, DocumentContent> documents = new LinkedHashMap<>();
+	private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
 
     AtomicPrintOnlyMessage(Message printMessage, MessageSender sender) {
@@ -52,7 +52,7 @@ final class AtomicPrintOnlyMessage implements OngoingDelivery.SendableForPrintOn
      */
     @Override
     public AtomicPrintOnlyMessage addContent(Document document, InputStream content) {
-    	documents.put(document, DocumentContent.CreatePrintContent(content));
+    	documents.put(document.uuid, DocumentContent.CreatePrintContent(content));
     	return this;
     }
 

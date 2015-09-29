@@ -184,12 +184,12 @@ public class Message implements MayHaveSender {
 	public static Message copyMessageWithOnlyPrintDetails(Message messageToCopy){
 		List<Document> tmpAttachments = new ArrayList<>();
 		for(Document attachment : messageToCopy.attachments){
-			tmpAttachments.add(copyDocumentAndSetFiletypeToPdf(attachment));
+			tmpAttachments.add(Document.copyDocumentAndSetDigipostFileTypeToPdf(attachment));
 		}
 
 		return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
 				null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference,
-				copyDocumentAndSetFiletypeToPdf(messageToCopy.primaryDocument), tmpAttachments, messageToCopy.recipient.getPrintDetails());
+				Document.copyDocumentAndSetDigipostFileTypeToPdf(messageToCopy.primaryDocument), tmpAttachments, messageToCopy.recipient.getPrintDetails());
 	}
 
 	public static Message copyMessageWithOnlyDigipostDetails(Message messageToCopy){
@@ -214,12 +214,6 @@ public class Message implements MayHaveSender {
 		this.invoiceReference = invoiceReference;
 		this.primaryDocument = primaryDocument;
 		this.attachments = attachments;
-	}
-
-	private static Document copyDocumentAndSetFiletypeToPdf(Document documentToCopy){
-		return new Document(documentToCopy.uuid, documentToCopy.subject, new FileType("PDF"), documentToCopy.openingReceipt,
-				documentToCopy.smsNotification, documentToCopy.emailNotification, documentToCopy.authenticationLevel,
-				documentToCopy.sensitivityLevel, documentToCopy.opened, documentToCopy.getTechnicalType());
 	}
 
 

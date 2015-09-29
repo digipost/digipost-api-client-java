@@ -222,19 +222,79 @@ public class MessageSenderTest {
 		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
 		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-		Map<Document, DocumentContent> documentAndContent = new LinkedHashMap<>();
+		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
 
 		MessageSender messageSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
 		Message message = newMessage(messageId, printDocument).attachments(printAttachments)
 				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
 
-		documentAndContent.put(message.primaryDocument, DocumentContent.CreateBothStreamContent(printablePdf1Page()));
+		documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
 		for (Document attachment : printAttachments) {
-			documentAndContent.put(attachment, DocumentContent.CreateBothStreamContent(printablePdf1Page()));
+			documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
 		}
 
 		messageSender.sendMultipartMessage(message, documentAndContent);
 	}
+
+	@Test
+	public void setDigipostContentToUUIDTest(){
+		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
+		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+
+		List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setPreEncrypt());
+		Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
+				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
+
+		documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+		for (Document attachment : printAttachments) {
+			documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+		}
+
+		Map<Document, InputStream> documentAndInputStreams = new HashMap<>();
+		Message digipostCopyMessage = Message.copyMessageWithOnlyDigipostDetails(message);
+		MessageSender.setDigipostContentToUUID(documentAndContent, documentAndInputStreams, digipostCopyMessage.getAllDocuments());
+
+		for(Document doc : digipostCopyMessage.getAllDocuments()){
+			InputStream inputStream = documentAndInputStreams.get(doc);
+			assertThat(inputStream, is(documentAndContent.get(doc.uuid).getDigipostContent()));
+		}
+
+		assertThat(digipostCopyMessage.recipient.hasPrintDetails(), is(false));
+		assertThat(digipostCopyMessage.recipient.hasDigipostIdentification(),is(true));
+	}
+
+	@Test
+	public void setPrintContentToUUIDTest(){
+		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
+		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+
+		List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setPreEncrypt());
+		Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
+				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
+
+		documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+		for (Document attachment : printAttachments) {
+			documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+		}
+
+		Map<Document, InputStream> documentAndInputStreams = new HashMap<>();
+		Message printCopyMessage = Message.copyMessageWithOnlyPrintDetails(message);
+		MessageSender.setPrintContentToUUID(documentAndContent, documentAndInputStreams, printCopyMessage.getAllDocuments());
+
+		for(Document doc : printCopyMessage.getAllDocuments()){
+			InputStream inputStream = documentAndInputStreams.get(doc);
+			assertThat(inputStream, is(documentAndContent.get(doc.uuid).getPrintContent()));
+		}
+
+		assertThat(printCopyMessage.recipient.hasPrintDetails(), is(true));
+		assertThat(printCopyMessage.recipient.hasDigipostIdentification(),is(false));
+	}
+
+
 
 	@Test
 	public void passes_pdf_validation_for_printonly_message() {

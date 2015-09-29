@@ -34,7 +34,7 @@ final class AtomicWithPrintFallback implements OngoingDelivery.SendableWithPrint
 
 	private final MessageSender sender;
 	private final Message message;
-	private final Map<Document, DocumentContent> documents = new LinkedHashMap<>();
+	private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
     AtomicWithPrintFallback(Message message, MessageSender sender) {
     	this.message = message;
@@ -49,13 +49,13 @@ final class AtomicWithPrintFallback implements OngoingDelivery.SendableWithPrint
      */
 	@Override
 	public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
-		documents.put(document, DocumentContent.CreateBothStreamContent(content));
+		documents.put(document.uuid, DocumentContent.CreateBothStreamContent(content));
 		return this;
 	}
 
 	@Override
 	public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
-		documents.put(document, DocumentContent.CreateMultiStreamContent(content, printContent));
+		documents.put(document.uuid, DocumentContent.CreateMultiStreamContent(content, printContent));
 		return this;
 	}
 
