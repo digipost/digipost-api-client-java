@@ -87,7 +87,6 @@ public class MessageSender extends Communicator {
 			messageBodyPart.setContentDisposition(messagePart);
 			multiPart.bodyPart(messageBodyPart);
 
-
 			Map<Document, InputStream> preparedDocuments = documentsPreparer.prepare(
 					documentInputStream, singleChannelMessage, encrypter, Apply.partially(resolvePdfValidationSettings).of(singleChannelMessage));
 			for (Entry<Document, InputStream> documentAndContent : preparedDocuments.entrySet()) {
@@ -313,28 +312,25 @@ public class MessageSender extends Communicator {
 		Message singleChannelMessage;
 
 			if (message.isDirectPrint()) {
-				singleChannelMessage = Message.copyMessageWithOnlyPrintDetails(message);
-				setPrintContentToUUID(documentsAndContent, documentsAndInputstream, singleChannelMessage.getAllDocuments());
+				singleChannelMessage = setMapAndMessageToPrint(message, documentsAndContent, documentsAndInputstream);
 
-				if (message.hasAnyDocumentRequiringPreEncryption()) {
+				if (singleChannelMessage.hasAnyDocumentRequiringPreEncryption()) {
 					eventLogger.log("Direkte print. Bruker krypteringsnøkkel for print.");
 					publicKeys = optional(getEncryptionKeyForPrint());
 				}
 			} else {
 				IdentificationResultWithEncryptionKey result = identifyAndGetEncryptionKey(message.recipient.toIdentification());
-				if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
-					singleChannelMessage = Message.copyMessageWithOnlyDigipostDetails(message);
-					setDigipostContentToUUID(documentsAndContent, documentsAndInputstream, singleChannelMessage.getAllDocuments());
+				if (result.getResultCode() == IdentificationResultCode.DIGIPOST) {
+					singleChannelMessage = setMapAndMessageToDigipost(message, documentsAndContent, documentsAndInputstream);
 
-					if (message.hasAnyDocumentRequiringPreEncryption()) {
+					if (singleChannelMessage.hasAnyDocumentRequiringPreEncryption()) {
 						eventLogger.log("Mottaker er Digipost-bruker. Bruker brukers krypteringsnøkkel.");
 						publicKeys = optional(new DigipostPublicKey(result.getEncryptionKey()));
 					}
 				} else if (message.recipient.hasPrintDetails()) {
-					singleChannelMessage = Message.copyMessageWithOnlyPrintDetails(message);
-					setPrintContentToUUID(documentsAndContent, documentsAndInputstream, singleChannelMessage.getAllDocuments());
+					singleChannelMessage = setMapAndMessageToPrint(message, documentsAndContent, documentsAndInputstream);
 
-					if (message.hasAnyDocumentRequiringPreEncryption()) {
+					if (singleChannelMessage.hasAnyDocumentRequiringPreEncryption()) {
 						eventLogger.log("Mottaker er ikke Digipost-bruker. Bruker krypteringsnøkkel for print.");
 						publicKeys = optional(getEncryptionKeyForPrint());
 					}
@@ -343,6 +339,22 @@ public class MessageSender extends Communicator {
 				}
 			}
 		return new EncryptionKeyAndDocsWithInputstream(publicKeys, documentsAndInputstream, singleChannelMessage);
+	}
+
+	static Message setMapAndMessageToDigipost(Message messageToCopy, Map<String, DocumentContent> documentsAndContent,
+											  Map<Document, InputStream> documentsAndInputStream){
+		Message singleChannelMessage = Message.copyMessageWithOnlyDigipostDetails(messageToCopy);
+		setDigipostContentToUUID(documentsAndContent, documentsAndInputStream, singleChannelMessage.getAllDocuments());
+
+		return singleChannelMessage;
+	}
+
+	static Message setMapAndMessageToPrint(Message messageToCopy, Map<String, DocumentContent> documentsAndContent,
+										   Map<Document, InputStream> documentsAndInputStream){
+		Message singleChannelMessage = Message.copyMessageWithOnlyPrintDetails(messageToCopy);
+		setPrintContentToUUID(documentsAndContent, documentsAndInputStream, singleChannelMessage.getAllDocuments());
+
+		return singleChannelMessage;
 	}
 
 	static void setDigipostContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, List<Document> allDocuments) {
