@@ -119,6 +119,21 @@ public class Document extends Representation {
 		validate();
 	}
 
+	public static Document copyDocumentAndSetDigipostFileTypeToPdf(Document doc){
+		Document newDoc = new Document(doc.uuid, doc.subject, new FileType("pdf"), doc.openingReceipt, doc.smsNotification, doc.emailNotification,
+				doc.authenticationLevel, doc.sensitivityLevel, doc.opened, doc.getTechnicalType());
+
+		if(doc.getPreEncryptNoPages() != null) {
+			newDoc.setNoEncryptedPages(doc.getPreEncryptNoPages());
+		}
+		if(doc.preEncrypt != null && doc.preEncrypt){
+			newDoc.setPreEncrypt();
+		}
+		newDoc.setContentHash(doc.contentHash);
+
+		return newDoc;
+	}
+
 	private void validate() {
 		List<String> errors = new ArrayList<>();
 		if (uuid != null && !UUID_PATTERN.matcher(this.uuid).matches()) {
@@ -138,6 +153,10 @@ public class Document extends Representation {
 		Document document = new Document(UUID.randomUUID().toString(), null, fileType);
 		document.technicalType = type;
 		return document;
+	}
+
+	public void setContentHash(ContentHash contentHash){
+		this.contentHash = contentHash;
 	}
 
 	public void setDigipostFileType(FileType fileType) {

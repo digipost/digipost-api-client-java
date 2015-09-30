@@ -16,7 +16,9 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.delivery.ApiFlavor;
+import no.digipost.api.client.delivery.DocumentContent;
 import no.digipost.api.client.delivery.MessageDeliverer;
+import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.delivery.OngoingDelivery.SendableForPrintOnly;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
@@ -24,6 +26,8 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.util.MockfriendlyResponse;
+import no.digipost.print.validate.PdfValidationError;
+import no.digipost.print.validate.PdfValidationResult;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -34,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
@@ -44,8 +49,7 @@ import javax.ws.rs.core.Response.Status;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
@@ -54,6 +58,7 @@ import static no.digipost.api.client.delivery.ApiFlavor.ATOMIC_REST;
 import static no.digipost.api.client.delivery.ApiFlavor.STEPWISE_REST;
 import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
+import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.Channel.PRINT;
@@ -90,6 +95,9 @@ public class MessageSenderTest {
 
 	@Mock
 	private ApiService api;
+
+	@Mock
+	IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey;
 
 	private MockfriendlyResponse encryptionKeyResponse;
 
@@ -186,6 +194,107 @@ public class MessageSenderTest {
 		sender.getEncryptionKeyForPrint();
 		then(api).should(times(2)).getEncryptionKeyForPrint();
 	}
+
+	@Test
+	public void fallback_to_print_changes_filetype_html_to_pdf() {
+		when(identificationResultWithEncryptionKey.getResult()).thenReturn(new IdentificationResult());
+		when(mockClientResponse.getStatus()).thenReturn(200);
+		when(mockClientResponse.readEntity(IdentificationResultWithEncryptionKey.class)).thenReturn(identificationResultWithEncryptionKey);
+
+		SenderInformation senderInformation = Mockito.mock(SenderInformation.class);
+		when(senderInformation.getPdfValidationSettings()).thenReturn(new PdfValidationSettings(false, false, true, false));
+
+		when(api.getEncryptionKey(any(URI.class))).thenReturn(encryptionKeyResponse);
+		when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
+		when(api.identifyAndGetEncryptionKey(any(Identification.class))).thenReturn(mockClientResponse);
+		when(api.getSenderInformation(any(Message.class))).thenReturn(senderInformation);
+
+		Response response = Mockito.mock(Response.class);
+		when(response.getEntity()).thenReturn(new Object());
+		when(response.getStatus()).thenReturn(200);
+		when(response.readEntity(Object.class)).thenReturn(new Object());
+
+		when(api.multipartMessage(any(MultiPart.class))).thenReturn(response);
+
+		String messageId = UUID.randomUUID().toString();
+		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
+		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setPreEncrypt());
+		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+
+		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+
+		MessageSender messageSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
+		Message message = newMessage(messageId, printDocument).attachments(printAttachments)
+				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
+
+		documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
+		for (Document attachment : printAttachments) {
+			documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
+		}
+
+		messageSender.sendMultipartMessage(message, documentAndContent);
+	}
+
+	@Test
+	public void setDigipostContentToUUIDTest(){
+		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
+		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+
+		List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setPreEncrypt());
+		Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
+				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
+
+		documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+		for (Document attachment : printAttachments) {
+			documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+		}
+
+		Map<Document, InputStream> documentAndInputStreams = new HashMap<>();
+		Message digipostCopyMessage = Message.copyMessageWithOnlyDigipostDetails(message);
+		MessageSender.setDigipostContentToUUID(documentAndContent, documentAndInputStreams, digipostCopyMessage.getAllDocuments());
+
+		for(Document doc : digipostCopyMessage.getAllDocuments()){
+			InputStream inputStream = documentAndInputStreams.get(doc);
+			assertThat(inputStream, is(documentAndContent.get(doc.uuid).getDigipostContent()));
+		}
+
+		assertThat(digipostCopyMessage.recipient.hasPrintDetails(), is(false));
+		assertThat(digipostCopyMessage.recipient.hasDigipostIdentification(),is(true));
+	}
+
+	@Test
+	public void setPrintContentToUUIDTest(){
+		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
+		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+
+		List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setPreEncrypt());
+		Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
+				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
+
+		documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+		for (Document attachment : printAttachments) {
+			documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+		}
+
+		Map<Document, InputStream> documentAndInputStreams = new HashMap<>();
+		Message printCopyMessage = Message.copyMessageWithOnlyPrintDetails(message);
+		MessageSender.setPrintContentToUUID(documentAndContent, documentAndInputStreams, printCopyMessage.getAllDocuments());
+
+		for(Document doc : printCopyMessage.getAllDocuments()){
+			InputStream inputStream = documentAndInputStreams.get(doc);
+			assertThat(inputStream, is(documentAndContent.get(doc.uuid).getPrintContent()));
+		}
+
+		assertThat(printCopyMessage.recipient.hasPrintDetails(), is(true));
+		assertThat(printCopyMessage.recipient.hasDigipostIdentification(),is(false));
+	}
+
+
 
 	@Test
 	public void passes_pdf_validation_for_printonly_message() {

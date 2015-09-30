@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.delivery.DocumentContent;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
@@ -38,6 +39,8 @@ import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -72,18 +75,20 @@ public class MessageSender extends Communicator {
 	 * Dersom dokumentene skal direkte til print og skal prekrypteres før sending kan det gjøres en ekstra request for å hente
 	 * krypteringsnøkkel.
 	 */
-	public MessageDelivery sendMultipartMessage(Message message, Map<Document, InputStream> documentsAndContent) {
-		Encrypter encrypter = fetchEncryptionKeyForRecipientIfNecessary(message).map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT);
+	public MessageDelivery sendMultipartMessage(Message message, Map<String, DocumentContent> documentsAndContent) {
+		EncryptionKeyAndDocsWithInputstream encryptionAndInputStream = fetchEncryptionKeyForRecipientIfNecessaryAndMapContentToInputstream(message, documentsAndContent);
+		Encrypter encrypter = encryptionAndInputStream.digipostPublicKeys.map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT);
+		Map<Document, InputStream> documentInputStream = encryptionAndInputStream.documentsAndInputstream;
+		Message singleChannelMessage = encryptionAndInputStream.getSingleChannelMessage();
 
 		try (MultiPart multiPart = new MultiPart()) {
-			BodyPart messageBodyPart = new BodyPart(message, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
+			BodyPart messageBodyPart = new BodyPart(singleChannelMessage, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
 			ContentDisposition messagePart = ContentDisposition.type("attachment").fileName("message").build();
 			messageBodyPart.setContentDisposition(messagePart);
 			multiPart.bodyPart(messageBodyPart);
 
-
 			Map<Document, InputStream> preparedDocuments = documentsPreparer.prepare(
-					documentsAndContent, message, encrypter, Apply.partially(resolvePdfValidationSettings).of(message));
+					documentInputStream, singleChannelMessage, encrypter, Apply.partially(resolvePdfValidationSettings).of(singleChannelMessage));
 			for (Entry<Document, InputStream> documentAndContent : preparedDocuments.entrySet()) {
 				Document document = documentAndContent.getKey();
 				InputStream content = documentAndContent.getValue();
@@ -92,7 +97,7 @@ public class MessageSender extends Communicator {
 				bodyPart.setContentDisposition(documentPart);
 				multiPart.bodyPart(bodyPart);
 			}
-			log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + message.messageId + " ***");
+			log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + singleChannelMessage.messageId + " ***");
 			Response response = apiService.multipartMessage(multiPart);
 			checkResponse(response);
 
@@ -300,26 +305,85 @@ public class MessageSender extends Communicator {
 	}
 
 
-	private Optional<DigipostPublicKey> fetchEncryptionKeyForRecipientIfNecessary(Message message) {
-		if (message.hasAnyDocumentRequiringPreEncryption()) {
-			if (message.isDirectPrint()) {
-				eventLogger.log("Direkte print. Bruker krypteringsnøkkel for print.");
-				return optional(getEncryptionKeyForPrint());
+	private EncryptionKeyAndDocsWithInputstream fetchEncryptionKeyForRecipientIfNecessaryAndMapContentToInputstream(Message message,
+																						Map<String, DocumentContent> documentsAndContent) {
+		final Map<Document, InputStream> documentsAndInputstream = new LinkedHashMap<>();
+		Optional<DigipostPublicKey> publicKeys = none();
+		Message singleChannelMessage;
 
+			if (message.isDirectPrint()) {
+				singleChannelMessage = setMapAndMessageToPrint(message, documentsAndContent, documentsAndInputstream);
+
+				if (singleChannelMessage.hasAnyDocumentRequiringPreEncryption()) {
+					eventLogger.log("Direkte print. Bruker krypteringsnøkkel for print.");
+					publicKeys = optional(getEncryptionKeyForPrint());
+				}
 			} else {
 				IdentificationResultWithEncryptionKey result = identifyAndGetEncryptionKey(message.recipient.toIdentification());
-				if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
-					eventLogger.log("Mottaker er Digipost-bruker. Bruker brukers krypteringsnøkkel.");
-					return optional(new DigipostPublicKey(result.getEncryptionKey()));
+				if (result.getResultCode() == IdentificationResultCode.DIGIPOST) {
+					singleChannelMessage = setMapAndMessageToDigipost(message, documentsAndContent, documentsAndInputstream);
+
+					if (singleChannelMessage.hasAnyDocumentRequiringPreEncryption()) {
+						eventLogger.log("Mottaker er Digipost-bruker. Bruker brukers krypteringsnøkkel.");
+						publicKeys = optional(new DigipostPublicKey(result.getEncryptionKey()));
+					}
 				} else if (message.recipient.hasPrintDetails()) {
-					eventLogger.log("Mottaker er ikke Digipost-bruker. Bruker krypteringsnøkkel for print.");
-					return optional(getEncryptionKeyForPrint());
+					singleChannelMessage = setMapAndMessageToPrint(message, documentsAndContent, documentsAndInputstream);
+
+					if (singleChannelMessage.hasAnyDocumentRequiringPreEncryption()) {
+						eventLogger.log("Mottaker er ikke Digipost-bruker. Bruker krypteringsnøkkel for print.");
+						publicKeys = optional(getEncryptionKeyForPrint());
+					}
 				} else {
 					throw new DigipostClientException(ErrorCode.UNKNOWN_RECIPIENT, "Mottaker er ikke Digipost-bruker og forsendelse mangler print-fallback.");
 				}
 			}
+		return new EncryptionKeyAndDocsWithInputstream(publicKeys, documentsAndInputstream, singleChannelMessage);
+	}
+
+	static Message setMapAndMessageToDigipost(Message messageToCopy, Map<String, DocumentContent> documentsAndContent,
+											  Map<Document, InputStream> documentsAndInputStream){
+		Message singleChannelMessage = Message.copyMessageWithOnlyDigipostDetails(messageToCopy);
+		setDigipostContentToUUID(documentsAndContent, documentsAndInputStream, singleChannelMessage.getAllDocuments());
+
+		return singleChannelMessage;
+	}
+
+	static Message setMapAndMessageToPrint(Message messageToCopy, Map<String, DocumentContent> documentsAndContent,
+										   Map<Document, InputStream> documentsAndInputStream){
+		Message singleChannelMessage = Message.copyMessageWithOnlyPrintDetails(messageToCopy);
+		setPrintContentToUUID(documentsAndContent, documentsAndInputStream, singleChannelMessage.getAllDocuments());
+
+		return singleChannelMessage;
+	}
+
+	static void setDigipostContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, List<Document> allDocuments) {
+		for(Document doc : allDocuments) {
+			documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getDigipostContent());
 		}
-		return none();
+	}
+
+	static void setPrintContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, List<Document> allDocuments) {
+		for(Document doc : allDocuments) {
+			documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getPrintContent());
+		}
+	}
+
+	private static class EncryptionKeyAndDocsWithInputstream{
+		public final Optional<DigipostPublicKey> digipostPublicKeys;
+		public final Map<Document, InputStream> documentsAndInputstream;
+		private final Message singleChannelMessage;
+
+		public EncryptionKeyAndDocsWithInputstream(Optional<DigipostPublicKey> digipostPublicKeys,
+							   Map<Document, InputStream> documentsAndInputstream, Message singleChannelMessage){
+			this.digipostPublicKeys = digipostPublicKeys;
+			this.documentsAndInputstream = documentsAndInputstream;
+			this.singleChannelMessage = singleChannelMessage;
+		}
+
+		public Message getSingleChannelMessage(){
+			return singleChannelMessage;
+		}
 	}
 
 }

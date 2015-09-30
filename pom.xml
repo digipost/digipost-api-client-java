@@ -14,7 +14,9 @@
 	</parent>
 
 	<artifactId>digipost-api-client-java</artifactId>
+
 	<version>6.10-SNAPSHOT</version>
+
 	<name>Digipost API Client</name>
 	<description>Java library for interacting with the Digipost REST API</description>
 

@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.delivery.DocumentContent;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.pdf.BlankPdf;
@@ -62,6 +63,10 @@ class DocumentsPreparer {
 			Encrypter encrypter, Fn0<PdfValidationSettings> pdfValidationSettings) throws IOException {
 
 		final Map<Document, InputStream> prepared = new LinkedHashMap<>();
+
+		if(message.recipient.hasPrintDetails() && message.recipient.hasDigipostIdentification()){
+			throw new IllegalStateException("Forventet message med enkelt kanal");
+		}
 
 		for (Elem<Document> i : on(on(documentsAndContent.keySet()).sorted(message.documentOrder())).indexed()) {
 			Document document = i.value;
