@@ -16,6 +16,7 @@
 package no.digipost.api.client.swing;
 
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.OngoingDelivery;
@@ -38,6 +39,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 import static java.nio.file.Files.newInputStream;
+import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
@@ -606,7 +608,7 @@ public class DigipostSwingClient {
 				Client jerseyClient = turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(endpointField.getText());
 
 				try {
-					client = new DigipostClient(ApiFlavor.STEPWISE_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
+					client = new DigipostClient(newBuilder().build(),ApiFlavor.STEPWISE_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
 							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger,
 							jerseyClient);
 				} catch (NumberFormatException e1) {

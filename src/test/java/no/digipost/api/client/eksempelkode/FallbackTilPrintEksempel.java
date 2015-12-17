@@ -16,6 +16,7 @@
 package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.FileUtils;
@@ -27,6 +28,7 @@ import java.io.InputStream;
 import java.security.Security;
 import java.util.UUID;
 
+import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
@@ -57,7 +59,7 @@ public class FallbackTilPrintEksempel {
 		InputStream sertifikatInputStream = lesInnSertifikat();
 
 		// 3. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient(ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+		DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
 		// 4. Vi oppretter et fødselsnummerobjekt som skal brukes til å
 		// identifisere mottaker i Digipost

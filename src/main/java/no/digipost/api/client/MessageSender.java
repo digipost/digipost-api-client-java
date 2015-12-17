@@ -58,14 +58,16 @@ public class MessageSender extends Communicator {
 		}};
 
 	private final DocumentsPreparer documentsPreparer;
+	private final DigipostClientConfig digipostClientConfig;
 
 	private DateTime printKeyCachedTime = null;
 	private DigipostPublicKey cachedPrintKey;
 
 
-	public MessageSender(ApiService apiService, EventLogger eventLogger, PdfValidator pdfValidator) {
+	public MessageSender(DigipostClientConfig digipostClientConfig, ApiService apiService, EventLogger eventLogger, PdfValidator pdfValidator) {
 		super(apiService, eventLogger);
 		this.documentsPreparer = new DocumentsPreparer(pdfValidator);
+		this.digipostClientConfig = digipostClientConfig;
 	}
 
 
@@ -225,7 +227,7 @@ public class MessageSender extends Communicator {
 	public DigipostPublicKey getEncryptionKeyForPrint() {
 		DateTime now = DateTime.now();
 
-		if (printKeyCachedTime == null || new Duration(printKeyCachedTime, now).isLongerThan(Duration.standardMinutes(5))) {
+		if (!digipostClientConfig.cachePrintKey || (printKeyCachedTime == null || new Duration(printKeyCachedTime, now).isLongerThan(Duration.standardMinutes(5)))) {
 			log("*** STARTER INTERAKSJON MED API: HENT KRYPTERINGSNØKKEL FOR PRINT ***");
 			Response response = apiService.getEncryptionKeyForPrint();
 			checkResponse(response);

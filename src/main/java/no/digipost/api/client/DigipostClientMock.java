@@ -33,6 +33,7 @@ import java.io.StringWriter;
 import java.util.Map;
 
 import static no.digipost.api.client.ApiServiceMock.MockRequest;
+import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 
 /**
  * Instansierer en DigipostClient som ikke går mot faktiskt Digipost REST-api endepunkt og
@@ -48,7 +49,7 @@ public class DigipostClientMock {
 			throw new RuntimeException("Stepwise REST is not yet supported by " + DigipostClientMock.class.getName());
 		}
 		apiService = new ApiServiceMock(initMarshaller());
-		client = new DigipostClient(apiFlavor, "digipostmock-url", 1, new Signer() {
+		client = new DigipostClient(newBuilder().build(),apiFlavor, "digipostmock-url", 1, new Signer() {
 
 			@Override
 			public byte[] sign(String dataToSign) {

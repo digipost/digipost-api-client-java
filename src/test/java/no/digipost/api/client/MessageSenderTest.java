@@ -35,6 +35,7 @@ import org.joda.time.DateTimeUtils;
 import org.joda.time.Duration;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -54,6 +55,7 @@ import java.util.*;
 import static java.util.Arrays.asList;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.OK;
+import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.*;
 import static no.digipost.api.client.delivery.ApiFlavor.ATOMIC_REST;
 import static no.digipost.api.client.delivery.ApiFlavor.STEPWISE_REST;
 import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
@@ -105,6 +107,7 @@ public class MessageSenderTest {
 	private PdfValidator pdfValidator;
 
 	private MessageSender sender;
+	private MessageSender cachelessSender;
 
 	@Before
 	public void setup() {
@@ -113,7 +116,9 @@ public class MessageSenderTest {
 				.entity(ApiServiceMock.createFakeEncryptionKey())
 				.build();
 
-		sender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
+		sender = new MessageSender(newBuilder().cachePrintKey(true).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
+
+		cachelessSender = new MessageSender(newBuilder().cachePrintKey(false).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
 	}
 
 
@@ -196,6 +201,21 @@ public class MessageSenderTest {
 	}
 
 	@Test
+	public void skal_ikke_bruke_cached_print_encryption_key_da_encryption_er_avskrudd() {
+		when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
+
+		cachelessSender.getEncryptionKeyForPrint();
+		then(api).should(times(1)).getEncryptionKeyForPrint();
+
+		cachelessSender.getEncryptionKeyForPrint();
+		then(api).should(times(2)).getEncryptionKeyForPrint();
+
+		DateTimeUtils.setCurrentMillisOffset(Duration.standardMinutes(10).getMillis());
+		cachelessSender.getEncryptionKeyForPrint();
+		then(api).should(times(3)).getEncryptionKeyForPrint();
+	}
+
+	@Test
 	public void fallback_to_print_changes_filetype_html_to_pdf() {
 		when(identificationResultWithEncryptionKey.getResult()).thenReturn(new IdentificationResult());
 		when(mockClientResponse.getStatus()).thenReturn(200);
@@ -224,7 +244,7 @@ public class MessageSenderTest {
 
 		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
 
-		MessageSender messageSender = new MessageSender(api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
+		MessageSender messageSender = new MessageSender(newBuilder().build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
 		Message message = newMessage(messageId, printDocument).attachments(printAttachments)
 				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
 
