@@ -320,6 +320,10 @@ public class MessageSender extends Communicator {
 					eventLogger.log("Direkte print. Bruker krypteringsnøkkel for print.");
 					publicKeys = optional(getEncryptionKeyForPrint());
 				}
+
+			} else if (!message.recipient.hasPrintDetails() && !message.hasAnyDocumentRequiringPreEncryption()) {
+				singleChannelMessage = setMapAndMessageToDigipost(message, documentsAndContent, documentsAndInputstream);
+
 			} else {
 				IdentificationResultWithEncryptionKey result = identifyAndGetEncryptionKey(message.recipient.toIdentification());
 				if (result.getResultCode() == IdentificationResultCode.DIGIPOST) {
