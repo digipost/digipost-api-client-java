@@ -15,22 +15,39 @@
  */
 package no.digipost.api.client.representations;
 
+import junit.framework.Assert;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import javax.print.Doc;
 import javax.xml.parsers.DocumentBuilder;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static junit.framework.Assert.assertNull;
+import static junit.framework.TestCase.assertTrue;
 import static no.digipost.api.client.representations.FileType.HTML;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 public class DocumentTest {
+
+	@Test
+	public void correctlyReadsTechnicalTypes(){
+		String s = Document.parseTechnicalTypes(new String[]{"TekniskType1", "TekniskType2", "", "", "TekniskType3", null, null, "TekniskType4"});
+		assertThat(s.length(), is("TekniskType1".length()*4 + 3));
+		assertTrue(s.contains("TekniskType1"));
+		assertTrue(s.contains("TekniskType2"));
+		assertTrue(s.contains("TekniskType3"));
+		assertTrue(s.contains("TekniskType4"));
+
+		assertThat(Document.parseTechnicalTypes(null), nullValue());
+	}
 
 	@Test
 	public void assertThatDocumentClassHaveNotBeenChangedWithoutChangingDocumentCopyMethod() {

@@ -36,6 +36,7 @@ public final class FileType {
 	public static final FileType JPEG = new FileType("jpeg");
 	public static final FileType GIF = new FileType("gif");
 	public static final FileType ZIP = new FileType("zip");
+	public static final FileType EHF = new FileType("ehf");
 
 	private final String fileType;
 
