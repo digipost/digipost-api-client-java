@@ -182,7 +182,7 @@ public class MessageTest {
 	public void sortsDocumentsByTheSameOrderAsTheyAppearInTheMessage() {
 		Document hoved = new Document(UUID.randomUUID().toString(), "hoved", GIF);
 		Document a1 = new Document(UUID.randomUUID().toString(), "a1", PDF);
-		Document a2 = technicalAttachment("uhu, så teknisk!", ZIP);
+		Document a2 = technicalAttachment(ZIP, "uhu, så teknisk!");
 		Document a3 = new Document(UUID.randomUUID().toString(), "a3", HTML);
 		Message message = newMessage("id", hoved).attachments(asList(a1, a2, a3)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
 
@@ -193,7 +193,7 @@ public class MessageTest {
 	public void sortingDocumentsNotInMessageByOrderInMessageThrowsException() {
 		Document hoved = new Document(UUID.randomUUID().toString(), "hoved", GIF);
 		Document a1 = new Document(UUID.randomUUID().toString(), "a1", PDF);
-		Document a2 = technicalAttachment("uhu, så teknisk!", ZIP);
+		Document a2 = technicalAttachment(ZIP, "uhu, så teknisk!");
 		Document notInMessage = new Document(UUID.randomUUID().toString(), "a3", HTML);
 		Message message = newMessage("id", hoved).attachments(asList(a1, a2)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
 
