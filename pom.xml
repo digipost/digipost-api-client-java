@@ -15,7 +15,7 @@
 
 	<artifactId>digipost-api-client-java</artifactId>
 
-	<version>6.14-SNAPSHOT</version>
+	<version>6.141-SNAPSHOT</version>
 
 	<name>Digipost API Client</name>
 	<description>Java library for interacting with the Digipost REST API</description>
@@ -36,7 +36,7 @@
 <!--             <version>${jersey.version}</version> -->
 <!--             <scope>runtime</scope> -->
 <!--         </dependency> -->
-		<jersey.version>2.15</jersey.version>
+		<jersey.version>2.22.2</jersey.version>
 
         <bouncycastle.version>1.52</bouncycastle.version>
 		<slf4j.version>1.7.12</slf4j.version>
@@ -88,6 +88,12 @@
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-multipart</artifactId>
 			<version>${jersey.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-jaxb</artifactId>
+			<version>${jersey.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.annotation</groupId>

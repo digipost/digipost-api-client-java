@@ -19,10 +19,13 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.Headers;
 import org.bouncycastle.crypto.digests.MD5Digest;
 
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.ext.Provider;
 
 
 @Provider
+@Priority(Priorities.USER)
 public class RequestContentMD5Filter extends RequestContentHashFilter {
 
 	public RequestContentMD5Filter(final EventLogger eventListener) {

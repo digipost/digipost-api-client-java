@@ -36,7 +36,7 @@ import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 
-@Priority(Priorities.HEADER_DECORATOR)
+@Priority(Priorities.USER)
 public abstract class RequestContentHashFilter implements ClientRequestFilter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RequestContentHashFilter.class);

@@ -35,6 +35,7 @@ This software includes third party software subject to the following licenses:
   JCL 1.1.1 implemented over SLF4J under MIT License
   jersey-core-client under CDDL+GPL License
   jersey-core-common under CDDL+GPL License
+  jersey-media-jaxb under CDDL+GPL License
   jersey-media-multipart under CDDL+GPL License
   jersey-repackaged-guava under CDDL+GPL License
   Joda-Time under Apache 2

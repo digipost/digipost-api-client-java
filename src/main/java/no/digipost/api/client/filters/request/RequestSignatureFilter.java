@@ -38,7 +38,7 @@ import java.security.Security;
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
 @Provider
-@Priority(Priorities.USER)
+@Priority(Priorities.ENTITY_CODER)
 public class RequestSignatureFilter implements ClientRequestFilter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RequestSignatureFilter.class);
