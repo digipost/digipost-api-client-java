@@ -15,7 +15,7 @@
 
 	<artifactId>digipost-api-client-java</artifactId>
 
-	<version>6.141-SNAPSHOT</version>
+	<version>6.14-SNAPSHOT</version>
 
 	<name>Digipost API Client</name>
 	<description>Java library for interacting with the Digipost REST API</description>
@@ -25,17 +25,6 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
 
-        <!--
-            Oppgradering til Jersey 2.17 knekker api-klienten.
-            Avhengigheten under må legges til (fett nok) https://jersey.java.net/documentation/latest/migration.html#mig-2.16-breaking-changes
-            I tillegg får vi feil ved validering av signature i dpost-api med Jersey >= 2.16.
-         -->
-<!--         <dependency> -->
-<!--             <groupId>org.glassfish.jersey.media</groupId> -->
-<!--             <artifactId>jersey-media-jaxb</artifactId> -->
-<!--             <version>${jersey.version}</version> -->
-<!--             <scope>runtime</scope> -->
-<!--         </dependency> -->
 		<jersey.version>2.22.2</jersey.version>
 
         <bouncycastle.version>1.52</bouncycastle.version>
