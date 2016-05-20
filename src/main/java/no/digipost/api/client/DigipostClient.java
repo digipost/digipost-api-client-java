@@ -31,6 +31,7 @@ import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
 import no.digipost.print.validate.PdfValidator;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
@@ -119,10 +120,9 @@ public class DigipostClient {
 		this.config = config;
 
 		webTarget.register(new LoggingFilter());
-		webTarget.register(new RequestContentSHA256Filter(eventLogger));
 		webTarget.register(new RequestDateFilter(eventLogger));
 		webTarget.register(new RequestUserAgentFilter());
-		webTarget.register(new RequestSignatureFilter(signer, eventLogger));
+		webTarget.register(new RequestSignatureFilter(signer, eventLogger, new RequestContentSHA256Filter(eventLogger)));
 		webTarget.register(responseDateFilter);
 		webTarget.register(responseHashFilter);
 		webTarget.register(responseSignatureFilter);

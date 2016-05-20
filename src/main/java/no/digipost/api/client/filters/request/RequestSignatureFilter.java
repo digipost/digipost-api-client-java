@@ -21,6 +21,7 @@ import no.digipost.api.client.security.ClientRequestToSign;
 import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,13 +48,16 @@ public class RequestSignatureFilter implements ClientRequestFilter {
 
 	private final EventLogger eventLogger;
 
-	public RequestSignatureFilter(final Signer signer) {
-		this(signer, NOOP_EVENT_LOGGER);
+	private final RequestContentHashFilter hashFilter;
+
+	public RequestSignatureFilter(final Signer signer, final RequestContentHashFilter hashFilter) {
+		this(signer, NOOP_EVENT_LOGGER, hashFilter);
 	}
 
-	public RequestSignatureFilter(final Signer signer, final EventLogger eventListener) {
+	public RequestSignatureFilter(final Signer signer, final EventLogger eventListener, final RequestContentHashFilter hashFilter) {
 		this.signer = signer;
 		eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
+		this.hashFilter = hashFilter;
 	}
 
 	@Override
@@ -102,6 +106,9 @@ public class RequestSignatureFilter implements ClientRequestFilter {
 
 		@Override
 		public void close() throws IOException {
+			byteArrayOutputStream.close();
+			byte[] byteArray = byteArrayOutputStream.toByteArray();
+			hashFilter.settContentHashHeader(byteArray, request);
 			setSignatureHeader(request);
 			writeTemporarilyToJerseystream();
 			jerseyStream.close();
