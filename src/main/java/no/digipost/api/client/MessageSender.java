@@ -27,6 +27,16 @@ import no.motif.f.Apply;
 import no.motif.f.Fn;
 import no.motif.single.Optional;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.FormBodyPart;
+import org.apache.http.entity.mime.FormBodyPartBuilder;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.*;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -35,10 +45,12 @@ import org.joda.time.Duration;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXB;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,27 +96,56 @@ public class MessageSender extends Communicator {
 		Message singleChannelMessage = encryptionAndInputStream.getSingleChannelMessage();
 
 		try (MultiPart multiPart = new MultiPart()) {
+
+			Map<Document, InputStream> preparedDocuments = documentsPreparer.prepare(
+					documentInputStream, singleChannelMessage, encrypter, Apply.partially(resolvePdfValidationSettings).of(singleChannelMessage));
+
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			JAXB.marshal(singleChannelMessage, bao);
+			ByteArrayBody attachment = new ByteArrayBody(bao.toByteArray(),
+					ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V6),"message");
+
+			MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create().setMode(HttpMultipartMode.STRICT)
+					.addPart(FormBodyPartBuilder.create("message", attachment).addField("Content-Disposition", "attachment;" + " filename=\"message\"").build());
+
 			BodyPart messageBodyPart = new BodyPart(singleChannelMessage, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
 			ContentDisposition messagePart = ContentDisposition.type("attachment").fileName("message").build();
 			messageBodyPart.setContentDisposition(messagePart);
 			multiPart.bodyPart(messageBodyPart);
 
-			Map<Document, InputStream> preparedDocuments = documentsPreparer.prepare(
-					documentInputStream, singleChannelMessage, encrypter, Apply.partially(resolvePdfValidationSettings).of(singleChannelMessage));
 			for (Entry<Document, InputStream> documentAndContent : preparedDocuments.entrySet()) {
 				Document document = documentAndContent.getKey();
 				InputStream content = documentAndContent.getValue();
-				BodyPart bodyPart = new BodyPart(content, new MediaType("application", defaultIfBlank(document.getDigipostFileType(), "octet-stream")));
+
+
+				byte[] bytes = IOUtils.toByteArray(content);
+				multipartEntity = multipartEntity
+						.addPart(FormBodyPartBuilder
+						.create("application", new ByteArrayBody(bytes, ContentType.create("application/" + defaultIfBlank(document.getDigipostFileType(), "octet-stream")), document.uuid.toString()))
+						.addField("Content-Disposition", "attachment;" + " filename=\"" + document.uuid.toString() + "\"").build());
+
+
+				BodyPart bodyPart = new BodyPart(bytes, new MediaType("application", defaultIfBlank(document.getDigipostFileType(), "octet-stream")));
 				ContentDisposition documentPart = ContentDisposition.type("attachment").fileName(document.uuid).build();
 				bodyPart.setContentDisposition(documentPart);
 				multiPart.bodyPart(bodyPart);
 			}
 			log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + singleChannelMessage.messageId + " ***");
-			Response response = apiService.multipartMessage(multiPart);
+			HttpEntity build = multipartEntity.build();
+			CloseableHttpResponse response = apiService.multipartMessage(build);
 			checkResponse(response);
 
 			log("Brevet ble sendt. Status: [" + response + "]");
-			return response.readEntity(MessageDelivery.class);
+			try {
+				checkResponse(response);
+				log("Forsendelse opprettet. Status: [" + response.getStatusLine().getStatusCode() + "]");
+				MessageDelivery messageDelivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
+				response.close();
+				return messageDelivery;
+
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
 
 		} catch (Exception e) {
 			throw DigipostClientException.from(e);
@@ -127,10 +168,10 @@ public class MessageSender extends Communicator {
 	 *
 	 */
 	public MessageDelivery createOrFetchMessage(final Message message) {
-		Response response = apiService.createMessage(message);
+		CloseableHttpResponse response = apiService.createMessage(message);
 
 		if (resourceAlreadyExists(response)) {
-			Response existingMessageResponse = apiService.fetchExistingMessage(response.getLocation());
+			Response existingMessageResponse = apiService.fetchExistingMessage(responseToURI(response));
 			checkResponse(existingMessageResponse);
 			MessageDelivery delivery = existingMessageResponse.readEntity(MessageDelivery.class);
 			checkThatExistingMessageIsIdenticalToNewMessage(delivery, message);
@@ -138,9 +179,16 @@ public class MessageSender extends Communicator {
 			log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
 			return delivery;
 		} else {
-			checkResponse(response);
-			log("Forsendelse opprettet. Status: [" + response.toString() + "]");
-			return response.readEntity(MessageDelivery.class);
+			try {
+				checkResponse(response);
+				log("Forsendelse opprettet. Status: [" + response.getStatusLine().getStatusCode() + "]");
+				MessageDelivery messageDelivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
+				response.close();
+				return messageDelivery;
+
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -199,29 +247,39 @@ public class MessageSender extends Communicator {
 	public InputStream fetchKeyAndEncrypt(Document document, InputStream content) {
 		checkThatMessageCanBePreEncrypted(document);
 
-		Response encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri());
+		CloseableHttpResponse encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri());
 
 		checkResponse(encryptionKeyResponse);
 
-		EncryptionKey key = encryptionKeyResponse.readEntity(EncryptionKey.class);
+		try {
+			EncryptionKey key = JAXB.unmarshal(encryptionKeyResponse.getEntity().getContent(), EncryptionKey.class);
+			encryptionKeyResponse.close();
+			return the(new DigipostPublicKey(key)).map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT).encrypt(content);
 
-		return the(new DigipostPublicKey(key)).map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT).encrypt(content);
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	public IdentificationResultWithEncryptionKey identifyAndGetEncryptionKey(Identification identification) {
-		Response response = apiService.identifyAndGetEncryptionKey(identification);
+		CloseableHttpResponse response = apiService.identifyAndGetEncryptionKey(identification);
 		checkResponse(response);
 
-		IdentificationResultWithEncryptionKey result = response.readEntity(IdentificationResultWithEncryptionKey.class);
-		if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
-			if (result.getEncryptionKey() == null) {
-				throw new DigipostClientException(ErrorCode.SERVER_ERROR, "Server identifisert mottaker som Digipost-bruker, men sendte ikke med krypteringsnøkkel. Indikerer en feil hos Digipost.");
+		try {
+			IdentificationResultWithEncryptionKey result = JAXB.unmarshal(response.getEntity().getContent(), IdentificationResultWithEncryptionKey.class);
+			response.close();
+			if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
+				if (result.getEncryptionKey() == null) {
+					throw new DigipostClientException(ErrorCode.SERVER_ERROR, "Server identifisert mottaker som Digipost-bruker, men sendte ikke med krypteringsnøkkel. Indikerer en feil hos Digipost.");
+				}
+				log("Mottaker er Digipost-bruker. Hentet krypteringsnøkkel.");
+			} else {
+				log("Mottaker er ikke Digipost-bruker.");
 			}
-			log("Mottaker er Digipost-bruker. Hentet krypteringsnøkkel.");
-		} else {
-			log("Mottaker er ikke Digipost-bruker.");
+			return result;
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
 		}
-		return result;
 	}
 
 	public DigipostPublicKey getEncryptionKeyForPrint() {
@@ -229,12 +287,17 @@ public class MessageSender extends Communicator {
 
 		if (!digipostClientConfig.cachePrintKey || (printKeyCachedTime == null || new Duration(printKeyCachedTime, now).isLongerThan(Duration.standardMinutes(5)))) {
 			log("*** STARTER INTERAKSJON MED API: HENT KRYPTERINGSNØKKEL FOR PRINT ***");
-			Response response = apiService.getEncryptionKeyForPrint();
+			CloseableHttpResponse response = apiService.getEncryptionKeyForPrint();
 			checkResponse(response);
-			EncryptionKey encryptionKey = response.readEntity(EncryptionKey.class);
-			cachedPrintKey = new DigipostPublicKey(encryptionKey);
-			printKeyCachedTime = now;
-			return cachedPrintKey;
+			try {
+				EncryptionKey encryptionKey = JAXB.unmarshal(response.getEntity().getContent(), EncryptionKey.class);
+				response.close();
+				cachedPrintKey = new DigipostPublicKey(encryptionKey);
+				printKeyCachedTime = now;
+				return cachedPrintKey;
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
 		} else {
 			log("Bruker cachet krypteringsnøkkel for print");
 			return cachedPrintKey;
@@ -245,12 +308,18 @@ public class MessageSender extends Communicator {
 	private MessageDelivery uploadContent(MessageDelivery createdMessage, Document document, InputStream documentContent) {
         log("*** STARTER INTERAKSJON MED API: LEGGE TIL FIL ***");
 
-        Response response = apiService.addContent(document, documentContent);
+		CloseableHttpResponse response = apiService.addContent(document, documentContent);
 
         checkResponse(response);
 
         log("Innhold ble lagt til. Status: [" + response + "]");
-        return response.readEntity(MessageDelivery.class);
+		try {
+			MessageDelivery messageDelivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
+			response.close();
+			return messageDelivery;
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 
@@ -261,12 +330,18 @@ public class MessageSender extends Communicator {
 	 */
 	private MessageDelivery send(final MessageDelivery delivery) {
 		log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + delivery.getMessageId() + " ***");
-		Response response = apiService.send(delivery);
+		CloseableHttpResponse response = apiService.send(delivery);
 
 		checkResponse(response);
 
 		log("Brevet ble sendt. Status: [" + response.toString() + "]");
-		return response.readEntity(MessageDelivery.class);
+		try {
+			MessageDelivery messageDelivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
+			response.close();
+			return messageDelivery;
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	private void checkThatMessageHasNotAlreadyBeenDelivered(final MessageDelivery existingMessage) {
@@ -372,6 +447,24 @@ public class MessageSender extends Communicator {
 	static void setPrintContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, List<Document> allDocuments) {
 		for(Document doc : allDocuments) {
 			documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getPrintContent());
+		}
+	}
+
+	private static URI responseToURI(CloseableHttpResponse response){
+		Header location = response.getFirstHeader("location");
+		if(location == null){
+			throw new RuntimeException("Expected header location");
+		}
+
+
+		try {
+			response.close();
+			String uri = (location.getValue().split(":")[1]).trim();
+			return new URI(uri);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 

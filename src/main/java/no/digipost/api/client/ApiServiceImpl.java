@@ -23,6 +23,16 @@ import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.cache.inmemory.Cache;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
 
@@ -32,10 +42,12 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXB;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -56,20 +68,31 @@ public class ApiServiceImpl implements ApiService {
 	private static final String ENTRY_POINT = "/";
 	private final WebTarget webResource;
 	private final long brokerId;
+	private CloseableHttpClient httpClient;
+	private final String digipostUrl;
 
 
 	private final Callable<EntryPoint> entryPoint = new Callable<EntryPoint>() {
 		@Override
         public EntryPoint call() throws Exception {
-			Response response = webResource.path(ENTRY_POINT)
-					.request(DIGIPOST_MEDIA_TYPE_V6)
-					.header(X_Digipost_UserId, brokerId)
-					.get();
-			if (response.getStatus() == OK.getStatusCode()) {
-				return response.readEntity(EntryPoint.class);
+			HttpGet httpGet = new HttpGet(digipostUrl + ENTRY_POINT);
+			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+
+			CloseableHttpResponse execute = httpClient.execute(httpGet);
+
+			execute.close();
+
+			if(execute.getStatusLine().getStatusCode() == OK.getStatusCode()){
+				EntryPoint entryPoint = JAXB.unmarshal(execute.getEntity().getContent(), EntryPoint.class);
+				execute.close();
+				return entryPoint;
 			} else {
-				throw new DigipostClientException(response.readEntity(ErrorMessage.class));
+				ErrorMessage errorMessage = JAXB.unmarshal(execute.getEntity().getContent(), ErrorMessage.class);
+				execute.close();
+				throw new DigipostClientException(errorMessage);
 			}
+
         }
 	};
 
@@ -77,10 +100,15 @@ public class ApiServiceImpl implements ApiService {
 	private final Cache<String, SenderInformation> senderInformation = new Cache<>("sender-information", expireAfterAccess(standardMinutes(5)), useSoftValues);
 	private final EventLogger eventLogger;
 
-	public ApiServiceImpl(WebTarget webResource, long senderAccountId, EventLogger eventLogger) {
+	public ApiServiceImpl(WebTarget webResource, long senderAccountId, EventLogger eventLogger, String digipostUrl) {
 		this.webResource = webResource;
 		this.brokerId = senderAccountId;
 		this.eventLogger = eventLogger;
+		this.digipostUrl = digipostUrl;
+	}
+
+	public void setApacheClient(CloseableHttpClient httpClient){
+		this.httpClient = httpClient;
 	}
 
 	@Override
@@ -90,37 +118,74 @@ public class ApiServiceImpl implements ApiService {
 
 
 	@Override
-	public Response multipartMessage(final MultiPart multiPart) {
+	public CloseableHttpResponse multipartMessage(final HttpEntity multipart) {
 		EntryPoint entryPoint = getEntryPoint();
-		return webResource
-				.path(entryPoint.getCreateMessageUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.post(Entity.entity(multiPart, "multipart/mixed"));
+
+		HttpPost httpPost = new HttpPost(digipostUrl + entryPoint.getCreateMessageUri().getPath());
+		try {
+			httpPost.addHeader(X_Digipost_UserId, brokerId + "");
+			httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			httpPost.setHeader("MIME-Version", "1.0");
+			httpPost.removeHeaders("Accept-Encoding");
+			httpPost.setEntity(new OverriddenMultipartSubtypeHttpEntity(multipart, "mixed"));
+			return httpClient.execute(httpPost);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
-	public Response identifyAndGetEncryptionKey(final Identification identification) {
+	public CloseableHttpResponse identifyAndGetEncryptionKey(final Identification identification) {
 		EntryPoint entryPoint = getEntryPoint();
-		return webResource
-				.path(entryPoint.getIdentificationWithEncryptionKeyUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V6));
+
+		HttpPost httpPost = new HttpPost(digipostUrl + entryPoint.getIdentificationWithEncryptionKeyUri().getPath());
+		try {
+			httpPost.addHeader(X_Digipost_UserId, brokerId + "");
+			httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V6);
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			JAXB.marshal(identification, bao);
+			httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
+			return httpClient.execute(httpPost);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
-	public Response createMessage(final Message message) {
+	public CloseableHttpResponse createMessage(final Message message) {
+
 		EntryPoint entryPoint = getEntryPoint();
-		return webResource
-				.path(entryPoint.getCreateMessageUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.post(Entity.entity(message, DIGIPOST_MEDIA_TYPE_V6));
+
+		HttpPost httpPost = new HttpPost(digipostUrl + entryPoint.getCreateMessageUri().getPath());
+		try {
+			httpPost.addHeader(X_Digipost_UserId, brokerId + "");
+			httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V6);
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			JAXB.marshal(message, bao);
+			httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
+			return httpClient.execute(httpPost);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public Response fetchExistingMessage(final URI location) {
+		HttpGet httpGet = new HttpGet(digipostUrl + location.getPath());
+		try {
+			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			CloseableHttpResponse execute = httpClient.execute(httpGet);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+
 		return webResource
 				.path(location.getPath())
 				.request(DIGIPOST_MEDIA_TYPE_V6)
@@ -129,46 +194,67 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
-	public Response getEncryptionKey(final URI location) {
-		return webResource
-				.path(location.getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.get();
+	public CloseableHttpResponse getEncryptionKey(final URI location) {
+		HttpGet httpGet = new HttpGet(location);
+		try {
+			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			return httpClient.execute(httpGet);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
-	public Response getEncryptionKeyForPrint() {
+	public CloseableHttpResponse getEncryptionKeyForPrint() {
 		EntryPoint entryPoint = getEntryPoint();
-		return webResource
-				.path(entryPoint.getPrintEncryptionKey().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.get();
+
+		HttpGet httpGet = new HttpGet(digipostUrl + entryPoint.getPrintEncryptionKey().getPath());
+		try {
+			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			return httpClient.execute(httpGet);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
-	public Response addContent(final Document document, final InputStream letterContent) {
+	public CloseableHttpResponse addContent(final Document document, final InputStream letterContent) {
 		Link addContentLink = fetchAddContentLink(document);
 
 		byte[] content = readLetterContent(letterContent);
 
-		return webResource
-				.path(addContentLink.getUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.post(Entity.entity(content, APPLICATION_OCTET_STREAM_TYPE));
+		HttpPost httpPost = new HttpPost(digipostUrl + addContentLink.getUri().getPath());
+		try {
+			httpPost.addHeader(X_Digipost_UserId, brokerId + "");
+			httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_OCTET_STREAM_TYPE.toString());
+			httpPost.setEntity(new ByteArrayEntity(content));
+			return httpClient.execute(httpPost);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+
 	}
 
 	@Override
-	public Response send(final MessageDelivery createdMessage) {
+	public CloseableHttpResponse send(final MessageDelivery createdMessage) {
 		Link sendLink = fetchSendLink(createdMessage);
 
-		return webResource
-				.path(sendLink.getUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.post(null);
+		HttpPost httpPost = new HttpPost(digipostUrl + sendLink.getUri().getPath());
+		try {
+			httpPost.addHeader(X_Digipost_UserId, brokerId + "");
+			httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			httpPost.setEntity(null);
+			return httpClient.execute(httpPost);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	private Link fetchAddContentLink(final Document document) {
@@ -199,41 +285,54 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
-	public Response getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
-		WebTarget target = webResource
-				.path(getEntryPoint().getDocumentEventsUri().getPath())
-				.queryParam("from", from.toString("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"))
-				.queryParam("to", to.toString("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"))
-				.queryParam("offset", String.valueOf(offset))
-				.queryParam("maxResults", String.valueOf(maxResults));
+	public CloseableHttpResponse getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
+
+		URIBuilder builder = new URIBuilder().setPath(digipostUrl + getEntryPoint().getDocumentEventsUri().getPath())
+				.setParameter("from", from.toString("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"))
+				.setParameter("to", to.toString("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"))
+				.setParameter("offset", String.valueOf(offset))
+				.setParameter("maxResults", String.valueOf(maxResults));
+
 		if (organisation != null) {
-			target = target.queryParam("org", organisation);
+			builder = builder.setParameter("org", organisation);
 		}
 		if (partId != null) {
-			target = target.queryParam("part", partId);
+			builder = builder.setParameter("part", partId);
 		}
-		return target
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.get();
+
+		try {
+			HttpGet httpGet = new HttpGet(builder.build());
+			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			return httpClient.execute(httpGet);
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+
 	}
 
 	@Override
-	public Response getDocumentStatus(Link linkToDocumentStatus) {
+	public CloseableHttpResponse getDocumentStatus(Link linkToDocumentStatus) {
 		return getDocumentStatus(linkToDocumentStatus.getUri().getPath());
 	}
 
 	@Override
-	public Response getDocumentStatus(long senderId, String uuid) {
+	public CloseableHttpResponse getDocumentStatus(long senderId, String uuid) {
 		return getDocumentStatus(String.format("/documents/%s/%s/status", senderId, uuid));
 	}
 
-	private Response getDocumentStatus(String path) {
-		return webResource
-				.path(path)
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.get();
+	private CloseableHttpResponse getDocumentStatus(String path) {
+
+		HttpGet httpGet = new HttpGet(digipostUrl + path);
+		try {
+			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			return httpClient.execute(httpGet);
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -247,20 +346,32 @@ public class ApiServiceImpl implements ApiService {
 
 	@Override
 	public Recipients search(final String searchString) {
-		return webResource
-				.path(getEntryPoint().getSearchUri().getPath() + "/" + searchString)
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.get(Recipients.class);
+		HttpGet httpGet = new HttpGet(digipostUrl + getEntryPoint().getSearchUri().getPath() + "/" + searchString);
+		try {
+			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			CloseableHttpResponse response = httpClient.execute(httpGet);
+			Recipients recipients = JAXB.unmarshal(response.getEntity().getContent(), Recipients.class);
+			response.close();
+			return recipients;
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public Autocomplete searchSuggest(final String searchString) {
-		return webResource
-				.path(getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString)
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.get(Autocomplete.class);
+		HttpGet httpGet = new HttpGet(digipostUrl + getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString);
+		try {
+			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			CloseableHttpResponse response = httpClient.execute(httpGet);
+			Autocomplete autocomplete = JAXB.unmarshal(response.getEntity().getContent(), Autocomplete.class);
+			response.close();
+			return autocomplete;
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -314,15 +425,25 @@ public class ApiServiceImpl implements ApiService {
 		return new Callable<R>() {
 			@Override
             public R call() {
-				WebTarget target = webResource.path(path);
-				for (Entry<String, List<P>> param : queryParams.entrySet()) {
-					target = target.queryParam(param.getKey(), param.getValue().toArray());
-				}
-				Response response = target.request(DIGIPOST_MEDIA_TYPE_V6).header(X_Digipost_UserId, brokerId).get();
+				HttpGet httpGet = new HttpGet(digipostUrl + path);
+				try {
+					for (Entry<String, List<P>> param : queryParams.entrySet()) {
+						httpGet.addHeader(param.getKey(), param.getValue().toString());
+					}
+					httpGet.addHeader(X_Digipost_UserId, brokerId + "");
+					httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 
-				Communicator.checkResponse(response, eventLogger);
-				return response.readEntity(entityType);
-            }};
+					CloseableHttpResponse execute = httpClient.execute(httpGet);
+					Communicator.checkResponse(execute, eventLogger);
+					R unmarshal = JAXB.unmarshal(execute.getEntity().getContent(), entityType);
+					execute.close();
+					return unmarshal;
+
+				} catch (IOException e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+            }
+		};
 	}
 
 }

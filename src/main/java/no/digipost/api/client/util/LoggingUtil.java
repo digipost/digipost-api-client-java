@@ -15,6 +15,9 @@
  */
 package no.digipost.api.client.util;
 
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +29,33 @@ public class LoggingUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(LoggingUtil.class);
 
+	public static void logResponse(HttpResponse response) {
+		LOG.info("HTTP response status code: {}", response.getStatusLine().getStatusCode());
+		LOG.info("HTTP response headers: {}", headersAsString(response.getAllHeaders()));
+	}
+
 	public static void logResponse(ClientResponseContext clientResponseContext) {
 		LOG.info("HTTP response status code: {}", clientResponseContext.getStatus());
 		LOG.info("HTTP response headers: {}", headersAsString(clientResponseContext.getHeaders()));
+	}
+
+	public static String headersAsString(Header[] httpHeaders) {
+
+		StringBuffer result = new StringBuffer();
+
+		for (Header header : httpHeaders) {
+
+			result.append(header.getName()).append(" :");
+
+			for (HeaderElement element : header.getElements()) {
+				result.append(" ").append(element.getValue());
+			}
+
+			result.append("; ");
+
+		}
+		return result.toString();
+
 	}
 
 	public static String headersAsString(MultivaluedMap<String, String> httpHeaders) {

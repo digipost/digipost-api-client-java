@@ -18,19 +18,23 @@ package no.digipost.api.client;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery;
-import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
-import no.digipost.api.client.filters.request.RequestDateFilter;
-import no.digipost.api.client.filters.request.RequestSignatureFilter;
-import no.digipost.api.client.filters.request.RequestUserAgentFilter;
-import no.digipost.api.client.filters.response.ResponseContentSHA256Filter;
-import no.digipost.api.client.filters.response.ResponseDateFilter;
-import no.digipost.api.client.filters.response.ResponseSignatureFilter;
+import no.digipost.api.client.filters.request.*;
+import no.digipost.api.client.filters.response.*;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JerseyClientProvider;
 import no.digipost.print.validate.PdfValidator;
+import no.posten.dpost.httpclient.DigipostHttpClientDefaults;
+import no.posten.dpost.httpclient.DigipostHttpClientDefaults.ConnectionAmount;
+import no.posten.dpost.httpclient.DigipostHttpClientFactory;
+import no.posten.dpost.httpclient.DigipostHttpClientMillisecondTimeouts;
+import no.posten.dpost.httpclient.DigipostHttpClientSettings;
+import org.apache.http.HttpHost;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
@@ -77,10 +81,14 @@ public class DigipostClient {
 	private final MessageDeliverer deliverer;
 	private final DocumentCommunicator documentCommunicator;
 	private final DigipostClientConfig config;
+	private final CloseableHttpClient httpClient;
 
 	private final ResponseSignatureFilter responseSignatureFilter;
+	private final ResponseSignatureInterceptor responseSignatureInterceptor;
+	private final ResponseContentSHA256Interceptor responseHashInterceptor = new ResponseContentSHA256Interceptor();
 	private final ResponseContentSHA256Filter responseHashFilter = new ResponseContentSHA256Filter();
 	private final ResponseDateFilter responseDateFilter = new ResponseDateFilter();
+	private final ResponseDateInterceptor responseDateInterceptor = new ResponseDateInterceptor();
 
 
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
@@ -111,13 +119,26 @@ public class DigipostClient {
 
 		WebTarget webTarget = (jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient).register(new GZipEncoder()).target(digipostUrl);
 
-		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId, eventLogger) : overriddenApiService;
+		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId, eventLogger, digipostUrl) : overriddenApiService;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 		this.messageSender = new MessageSender(config, apiService, eventLogger, new PdfValidator());
 		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
 		this.documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
 		this.responseSignatureFilter = new ResponseSignatureFilter(apiService);
+		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
 		this.config = config;
+
+		HttpClientBuilder builder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
+		CloseableHttpClient apacheClient = builder.addInterceptorLast(new RequestDateInterceptor(eventLogger))
+				.addInterceptorLast(new RequestUserAgentInterceptor())
+				.addInterceptorLast(new RequestSignatureInterceptor(signer, eventLogger, new RequestContentSHA256Filter(eventLogger)))
+				.addInterceptorLast(responseDateInterceptor)
+				.addInterceptorLast(responseHashInterceptor)
+				.addInterceptorLast(responseSignatureInterceptor).build();
+
+		apiService.setApacheClient(apacheClient);
+
+		this.httpClient = apacheClient;
 
 		webTarget.register(new LoggingFilter());
 		webTarget.register(new RequestDateFilter(eventLogger));

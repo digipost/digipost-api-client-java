@@ -17,9 +17,11 @@ package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
+import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +29,11 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.bind.DataBindingException;
+import javax.xml.bind.JAXB;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -48,6 +54,40 @@ public abstract class Communicator {
 	public Communicator(final ApiService apiService, final EventLogger eventLogger) {
 		this.apiService = apiService;
 		this.eventLogger = eventLogger;
+	}
+
+	protected void checkResponse(CloseableHttpResponse response) {
+		checkResponse(response, eventLogger);
+	}
+
+	public static void checkResponse(final CloseableHttpResponse response, EventLogger eventLogger) {
+		Status status = Status.fromStatusCode(response.getStatusLine().getStatusCode());
+		if (!responseOk(status)) {
+			ErrorMessage error = fetchErrorMessageString(response);
+			log(error.toString(), eventLogger);
+			switch (status) {
+				case INTERNAL_SERVER_ERROR:
+					throw new DigipostClientException(ErrorCode.SERVER_ERROR, error.getErrorMessage());
+				case SERVICE_UNAVAILABLE:
+					throw new DigipostClientException(ErrorCode.API_UNAVAILABLE, error.getErrorMessage());
+				default:
+					throw new DigipostClientException(error);
+			}
+		}
+	}
+
+	protected static ErrorMessage fetchErrorMessageString(final CloseableHttpResponse response) {
+		try {
+			ErrorMessage errorMessage = JAXB.unmarshal(response.getEntity().getContent(), ErrorMessage.class);
+			response.close();
+			return errorMessage != null ? errorMessage : ErrorMessage.EMPTY;
+		} catch (ProcessingException | IllegalStateException | WebApplicationException | DataBindingException e) {
+			return new ErrorMessage(SERVER, ErrorCode.SERVER_ERROR.name(),
+					e.getClass().getSimpleName() + ": Det skjedde en feil på serveren (" + e.getMessage() +
+							"), men klienten kunne ikke lese responsen.");
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	protected void checkResponse(Response response) {
@@ -74,7 +114,7 @@ public abstract class Communicator {
 		try {
 			ErrorMessage errorMessage = response.readEntity(ErrorMessage.class);
 			return errorMessage != null ? errorMessage : ErrorMessage.EMPTY;
-		} catch (ProcessingException | IllegalStateException | WebApplicationException e) {
+		} catch (ProcessingException | IllegalStateException | WebApplicationException | DataBindingException e) {
 			return new ErrorMessage(SERVER, ErrorCode.SERVER_ERROR.name(),
 					e.getClass().getSimpleName() + ": Det skjedde en feil på serveren (" + e.getMessage() +
 					"), men klienten kunne ikke lese responsen.");
@@ -113,6 +153,10 @@ public abstract class Communicator {
 
 	protected boolean resourceAlreadyExists(final Response response) {
 		return Status.CONFLICT.equals(Status.fromStatusCode(response.getStatus()));
+	}
+
+	protected boolean resourceAlreadyExists(final CloseableHttpResponse response) {
+		return Status.CONFLICT.equals(Status.fromStatusCode(response.getStatusLine().getStatusCode()));
 	}
 
 	protected void checkThatExistingMessageIsIdenticalToNewMessage(final MessageDelivery exisitingMessage, final Message message) {

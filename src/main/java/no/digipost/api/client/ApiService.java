@@ -17,6 +17,10 @@ package no.digipost.api.client;
 
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
 
@@ -59,23 +63,26 @@ import java.net.URI;
 public interface ApiService {
 	EntryPoint getEntryPoint();
 
+
+	void setApacheClient(CloseableHttpClient httpClientBuilder);
+
 	/**
 	 * Oppretter og sender en multipartforsendelse
 	 */
-	Response multipartMessage(MultiPart multiPart);
+	CloseableHttpResponse multipartMessage(HttpEntity multipart);
 
 	/**
 	 * Oppretter en ny forsendelsesressurs på serveren ved å sende en
 	 * POST-forespørsel.
 	 */
-	Response createMessage(Message message);
+	CloseableHttpResponse createMessage(Message message);
 
 	/**
 	 * Henter en allerede eksisterende forsendelsesressurs fra serveren.
 	 */
 	Response fetchExistingMessage(URI location);
 
-	Response getEncryptionKey(URI location);
+	CloseableHttpResponse getEncryptionKey(URI location);
 
 	/**
 	 * Angir innholdet i en allerede opprettet forsendelse
@@ -84,7 +91,7 @@ public interface ApiService {
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
 	 *
 	 */
-	Response addContent(Document document, InputStream letterContent);
+	CloseableHttpResponse addContent(Document document, InputStream letterContent);
 
 	/**
 	 * Sender innholdet i forsendelsen som en POST-forespørsel til serveren
@@ -95,7 +102,7 @@ public interface ApiService {
 	 * metoden {@code addContent}
 	 *
 	 */
-	Response send(MessageDelivery createdMessage);
+	CloseableHttpResponse send(MessageDelivery createdMessage);
 
 	Recipients search(String searchString);
 
@@ -112,7 +119,7 @@ public interface ApiService {
 	 * skal prekrypteres.
 	 * @param identification
 	 */
-	Response identifyAndGetEncryptionKey(Identification identification);
+	CloseableHttpResponse identifyAndGetEncryptionKey(Identification identification);
 
 	/**
 	 * Henter hendelser knyttet til tidligere sendte brev.
@@ -121,21 +128,21 @@ public interface ApiService {
 	 * @param partId Frivillig organisasjons-enhet, kan være {@code null}
 	 *
 	 */
-	Response getDocumentEvents(String organisation, String partId, DateTime from, DateTime to, int offset, int maxResults);
+	CloseableHttpResponse getDocumentEvents(String organisation, String partId, DateTime from, DateTime to, int offset, int maxResults);
 
 	/**
 	 * Henter status på dokumeter som tidligere blitt sendt i Digipost, både via digital og print-kanal.
 	 * @param linkToDocumentStatus
 	 */
-	Response getDocumentStatus(Link linkToDocumentStatus);
-	Response getDocumentStatus(long senderId, String uuid);
+	CloseableHttpResponse getDocumentStatus(Link linkToDocumentStatus);
+	CloseableHttpResponse getDocumentStatus(long senderId, String uuid);
 
 	Response getContent(String path);
 
 	/**
 	 * Henter publik krypteringsnøkkel for forsendelser som skal sendes til print.
 	 */
-	Response getEncryptionKeyForPrint();
+	CloseableHttpResponse getEncryptionKeyForPrint();
 
 
 	/**

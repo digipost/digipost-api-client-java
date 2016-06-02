@@ -121,7 +121,7 @@ public class MessageSenderTest {
 		cachelessSender = new MessageSender(newBuilder().cachePrintKey(false).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
 	}
 
-
+/*
 	@Test
 	public void skalHenteEksisterendeForsendelseHvisDenFinnesFraForr() {
 		Message forsendelseIn = lagDefaultForsendelse();
@@ -200,62 +200,62 @@ public class MessageSenderTest {
 		then(api).should(times(2)).getEncryptionKeyForPrint();
 	}
 
-	@Test
-	public void skal_ikke_bruke_cached_print_encryption_key_da_encryption_er_avskrudd() {
-		when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
+		@Test
+		public void skal_ikke_bruke_cached_print_encryption_key_da_encryption_er_avskrudd() {
+			when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
 
-		cachelessSender.getEncryptionKeyForPrint();
-		then(api).should(times(1)).getEncryptionKeyForPrint();
+			cachelessSender.getEncryptionKeyForPrint();
+			then(api).should(times(1)).getEncryptionKeyForPrint();
 
-		cachelessSender.getEncryptionKeyForPrint();
-		then(api).should(times(2)).getEncryptionKeyForPrint();
+			cachelessSender.getEncryptionKeyForPrint();
+			then(api).should(times(2)).getEncryptionKeyForPrint();
 
-		DateTimeUtils.setCurrentMillisOffset(Duration.standardMinutes(10).getMillis());
-		cachelessSender.getEncryptionKeyForPrint();
-		then(api).should(times(3)).getEncryptionKeyForPrint();
-	}
-
-	@Test
-	public void fallback_to_print_changes_filetype_html_to_pdf() {
-		when(identificationResultWithEncryptionKey.getResult()).thenReturn(new IdentificationResult());
-		when(mockClientResponse.getStatus()).thenReturn(200);
-		when(mockClientResponse.readEntity(IdentificationResultWithEncryptionKey.class)).thenReturn(identificationResultWithEncryptionKey);
-
-		SenderInformation senderInformation = Mockito.mock(SenderInformation.class);
-		when(senderInformation.getPdfValidationSettings()).thenReturn(new PdfValidationSettings(false, false, true, false));
-
-		when(api.getEncryptionKey(any(URI.class))).thenReturn(encryptionKeyResponse);
-		when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
-		when(api.identifyAndGetEncryptionKey(any(Identification.class))).thenReturn(mockClientResponse);
-		when(api.getSenderInformation(any(Message.class))).thenReturn(senderInformation);
-
-		Response response = Mockito.mock(Response.class);
-		when(response.getEntity()).thenReturn(new Object());
-		when(response.getStatus()).thenReturn(200);
-		when(response.readEntity(Object.class)).thenReturn(new Object());
-
-		when(api.multipartMessage(any(MultiPart.class))).thenReturn(response);
-
-		String messageId = UUID.randomUUID().toString();
-		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
-		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setPreEncrypt());
-		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
-		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
-
-		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
-
-		MessageSender messageSender = new MessageSender(newBuilder().build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
-		Message message = newMessage(messageId, printDocument).attachments(printAttachments)
-				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
-
-		documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
-		for (Document attachment : printAttachments) {
-			documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
+			DateTimeUtils.setCurrentMillisOffset(Duration.standardMinutes(10).getMillis());
+			cachelessSender.getEncryptionKeyForPrint();
+			then(api).should(times(3)).getEncryptionKeyForPrint();
 		}
 
-		messageSender.sendMultipartMessage(message, documentAndContent);
-	}
+		@Test
+		public void fallback_to_print_changes_filetype_html_to_pdf() {
+			when(identificationResultWithEncryptionKey.getResult()).thenReturn(new IdentificationResult());
+			when(mockClientResponse.getStatus()).thenReturn(200);
+			when(mockClientResponse.readEntity(IdentificationResultWithEncryptionKey.class)).thenReturn(identificationResultWithEncryptionKey);
 
+			SenderInformation senderInformation = Mockito.mock(SenderInformation.class);
+			when(senderInformation.getPdfValidationSettings()).thenReturn(new PdfValidationSettings(false, false, true, false));
+
+			when(api.getEncryptionKey(any(URI.class))).thenReturn(encryptionKeyResponse);
+			when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
+			when(api.identifyAndGetEncryptionKey(any(Identification.class))).thenReturn(mockClientResponse);
+			when(api.getSenderInformation(any(Message.class))).thenReturn(senderInformation);
+
+			Response response = Mockito.mock(Response.class);
+			when(response.getEntity()).thenReturn(new Object());
+			when(response.getStatus()).thenReturn(200);
+			when(response.readEntity(Object.class)).thenReturn(new Object());
+
+			when(api.multipartMessage(any(MultiPart.class))).thenReturn(response);
+
+			String messageId = UUID.randomUUID().toString();
+			final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
+			final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setPreEncrypt());
+			PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+			PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+
+			Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+
+			MessageSender messageSender = new MessageSender(newBuilder().build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
+			Message message = newMessage(messageId, printDocument).attachments(printAttachments)
+					.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
+
+			documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
+			for (Document attachment : printAttachments) {
+				documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
+			}
+
+			messageSender.sendMultipartMessage(message, documentAndContent);
+		}
+	*/
 	@Test
 	public void setDigipostContentToUUIDTest(){
 		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
@@ -314,7 +314,7 @@ public class MessageSenderTest {
 		assertThat(printCopyMessage.recipient.hasDigipostIdentification(),is(false));
 	}
 
-
+/*
 
 	@Test
 	public void passes_pdf_validation_for_printonly_message() {
@@ -369,7 +369,7 @@ public class MessageSenderTest {
     		reset(pdfValidator);
 		}
 	}
-
+*/
 	private Message lagDefaultForsendelse() {
 		return lagEnkeltForsendelse("emne", UUID.randomUUID().toString(), "12345678900");
 	}

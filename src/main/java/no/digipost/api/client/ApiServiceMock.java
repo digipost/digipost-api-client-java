@@ -25,6 +25,10 @@ import no.digipost.api.client.representations.sender.SenderStatus;
 import no.digipost.api.client.util.MockfriendlyResponse.MockedResponseBuilder;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -118,8 +122,14 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	@Override
-	public Response multipartMessage(final MultiPart multiPart) {
-		Message message = null;
+	public void setApacheClient(CloseableHttpClient httpClientBuilder) {
+
+	}
+
+
+	@Override
+	public CloseableHttpResponse multipartMessage(final HttpEntity multipart) {
+		/*Message message = null;
 		List<ContentPart> contentParts = new ArrayList<>();
 		for (BodyPart bodyPart : multiPart.getBodyParts()) {
 			if (bodyPart.getMediaType().toString().equals(MediaTypes.DIGIPOST_MEDIA_TYPE_V6)) {
@@ -140,32 +150,35 @@ public class ApiServiceMock implements ApiService {
 		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
 		Response response = requestsAndResponses.getResponse(subject);
 
-		requestsAndResponses.addRequest(new DigipostRequest(message, contentParts));
-		return response;
+		requestsAndResponses.addRequest(new DigipostRequest(message, contentParts));*/
+		//return response;
+		return null;
 	}
 
 	@Override
-	public Response identifyAndGetEncryptionKey(Identification identification) {
+	public CloseableHttpResponse identifyAndGetEncryptionKey(Identification identification) {
 		IdentificationResultWithEncryptionKey mockEntity = new IdentificationResultWithEncryptionKey(
 				IdentificationResult.digipost("fake.address#1234"),
 				fakeEncryptionKey
 		);
-		return MockedResponseBuilder.create()
+		return null;
+		/*return MockedResponseBuilder.create()
 				.status(OK.getStatusCode())
 				.entity(mockEntity)
-				.build();
+				.build();*/
 	}
 
 	@Override
-	public Response getEncryptionKeyForPrint() {
-		return MockedResponseBuilder.create()
+	public CloseableHttpResponse getEncryptionKeyForPrint() {
+		return null;
+		/*return MockedResponseBuilder.create()
 				.status(OK.getStatusCode())
 				.entity(fakeEncryptionKey)
-				.build();
+				.build();*/
 	}
 
 	@Override
-	public Response createMessage(final Message message) {
+	public CloseableHttpResponse createMessage(final Message message) {
 		throw new NotImplementedException("This is a mock");
 	}
 
@@ -175,17 +188,17 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	@Override
-	public Response getEncryptionKey(final URI location) {
+	public CloseableHttpResponse getEncryptionKey(final URI location) {
 		throw new NotImplementedException("This is a mock");
 	}
 
 	@Override
-	public Response addContent(final Document document, final InputStream letterContent) {
+	public CloseableHttpResponse addContent(final Document document, final InputStream letterContent) {
 		throw new NotImplementedException("This is a mock");
 	}
 
 	@Override
-	public Response send(final MessageDelivery createdMessage) {
+	public CloseableHttpResponse send(final MessageDelivery createdMessage) {
 		throw new NotImplementedException("This is a mock");
 	}
 
@@ -210,32 +223,36 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	@Override
-	public Response getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
+	public CloseableHttpResponse getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
 		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.GET_DOCUMENTS_EVENTS);
 		Response response = requestsAndResponses.getResponse();
-
+/*
 		if (response != null) {
 			return response;
 		} else {
 			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new DocumentEvents()).build();
 		}
+		*/
+		return null;
 	}
 
 	@Override
-	public Response getDocumentStatus(Link linkToDocumentStatus) {
+	public CloseableHttpResponse getDocumentStatus(Link linkToDocumentStatus) {
 		return getDocumentStatus(1, "uuid");
 	}
 
 	@Override
-	public Response getDocumentStatus(long senderId, String uuid) {
+	public CloseableHttpResponse getDocumentStatus(long senderId, String uuid) {
 		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.GET_DOCUMENT_STATUS);
 		Response response = requestsAndResponses.getResponse();
-
+/*
 		if (response != null) {
 			return response;
 		} else {
 			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new DocumentStatus()).build();
 		}
+		*/
+		return null;
 	}
 
 	@Override
