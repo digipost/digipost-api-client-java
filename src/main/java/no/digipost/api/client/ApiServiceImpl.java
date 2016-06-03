@@ -26,6 +26,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -70,6 +72,12 @@ public class ApiServiceImpl implements ApiService {
 		@Override
         public EntryPoint call() throws Exception {
 			HttpGet httpGet = new HttpGet(digipostUrl + ENTRY_POINT);
+			HttpHost proxy = new HttpHost("sig-web.posten.no", 3128, "http");
+			RequestConfig config = RequestConfig.custom()
+					.setProxy(proxy)
+					.build();
+			httpGet.setConfig(config);
+
 			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
 			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 
