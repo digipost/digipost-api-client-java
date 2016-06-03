@@ -76,7 +76,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
-			<version>4.5.2</version>
+			<version>4.5.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>no.posten.dpost</groupId>
@@ -86,11 +86,6 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-common</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-client</artifactId>
 			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>

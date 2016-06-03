@@ -105,7 +105,7 @@ public class MessageSender extends Communicator {
 			ByteArrayBody attachment = new ByteArrayBody(bao.toByteArray(),
 					ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V6),"message");
 
-			MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create().setMode(HttpMultipartMode.STRICT)
+			MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create().setMode(HttpMultipartMode.STRICT).setMimeSubtype("mixed")
 					.addPart(FormBodyPartBuilder.create("message", attachment).addField("Content-Disposition", "attachment;" + " filename=\"message\"").build());
 
 			BodyPart messageBodyPart = new BodyPart(singleChannelMessage, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
@@ -171,13 +171,18 @@ public class MessageSender extends Communicator {
 		CloseableHttpResponse response = apiService.createMessage(message);
 
 		if (resourceAlreadyExists(response)) {
-			Response existingMessageResponse = apiService.fetchExistingMessage(responseToURI(response));
+			CloseableHttpResponse existingMessageResponse = apiService.fetchExistingMessage(responseToURI(response));
 			checkResponse(existingMessageResponse);
-			MessageDelivery delivery = existingMessageResponse.readEntity(MessageDelivery.class);
-			checkThatExistingMessageIsIdenticalToNewMessage(delivery, message);
-			checkThatMessageHasNotAlreadyBeenDelivered(delivery);
-			log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
-			return delivery;
+			try {
+				MessageDelivery delivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
+				response.close();
+				checkThatExistingMessageIsIdenticalToNewMessage(delivery, message);
+				checkThatMessageHasNotAlreadyBeenDelivered(delivery);
+				log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
+				return delivery;
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
 		} else {
 			try {
 				checkResponse(response);

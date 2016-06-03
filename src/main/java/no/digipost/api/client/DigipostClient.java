@@ -24,37 +24,20 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
-import no.digipost.api.client.util.JerseyClientProvider;
 import no.digipost.print.validate.PdfValidator;
-import no.posten.dpost.httpclient.DigipostHttpClientDefaults;
-import no.posten.dpost.httpclient.DigipostHttpClientDefaults.ConnectionAmount;
 import no.posten.dpost.httpclient.DigipostHttpClientFactory;
-import no.posten.dpost.httpclient.DigipostHttpClientMillisecondTimeouts;
 import no.posten.dpost.httpclient.DigipostHttpClientSettings;
-import org.apache.http.HttpHost;
-import org.apache.http.config.ConnectionConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.JerseyClient;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.glassfish.jersey.filter.LoggingFilter;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.message.GZipEncoder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.*;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXB;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -117,9 +100,7 @@ public class DigipostClient {
 
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final Client jerseyClient, final ApiService overriddenApiService) {
 
-		WebTarget webTarget = (jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient).register(new GZipEncoder()).target(digipostUrl);
-
-		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId, eventLogger, digipostUrl) : overriddenApiService;
+		this.apiService = overriddenApiService == null ? new ApiServiceImpl(senderAccountId, eventLogger, digipostUrl) : overriddenApiService;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 		this.messageSender = new MessageSender(config, apiService, eventLogger, new PdfValidator());
 		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
@@ -128,8 +109,8 @@ public class DigipostClient {
 		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
 		this.config = config;
 
-		HttpClientBuilder builder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
-		CloseableHttpClient apacheClient = builder.addInterceptorLast(new RequestDateInterceptor(eventLogger))
+		CloseableHttpClient apacheClient = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT)
+				.addInterceptorLast(new RequestDateInterceptor(eventLogger))
 				.addInterceptorLast(new RequestUserAgentInterceptor())
 				.addInterceptorLast(new RequestSignatureInterceptor(signer, eventLogger, new RequestContentSHA256Filter(eventLogger)))
 				.addInterceptorLast(responseDateInterceptor)
@@ -139,14 +120,6 @@ public class DigipostClient {
 		apiService.setApacheClient(apacheClient);
 
 		this.httpClient = apacheClient;
-
-		webTarget.register(new LoggingFilter());
-		webTarget.register(new RequestDateFilter(eventLogger));
-		webTarget.register(new RequestUserAgentFilter());
-		webTarget.register(new RequestSignatureFilter(signer, eventLogger, new RequestContentSHA256Filter(eventLogger)));
-		webTarget.register(responseDateFilter);
-		webTarget.register(responseHashFilter);
-		webTarget.register(responseSignatureFilter);
 
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
 	}
@@ -185,9 +158,17 @@ public class DigipostClient {
 	}
 
 	public IdentificationResult identifyRecipient(final Identification identification) {
-		Response response = apiService.identifyRecipient(identification);
+		CloseableHttpResponse response = apiService.identifyRecipient(identification);
 		Communicator.checkResponse(response, eventLogger);
-		return response.readEntity(IdentificationResult.class);
+
+		try {
+			IdentificationResult identificationResult = JAXB.unmarshal(response.getEntity().getContent(), IdentificationResult.class);
+			response.close();
+			return identificationResult;
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	public Recipients search(final String searchString) {
@@ -208,6 +189,48 @@ public class DigipostClient {
 		return documentCommunicator.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
 	}
 
+	/**
+	* Dersom vi tester mot et av Digiposts testmiljøer, vil vi ikke bruke
+	* SSL-validering.
+	*/
+	/*
+	public static CloseableHttpClient createApacheClientWithoutSSLValidation() {
+		TrustManager[] noopTrustManager = new TrustManager[]{new X509TrustManager() {
+			@Override
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
+
+			@Override
+			public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+			}
+
+			@Override
+			public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+			}
+		}};
+
+		HostnameVerifier noopHostnameVerifier = new HostnameVerifier() {
+			@Override
+			public boolean verify(final String hostname, final SSLSession session) {
+				return true;
+			}
+		};
+
+		SSLContext sc;
+		try {
+			sc = SSLContext.getInstance("SSL");
+			sc.init(null, noopTrustManager, new SecureRandom());
+			ClientConfig c = new ClientConfig();
+			c.register(LoggingFilter.class);
+			c.register(MultiPartFeature.class);
+
+			return new JerseyClientBuilder().sslContext(sc).withConfig(c).hostnameVerifier(noopHostnameVerifier).build();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+*/
 
 	/**
 	 * Hent informasjon om en gitt avsender. Kan enten be om informasjon om
@@ -257,47 +280,6 @@ public class DigipostClient {
 	private void log(final String stringToSignMsg) {
 		LOG.debug(stringToSignMsg);
 		eventLogger.log(stringToSignMsg);
-	}
-
-	/**
-	 * Dersom vi tester mot et av Digiposts testmiljøer, vil vi ikke bruke
-	 * SSL-validering.
-	 */
-	public static JerseyClient createJerseyClientWithoutSSLValidation() {
-		TrustManager[] noopTrustManager = new TrustManager[]{new X509TrustManager() {
-			@Override
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return null;
-			}
-
-			@Override
-			public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-			}
-
-			@Override
-			public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-			}
-		}};
-
-		HostnameVerifier noopHostnameVerifier = new HostnameVerifier() {
-			@Override
-			public boolean verify(final String hostname, final SSLSession session) {
-				return true;
-			}
-		};
-
-		SSLContext sc;
-		try {
-			sc = SSLContext.getInstance("SSL");
-			sc.init(null, noopTrustManager, new SecureRandom());
-			ClientConfig c = new ClientConfig();
-			c.register(LoggingFilter.class);
-			c.register(MultiPartFeature.class);
-
-			return new JerseyClientBuilder().sslContext(sc).withConfig(c).hostnameVerifier(noopHostnameVerifier).build();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	public InputStream getContent(final String path) {

@@ -32,16 +32,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
 
 import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXB;
 
 import java.io.IOException;
@@ -66,7 +61,6 @@ import static org.joda.time.Duration.standardMinutes;
 public class ApiServiceImpl implements ApiService {
 
 	private static final String ENTRY_POINT = "/";
-	private final WebTarget webResource;
 	private final long brokerId;
 	private CloseableHttpClient httpClient;
 	private final String digipostUrl;
@@ -100,8 +94,7 @@ public class ApiServiceImpl implements ApiService {
 	private final Cache<String, SenderInformation> senderInformation = new Cache<>("sender-information", expireAfterAccess(standardMinutes(5)), useSoftValues);
 	private final EventLogger eventLogger;
 
-	public ApiServiceImpl(WebTarget webResource, long senderAccountId, EventLogger eventLogger, String digipostUrl) {
-		this.webResource = webResource;
+	public ApiServiceImpl(long senderAccountId, EventLogger eventLogger, String digipostUrl) {
 		this.brokerId = senderAccountId;
 		this.eventLogger = eventLogger;
 		this.digipostUrl = digipostUrl;
@@ -127,7 +120,7 @@ public class ApiServiceImpl implements ApiService {
 			httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 			httpPost.setHeader("MIME-Version", "1.0");
 			httpPost.removeHeaders("Accept-Encoding");
-			httpPost.setEntity(new OverriddenMultipartSubtypeHttpEntity(multipart, "mixed"));
+			httpPost.setEntity(multipart);
 			return httpClient.execute(httpPost);
 
 		} catch (IOException e) {
@@ -175,22 +168,15 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
-	public Response fetchExistingMessage(final URI location) {
+	public CloseableHttpResponse fetchExistingMessage(final URI location) {
 		HttpGet httpGet = new HttpGet(digipostUrl + location.getPath());
 		try {
 			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
 			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
-			CloseableHttpResponse execute = httpClient.execute(httpGet);
-
+			return httpClient.execute(httpGet);
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
-
-		return webResource
-				.path(location.getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.get();
 	}
 
 	@Override
@@ -336,12 +322,20 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
-	public Response getContent(String path) {
-		return webResource
+	public CloseableHttpResponse getContent(String path) {
+		HttpGet httpGet = new HttpGet(digipostUrl + path);
+		try {
+			httpGet.addHeader(X_Digipost_UserId, brokerId + "");
+			return httpClient.execute(httpGet);
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+
+		/*return webResource
 				.path(path)
 				.request()
 				.header(X_Digipost_UserId, brokerId)
-				.get();
+				.get();*/
 	}
 
 	@Override
@@ -376,15 +370,25 @@ public class ApiServiceImpl implements ApiService {
 
 	@Override
 	public void addFilter(final ClientRequestFilter filter) {
-		webResource.register(filter);
+		//TODO what to do with this
+		//webResource.register(filter);
 	}
 
 	@Override
-	public Response identifyRecipient(final Identification identification) {
-		return webResource.path(getEntryPoint().getIdentificationUri().getPath())
-				.request(DIGIPOST_MEDIA_TYPE_V6)
-				.header(X_Digipost_UserId, brokerId)
-				.post(Entity.entity(identification, DIGIPOST_MEDIA_TYPE_V6));
+	public CloseableHttpResponse identifyRecipient(final Identification identification) {
+
+		HttpPost httpPost = new HttpPost(digipostUrl + getEntryPoint().getIdentificationUri().getPath());
+		try {
+			httpPost.addHeader(X_Digipost_UserId, brokerId + "");
+			httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V6);
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			JAXB.marshal(identification, bao);
+			httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
+			return httpClient.execute(httpPost);
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 

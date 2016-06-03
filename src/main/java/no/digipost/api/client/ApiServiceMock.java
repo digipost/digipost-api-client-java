@@ -183,7 +183,7 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	@Override
-	public Response fetchExistingMessage(final URI location) {
+	public CloseableHttpResponse fetchExistingMessage(final URI location) {
 		throw new NotImplementedException("This is a mock");
 	}
 
@@ -218,7 +218,7 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	@Override
-	public Response identifyRecipient(final Identification identification) {
+	public CloseableHttpResponse identifyRecipient(final Identification identification) {
 		throw new NotImplementedException("This is a mock");
 	}
 
@@ -256,14 +256,16 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	@Override
-	public Response getContent(String path) {
+	public CloseableHttpResponse getContent(String path) {
 		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.GET_CONTENT);
 		Response response = requestsAndResponses.getResponse();
-		if (response != null) {
+
+		return null;
+		/*if (response != null) {
 			return response;
 		} else {
 			return MockedResponseBuilder.create().status(NOT_FOUND.getStatusCode()).build();
-		}
+		}*/
 	}
 
 	@Override

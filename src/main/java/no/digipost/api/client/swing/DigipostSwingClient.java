@@ -16,14 +16,12 @@
 package no.digipost.api.client.swing;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.PrintDetails.PostType;
-import no.digipost.api.client.util.JerseyClientProvider;
 import org.joda.time.LocalDate;
 
 import javax.swing.*;
@@ -718,11 +716,12 @@ public class DigipostSwingClient {
 	 * SSL-validering.
 	 */
 	private Client turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(final String endpoint) {
-		Client jerseyClient = JerseyClientProvider.newClient();
+		/*Client jerseyClient = JerseyClientProvider.newClient();
 		if (endpoint.contains("camelon")) {
 			eventLogger.log("Detekterte at vi går mot Digipost Testmiljø. Skrur derfor av SSL-sjekk");
 			jerseyClient = DigipostClient.createJerseyClientWithoutSSLValidation();
 		}
-		return jerseyClient;
+		return jerseyClient;*/
+		return null;
 	}
 }

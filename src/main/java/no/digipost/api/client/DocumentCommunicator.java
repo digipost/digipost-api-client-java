@@ -48,9 +48,13 @@ public class DocumentCommunicator extends Communicator {
 	}
 
 	public InputStream getContent(String path) {
-		Response response = apiService.getContent(path);
+		CloseableHttpResponse response = apiService.getContent(path);
 		checkResponse(response, eventLogger);
-		return response.readEntity(InputStream.class);
+		try {
+			return response.getEntity().getContent();
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	public DocumentStatus getDocumentStatus(Link linkToDocumentStatus) {

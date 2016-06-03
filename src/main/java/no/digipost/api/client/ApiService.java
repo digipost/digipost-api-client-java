@@ -20,12 +20,9 @@ import no.digipost.api.client.representations.sender.SenderInformation;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
 
 import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.Response;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -80,7 +77,7 @@ public interface ApiService {
 	/**
 	 * Henter en allerede eksisterende forsendelsesressurs fra serveren.
 	 */
-	Response fetchExistingMessage(URI location);
+	CloseableHttpResponse fetchExistingMessage(URI location);
 
 	CloseableHttpResponse getEncryptionKey(URI location);
 
@@ -110,7 +107,7 @@ public interface ApiService {
 
 	void addFilter(ClientRequestFilter filter);
 
-	Response identifyRecipient(Identification identification);
+	CloseableHttpResponse identifyRecipient(Identification identification);
 
 	/**
 	 * Sjekker hvis spesifisert mottaker er Digipost-bruker.
@@ -137,7 +134,7 @@ public interface ApiService {
 	CloseableHttpResponse getDocumentStatus(Link linkToDocumentStatus);
 	CloseableHttpResponse getDocumentStatus(long senderId, String uuid);
 
-	Response getContent(String path);
+	CloseableHttpResponse getContent(String path);
 
 	/**
 	 * Henter publik krypteringsnøkkel for forsendelser som skal sendes til print.
