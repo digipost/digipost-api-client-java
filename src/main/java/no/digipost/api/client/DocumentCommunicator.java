@@ -34,12 +34,10 @@ public class DocumentCommunicator extends Communicator {
 	}
 
 	public DocumentEvents getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
-		CloseableHttpResponse response = apiService.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
-		checkResponse(response, eventLogger);
+		try(CloseableHttpResponse response = apiService.getDocumentEvents(organisation, partId, from, to, offset, maxResults)){;
 
-		try {
+			checkResponse(response, eventLogger);
 			DocumentEvents documentEvents = JAXB.unmarshal(response.getEntity().getContent(), DocumentEvents.class);
-			response.close();
 			return documentEvents;
 
 		} catch (IOException e) {
@@ -58,12 +56,10 @@ public class DocumentCommunicator extends Communicator {
 	}
 
 	public DocumentStatus getDocumentStatus(Link linkToDocumentStatus) {
-		CloseableHttpResponse response = apiService.getDocumentStatus(linkToDocumentStatus);
-		checkResponse(response, eventLogger);
+		try(CloseableHttpResponse response = apiService.getDocumentStatus(linkToDocumentStatus)){
+			checkResponse(response, eventLogger);
 
-		try {
 			DocumentStatus documentStatus = JAXB.unmarshal(response.getEntity().getContent(), DocumentStatus.class);
-			response.close();
 			return documentStatus;
 
 		} catch (IOException e) {

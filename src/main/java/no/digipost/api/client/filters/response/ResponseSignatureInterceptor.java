@@ -12,6 +12,8 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.methods.HttpRequestWrapper;
+import org.apache.http.cookie.CookieOrigin;
+import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.glassfish.jersey.internal.util.Base64;
@@ -24,6 +26,8 @@ import javax.ws.rs.client.ClientResponseFilter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.cert.CertificateFactory;
@@ -59,7 +63,7 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 	@Override
 	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
 		// TODO configure this on relevant WebTarget instead
-		if ("/".equals(((HttpRequestWrapper)context.getAttribute("http.request")).getURI().getPath())) {
+		if ("/".equals(((CookieOrigin)(context.getAttribute("http.cookie-origin"))).getPath())) {
 			eventLogger.log("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
 			return;
 		}

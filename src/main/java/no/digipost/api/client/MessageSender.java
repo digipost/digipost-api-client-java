@@ -168,32 +168,33 @@ public class MessageSender extends Communicator {
 	 *
 	 */
 	public MessageDelivery createOrFetchMessage(final Message message) {
-		CloseableHttpResponse response = apiService.createMessage(message);
+		try(CloseableHttpResponse response = apiService.createMessage(message)){
+			if (resourceAlreadyExists(response)) {
+				try(CloseableHttpResponse existingMessageResponse = apiService.fetchExistingMessage(responseToURI(response))) {
+					checkResponse(existingMessageResponse);
+					try {
+						MessageDelivery delivery = JAXB.unmarshal(existingMessageResponse.getEntity().getContent(), MessageDelivery.class);
+						checkThatExistingMessageIsIdenticalToNewMessage(delivery, message);
+						checkThatMessageHasNotAlreadyBeenDelivered(delivery);
+						log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
+						return delivery;
+					} catch (IOException e) {
+						throw new RuntimeException(e.getMessage(), e);
+					}
+				}
+			} else {
+				try {
+					checkResponse(response);
+					log("Forsendelse opprettet. Status: [" + response.getStatusLine().getStatusCode() + "]");
+					MessageDelivery messageDelivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
+					return messageDelivery;
 
-		if (resourceAlreadyExists(response)) {
-			CloseableHttpResponse existingMessageResponse = apiService.fetchExistingMessage(responseToURI(response));
-			checkResponse(existingMessageResponse);
-			try {
-				MessageDelivery delivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
-				response.close();
-				checkThatExistingMessageIsIdenticalToNewMessage(delivery, message);
-				checkThatMessageHasNotAlreadyBeenDelivered(delivery);
-				log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
-				return delivery;
-			} catch (IOException e) {
-				throw new RuntimeException(e.getMessage(), e);
+				} catch (IOException e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
 			}
-		} else {
-			try {
-				checkResponse(response);
-				log("Forsendelse opprettet. Status: [" + response.getStatusLine().getStatusCode() + "]");
-				MessageDelivery messageDelivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
-				response.close();
-				return messageDelivery;
-
-			} catch (IOException e) {
-				throw new RuntimeException(e.getMessage(), e);
-			}
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
@@ -252,27 +253,21 @@ public class MessageSender extends Communicator {
 	public InputStream fetchKeyAndEncrypt(Document document, InputStream content) {
 		checkThatMessageCanBePreEncrypted(document);
 
-		CloseableHttpResponse encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri());
+		try(CloseableHttpResponse encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri())){
+			checkResponse(encryptionKeyResponse);
 
-		checkResponse(encryptionKeyResponse);
-
-		try {
 			EncryptionKey key = JAXB.unmarshal(encryptionKeyResponse.getEntity().getContent(), EncryptionKey.class);
-			encryptionKeyResponse.close();
 			return the(new DigipostPublicKey(key)).map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT).encrypt(content);
-
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
+
 	}
 
 	public IdentificationResultWithEncryptionKey identifyAndGetEncryptionKey(Identification identification) {
-		CloseableHttpResponse response = apiService.identifyAndGetEncryptionKey(identification);
-		checkResponse(response);
-
-		try {
+		try(CloseableHttpResponse response = apiService.identifyAndGetEncryptionKey(identification)){
+			checkResponse(response);
 			IdentificationResultWithEncryptionKey result = JAXB.unmarshal(response.getEntity().getContent(), IdentificationResultWithEncryptionKey.class);
-			response.close();
 			if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
 				if (result.getEncryptionKey() == null) {
 					throw new DigipostClientException(ErrorCode.SERVER_ERROR, "Server identifisert mottaker som Digipost-bruker, men sendte ikke med krypteringsnøkkel. Indikerer en feil hos Digipost.");
@@ -292,11 +287,9 @@ public class MessageSender extends Communicator {
 
 		if (!digipostClientConfig.cachePrintKey || (printKeyCachedTime == null || new Duration(printKeyCachedTime, now).isLongerThan(Duration.standardMinutes(5)))) {
 			log("*** STARTER INTERAKSJON MED API: HENT KRYPTERINGSNØKKEL FOR PRINT ***");
-			CloseableHttpResponse response = apiService.getEncryptionKeyForPrint();
-			checkResponse(response);
-			try {
+			try(CloseableHttpResponse response = apiService.getEncryptionKeyForPrint()){
+				checkResponse(response);
 				EncryptionKey encryptionKey = JAXB.unmarshal(response.getEntity().getContent(), EncryptionKey.class);
-				response.close();
 				cachedPrintKey = new DigipostPublicKey(encryptionKey);
 				printKeyCachedTime = now;
 				return cachedPrintKey;
@@ -313,14 +306,13 @@ public class MessageSender extends Communicator {
 	private MessageDelivery uploadContent(MessageDelivery createdMessage, Document document, InputStream documentContent) {
         log("*** STARTER INTERAKSJON MED API: LEGGE TIL FIL ***");
 
-		CloseableHttpResponse response = apiService.addContent(document, documentContent);
+		try(CloseableHttpResponse response = apiService.addContent(document, documentContent)){
 
-        checkResponse(response);
+        	checkResponse(response);
 
-        log("Innhold ble lagt til. Status: [" + response + "]");
-		try {
+        	log("Innhold ble lagt til. Status: [" + response + "]");
+
 			MessageDelivery messageDelivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
-			response.close();
 			return messageDelivery;
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
@@ -335,14 +327,13 @@ public class MessageSender extends Communicator {
 	 */
 	private MessageDelivery send(final MessageDelivery delivery) {
 		log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + delivery.getMessageId() + " ***");
-		CloseableHttpResponse response = apiService.send(delivery);
+		try(CloseableHttpResponse response = apiService.send(delivery)){
 
-		checkResponse(response);
+			checkResponse(response);
 
-		log("Brevet ble sendt. Status: [" + response.toString() + "]");
-		try {
+			log("Brevet ble sendt. Status: [" + response.toString() + "]");
+
 			MessageDelivery messageDelivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
-			response.close();
 			return messageDelivery;
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
@@ -456,19 +447,9 @@ public class MessageSender extends Communicator {
 	}
 
 	private static URI responseToURI(CloseableHttpResponse response){
-		Header location = response.getFirstHeader("location");
-		if(location == null){
-			throw new RuntimeException("Expected header location");
-		}
-
-
 		try {
-			response.close();
-			String uri = (location.getValue().split(":")[1]).trim();
-			return new URI(uri);
+			return new URI(response.getFirstHeader("location").getValue());
 		} catch (URISyntaxException e) {
-			throw new RuntimeException(e.getMessage(), e);
-		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
