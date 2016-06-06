@@ -237,11 +237,14 @@ public class MessageSenderTest {
 	@Test
 	public void fallback_to_print_changes_filetype_html_to_pdf() {
 		when(identificationResultWithEncryptionKey.getResult()).thenReturn(new IdentificationResult());
-
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXB.marshal(identificationResultWithEncryptionKey, bao);
 		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(200));
-		when(mockClientResponse.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
+
+		//ByteArrayOutputStream bao = new ByteArrayOutputStream();
+		//JAXB.marshal(identificationResultWithEncryptionKey, bao);
+
+		HttpEntity entityMock = Mockito.mock(HttpEntity.class);
+
+		when(mockClientResponse.getEntity()).thenReturn(entityMock);
 
 		SenderInformation senderInformation = Mockito.mock(SenderInformation.class);
 		when(senderInformation.getPdfValidationSettings()).thenReturn(new PdfValidationSettings(false, false, true, false));
@@ -364,14 +367,15 @@ public class MessageSenderTest {
 			document.setPreEncrypt();
 		}
 
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
+		/*ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		JAXB.marshal(incompleteDelivery, bao);
-		HttpEntity incompleteDeliveryEntity = MultipartEntityBuilder.create().addBinaryBody("forsendelse", bao.toByteArray()).build();
+		HttpEntity incompleteDeliveryEntity = MultipartEntityBuilder.create().addBinaryBody("forsendelse", bao.toByteArray()).build();*/
 
+		HttpEntity mock = Mockito.mock(HttpEntity.class);
 
 		when(mockClientResponse.getEntity())
-			.thenReturn(incompleteDeliveryEntity, incompleteDeliveryEntity, incompleteDeliveryEntity)
-			.thenReturn(incompleteDeliveryEntity);
+			.thenReturn(mock, mock, mock)
+			.thenReturn(mock);
 
 		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
 		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
