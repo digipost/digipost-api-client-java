@@ -19,6 +19,7 @@ import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.security.Signer;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.xml.sax.ContentHandler;
 
 import javax.ws.rs.core.Response;
@@ -70,7 +71,7 @@ public class DigipostClientMock {
 		return apiService.requestsAndResponsesMap.get(method).getRequest(requestKey);
 	}
 
-	public void addExpectedResponse(ApiServiceMock.Method method, Response response) {
+	public void addExpectedResponse(ApiServiceMock.Method method, CloseableHttpResponse response) {
 		ApiServiceMock.RequestsAndResponses requestsAndResponses = apiService.requestsAndResponsesMap.get(method);
 
 		requestsAndResponses.addExpectedResponse(response);

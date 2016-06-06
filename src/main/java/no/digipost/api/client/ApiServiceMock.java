@@ -27,18 +27,15 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.glassfish.jersey.media.multipart.BodyPart;
-import org.glassfish.jersey.media.multipart.MultiPart;
 import org.joda.time.DateTime;
-import org.xml.sax.helpers.DefaultHandler;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXB;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -148,10 +145,10 @@ public class ApiServiceMock implements ApiService {
 
 		String subject = message.primaryDocument.subject;
 		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
-		Response response = requestsAndResponses.getResponse(subject);
+		CloseableHttpResponse response = requestsAndResponses.getResponse(subject);
 
-		requestsAndResponses.addRequest(new DigipostRequest(message, contentParts));*/
-		//return response;
+		requestsAndResponses.addRequest(new DigipostRequest(message, contentParts));
+		return response;*/
 		return null;
 	}
 
@@ -161,20 +158,26 @@ public class ApiServiceMock implements ApiService {
 				IdentificationResult.digipost("fake.address#1234"),
 				fakeEncryptionKey
 		);
-		return null;
-		/*return MockedResponseBuilder.create()
+
+		org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
+		JAXB.marshal(mockEntity, bao);
+
+		return MockedResponseBuilder.create()
 				.status(OK.getStatusCode())
-				.entity(mockEntity)
-				.build();*/
+				.entity(new ByteArrayEntity(bao.toByteArray()))
+				.build();
 	}
 
 	@Override
 	public CloseableHttpResponse getEncryptionKeyForPrint() {
-		return null;
-		/*return MockedResponseBuilder.create()
+
+		org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
+		JAXB.marshal(fakeEncryptionKey, bao);
+
+		return MockedResponseBuilder.create()
 				.status(OK.getStatusCode())
-				.entity(fakeEncryptionKey)
-				.build();*/
+				.entity(new ByteArrayEntity(bao.toByteArray()))
+				.build();
 	}
 
 	@Override
@@ -225,15 +228,16 @@ public class ApiServiceMock implements ApiService {
 	@Override
 	public CloseableHttpResponse getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
 		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.GET_DOCUMENTS_EVENTS);
-		Response response = requestsAndResponses.getResponse();
-/*
+		CloseableHttpResponse response = requestsAndResponses.getResponse();
+
+		org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
+		JAXB.marshal(new DocumentEvents(), bao);
+
 		if (response != null) {
 			return response;
 		} else {
-			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new DocumentEvents()).build();
+			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new ByteArrayEntity(bao.toByteArray())).build();
 		}
-		*/
-		return null;
 	}
 
 	@Override
@@ -244,28 +248,28 @@ public class ApiServiceMock implements ApiService {
 	@Override
 	public CloseableHttpResponse getDocumentStatus(long senderId, String uuid) {
 		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.GET_DOCUMENT_STATUS);
-		Response response = requestsAndResponses.getResponse();
-/*
+		CloseableHttpResponse response = requestsAndResponses.getResponse();
+
+		org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
+		JAXB.marshal(new DocumentEvents(), bao);
+
 		if (response != null) {
 			return response;
 		} else {
-			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new DocumentStatus()).build();
+			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new ByteArrayEntity(bao.toByteArray())).build();
 		}
-		*/
-		return null;
 	}
 
 	@Override
 	public CloseableHttpResponse getContent(String path) {
 		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.GET_CONTENT);
-		Response response = requestsAndResponses.getResponse();
+		CloseableHttpResponse response = requestsAndResponses.getResponse();
 
-		return null;
-		/*if (response != null) {
+		if (response != null) {
 			return response;
 		} else {
 			return MockedResponseBuilder.create().status(NOT_FOUND.getStatusCode()).build();
-		}*/
+		}
 	}
 
 	@Override
@@ -290,7 +294,7 @@ public class ApiServiceMock implements ApiService {
 
 
 	public static class RequestMatcher {
-		public Response findResponse(String requestString) {
+		public CloseableHttpResponse findResponse(String requestString) {
 			return null;
 		}
 	}
@@ -314,18 +318,18 @@ public class ApiServiceMock implements ApiService {
 			});
 		}
 
-		public void addExpectedResponse(Response response) {
+		public void addExpectedResponse(CloseableHttpResponse response) {
 			responseQueue.add(new MockResponse(response));
 		}
 		public void addExpectedException(RuntimeException ex) {
 			responseQueue.add(new MockResponse(ex));
 		}
 
-		public Response getResponse() {
+		public CloseableHttpResponse getResponse() {
 			return getResponse("default");
 		}
 
-		public Response getResponse(String requestString) {
+		public CloseableHttpResponse getResponse(String requestString) {
 			ResponseProducer response = responseQueue.poll();
 			if (response != null) {
 				return response.getResponse();
@@ -348,14 +352,14 @@ public class ApiServiceMock implements ApiService {
 	}
 
 	public static interface ResponseProducer {
-		Response getResponse();
+		CloseableHttpResponse getResponse();
 	}
 	public static class MockResponse implements ResponseProducer {
 
-		private Response response;
+		private CloseableHttpResponse response;
 		private RuntimeException exception;
 
-		public MockResponse(Response response) {
+		public MockResponse(CloseableHttpResponse response) {
 			this.response = response;
 		}
 		public MockResponse(RuntimeException ex) {
@@ -363,7 +367,7 @@ public class ApiServiceMock implements ApiService {
 		}
 
 		@Override
-		public Response getResponse() {
+		public CloseableHttpResponse getResponse() {
 			if (exception != null) {
 				throw exception;
 			}
@@ -385,14 +389,23 @@ public class ApiServiceMock implements ApiService {
 
 	public static class MultipartRequestMatcher extends RequestMatcher {
 
-		public static Response DEFAULT_RESPONSE = MockedResponseBuilder.create()
-				.status(OK.getStatusCode())
-				.entity(new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, COMPLETE, DateTime.now()))
-				.build();
+		public static CloseableHttpResponse DEFAULT_RESPONSE = getDefaultResponse();
 		public static ProcessingException CONNECTION_REFUSED = new ProcessingException(new ConnectException("Connection refused"));
 
-		public static final Map<String, Response> responses = new HashMap<>();
+		public static final Map<String, CloseableHttpResponse> responses = new HashMap<>();
 		public static final Map<String, RuntimeException> errors = new HashMap<>();
+
+		public static CloseableHttpResponse getDefaultResponse(){
+			MessageDelivery messageDelivery = new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, COMPLETE, DateTime.now());
+
+			org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
+			JAXB.marshal(messageDelivery, bao);
+
+			return MockedResponseBuilder.create()
+					.status(OK.getStatusCode())
+					.entity(new ByteArrayEntity(bao.toByteArray()))
+					.build();
+		}
 
 
 		static {
@@ -401,7 +414,7 @@ public class ApiServiceMock implements ApiService {
 		}
 
 		@Override
-		public Response findResponse(String requestString) {
+		public CloseableHttpResponse findResponse(String requestString) {
 
 			if (responses.containsKey(requestString)) {
 				return responses.get(requestString);
@@ -412,8 +425,12 @@ public class ApiServiceMock implements ApiService {
 				if (ErrorCode.isKnown(split[1])) {
 					ErrorCode errorCode = ErrorCode.resolve(split[1]);
 					ErrorType translated = EnumUtils.getEnum(ErrorType.class, errorCode.getOverriddenErrorType().name());
+
+					org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
+					JAXB.marshal(new ErrorMessage(translated != null ? translated : ErrorType.SERVER, errorCode.name(), "Generic error-message from digipost-api-client-mock"), bao);
+
 					return MockedResponseBuilder.create().status(parseInt(split[0]))
-							.entity(new ErrorMessage(translated != null ? translated : ErrorType.SERVER, errorCode.name(), "Generic error-message from digipost-api-client-mock")).build();
+							.entity(new ByteArrayEntity(bao.toByteArray())).build();
 				} else {
 					throw new IllegalArgumentException("ErrorCode " + split[1] + " is unknown");
 				}
