@@ -33,8 +33,8 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicHeader;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeUtils;
 import org.joda.time.Duration;
 import org.junit.After;
@@ -52,6 +52,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXB;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
@@ -110,10 +111,11 @@ public class MessageSenderTest {
 
 	private MessageSender sender;
 	private MessageSender cachelessSender;
+	private EncryptionKey fakeEncryptionKey;
 
 	@Before
 	public void setup() {
-		EncryptionKey fakeEncryptionKey = ApiServiceMock.createFakeEncryptionKey();
+		this.fakeEncryptionKey = ApiServiceMock.createFakeEncryptionKey();
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		JAXB.marshal(fakeEncryptionKey, bao);
 
@@ -234,17 +236,18 @@ public class MessageSenderTest {
 		then(api).should(times(3)).getEncryptionKeyForPrint();
 	}
 
+
 	@Test
 	public void fallback_to_print_changes_filetype_html_to_pdf() {
-		when(identificationResultWithEncryptionKey.getResult()).thenReturn(new IdentificationResult());
+		IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey =
+				new IdentificationResultWithEncryptionKey(IdentificationResult.digipost("123"), fakeEncryptionKey);
+
 		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(200));
 
-		//ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		//JAXB.marshal(identificationResultWithEncryptionKey, bao);
+		ByteArrayOutputStream bao = new ByteArrayOutputStream();
+		JAXB.marshal(identificationResultWithEncryptionKey, bao);
 
-		HttpEntity entityMock = Mockito.mock(HttpEntity.class);
-
-		when(mockClientResponse.getEntity()).thenReturn(entityMock);
+		when(mockClientResponse.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
 
 		SenderInformation senderInformation = Mockito.mock(SenderInformation.class);
 		when(senderInformation.getPdfValidationSettings()).thenReturn(new PdfValidationSettings(false, false, true, false));
@@ -255,9 +258,11 @@ public class MessageSenderTest {
 		when(api.getSenderInformation(any(Message.class))).thenReturn(senderInformation);
 
 		CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
-		when(response.getEntity()).thenReturn(new ByteArrayEntity(new byte[]{}));
+		ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
+		JAXB.marshal(new MessageDelivery(UUID.randomUUID().toString(), Channel.PRINT, MessageStatus.COMPLETE, DateTime.now()), bao2);
+
+		when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray()));
 		when(response.getStatusLine()).thenReturn(new StatusLineMock(200));
-		when(response.getEntity()).thenReturn(new ByteArrayEntity(new byte[]{}));
 
 		when(api.multipartMessage(any(HttpEntity.class))).thenReturn(response);
 
@@ -339,11 +344,8 @@ public class MessageSenderTest {
 		assertThat(printCopyMessage.recipient.hasDigipostIdentification(),is(false));
 	}
 
-
-
 	@Test
-	public void passes_pdf_validation_for_printonly_message() {
-
+	public void passes_pdf_validation_for_printonly_message() throws IOException {
 		String messageId = UUID.randomUUID().toString();
 		when(api.getEncryptionKey(any(URI.class))).thenReturn(encryptionKeyResponse);
 		when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
@@ -355,11 +357,10 @@ public class MessageSenderTest {
 
 		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).setPreEncrypt();
 		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).setPreEncrypt());
-		MessageDelivery incompleteDelivery = new MessageDelivery(messageId, PRINT, NOT_COMPLETE, now()) {{
-			primaryDocument = printDocument;
-			attachments = printAttachments;
-			addLink(new Link(SEND, new DigipostUri("/send")));
-		}};
+
+		MessageDelivery incompleteDelivery = MessageDeliveryMock.setMessageDeliveryStatus(new MessageDelivery(messageId, PRINT, NOT_COMPLETE, now()), printDocument,
+				printAttachments, new Link(SEND, new DigipostUri("/send")));
+
 		final List<Document> allDocuments = the(printDocument).append(printAttachments).collect();
 
 		for (Document document : allDocuments) {
@@ -367,15 +368,17 @@ public class MessageSenderTest {
 			document.setPreEncrypt();
 		}
 
-		/*ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXB.marshal(incompleteDelivery, bao);
-		HttpEntity incompleteDeliveryEntity = MultipartEntityBuilder.create().addBinaryBody("forsendelse", bao.toByteArray()).build();*/
 
-		HttpEntity mock = Mockito.mock(HttpEntity.class);
+		ByteArrayOutputStream bao = new ByteArrayOutputStream();
+		JAXB.marshal(incompleteDelivery, bao);
+		byte[] bytes = bao.toByteArray();
+		ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
+		JAXB.marshal(new MessageDelivery(messageId, PRINT, DELIVERED_TO_PRINT, now()), bao2);
 
 		when(mockClientResponse.getEntity())
-			.thenReturn(mock, mock, mock)
-			.thenReturn(mock);
+				.thenReturn(new ByteArrayEntity(bytes), new ByteArrayEntity(bytes), new ByteArrayEntity(bytes))
+				.thenReturn(new ByteArrayEntity(bao2.toByteArray()));
+
 
 		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
 		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));

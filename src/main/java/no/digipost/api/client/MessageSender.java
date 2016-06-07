@@ -137,8 +137,6 @@ public class MessageSender extends Communicator {
 
 			log("Brevet ble sendt. Status: [" + response + "]");
 			try {
-				checkResponse(response);
-				log("Forsendelse opprettet. Status: [" + response.getStatusLine().getStatusCode() + "]");
 				MessageDelivery messageDelivery = JAXB.unmarshal(response.getEntity().getContent(), MessageDelivery.class);
 				response.close();
 				return messageDelivery;
