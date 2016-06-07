@@ -16,33 +16,28 @@
 package no.digipost.api.client.filters.response;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.client.ClientResponseFilter;
-import javax.ws.rs.ext.Provider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Simple client response filter that will log complete response entity
- */
-@Provider
-public class LoggingClientResponseFilter implements ClientResponseFilter {
+public class LoggingClientResponseInterceptor implements HttpResponseInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(LoggingClientResponseFilter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LoggingClientResponseInterceptor.class);
 
 	@Override
-	public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
-		InputStream entityStream = responseContext.getEntityStream();
+	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+		InputStream entityStream = response.getEntity().getContent();
 		byte[] bytes = IOUtils.toByteArray(entityStream);
 		LOG.info(new String(bytes, "UTF8"));
 		ByteArrayInputStream baos = new ByteArrayInputStream(bytes);
-		responseContext.setEntityStream(baos);
+		response.setEntity(new ByteArrayEntity(bytes));
 	}
-
-
 }

@@ -20,10 +20,5 @@
         <artifactId>antlr-runtime</artifactId>
         <version>3.1.2</version>
         <license>BSD licence</license>
-    </artifact>    
-    <artifact>
-        <groupId>no.posten.dpost</groupId>
-        <artifactId>digipost-http-client</artifactId>
-        <version>1.2</version>
     </artifact>
 </license-lookup>

@@ -15,44 +15,56 @@
  */
 package no.digipost.api.client.security;
 
-import java.util.SortedMap;
-import java.util.TreeMap;
+import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedMap;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class ClientRequestToSign implements RequestToSign {
 
-	private final ClientRequestContext clientRequest;
+	private final HttpRequest clientRequest;
 
-	public ClientRequestToSign(final ClientRequestContext clientRequest) {
-		this.clientRequest = clientRequest;
+	public ClientRequestToSign(final HttpRequest httpRequest) {
+		this.clientRequest = httpRequest;
 	}
 
 	@Override
 	public String getMethod() {
-		return clientRequest.getMethod();
+		return clientRequest.getRequestLine().getMethod();
 	}
 
 	@Override
 	public SortedMap<String, String> getHeaders() {
 		TreeMap<String, String> sortedHeaders = new TreeMap<String, String>();
-		MultivaluedMap<String, String> headers = clientRequest.getStringHeaders();
-		for (String key : headers.keySet()) {
-			sortedHeaders.put(key, headers.getFirst(key));
+		Header[] headers = clientRequest.getAllHeaders();
+		for (Header header : headers) {
+			sortedHeaders.put(header.getName(), header.getValue());
 		}
 		return sortedHeaders;
 	}
 
 	@Override
 	public String getPath() {
-		String path = clientRequest.getUri().getRawPath();
-		return path != null ? path : "";
+		try {
+			String path = new URI(clientRequest.getRequestLine().getUri()).getPath();
+			return path != null ? path : "";
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public String getParameters() {
-		String query = clientRequest.getUri().getRawQuery();
+		int index = clientRequest.getRequestLine().getUri().indexOf('?');
+		if(index == -1){
+			return "";
+		}
+		String query = clientRequest.getRequestLine().getUri().substring(index + 1);
 		return query != null ? query : "";
 	}
 

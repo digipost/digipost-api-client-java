@@ -65,22 +65,6 @@ public abstract class RequestContentHashFilter {
 		eventLogger.log(stringToSignMsg);
 	}
 
-	public void settContentHashHeader(final byte[] data, final ClientRequestContext request) {
-		try {
-			ExtendedDigest instance = digestClass.newInstance();
-			byte[] result = new byte[instance.getDigestSize()];
-			instance.update(data, 0, data.length);
-			instance.doFinal(result, 0);
-			String hash = new String(Base64.encode(result));
-			request.getHeaders().add(header, hash);
-			log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
-		} catch (InstantiationException e) {
-			log("Feil ved generering av " + header + " : " + e.getMessage());
-		} catch (IllegalAccessException e) {
-			log("Feil ved generering av " + header + " : " + e.getMessage());
-		}
-	}
-
 	public void settContentHashHeader(final byte[] data, final HttpRequest httpRequest) {
 		try {
 			ExtendedDigest instance = digestClass.newInstance();

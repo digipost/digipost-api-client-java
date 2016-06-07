@@ -28,9 +28,12 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.glassfish.jersey.media.multipart.BodyPart;
 import org.joda.time.DateTime;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.ClientRequestFilter;
@@ -126,30 +129,7 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public CloseableHttpResponse multipartMessage(final HttpEntity multipart) {
-		/*Message message = null;
-		List<ContentPart> contentParts = new ArrayList<>();
-		for (BodyPart bodyPart : multiPart.getBodyParts()) {
-			if (bodyPart.getMediaType().toString().equals(MediaTypes.DIGIPOST_MEDIA_TYPE_V6)) {
-				message = (Message) bodyPart.getEntity();
-			} else {
-				contentParts.add(new ContentPart(bodyPart.getMediaType()));
-			}
-		}
-		if (message == null) {
-			throw new IllegalArgumentException("MultiPart does not contain Message");
-		}
-
-		if (marshaller != null) {
-			marshaller.marshal(message, new DefaultHandler());
-		}
-
-		String subject = message.primaryDocument.subject;
-		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
-		CloseableHttpResponse response = requestsAndResponses.getResponse(subject);
-
-		requestsAndResponses.addRequest(new DigipostRequest(message, contentParts));
-		return response;*/
-		return null;
+		throw new NotImplementedException("This is a mock");
 	}
 
 	@Override
@@ -212,11 +192,6 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public Autocomplete searchSuggest(final String searchString) {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public void addFilter(final ClientRequestFilter filter) {
 		throw new NotImplementedException("This is a mock");
 	}
 

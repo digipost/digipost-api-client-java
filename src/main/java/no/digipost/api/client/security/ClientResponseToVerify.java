@@ -15,42 +15,42 @@
  */
 package no.digipost.api.client.security;
 
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpRequestWrapper;
+import org.apache.http.protocol.HttpContext;
+
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.core.MultivaluedMap;
+public class ClientResponseToVerify implements ResponseToVerify{
 
-public class ClientResponseToVerify implements ResponseToVerify {
+	private final HttpContext context;
+	private final HttpResponse response;
 
-	private final ClientRequestContext request;
-	private final ClientResponseContext response;
-
-	public ClientResponseToVerify(final ClientRequestContext request, final ClientResponseContext response) {
-		this.request = request;
+	public ClientResponseToVerify(final HttpContext context, final HttpResponse response) {
+		this.context = context;
 		this.response = response;
 	}
 
 	@Override
 	public int getStatus() {
-		return response.getStatus();
+		return response.getStatusLine().getStatusCode();
 	}
 
 	@Override
 	public SortedMap<String, String> getHeaders() {
 		TreeMap<String, String> sortedHeaders = new TreeMap<String, String>();
-		MultivaluedMap<String, String> headers = response.getHeaders();
-		for (String key : headers.keySet()) {
-			sortedHeaders.put(key, headers.getFirst(key));
+		for(Header header : response.getAllHeaders()){
+			sortedHeaders.put(header.getName(), header.getValue());
 		}
+
 		return sortedHeaders;
 	}
 
 	@Override
 	public String getPath() {
-		String path = request.getUri().getPath();
-		return path != null ? path : "";
+		HttpRequestWrapper attribute = (HttpRequestWrapper)context.getAttribute("http.request");
+		return attribute.getURI().getPath();
 	}
-
 }

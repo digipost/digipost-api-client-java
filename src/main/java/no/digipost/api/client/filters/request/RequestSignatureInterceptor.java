@@ -18,29 +18,23 @@ package no.digipost.api.client.filters.request;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.Headers;
 import no.digipost.api.client.security.ClientRequestToSign;
-import no.digipost.api.client.security.ClientRequestToSign2;
 import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
-import org.apache.http.entity.BasicHttpEntity;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.ClientRequestContext;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.Security;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
 public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RequestSignatureFilter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RequestSignatureInterceptor.class);
 
 	private final Signer signer;
 	private final EventLogger eventListener;
@@ -60,7 +54,7 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 
 	private void setSignatureHeader(final HttpRequest httpRequest) {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ClientRequestToSign2(httpRequest));
+		String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ClientRequestToSign(httpRequest));
 		log(getClass().getSimpleName() + " beregnet streng som skal signeres:\n===START SIGNATURSTRENG===\n" + stringToSign
 				+ "===SLUTT SIGNATURSTRENG===");
 

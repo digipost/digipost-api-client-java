@@ -28,7 +28,7 @@ public class ResponseMessageSignatureUtil2 {
 	private static final List<String> HEADERS_FOR_SIGNATURE = Arrays.asList(Content_MD5.toLowerCase(), DATE.toLowerCase(),
 			X_Digipost_UserId.toLowerCase(), X_Content_SHA256.toLowerCase());
 
-	public static String getCanonicalResponseRepresentation(final ClientResponseToVerify2 clientResponseToVerify) {
+	public static String getCanonicalResponseRepresentation(final ClientResponseToVerify clientResponseToVerify) {
 		StringBuilder s = new StringBuilder();
 		s.append(getCanonicalResponseCodeRepresentation(clientResponseToVerify));
 		s.append(getCanonicalUrlRepresentation(clientResponseToVerify));
@@ -36,15 +36,15 @@ public class ResponseMessageSignatureUtil2 {
 		return s.toString();
 	}
 
-	private static String getCanonicalResponseCodeRepresentation(final ClientResponseToVerify2 clientResponseToVerify) {
+	private static String getCanonicalResponseCodeRepresentation(final ClientResponseToVerify clientResponseToVerify) {
 		return clientResponseToVerify.getStatus() + "\n";
 	}
 
-	private static String getCanonicalUrlRepresentation(final ClientResponseToVerify2 clientResponseToVerify) {
+	private static String getCanonicalUrlRepresentation(final ClientResponseToVerify clientResponseToVerify) {
 		return clientResponseToVerify.getPath().toLowerCase() + "\n";
 	}
 
-	private static String getCanonicalHeaderRepresentation(final ClientResponseToVerify2 clientResponseToVerify) {
+	private static String getCanonicalHeaderRepresentation(final ClientResponseToVerify clientResponseToVerify) {
 		SortedMap<String, String> headers = clientResponseToVerify.getHeaders();
 		StringBuilder headersString = new StringBuilder();
 		for (Entry<String, String> entry : headers.entrySet()) {

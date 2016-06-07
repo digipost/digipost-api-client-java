@@ -76,17 +76,12 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
-			<version>4.5.3-SNAPSHOT</version>
+			<version>4.5.2</version>
 		</dependency>
 		<dependency>
-			<groupId>no.posten.dpost</groupId>
+			<groupId>no.digipost</groupId>
 			<artifactId>digipost-http-client</artifactId>
-			<version>1.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-client</artifactId>
-			<version>${jersey.version}</version>
+			<version>1.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
@@ -216,7 +211,7 @@
                         <tagNameFormat>@{project.version}</tagNameFormat>
 					</configuration>
 				</plugin>
-				<!--<plugin>
+				<plugin>
 					<groupId>org.jasig.maven</groupId>
 					<artifactId>maven-notice-plugin</artifactId>
 					<version>1.0.6.1</version>
@@ -226,7 +221,7 @@
 							<param>${project.basedir}/src/main/notice/license-mappings.xml</param>
 						</licenseMapping>
 					</configuration>
-				</plugin>-->
+				</plugin>
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.3</version>
@@ -274,7 +269,7 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<!--<plugin>
+			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<version>2.11</version>
@@ -302,7 +297,7 @@
 						<phase>test</phase>
 					</execution>
 				</executions>
-			</plugin>-->
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>animal-sniffer-maven-plugin</artifactId>
@@ -355,7 +350,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--<plugin>
+			<plugin>
 				<groupId>org.jasig.maven</groupId>
 				<artifactId>maven-notice-plugin</artifactId>
 				<executions>
@@ -367,7 +362,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>-->
+			</plugin>
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -429,7 +424,7 @@
 										<include>no.digipost:printability-validator</include>
 										<include>no.digipost:cache</include>
                                         <include>com.google.guava:guava</include>
-										<include>no.posten.dpost:digipost-http-client</include>
+										<include>no.digipost:digipost-http-client</include>
 										<include>org.apache.httpcomponents:httpclient</include>
 										<include>commons-codec:commons-codec</include>
 										<include>commons-logging:commons-logging</include>

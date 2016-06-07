@@ -30,7 +30,7 @@ import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
 public class RequestDateInterceptor implements HttpRequestInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RequestDateFilter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RequestDateInterceptor.class);
 	private final EventLogger eventLogger;
 
 	public RequestDateInterceptor(final EventLogger eventListener) {
@@ -50,8 +50,6 @@ public class RequestDateInterceptor implements HttpRequestInterceptor {
 	private void modifyRequest(final HttpRequest httpRequest) {
 		String dateOnRFC1123Format = DateUtils.formatDate(DateTime.now());
 		httpRequest.setHeader(DATE, dateOnRFC1123Format);
-		//cr.getHeaders().add(DATE, dateOnRFC1123Format);
 		log(getClass().getSimpleName() + " satt headeren " + DATE + "=" + dateOnRFC1123Format);
-		//return cr;
 	}
 }

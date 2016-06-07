@@ -28,11 +28,9 @@ import no.motif.f.Fn;
 import no.motif.single.Optional;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.FormBodyPartBuilder;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -44,13 +42,11 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXB;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,8 +127,7 @@ public class MessageSender extends Communicator {
 				multiPart.bodyPart(bodyPart);
 			}
 			log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + singleChannelMessage.messageId + " ***");
-			HttpEntity build = multipartEntity.build();
-			CloseableHttpResponse response = apiService.multipartMessage(build);
+			CloseableHttpResponse response = apiService.multipartMessage(multipartEntity.build());
 			checkResponse(response);
 
 			log("Brevet ble sendt. Status: [" + response + "]");

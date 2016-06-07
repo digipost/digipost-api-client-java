@@ -10,8 +10,13 @@ This software includes third party software subject to the following licenses:
 
   Antlr 3 Runtime under BSD licence
   aopalliance version 1.0 repackaged as a module under CDDL + GPLv2 with classpath exception
+  Apache Commons Codec under The Apache Software License, Version 2.0
   Apache Commons Lang under Apache License, Version 2.0
+  Apache Commons Logging under The Apache Software License, Version 2.0
   Apache FontBox under The Apache Software License, Version 2.0
+  Apache HttpClient under Apache License, Version 2.0
+  Apache HttpClient Mime under Apache License, Version 2.0
+  Apache HttpCore under Apache License, Version 2.0
   Apache JempBox under The Apache Software License, Version 2.0
   Apache PDFBox under The Apache Software License, Version 2.0
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
@@ -20,6 +25,7 @@ This software includes third party software subject to the following licenses:
   Commons IO under The Apache Software License, Version 2.0
   Digipost API Client under The Apache Software License, Version 2.0
   Digipost Caching under The Apache Software License, Version 2.0
+  Digipost HTTP Client under The Apache Software License, Version 2.0
   Digipost Printability Validator under The Apache Software License, Version 2.0
   EqualsVerifier under The Apache Software License, Version 2.0
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
@@ -33,7 +39,6 @@ This software includes third party software subject to the following licenses:
   javax.inject:1 as OSGi bundle under CDDL + GPLv2 with classpath exception
   javax.ws.rs-api under CDDL 1.1 or GPL2 w/ CPE
   JCL 1.1.1 implemented over SLF4J under MIT License
-  jersey-core-client under CDDL+GPL License
   jersey-core-common under CDDL+GPL License
   jersey-media-jaxb under CDDL+GPL License
   jersey-media-multipart under CDDL+GPL License

@@ -20,6 +20,7 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.api.client.util.MultipartNoLengthCheckHttpEntity;
 import no.digipost.cache.inmemory.Cache;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.IOUtils;
@@ -33,11 +34,8 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.bind.JAXB;
@@ -63,8 +61,6 @@ import static org.joda.time.Duration.standardMinutes;
 
 public class ApiServiceImpl implements ApiService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
-
 	private static final String ENTRY_POINT = "/";
 	private final long brokerId;
 	private CloseableHttpClient httpClient;
@@ -80,18 +76,15 @@ public class ApiServiceImpl implements ApiService {
 			HttpGet httpGet = new HttpGet(digipostUrl + ENTRY_POINT);
 			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 
-			CloseableHttpResponse execute = send(httpGet);
+			try(CloseableHttpResponse execute = send(httpGet)) {
 
-			execute.close();
-
-			if(execute.getStatusLine().getStatusCode() == OK.getStatusCode()){
-				EntryPoint entryPoint = JAXB.unmarshal(execute.getEntity().getContent(), EntryPoint.class);
-				execute.close();
-				return entryPoint;
-			} else {
-				ErrorMessage errorMessage = JAXB.unmarshal(execute.getEntity().getContent(), ErrorMessage.class);
-				execute.close();
-				throw new DigipostClientException(errorMessage);
+				if (execute.getStatusLine().getStatusCode() == OK.getStatusCode()) {
+					EntryPoint entryPoint = JAXB.unmarshal(execute.getEntity().getContent(), EntryPoint.class);
+					return entryPoint;
+				} else {
+					ErrorMessage errorMessage = JAXB.unmarshal(execute.getEntity().getContent(), ErrorMessage.class);
+					throw new DigipostClientException(errorMessage);
+				}
 			}
 
         }
@@ -100,10 +93,8 @@ public class ApiServiceImpl implements ApiService {
 	private final SingleCached<EntryPoint> cachedEntryPoint = new SingleCached<>("digipost-entrypoint", entryPoint, expireAfterAccess(standardMinutes(5)), useSoftValues);
 	private final Cache<String, SenderInformation> senderInformation = new Cache<>("sender-information", expireAfterAccess(standardMinutes(5)), useSoftValues);
 	private final EventLogger eventLogger;
-	private final WebTarget webResource;
 
-	public ApiServiceImpl(WebTarget webTarget, long senderAccountId, EventLogger eventLogger, String digipostUrl) {
-		this.webResource = webTarget;
+	public ApiServiceImpl(long senderAccountId, EventLogger eventLogger, String digipostUrl) {
 		this.brokerId = senderAccountId;
 		this.eventLogger = eventLogger;
 		this.digipostUrl = digipostUrl;
@@ -111,9 +102,6 @@ public class ApiServiceImpl implements ApiService {
 				.setProxy(new HttpHost("sig-web.posten.no", 3128, "http"))
 				.build();
 		this.qaEnvironment = digipostUrl.contains("qa");
-		if(qaEnvironment){
-			LOG.info("Host is QA, sets proxy");
-		}
 	}
 
 	public void setApacheClient(CloseableHttpClient httpClient){
@@ -128,13 +116,15 @@ public class ApiServiceImpl implements ApiService {
 
 	@Override
 	public CloseableHttpResponse multipartMessage(final HttpEntity multipart) {
+		MultipartNoLengthCheckHttpEntity multipartLengthCheckHttpEntity = new MultipartNoLengthCheckHttpEntity(multipart);
+
 		EntryPoint entryPoint = getEntryPoint();
 
 		HttpPost httpPost = new HttpPost(digipostUrl + entryPoint.getCreateMessageUri().getPath());
 		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 		httpPost.setHeader("MIME-Version", "1.0");
 		httpPost.removeHeaders("Accept-Encoding");
-		httpPost.setEntity(multipart);
+		httpPost.setEntity(multipartLengthCheckHttpEntity);
 		return send(httpPost);
 
 	}
@@ -315,12 +305,6 @@ public class ApiServiceImpl implements ApiService {
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
-	}
-
-	@Override
-	public void addFilter(final ClientRequestFilter filter) {
-		//TODO what to do with this
-		//webResource.register(filter);
 	}
 
 	@Override

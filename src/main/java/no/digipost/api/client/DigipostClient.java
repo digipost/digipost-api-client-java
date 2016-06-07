@@ -24,20 +24,16 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
-import no.digipost.api.client.util.JerseyClientProvider;
 import no.digipost.print.validate.PdfValidator;
 import no.posten.dpost.httpclient.DigipostHttpClientFactory;
 import no.posten.dpost.httpclient.DigipostHttpClientSettings;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.glassfish.jersey.filter.LoggingFilter;
-import org.glassfish.jersey.message.GZipEncoder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
 import javax.xml.bind.JAXB;
 
 import java.io.IOException;
@@ -67,14 +63,9 @@ public class DigipostClient {
 	private final MessageSender messageSender;
 	private final MessageDeliverer deliverer;
 	private final DocumentCommunicator documentCommunicator;
-	private final DigipostClientConfig config;
-	private final CloseableHttpClient httpClient;
 
-	private final ResponseSignatureFilter responseSignatureFilter;
 	private final ResponseSignatureInterceptor responseSignatureInterceptor;
 	private final ResponseContentSHA256Interceptor responseHashInterceptor = new ResponseContentSHA256Interceptor();
-	private final ResponseContentSHA256Filter responseHashFilter = new ResponseContentSHA256Filter();
-	private final ResponseDateFilter responseDateFilter = new ResponseDateFilter();
 	private final ResponseDateInterceptor responseDateInterceptor = new ResponseDateInterceptor();
 
 
@@ -103,24 +94,13 @@ public class DigipostClient {
 	}
 
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final Client jerseyClient, final ApiService overriddenApiService) {
-		WebTarget webTarget = (jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient).register(new GZipEncoder()).target(digipostUrl);
-		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId, eventLogger, digipostUrl) : overriddenApiService;
+		this.apiService = overriddenApiService == null ? new ApiServiceImpl(senderAccountId, eventLogger, digipostUrl) : overriddenApiService;
 
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 		this.messageSender = new MessageSender(config, apiService, eventLogger, new PdfValidator());
 		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
 		this.documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
-		this.responseSignatureFilter = new ResponseSignatureFilter(apiService);
 		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
-		this.config = config;
-
-		webTarget.register(new LoggingFilter());
-		webTarget.register(new RequestDateFilter(eventLogger));
-		webTarget.register(new RequestUserAgentFilter());
-		webTarget.register(new RequestSignatureFilter(signer, eventLogger, new RequestContentSHA256Filter(eventLogger)));
-		webTarget.register(responseDateFilter);
-		webTarget.register(responseHashFilter);
-		webTarget.register(responseSignatureFilter);
 
 		CloseableHttpClient apacheClient = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT)
 				.addInterceptorLast(new RequestDateInterceptor(eventLogger))
@@ -132,8 +112,6 @@ public class DigipostClient {
 
 		apiService.setApacheClient(apacheClient);
 
-		this.httpClient = apacheClient;
-
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
 	}
 
@@ -144,9 +122,9 @@ public class DigipostClient {
 	 * @param throwOnError true hvis den skal kaste exception, false for warn logging
 	 */
 	public DigipostClient setThrowOnResponseValidationError(final boolean throwOnError) {
-		responseDateFilter.setThrowOnError(throwOnError);
-		responseHashFilter.setThrowOnError(throwOnError);
-		responseSignatureFilter.setThrowOnError(throwOnError);
+		responseDateInterceptor.setThrowOnError(throwOnError);
+		responseHashInterceptor.setThrowOnError(throwOnError);
+		responseSignatureInterceptor.setThrowOnError(throwOnError);
 		return this;
 	}
 
@@ -201,49 +179,6 @@ public class DigipostClient {
 	                                        final int offset, final int maxResults) {
 		return documentCommunicator.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
 	}
-
-	/**
-	* Dersom vi tester mot et av Digiposts testmiljøer, vil vi ikke bruke
-	* SSL-validering.
-	*/
-	/*
-	public static CloseableHttpClient createApacheClientWithoutSSLValidation() {
-		TrustManager[] noopTrustManager = new TrustManager[]{new X509TrustManager() {
-			@Override
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return null;
-			}
-
-			@Override
-			public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-			}
-
-			@Override
-			public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-			}
-		}};
-
-		HostnameVerifier noopHostnameVerifier = new HostnameVerifier() {
-			@Override
-			public boolean verify(final String hostname, final SSLSession session) {
-				return true;
-			}
-		};
-
-		SSLContext sc;
-		try {
-			sc = SSLContext.getInstance("SSL");
-			sc.init(null, noopTrustManager, new SecureRandom());
-			ClientConfig c = new ClientConfig();
-			c.register(LoggingFilter.class);
-			c.register(MultiPartFeature.class);
-
-			return new JerseyClientBuilder().sslContext(sc).withConfig(c).hostnameVerifier(noopHostnameVerifier).build();
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-*/
 
 	/**
 	 * Hent informasjon om en gitt avsender. Kan enten be om informasjon om

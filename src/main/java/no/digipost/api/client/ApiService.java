@@ -105,8 +105,6 @@ public interface ApiService {
 
 	Autocomplete searchSuggest(String searchString);
 
-	void addFilter(ClientRequestFilter filter);
-
 	CloseableHttpResponse identifyRecipient(Identification identification);
 
 	/**

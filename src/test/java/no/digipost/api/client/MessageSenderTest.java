@@ -358,7 +358,7 @@ public class MessageSenderTest {
 		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).setPreEncrypt();
 		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).setPreEncrypt());
 
-		MessageDelivery incompleteDelivery = MessageDeliveryMock.setMessageDeliveryStatus(new MessageDelivery(messageId, PRINT, NOT_COMPLETE, now()), printDocument,
+		MessageDelivery incompleteDelivery = MessageDeliverySetter.setMessageDeliveryStatus(new MessageDelivery(messageId, PRINT, NOT_COMPLETE, now()), printDocument,
 				printAttachments, new Link(SEND, new DigipostUri("/send")));
 
 		final List<Document> allDocuments = the(printDocument).append(printAttachments).collect();
