@@ -603,8 +603,6 @@ public class DigipostSwingClient {
 				CardLayout layout = (CardLayout) contentPane.getLayout();
 				layout.show(contentPane, BREV);
 
-				Client jerseyClient = turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(endpointField.getText());
-
 				try {
 					client = new DigipostClient(newBuilder().build(),ApiFlavor.STEPWISE_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
 							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger);
@@ -708,19 +706,5 @@ public class DigipostSwingClient {
 		gbc.gridx = gridx;
 		gbc.gridy = gridy;
 		return gbc;
-	}
-
-	/**
-	 * Dersom vi tester mot et av Digiposts testmiljøer, vil vi ikke bruke
-	 * SSL-validering.
-	 */
-	private Client turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(final String endpoint) {
-		/*Client jerseyClient = JerseyClientProvider.newClient();
-		if (endpoint.contains("camelon")) {
-			eventLogger.log("Detekterte at vi går mot Digipost Testmiljø. Skrur derfor av SSL-sjekk");
-			jerseyClient = DigipostClient.createJerseyClientWithoutSSLValidation();
-		}
-		return jerseyClient;*/
-		return null;
 	}
 }
