@@ -25,17 +25,15 @@ import no.digipost.cache.inmemory.Cache;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpHost;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.bind.JAXB;
@@ -67,7 +65,7 @@ public class ApiServiceImpl implements ApiService {
 	private final String digipostUrl;
 	private final RequestConfig config;
 	private final boolean qaEnvironment;
-
+	private final HttpClientBuilder httpClientBuilder;
 
 	private final Callable<EntryPoint> entryPoint = new Callable<EntryPoint>() {
 		@Override
@@ -94,7 +92,7 @@ public class ApiServiceImpl implements ApiService {
 	private final Cache<String, SenderInformation> senderInformation = new Cache<>("sender-information", expireAfterAccess(standardMinutes(5)), useSoftValues);
 	private final EventLogger eventLogger;
 
-	public ApiServiceImpl(long senderAccountId, EventLogger eventLogger, String digipostUrl) {
+	public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long senderAccountId, EventLogger eventLogger, String digipostUrl) {
 		this.brokerId = senderAccountId;
 		this.eventLogger = eventLogger;
 		this.digipostUrl = digipostUrl;
@@ -102,10 +100,7 @@ public class ApiServiceImpl implements ApiService {
 				.setProxy(new HttpHost("sig-web.posten.no", 3128, "http"))
 				.build();
 		this.qaEnvironment = digipostUrl.contains("qa");
-	}
-
-	public void setApacheClient(CloseableHttpClient httpClient){
-		this.httpClient = httpClient;
+		this.httpClientBuilder = httpClientBuilder;
 	}
 
 	@Override
@@ -305,6 +300,21 @@ public class ApiServiceImpl implements ApiService {
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
+	}
+
+	@Override
+	public void addFilter(HttpResponseInterceptor interceptor) {
+		httpClientBuilder.addInterceptorLast(interceptor);
+	}
+
+	@Override
+	public void addFilter(HttpRequestInterceptor interceptor) {
+		httpClientBuilder.addInterceptorLast(interceptor);
+	}
+
+	@Override
+	public void buildApacheHttpClientBuilder(){
+		httpClient = httpClientBuilder.build();
 	}
 
 	@Override

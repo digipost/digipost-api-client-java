@@ -18,6 +18,8 @@ package no.digipost.api.client;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.joda.time.DateTime;
@@ -61,8 +63,6 @@ public interface ApiService {
 	EntryPoint getEntryPoint();
 
 
-	void setApacheClient(CloseableHttpClient httpClientBuilder);
-
 	/**
 	 * Oppretter og sender en multipartforsendelse
 	 */
@@ -104,6 +104,12 @@ public interface ApiService {
 	Recipients search(String searchString);
 
 	Autocomplete searchSuggest(String searchString);
+
+	void addFilter(HttpResponseInterceptor interceptor);
+
+	void addFilter(HttpRequestInterceptor interceptor);
+
+	void buildApacheHttpClientBuilder();
 
 	CloseableHttpResponse identifyRecipient(Identification identification);
 

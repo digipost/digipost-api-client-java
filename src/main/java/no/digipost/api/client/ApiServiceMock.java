@@ -26,6 +26,8 @@ import no.digipost.api.client.util.MockfriendlyResponse.MockedResponseBuilder;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -121,11 +123,6 @@ public class ApiServiceMock implements ApiService {
 		throw new NotImplementedException("This is a mock");
 	}
 
-	@Override
-	public void setApacheClient(CloseableHttpClient httpClientBuilder) {
-
-	}
-
 
 	@Override
 	public CloseableHttpResponse multipartMessage(final HttpEntity multipart) {
@@ -192,6 +189,21 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public Autocomplete searchSuggest(final String searchString) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void addFilter(HttpResponseInterceptor interceptor) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void addFilter(HttpRequestInterceptor interceptor) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void buildApacheHttpClientBuilder() {
 		throw new NotImplementedException("This is a mock");
 	}
 

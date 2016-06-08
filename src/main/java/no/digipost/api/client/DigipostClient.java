@@ -28,7 +28,6 @@ import no.digipost.print.validate.PdfValidator;
 import no.posten.dpost.httpclient.DigipostHttpClientFactory;
 import no.posten.dpost.httpclient.DigipostHttpClientSettings;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +85,8 @@ public class DigipostClient {
 	}
 
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final ApiService overriddenApiService) {
-		this.apiService = overriddenApiService == null ? new ApiServiceImpl(senderAccountId, eventLogger, digipostUrl) : overriddenApiService;
+		this.apiService = overriddenApiService == null ?
+				new ApiServiceImpl(DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT), senderAccountId, eventLogger, digipostUrl) : overriddenApiService;
 
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 		this.messageSender = new MessageSender(config, apiService, eventLogger, new PdfValidator());
@@ -94,15 +94,14 @@ public class DigipostClient {
 		this.documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
 		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
 
-		CloseableHttpClient apacheClient = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT)
-				.addInterceptorLast(new RequestDateInterceptor(eventLogger))
-				.addInterceptorLast(new RequestUserAgentInterceptor())
-				.addInterceptorLast(new RequestSignatureInterceptor(signer, eventLogger, new RequestContentSHA256Filter(eventLogger)))
-				.addInterceptorLast(responseDateInterceptor)
-				.addInterceptorLast(responseHashInterceptor)
-				.addInterceptorLast(responseSignatureInterceptor).build();
+		apiService.addFilter(new RequestDateInterceptor(eventLogger));
+		apiService.addFilter(new RequestUserAgentInterceptor());
+		apiService.addFilter(new RequestSignatureInterceptor(signer, eventLogger, new RequestContentSHA256Filter(eventLogger)));
+		apiService.addFilter(responseDateInterceptor);
+		apiService.addFilter(responseHashInterceptor);
+		apiService.addFilter(responseSignatureInterceptor);
 
-		apiService.setApacheClient(apacheClient);
+		apiService.buildApacheHttpClientBuilder();
 
 		log("Initialiserte Jersey-klient mot " + digipostUrl);
 	}
