@@ -279,8 +279,8 @@ public class DigipostClient {
 		}
 
 		public DigipostClient build(){
-			return signer.equals(null) ? new DigipostClient(config, deliveryType, digipostURL, senderAccountId, certificateP12File, certificatePassword, eventLogger, client)
-					: new DigipostClient(config, deliveryType, digipostURL, senderAccountId, signer, eventLogger, client, apiService);
+			return signer.equals(null) ? new DigipostClient(config, deliveryType, digipostURL, senderAccountId, certificateP12File, certificatePassword, eventLogger)
+					: new DigipostClient(config, deliveryType, digipostURL, senderAccountId, signer, eventLogger, apiService);
 		}
 
 	}
