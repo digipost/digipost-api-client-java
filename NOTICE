@@ -11,9 +11,9 @@ This software includes third party software subject to the following licenses:
   Antlr 3 Runtime under BSD licence
   aopalliance version 1.0 repackaged as a module under CDDL + GPLv2 with classpath exception
   Apache Commons Lang under Apache License, Version 2.0
-  Apache FontBox under The Apache Software License, Version 2.0
-  Apache JempBox under The Apache Software License, Version 2.0
-  Apache PDFBox under The Apache Software License, Version 2.0
+  Apache FontBox under Apache License, Version 2.0
+  Apache JempBox under Apache License, Version 2.0
+  Apache PDFBox under Apache License, Version 2.0
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
   Byte Buddy (without dependencies) under The Apache Software License, Version 2.0
