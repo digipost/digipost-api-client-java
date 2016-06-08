@@ -24,15 +24,15 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
+import no.digipost.http.client.DigipostHttpClientFactory;
+import no.digipost.http.client.DigipostHttpClientSettings;
 import no.digipost.print.validate.PdfValidator;
-import no.posten.dpost.httpclient.DigipostHttpClientFactory;
-import no.posten.dpost.httpclient.DigipostHttpClientSettings;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.Client;
 import javax.xml.bind.JAXB;
 
 import java.io.IOException;
@@ -73,20 +73,26 @@ public class DigipostClient {
 	}
 
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final ApiService apiService) {
-		this(config, deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, apiService);
+		this(config, deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, null, apiService);
 	}
 
-	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer) {
-		this(config, deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, null);
+	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final HttpClientBuilder clientBuilder) {
+		this(config, deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, clientBuilder, null);
 	}
 
-	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword, final EventLogger eventLogger) {
-		this(config, deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), eventLogger, null);
+	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final HttpClientBuilder clientBuilder) {
+		this(config, deliveryType, digipostUrl, senderAccountId, signer, eventLogger, clientBuilder, null);
 	}
 
-	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final ApiService overriddenApiService) {
+	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword, final EventLogger eventLogger, final HttpClientBuilder clientBuilder) {
+		this(config, deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), eventLogger, clientBuilder, null);
+	}
+
+	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final HttpClientBuilder clientBuilder, final ApiService overriddenApiService) {
+		HttpClientBuilder httpClientBuilder = clientBuilder == null ? DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT) : clientBuilder;
+
 		this.apiService = overriddenApiService == null ?
-				new ApiServiceImpl(DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT), senderAccountId, eventLogger, digipostUrl) : overriddenApiService;
+				new ApiServiceImpl(httpClientBuilder, senderAccountId, eventLogger, digipostUrl) : overriddenApiService;
 
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 		this.messageSender = new MessageSender(config, apiService, eventLogger, new PdfValidator());
@@ -233,9 +239,9 @@ public class DigipostClient {
 		private final String certificatePassword;
 		private final Signer signer;
 		private final DigipostClientConfig config;
-		private ApiService apiService = null;
+		private HttpClientBuilder clientBuilder = null;
 		private EventLogger eventLogger = NOOP_EVENT_LOGGER;
-		private Client client = null;
+		private ApiService apiService = null;
 
 
 		public DigipostClientBuilder(String digipostURL, long senderAccountId, InputStream certificateP12File,
@@ -262,8 +268,8 @@ public class DigipostClient {
 			return this;
 		}
 
-		public DigipostClientBuilder client(Client client){
-			this.client = client;
+		public DigipostClientBuilder clientBuilder(HttpClientBuilder clientBuilder){
+			this.clientBuilder = clientBuilder;
 			return this;
 		}
 
@@ -278,8 +284,8 @@ public class DigipostClient {
 		}
 
 		public DigipostClient build(){
-			return signer.equals(null) ? new DigipostClient(config, deliveryType, digipostURL, senderAccountId, certificateP12File, certificatePassword, eventLogger)
-					: new DigipostClient(config, deliveryType, digipostURL, senderAccountId, signer, eventLogger, apiService);
+			return signer.equals(null) ? new DigipostClient(config, deliveryType, digipostURL, senderAccountId, certificateP12File, certificatePassword, eventLogger, clientBuilder)
+					: new DigipostClient(config, deliveryType, digipostURL, senderAccountId, signer, eventLogger, clientBuilder, apiService);
 		}
 
 	}

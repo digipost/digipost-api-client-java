@@ -15,24 +15,17 @@
  */
 package no.digipost.api.client.representations;
 
-import junit.framework.Assert;
-import org.joda.time.DateTime;
 import org.junit.Test;
 
-import javax.print.Doc;
-import javax.xml.parsers.DocumentBuilder;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static junit.framework.Assert.assertNull;
 import static junit.framework.TestCase.assertTrue;
 import static no.digipost.api.client.representations.FileType.HTML;
 import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 public class DocumentTest {

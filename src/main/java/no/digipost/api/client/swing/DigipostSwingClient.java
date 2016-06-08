@@ -605,7 +605,7 @@ public class DigipostSwingClient {
 
 				try {
 					client = new DigipostClient(newBuilder().build(),ApiFlavor.STEPWISE_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
-							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger);
+							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger, null);
 				} catch (NumberFormatException e1) {
 					eventLogger.log("FEIL: Avsenders ID må være et tall > 0");
 				} catch (IOException e1) {
