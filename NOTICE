@@ -38,6 +38,7 @@ This software includes third party software subject to the following licenses:
   javax.annotation API under CDDL + GPLv2 with classpath exception
   javax.inject:1 as OSGi bundle under CDDL + GPLv2 with classpath exception
   javax.ws.rs-api under CDDL 1.1 or GPL2 w/ CPE
+  JBoss Logging 3 under Apache License, version 2.0
   JCL 1.1.1 implemented over SLF4J under MIT License
   jersey-core-common under CDDL+GPL License
   jersey-media-jaxb under CDDL+GPL License
@@ -58,4 +59,7 @@ This software includes third party software subject to the following licenses:
   OSGi resource locator bundle - used by various API providers that rely on META-INF/services mechanism to locate providers. under CDDL + GPLv2 with classpath exception
   ServiceLocator Default Implementation under CDDL + GPLv2 with classpath exception
   SLF4J API Module under MIT License
+  Undertow Core under Apache License Version 2.0
+  XNIO API under Public Domain
+  XNIO NIO Implementation under Public Domain
 

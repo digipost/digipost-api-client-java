@@ -126,7 +126,11 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public CloseableHttpResponse multipartMessage(final HttpEntity multipart) {
-		throw new NotImplementedException("This is a mock");
+		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
+		CloseableHttpResponse response = requestsAndResponses.getResponse("Request");
+
+		//TODO: Could be done a bit better
+		return response;
 	}
 
 	@Override
@@ -194,17 +198,14 @@ public class ApiServiceMock implements ApiService {
 
 	@Override
 	public void addFilter(HttpResponseInterceptor interceptor) {
-		throw new NotImplementedException("This is a mock");
 	}
 
 	@Override
 	public void addFilter(HttpRequestInterceptor interceptor) {
-		throw new NotImplementedException("This is a mock");
 	}
 
 	@Override
 	public void buildApacheHttpClientBuilder() {
-		throw new NotImplementedException("This is a mock");
 	}
 
 	@Override

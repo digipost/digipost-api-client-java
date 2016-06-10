@@ -15,11 +15,19 @@
  */
 package no.digipost.api.client;
 
+import io.undertow.Undertow;
+import no.digipost.api.client.ApiServiceMock.Method;
+import no.digipost.api.client.ApiServiceMock.MultipartRequestMatcher;
+import no.digipost.api.client.ApiServiceMock.RequestsAndResponses;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.util.DigipostApiMock;
+import no.digipost.http.client.DigipostHttpClientFactory;
+import no.digipost.http.client.DigipostHttpClientSettings;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.xml.sax.ContentHandler;
 
 import javax.ws.rs.core.Response;
@@ -31,6 +39,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import static no.digipost.api.client.ApiServiceMock.MockRequest;
@@ -43,13 +52,22 @@ import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBu
 public class DigipostClientMock {
 
 	private final DigipostClient client;
-	private final ApiServiceMock apiService;
+	private final ApiService apiService;
+	public final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
+	private static DigipostApiMock digipostApiMock = new DigipostApiMock();
 
 	public DigipostClientMock(ApiFlavor apiFlavor) {
+		int port = 9999;
+		String host = "http://localhost:" + port;
+		digipostApiMock.start(port, requestsAndResponsesMap);
+
 		if (apiFlavor == ApiFlavor.STEPWISE_REST) {
 			throw new RuntimeException("Stepwise REST is not yet supported by " + DigipostClientMock.class.getName());
 		}
-		apiService = new ApiServiceMock(initMarshaller());
+		HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
+
+		apiService = new ApiServiceImpl(httpClientBuilder, port, null, host);
+		apiService.buildApacheHttpClientBuilder();
 		client = new DigipostClient(newBuilder().build(),apiFlavor, "digipostmock-url", 1, new Signer() {
 
 			@Override
@@ -59,32 +77,44 @@ public class DigipostClientMock {
 		}, apiService);
 	}
 
+	public void shutdownWebserver(){
+		digipostApiMock.stop();
+	}
+
 	public DigipostClient getClient() {
 		return client;
 	}
 
-	public Map<String, MockRequest> getAllRequests(ApiServiceMock.Method method) {
-		return apiService.requestsAndResponsesMap.get(method).getRequests();
+	public Map<String, MockRequest> getAllRequests(Method method) {
+		return requestsAndResponsesMap.get(method).getRequests();
 	}
 
-	public MockRequest getRequest(ApiServiceMock.Method method, String requestKey) {
-		return apiService.requestsAndResponsesMap.get(method).getRequest(requestKey);
+	public MockRequest getRequest(Method method, String requestKey) {
+		return requestsAndResponsesMap.get(method).getRequest(requestKey);
 	}
 
-	public void addExpectedResponse(ApiServiceMock.Method method, CloseableHttpResponse response) {
-		ApiServiceMock.RequestsAndResponses requestsAndResponses = apiService.requestsAndResponsesMap.get(method);
+	public void addExpectedResponse(Method method, CloseableHttpResponse response) {
+		ApiServiceMock.RequestsAndResponses requestsAndResponses = requestsAndResponsesMap.get(method);
 
 		requestsAndResponses.addExpectedResponse(response);
 	}
 
-	public void addExpectedException(ApiServiceMock.Method method, RuntimeException exception) {
-		ApiServiceMock.RequestsAndResponses requestsAndResponses = apiService.requestsAndResponsesMap.get(method);
+	public void addExpectedException(Method method, RuntimeException exception) {
+		ApiServiceMock.RequestsAndResponses requestsAndResponses = requestsAndResponsesMap.get(method);
 
 		requestsAndResponses.addExpectedException(exception);
 	}
 
 	public void reset() {
-		apiService.reset();
+		init();
+	}
+
+	private void init() {
+		requestsAndResponsesMap.clear();
+		requestsAndResponsesMap.put(Method.GET_CONTENT, new RequestsAndResponses());
+		requestsAndResponsesMap.put(Method.GET_DOCUMENTS_EVENTS, new RequestsAndResponses());
+		requestsAndResponsesMap.put(Method.GET_DOCUMENT_STATUS, new RequestsAndResponses());
+		requestsAndResponsesMap.put(Method.MULTIPART_MESSAGE, new RequestsAndResponses(new MultipartRequestMatcher()));
 	}
 
 	/**

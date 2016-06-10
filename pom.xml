@@ -182,6 +182,11 @@
 			<version>0.4</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-core</artifactId>
+			<version>2.0.0.Alpha1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -430,6 +435,9 @@
 										<include>commons-logging:commons-logging</include>
 										<include>org.apache.httpcomponents:httpcore</include>
 										<include>org.apache.httpcomponents:httpmime</include>
+										<include>io.undertow:undertow-core</include>
+										<include>org.jboss.logging:jboss-logging</include>
+										<include>org.jboss.xnio:xnio-api</include>
 									</includes>
 									<searchTransitive>true</searchTransitive>
 									<message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før distribusjon. Husk også å oppdatere fila «NOTICE».</message>

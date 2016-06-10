@@ -236,8 +236,10 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 			};
 		}
 
-		public static CloseableHttpResponse ok(HttpEntity entity) {
-			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(entity).build();
+		public static CloseableHttpResponse ok(Object object) {
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			JAXB.marshal(object, bao);
+			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new ByteArrayEntity(bao.toByteArray())).build();
 		}
 	}
 }
