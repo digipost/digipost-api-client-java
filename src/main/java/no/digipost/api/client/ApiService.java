@@ -21,10 +21,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.joda.time.DateTime;
-
-import javax.ws.rs.client.ClientRequestFilter;
 
 import java.io.InputStream;
 import java.net.URI;

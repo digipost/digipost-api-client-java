@@ -15,34 +15,15 @@
  */
 package no.digipost.api.client.filters.request;
 
-import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.Security;
-
 import no.digipost.api.client.EventLogger;
-
-import no.digipost.api.client.Headers;
-import no.digipost.api.client.security.ClientRequestToSign;
-import no.digipost.api.client.security.RequestMessageSignatureUtil;
-import no.digipost.api.client.security.Signer;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpRequest;
 import org.bouncycastle.crypto.ExtendedDigest;
-
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-
-@Priority(Priorities.USER)
 public abstract class RequestContentHashFilter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RequestContentHashFilter.class);
@@ -74,9 +55,7 @@ public abstract class RequestContentHashFilter {
 			String hash = new String(Base64.encode(result));
 			httpRequest.setHeader(header, hash);
 			log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
-		} catch (InstantiationException e) {
-			log("Feil ved generering av " + header + " : " + e.getMessage());
-		} catch (IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			log("Feil ved generering av " + header + " : " + e.getMessage());
 		}
 	}

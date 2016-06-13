@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static javax.ws.rs.core.HttpHeaders.DATE;
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
+import static org.apache.http.HttpHeaders.DATE;
 
 public class RequestDateInterceptor implements HttpRequestInterceptor {
 

@@ -18,8 +18,6 @@ package no.digipost.api.client.security;
 import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.SortedMap;

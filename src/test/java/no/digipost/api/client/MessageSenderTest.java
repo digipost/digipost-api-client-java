@@ -48,23 +48,17 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXB;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
 
 import static java.util.Arrays.asList;
-import static javax.ws.rs.core.Response.Status.OK;
-import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.*;
+import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.delivery.ApiFlavor.ATOMIC_REST;
 import static no.digipost.api.client.delivery.ApiFlavor.STEPWISE_REST;
-import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
-import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
-import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
+import static no.digipost.api.client.pdf.EksempelPdf.*;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
@@ -76,6 +70,8 @@ import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static no.digipost.api.client.representations.sender.SenderFeature.*;
 import static no.digipost.api.client.representations.sender.SenderStatus.VALID_SENDER;
 import static no.motif.Singular.the;
+import static org.apache.http.HttpStatus.SC_CONFLICT;
+import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.Matchers.is;
 import static org.joda.time.DateTime.now;
 import static org.junit.Assert.*;
@@ -120,7 +116,7 @@ public class MessageSenderTest {
 		JAXB.marshal(fakeEncryptionKey, bao);
 
 		encryptionKeyResponse = MockfriendlyResponse.MockedResponseBuilder.create()
-				.status(OK.getStatusCode())
+				.status(SC_OK)
 				.entity(new ByteArrayEntity(bao.toByteArray()))
 				.build();
 
@@ -134,14 +130,14 @@ public class MessageSenderTest {
 	public void skalHenteEksisterendeForsendelseHvisDenFinnesFraForr() {
 		Message forsendelseIn = lagDefaultForsendelse();
 
-		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(Response.Status.CONFLICT.getStatusCode()));
+		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_CONFLICT));
 		when(mockClientResponse.getFirstHeader(anyString())).thenReturn(new BasicHeader("head", "er"));
 
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
 		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, Channel.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
 
-		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(Response.Status.OK.getStatusCode()));
+		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		JAXB.marshal(eksisterendeForsendelse, bao);
@@ -160,7 +156,7 @@ public class MessageSenderTest {
 	public void skalKasteFeilHvisForsendelseAlleredeLevert() {
 		Message forsendelseIn = lagDefaultForsendelse();
 
-		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(Response.Status.CONFLICT.getStatusCode()));
+		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_CONFLICT));
 		when(mockClientResponse.getFirstHeader(anyString())).thenReturn(new BasicHeader("head", "er"));
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
@@ -168,7 +164,7 @@ public class MessageSenderTest {
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		JAXB.marshal(eksisterendeForsendelse, bao);
 
-		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(Response.Status.OK.getStatusCode()));
+		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 		when(mockClientResponse2.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
 		when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
 
@@ -185,7 +181,7 @@ public class MessageSenderTest {
 	public void skalKasteFeilHvisForsendelseAlleredeLevertTilPrint() {
 		Message forsendelseIn = lagDefaultForsendelse();
 
-		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(Response.Status.CONFLICT.getStatusCode()));
+		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_CONFLICT));
 		when(mockClientResponse.getFirstHeader(anyString())).thenReturn(new BasicHeader("head", "er"));
 		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
@@ -193,7 +189,7 @@ public class MessageSenderTest {
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		JAXB.marshal(eksisterendeForsendelse, bao);
 
-		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(Response.Status.OK.getStatusCode()));
+		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 		when(mockClientResponse2.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
 		when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
 
@@ -353,7 +349,7 @@ public class MessageSenderTest {
 		when(api.addContent(any(Document.class), any(InputStream.class))).thenReturn(mockClientResponse);
 		when(api.multipartMessage(any(HttpEntity.class))).thenReturn(mockClientResponse);
 		when(api.send(any(MessageDelivery.class))).thenReturn(mockClientResponse);
-		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(Status.OK.getStatusCode()));
+		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 
 		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).setPreEncrypt();
 		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).setPreEncrypt());

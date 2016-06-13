@@ -28,23 +28,19 @@ import no.motif.f.Fn;
 import no.motif.single.Optional;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.FormBodyPartBuilder;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.*;
-import org.glassfish.jersey.media.multipart.BodyPart;
-import org.glassfish.jersey.media.multipart.ContentDisposition;
-import org.glassfish.jersey.media.multipart.MultiPart;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
-import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXB;
-
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
@@ -91,8 +87,7 @@ public class MessageSender extends Communicator {
 		Map<Document, InputStream> documentInputStream = encryptionAndInputStream.documentsAndInputstream;
 		Message singleChannelMessage = encryptionAndInputStream.getSingleChannelMessage();
 
-		try (MultiPart multiPart = new MultiPart()) {
-
+		try {
 			Map<Document, InputStream> preparedDocuments = documentsPreparer.prepare(
 					documentInputStream, singleChannelMessage, encrypter, Apply.partially(resolvePdfValidationSettings).of(singleChannelMessage));
 
@@ -104,11 +99,6 @@ public class MessageSender extends Communicator {
 			MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create().setMode(HttpMultipartMode.STRICT).setMimeSubtype("mixed")
 					.addPart(FormBodyPartBuilder.create("message", attachment).addField("Content-Disposition", "attachment;" + " filename=\"message\"").build());
 
-			BodyPart messageBodyPart = new BodyPart(singleChannelMessage, MediaType.valueOf(MediaTypes.DIGIPOST_MEDIA_TYPE_V6));
-			ContentDisposition messagePart = ContentDisposition.type("attachment").fileName("message").build();
-			messageBodyPart.setContentDisposition(messagePart);
-			multiPart.bodyPart(messageBodyPart);
-
 			for (Entry<Document, InputStream> documentAndContent : preparedDocuments.entrySet()) {
 				Document document = documentAndContent.getKey();
 				InputStream content = documentAndContent.getValue();
@@ -119,12 +109,6 @@ public class MessageSender extends Communicator {
 						.addPart(FormBodyPartBuilder
 						.create("application", new ByteArrayBody(bytes, ContentType.create("application/" + defaultIfBlank(document.getDigipostFileType(), "octet-stream")), document.uuid.toString()))
 						.addField("Content-Disposition", "attachment;" + " filename=\"" + document.uuid.toString() + "\"").build());
-
-
-				BodyPart bodyPart = new BodyPart(bytes, new MediaType("application", defaultIfBlank(document.getDigipostFileType(), "octet-stream")));
-				ContentDisposition documentPart = ContentDisposition.type("attachment").fileName(document.uuid).build();
-				bodyPart.setContentDisposition(documentPart);
-				multiPart.bodyPart(bodyPart);
 			}
 			log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + singleChannelMessage.messageId + " ***");
 			CloseableHttpResponse response = apiService.multipartMessage(multipartEntity.build());

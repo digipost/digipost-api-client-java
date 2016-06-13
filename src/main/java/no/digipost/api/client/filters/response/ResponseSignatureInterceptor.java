@@ -27,7 +27,7 @@ import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.glassfish.jersey.internal.util.Base64;
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

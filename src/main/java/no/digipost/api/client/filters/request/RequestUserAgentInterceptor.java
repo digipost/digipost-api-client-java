@@ -22,8 +22,8 @@ import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
 
-import static javax.ws.rs.core.HttpHeaders.USER_AGENT;
 import static no.digipost.api.client.util.UserAgent.DIGIPOST_USER_AGENT;
+import static org.apache.http.HttpHeaders.USER_AGENT;
 
 public class RequestUserAgentInterceptor implements HttpRequestInterceptor {
 	@Override

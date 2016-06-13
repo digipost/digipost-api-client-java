@@ -15,19 +15,18 @@
  */
 package no.digipost.api.client.security;
 
+import org.apache.http.HttpHeaders;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 
-import static javax.ws.rs.core.HttpHeaders.DATE;
-import static no.digipost.api.client.Headers.Content_MD5;
-import static no.digipost.api.client.Headers.X_Content_SHA256;
-import static no.digipost.api.client.Headers.X_Digipost_UserId;
+import static no.digipost.api.client.Headers.*;
 
 public class RequestMessageSignatureUtil {
 
-	private static final List<String> HEADERS_FOR_SIGNATURE = Arrays.asList(Content_MD5.toLowerCase(), DATE.toLowerCase(),
+	private static final List<String> HEADERS_FOR_SIGNATURE = Arrays.asList(Content_MD5.toLowerCase(), HttpHeaders.DATE.toLowerCase(),
 			X_Digipost_UserId.toLowerCase(), X_Content_SHA256.toLowerCase());
 
 	public static String getCanonicalRequestRepresentation(final RequestToSign request) {

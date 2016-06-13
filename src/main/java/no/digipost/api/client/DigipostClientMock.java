@@ -22,7 +22,6 @@ import no.digipost.api.client.security.Signer;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.xml.sax.ContentHandler;
 
-import javax.ws.rs.core.Response;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

@@ -25,13 +25,11 @@ import org.apache.http.message.BasicStatusLine;
 import org.apache.http.params.HttpParams;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.ProcessingException;
 import javax.xml.bind.JAXB;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.*;
 
-import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 
@@ -48,12 +46,12 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 		JAXB.marshal(messageDelivery, bao);
 
 		return MockedResponseBuilder.create()
-				.status(OK.getStatusCode())
+				.status(HttpStatus.SC_OK)
 				.entity(new ByteArrayEntity(bao.toByteArray()))
 				.build();
 	}
 
-	public static ProcessingException CONNECTION_REFUSED = new ProcessingException(new ConnectException("Connection refused"));
+	public static RuntimeException CONNECTION_REFUSED = new RuntimeException(new ConnectException("Connection refused"));
 
 	static {
 		responses.put("200:OK", DEFAULT_RESPONSE);
@@ -237,7 +235,7 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 		}
 
 		public static CloseableHttpResponse ok(HttpEntity entity) {
-			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(entity).build();
+			return MockedResponseBuilder.create().status(200).entity(entity).build();
 		}
 	}
 }

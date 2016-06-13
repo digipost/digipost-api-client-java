@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static javax.ws.rs.core.HttpHeaders.DATE;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.http.HttpHeaders.DATE;
 import static org.joda.time.DateTime.now;
 
 public class ResponseDateInterceptor implements HttpResponseInterceptor {
