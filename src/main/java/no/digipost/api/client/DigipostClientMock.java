@@ -26,11 +26,11 @@ import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.DigipostApiMock;
 import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.xml.sax.ContentHandler;
 
-import javax.ws.rs.core.Response;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -39,6 +39,8 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.*;
+import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,15 +57,22 @@ public class DigipostClientMock {
 	private final ApiService apiService;
 	public final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
 	private static DigipostApiMock digipostApiMock = new DigipostApiMock();
+	private static final String KEY_STORE_PASSWORD = "Qwer12345";
+	private static final String KEY_STORE_ALIAS = "apiTest";
 
 	public DigipostClientMock(ApiFlavor apiFlavor) {
-		int port = 9999;
-		String host = "http://localhost:" + port;
-		digipostApiMock.start(port, requestsAndResponsesMap);
-
 		if (apiFlavor == ApiFlavor.STEPWISE_REST) {
 			throw new RuntimeException("Stepwise REST is not yet supported by " + DigipostClientMock.class.getName());
 		}
+
+		int port = 9999;
+		String host = "http://localhost:" + port;
+
+		KeyPair keyPair = getKeyPair(KEY_STORE_ALIAS, KEY_STORE_PASSWORD);
+
+		init();
+		digipostApiMock.start(port, requestsAndResponsesMap, keyPair);
+
 		HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 
 		apiService = new ApiServiceImpl(httpClientBuilder, port, null, host);
@@ -75,6 +84,21 @@ public class DigipostClientMock {
 				return new byte[0];
 			}
 		}, apiService);
+	}
+
+	public static KeyPair getKeyPair(final String alias, final String password) {
+		try {
+			KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+			keystore.load(DigipostClientMock.class.getClass().getResourceAsStream("/mockKeystore.jks"), KEY_STORE_PASSWORD.toCharArray());
+
+			final Key key = (PrivateKey) keystore.getKey(alias, password.toCharArray());
+			final Certificate cert = keystore.getCertificate(alias);
+			final PublicKey publicKey = cert.getPublicKey();
+
+			return new KeyPair(publicKey, (PrivateKey) key);
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	public void shutdownWebserver(){
@@ -142,7 +166,6 @@ public class DigipostClientMock {
 				throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, "DigipostClientMock failed to marshall the " + jaxbElement.getClass().getSimpleName() + " to xml.\n\n" + w.toString());
 			}
 		}
-
 	}
 
 	/**
