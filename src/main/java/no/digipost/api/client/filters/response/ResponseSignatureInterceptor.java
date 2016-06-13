@@ -15,11 +15,11 @@
  */
 package no.digipost.api.client.filters.response;
 
-import no.digipost.api.client.ApiService;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.security.ClientResponseToVerify;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil2;
+import no.digipost.api.client.util.Supplier;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
@@ -54,15 +54,15 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 	}
 
 	private final EventLogger eventLogger;
-	private final ApiService apiService;
+	private final Supplier<byte[]> certificateSupplier;
 
-	public ResponseSignatureInterceptor(final ApiService apiService) {
-		this(NOOP_EVENT_LOGGER, apiService);
+	public ResponseSignatureInterceptor(final Supplier<byte[]> certificateSupplier) {
+		this(NOOP_EVENT_LOGGER, certificateSupplier);
 	}
 
-	public ResponseSignatureInterceptor(final EventLogger eventLogger, final ApiService apiService) {
+	public ResponseSignatureInterceptor(final EventLogger eventLogger, final Supplier<byte[]> certificateSupplier) {
 		this.eventLogger = eventLogger;
-		this.apiService = apiService;
+		this.certificateSupplier = certificateSupplier;
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 
 	public X509Certificate lastSertifikat() {
 		try {
-			InputStream certStream = new ByteArrayInputStream(apiService.getEntryPoint().getCertificate().getBytes());
+			InputStream certStream = new ByteArrayInputStream(certificateSupplier.get());
 
 			CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 			X509Certificate sertifikat = (X509Certificate) cf.generateCertificate(certStream);

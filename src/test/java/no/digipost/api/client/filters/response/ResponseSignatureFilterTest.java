@@ -17,6 +17,7 @@ package no.digipost.api.client.filters.response;
 
 import no.digipost.api.client.ApiService;
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.util.Supplier;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.cookie.CookieOrigin;
@@ -53,7 +54,12 @@ public class ResponseSignatureFilterTest {
 
 	@Before
 	public void setUp() throws URISyntaxException {
-		responseSignatureInterceptor = new ResponseSignatureInterceptor(apiServiceMock);
+		responseSignatureInterceptor = new ResponseSignatureInterceptor(new Supplier<byte[]>() {
+			@Override
+			public byte[] get() {
+				return apiServiceMock.getEntryPoint().getCertificate().getBytes();
+			}
+		});
 		responseSignatureInterceptor.setThrowOnError(true);
 		when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
 		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});

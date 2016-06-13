@@ -27,8 +27,9 @@ import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
-import no.digipost.api.client.security.FileKeystoreSigner;
+import no.digipost.api.client.security.Pkcs12KeySigner;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.util.Supplier;
 import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
 import no.digipost.print.validate.PdfValidator;
@@ -73,7 +74,7 @@ public class DigipostClient {
 
 
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
-		this(config, deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
+		this(config, deliveryType, digipostUrl, senderAccountId, new Pkcs12KeySigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
 	}
 
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final ApiService apiService) {
@@ -89,7 +90,7 @@ public class DigipostClient {
 	}
 
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword, final EventLogger eventLogger, final HttpClientBuilder clientBuilder) {
-		this(config, deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), eventLogger, clientBuilder, null);
+		this(config, deliveryType, digipostUrl, senderAccountId, new Pkcs12KeySigner(certificateP12File, certificatePassword), eventLogger, clientBuilder, null);
 	}
 
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final HttpClientBuilder clientBuilder, final ApiService overriddenApiService) {
@@ -102,7 +103,12 @@ public class DigipostClient {
 		this.messageSender = new MessageSender(config, apiService, eventLogger, new PdfValidator());
 		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
 		this.documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
-		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
+		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(new Supplier<byte[]>() {
+			@Override
+			public byte[] get() {
+				return apiService.getEntryPoint().getCertificate().getBytes();
+			}
+		});
 
 		apiService.addFilter(new RequestDateInterceptor(eventLogger));
 		apiService.addFilter(new RequestUserAgentInterceptor());
@@ -151,7 +157,7 @@ public class DigipostClient {
 
 	public IdentificationResult identifyRecipient(final Identification identification) {
 		CloseableHttpResponse response = apiService.identifyRecipient(identification);
-		Communicator.checkResponse(response, eventLogger);
+		ApiCommons.checkResponse(response, eventLogger);
 
 		try {
 			IdentificationResult identificationResult = JAXB.unmarshal(response.getEntity().getContent(), IdentificationResult.class);
