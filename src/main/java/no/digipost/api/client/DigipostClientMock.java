@@ -138,6 +138,9 @@ public class DigipostClientMock {
 		requestsAndResponsesMap.put(Method.GET_CONTENT, new RequestsAndResponses());
 		requestsAndResponsesMap.put(Method.GET_DOCUMENTS_EVENTS, new RequestsAndResponses());
 		requestsAndResponsesMap.put(Method.GET_DOCUMENT_STATUS, new RequestsAndResponses());
+		requestsAndResponsesMap.put(Method.GET_PRINT_KEY, new RequestsAndResponses());
+		requestsAndResponsesMap.put(Method.GET_SENDER_INFORMATION, new RequestsAndResponses());
+		requestsAndResponsesMap.put(Method.SEND_MULTIPART_MESSAGE, new RequestsAndResponses());
 		requestsAndResponsesMap.put(Method.MULTIPART_MESSAGE, new RequestsAndResponses(new MultipartRequestMatcher()));
 	}
 

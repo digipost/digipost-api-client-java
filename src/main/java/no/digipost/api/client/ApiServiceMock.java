@@ -30,15 +30,10 @@ import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.glassfish.jersey.media.multipart.BodyPart;
 import org.joda.time.DateTime;
-import org.xml.sax.helpers.DefaultHandler;
 
 import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXB;
 
@@ -65,6 +60,9 @@ public class ApiServiceMock implements ApiService {
 	private final EncryptionKey fakeEncryptionKey;
 
 	public enum Method {
+		SEND_MULTIPART_MESSAGE,
+		GET_PRINT_KEY,
+		GET_SENDER_INFORMATION,
 		GET_CONTENT,
 		MULTIPART_MESSAGE,
 		GET_DOCUMENTS_EVENTS,

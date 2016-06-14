@@ -30,6 +30,7 @@ import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.representations.sender.SenderStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Base64;
 import org.joda.time.DateTime;
@@ -98,30 +99,39 @@ public class DigipostApiMock implements HttpHandler {
 	public void handleRequest(HttpServerExchange httpContext) throws Exception {
 		HttpString method = httpContext.getRequestMethod();
 
+		ByteArrayOutputStream bao = new ByteArrayOutputStream();
+
 		if(method.equals(new HttpString("POST"))){
-			String multipart = new String(IOUtils.toByteArray(httpContext.getInputStream()));
-			String messageString = multipart.substring(multipart.indexOf("<?xml"));
-			messageString = messageString.substring(0, messageString.indexOf("</message>") + 10);
+			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE).getResponse(httpContext.getRequestPath());
+			if(response.getStatusLine().getStatusCode() != 200){
+				httpContext.setStatusCode(response.getStatusLine().getStatusCode());
+				IOUtils.copy(response.getEntity().getContent(), bao);
+			} else {
+				String multipart = new String(IOUtils.toByteArray(httpContext.getInputStream()));
+				String messageString = multipart.substring(multipart.indexOf("<?xml"));
+				messageString = messageString.substring(0, messageString.indexOf("</message>") + 10);
 
-			ByteArrayInputStream messageStream = new ByteArrayInputStream(messageString.getBytes());
+				ByteArrayInputStream messageStream = new ByteArrayInputStream(messageString.getBytes());
 
-			Message message = JAXB.unmarshal(messageStream, Message.class);
+				Message message = JAXB.unmarshal(messageStream, Message.class);
 
-			RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
-			requestsAndResponses.addRequest(new ApiServiceMock.DigipostRequest(message, getContentparts(multipart)));
+				RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
+				requestsAndResponses.addRequest(new ApiServiceMock.DigipostRequest(message, getContentparts(multipart)));
+			}
 		}
 
-
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		if(httpContext.getRequestPath().equals("/printkey")) {
+			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_PRINT_KEY).getResponse(httpContext.getRequestPath());
 			EncryptionKey encryptionKey = new EncryptionKey();
 			encryptionKey.setKeyId(PRINT_ID);
 			encryptionKey.setValue(PRINT_KEY);
 			JAXB.marshal(encryptionKey, bao);
 		}
 		else if(httpContext.getRequestPath().equals("/getsenderinformation")) {
+			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_SENDER_INFORMATION).getResponse(httpContext.getRequestPath());
 			List<SenderFeature> senderFeatures = new ArrayList<>();
 			senderFeatures.add(SenderFeature.DELIVERY_DIRECT_TO_PRINT);
+			senderFeatures.add(SenderFeature.DIGIPOST_DELIVERY);
 			JAXB.marshal(new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
 		} else {
 			JAXB.marshal(new EntryPoint(certificate, new Link(Relation.CREATE_MESSAGE, new DigipostUri("http://localhost:9999/create")),
