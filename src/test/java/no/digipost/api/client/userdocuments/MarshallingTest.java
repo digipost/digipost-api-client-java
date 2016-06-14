@@ -31,7 +31,7 @@ public class MarshallingTest {
 	@Test
 	public void shouldMarshallUnmarshallAgreement() {
 		final StringWriter xml = new StringWriter();
-		JAXB.marshal(Agreement.createInvoiceBankAgreement("01017012345", true), xml);
+		JAXB.marshal(Agreement.createInvoiceBankAgreement(new UserId("01017012345"), true), xml);
 		log.debug(xml.toString());
 		JAXB.unmarshal(new StringReader(xml.toString()), Agreement.class);
 	}
@@ -39,7 +39,7 @@ public class MarshallingTest {
 	@Test
 	public void shouldMarshallUnmarshallAgreements() {
 		final StringWriter xml = new StringWriter();
-		final Agreements agreements = new Agreements(Collections.singletonList(Agreement.createInvoiceBankAgreement("01017012345", true)));
+		final Agreements agreements = new Agreements(Collections.singletonList(Agreement.createInvoiceBankAgreement(new UserId("01017012345"), true)));
 		JAXB.marshal(agreements, xml);
 		log.debug(xml.toString());
 		JAXB.unmarshal(new StringReader(xml.toString()), Agreements.class);

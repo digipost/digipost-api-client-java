@@ -37,13 +37,13 @@ public class Agreement {
 
 	public Agreement() {}
 
-	public Agreement(final String type, final String userId, final Map<String, String> attributes) {
+	public Agreement(final String type, final UserId userId, final Map<String, String> attributes) {
 		this.type = type;
-		this.userId = userId;
+		this.userId = userId.getFnr();
 		this.attributes = attributes;
 	}
 
-	public static Agreement createInvoiceBankAgreement(final String userId, final boolean smsNotification) {
+	public static Agreement createInvoiceBankAgreement(final UserId userId, final boolean smsNotification) {
 		Map<String, String> attribs = new HashMap<>();
 		attribs.put("sms-notification", String.valueOf(smsNotification));
 		return new Agreement(INVOICE_BANK_TYPE, userId, attribs);
