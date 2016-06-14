@@ -15,13 +15,12 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import no.digipost.api.client.representations.Identification;
 import no.digipost.api.client.representations.IdentificationResult;
 import no.digipost.api.client.representations.IdentificationResultCode;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import org.apache.http.HttpHost;
 
 import java.io.InputStream;
+import java.util.List;
 
 public class Examples {
 
@@ -32,9 +31,13 @@ public class Examples {
 
 		DigipostUserDocumentClient client = new DigipostUserDocumentClient.Builder(1234L, key, "password").useProxy(proxy).build();
 
-		final IdentificationResult identificationResult = client.identifyUser(new Identification(new PersonalIdentificationNumber("01017012345")));
+		final UserId userId = new UserId("01017012345");
+
+		final IdentificationResult identificationResult = client.identifyUser(userId);
 		boolean isDigipost = identificationResult.getResult() == IdentificationResultCode.DIGIPOST;
 
 		client.createAgreement(Agreement.createInvoiceBankAgreement("01017012345", true));
+
+		final List<Agreement> agreements = client.getAgreements(userId);
 	}
 }

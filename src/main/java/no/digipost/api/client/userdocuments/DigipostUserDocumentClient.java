@@ -23,7 +23,6 @@ import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.Identification;
 import no.digipost.api.client.representations.IdentificationResult;
 import no.digipost.api.client.security.Pkcs12KeySigner;
 import no.digipost.api.client.util.Supplier;
@@ -51,11 +50,11 @@ public class DigipostUserDocumentClient {
 		this.apiService = apiService;
 	}
 
-	public IdentificationResult identifyUser(final Identification identification) {
+	public IdentificationResult identifyUser(final UserId userId) {
 		return handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.identifyUser(identification);
+				return apiService.identifyUser(userId);
 			}
 		}, IdentificationResult.class);
 	}
@@ -67,6 +66,16 @@ public class DigipostUserDocumentClient {
 				return apiService.createAgreement(agreement);
 			}
 		});
+	}
+
+	public List<Agreement> getAgreements(final UserId userId) {
+		final Agreements agreements = handle(new Callable<CloseableHttpResponse>() {
+			@Override
+			public CloseableHttpResponse call() throws Exception {
+				return apiService.getAgreements(userId);
+			}
+		}, Agreements.class);
+		return agreements.getAgreements();
 	}
 
 	private <T> T handle(final Callable<CloseableHttpResponse> action, Class<T> resultType) {

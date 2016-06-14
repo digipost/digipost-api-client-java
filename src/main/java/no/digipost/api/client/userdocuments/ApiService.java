@@ -19,6 +19,7 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
@@ -27,13 +28,14 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import javax.xml.bind.JAXB;
-
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
 
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
@@ -59,9 +61,9 @@ public class ApiService {
 		this.httpClient = httpClient;
 	}
 
-	public CloseableHttpResponse identifyUser(final Identification identification) {
+	public CloseableHttpResponse identifyUser(final UserId userId) {
 		HttpPost httpPost = prepareHttpPost(getEntryPoint().getIdentificationUri().getPath());
-		httpPost.setEntity(marshallJaxbEntity(identification));
+		httpPost.setEntity(marshallJaxbEntity(new Identification(new PersonalIdentificationNumber(userId.getFnr()))));
 		return send(httpPost);
 	}
 
@@ -69,6 +71,19 @@ public class ApiService {
 		HttpPost httpPost = prepareHttpPost(USER_AGREEMENTS);
 		httpPost.setEntity(marshallJaxbEntity(agreement));
 		return send(httpPost);
+	}
+
+	public CloseableHttpResponse getAgreements(final UserId userId) {
+		try {
+			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+					.setPath(USER_AGREEMENTS)
+					.setParameter("user-id", userId.getFnr());
+			HttpGet httpGet = new HttpGet(uriBuilder.build());
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			return send(httpGet);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private HttpPost prepareHttpPost(final String path) {
