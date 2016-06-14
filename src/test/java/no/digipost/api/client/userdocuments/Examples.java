@@ -35,6 +35,6 @@ public class Examples {
 		final IdentificationResult identificationResult = client.identifyUser(new Identification(new PersonalIdentificationNumber("01017012345")));
 		boolean isDigipost = identificationResult.getResult() == IdentificationResultCode.DIGIPOST;
 
-		client.createAgreement(Agreement.createInvoiceBankAgreement("01017012345"));
+		client.createAgreement(Agreement.createInvoiceBankAgreement("01017012345", true));
 	}
 }
