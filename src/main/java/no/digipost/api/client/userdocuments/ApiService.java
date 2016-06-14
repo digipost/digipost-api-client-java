@@ -59,7 +59,7 @@ public class ApiService {
 		this.httpClient = httpClient;
 	}
 
-	public CloseableHttpResponse identifyRecipient(final Identification identification) {
+	public CloseableHttpResponse identifyUser(final Identification identification) {
 		HttpPost httpPost = prepareHttpPost(getEntryPoint().getIdentificationUri().getPath());
 		httpPost.setEntity(marshallJaxbEntity(identification));
 		return send(httpPost);

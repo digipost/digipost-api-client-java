@@ -32,7 +32,7 @@ public class Examples {
 
 		DigipostUserDocumentClient client = new DigipostUserDocumentClient.Builder(1234L, key, "password").useProxy(proxy).build();
 
-		final IdentificationResult identificationResult = client.identifyRecipient(new Identification(new PersonalIdentificationNumber("01017012345")));
+		final IdentificationResult identificationResult = client.identifyUser(new Identification(new PersonalIdentificationNumber("01017012345")));
 		boolean isDigipost = identificationResult.getResult() == IdentificationResultCode.DIGIPOST;
 
 		client.createAgreement(Agreement.createInvoiceBankAgreement("01017012345"));

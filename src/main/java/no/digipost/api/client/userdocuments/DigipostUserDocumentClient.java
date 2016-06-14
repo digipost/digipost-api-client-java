@@ -51,11 +51,11 @@ public class DigipostUserDocumentClient {
 		this.apiService = apiService;
 	}
 
-	public IdentificationResult identifyRecipient(final Identification identification) {
+	public IdentificationResult identifyUser(final Identification identification) {
 		return handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.identifyRecipient(identification);
+				return apiService.identifyUser(identification);
 			}
 		}, IdentificationResult.class);
 	}
