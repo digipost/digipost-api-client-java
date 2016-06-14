@@ -15,5 +15,59 @@
  */
 package no.digipost.api.client.userdocuments;
 
+import no.digipost.api.client.representations.xml.DateXmlAdapter;
+import org.joda.time.LocalDate;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.math.BigDecimal;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Invoice {
+
+	@XmlElement
+	private String kid;
+	@XmlElement
+	private BigDecimal amount;
+	@XmlElement(name = "due-date", type = String.class)
+	@XmlJavaTypeAdapter(DateXmlAdapter.class)
+	@XmlSchemaType(name = "date")
+	private LocalDate dueDate;
+	@XmlElement
+	private String status;
+	@XmlElement
+	private String account;
+
+	public Invoice() {}
+
+	public Invoice(final String kid, final BigDecimal amount, final LocalDate dueDate, final InvoiceStatus status, final String account) {
+		this.kid = kid;
+		this.amount = amount;
+		this.dueDate = dueDate;
+		this.status = status.getStatus();
+		this.account = account;
+	}
+
+	public String getKid() {
+		return kid;
+	}
+
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public LocalDate getDueDate() {
+		return dueDate;
+	}
+
+	public InvoiceStatus getStatus() {
+		return new InvoiceStatus(status);
+	}
+
+	public String getAccount() {
+		return account;
+	}
 }

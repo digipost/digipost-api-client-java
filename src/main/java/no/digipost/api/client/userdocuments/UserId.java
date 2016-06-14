@@ -20,6 +20,8 @@ package no.digipost.api.client.userdocuments;
  */
 public class UserId {
 
+	public static final String QUERY_PARAM_NAME = "user-id";
+
 	private final String fnr;
 
 	public UserId(final String fnr) {

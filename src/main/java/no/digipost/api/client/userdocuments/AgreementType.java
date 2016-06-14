@@ -15,20 +15,34 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import java.util.Objects;
 
-@XmlAccessorType(XmlAccessType.FIELD)
-public class Document {
+public class AgreementType {
 
-	@XmlElement
-	private final long id;
-	@XmlElement
-	private final Invoice invoice;
+	public static final AgreementType INVOICE_BANK = new AgreementType("invoice-bank");
 
-	public Document(final long id, final Invoice invoice) {
-		this.id = id;
-		this.invoice = invoice;
+	public static final String QUERY_PARAM_NAME = "agreement-type";
+
+	private final String type;
+
+	public AgreementType(final String type) {
+		this.type = type;
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		final AgreementType that = (AgreementType) o;
+		return Objects.equals(type, that.type);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(type);
+	}
+
+	public String getType() {
+		return type;
 	}
 }

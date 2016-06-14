@@ -39,5 +39,7 @@ public class Examples {
 		client.createAgreement(Agreement.createInvoiceBankAgreement(userId, true));
 
 		final List<Agreement> agreements = client.getAgreements(userId);
+
+		final List<Document> documents = client.getDocuments(userId, AgreementType.INVOICE_BANK);
 	}
 }

@@ -24,8 +24,6 @@ import java.util.Map;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Agreement {
 
-	public static String INVOICE_BANK_TYPE = "invoice-bank";
-
 	@XmlElement(required = true)
 	private String type;
 	@XmlElement(name = "user-id", required = true)
@@ -37,8 +35,8 @@ public class Agreement {
 
 	public Agreement() {}
 
-	public Agreement(final String type, final UserId userId, final Map<String, String> attributes) {
-		this.type = type;
+	public Agreement(final AgreementType type, final UserId userId, final Map<String, String> attributes) {
+		this.type = type.getType();
 		this.userId = userId.getFnr();
 		this.attributes = attributes;
 	}
@@ -46,6 +44,6 @@ public class Agreement {
 	public static Agreement createInvoiceBankAgreement(final UserId userId, final boolean smsNotification) {
 		Map<String, String> attribs = new HashMap<>();
 		attribs.put("sms-notification", String.valueOf(smsNotification));
-		return new Agreement(INVOICE_BANK_TYPE, userId, attribs);
+		return new Agreement(AgreementType.INVOICE_BANK, userId, attribs);
 	}
 }

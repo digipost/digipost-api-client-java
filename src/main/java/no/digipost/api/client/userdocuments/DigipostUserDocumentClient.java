@@ -78,6 +78,16 @@ public class DigipostUserDocumentClient {
 		return agreements.getAgreements();
 	}
 
+	public List<Document> getDocuments(final UserId userId, final AgreementType agreementType) {
+		final Documents documents = handle(new Callable<CloseableHttpResponse>() {
+			@Override
+			public CloseableHttpResponse call() throws Exception {
+				return apiService.getDocuments(userId, agreementType);
+			}
+		}, Documents.class);
+		return documents.getDocuments();
+	}
+
 	private <T> T handle(final Callable<CloseableHttpResponse> action, Class<T> resultType) {
 		try (final CloseableHttpResponse response = action.call()) {
 			ApiCommons.checkResponse(response);
@@ -93,10 +103,6 @@ public class DigipostUserDocumentClient {
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
-	}
-
-	public List<Document> getDocuments() {
-		return null;
 	}
 
 	public static class Builder {

@@ -86,6 +86,20 @@ public class ApiService {
 		}
 	}
 
+	public CloseableHttpResponse getDocuments(final UserId userId, final AgreementType agreementType) {
+		try {
+			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+					.setPath(USER_DOCUMENTS)
+					.setParameter(UserId.QUERY_PARAM_NAME, userId.getFnr())
+					.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
+			HttpGet httpGet = new HttpGet(uriBuilder.build());
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			return send(httpGet);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private HttpPost prepareHttpPost(final String path) {
 		HttpPost httpPost = new HttpPost(serviceEndpoint.resolve(path));
 		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
