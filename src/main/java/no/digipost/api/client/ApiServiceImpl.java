@@ -390,7 +390,7 @@ public class ApiServiceImpl implements ApiService {
 				httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 
 				try (CloseableHttpResponse execute = send(httpGet)){
-					Communicator.checkResponse(execute, eventLogger);
+					ApiCommons.checkResponse(execute, eventLogger);
 					R unmarshal = JAXB.unmarshal(execute.getEntity().getContent(), entityType);
 					return unmarshal;
 

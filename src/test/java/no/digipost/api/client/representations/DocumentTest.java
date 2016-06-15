@@ -32,14 +32,14 @@ public class DocumentTest {
 
 	@Test
 	public void correctlyReadsTechnicalTypes(){
-		String s = Document.parseTechnicalTypes(new String[]{"TekniskType1", "TekniskType2", "", "", "TekniskType3", null, null, "TekniskType4"});
+		String s = Document.parseTechnicalTypes("TekniskType1", "TekniskType2", "", "", "TekniskType3", null, null, "TekniskType4");
 		assertThat(s.length(), is("TekniskType1".length()*4 + 3));
 		assertTrue(s.contains("TekniskType1"));
 		assertTrue(s.contains("TekniskType2"));
 		assertTrue(s.contains("TekniskType3"));
 		assertTrue(s.contains("TekniskType4"));
 
-		assertThat(Document.parseTechnicalTypes(null), nullValue());
+		assertThat(Document.parseTechnicalTypes(), nullValue());
 	}
 
 	@Test
@@ -51,9 +51,9 @@ public class DocumentTest {
 				"opened", "openingReceipt", "smsNotification", "emailNotification", "authenticationLevel", "sensitivityLevel",
 				"preEncrypt", "preEncryptNoPages", "contentHash", "technicalType", "isPreEncrypt", "getUuid", "getFileType"};
 
-		for(int i = 0; i < messageFields.length; i++){
-			for(int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++){
-				if(messageFields[i].getName().equals(allFieldsThatAreUsedForCopyInMessage[n])){
+		for (final Field messageField : messageFields) {
+			for (int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++) {
+				if (messageField.getName().equals(allFieldsThatAreUsedForCopyInMessage[n])) {
 					allFieldsThatAreUsedForCopyInMessage[n] = "";
 				}
 			}
