@@ -15,9 +15,8 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.ApiServiceMock.Method;
-import no.digipost.api.client.ApiServiceMock.MultipartRequestMatcher;
-import no.digipost.api.client.ApiServiceMock.RequestsAndResponses;
+import no.digipost.api.client.util.DigipostApiMock.Method;
+import no.digipost.api.client.util.DigipostApiMock.RequestsAndResponses;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
@@ -42,7 +41,7 @@ import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
-import static no.digipost.api.client.ApiServiceMock.MockRequest;
+import static no.digipost.api.client.util.DigipostApiMock.MockRequest;
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 
 /**
@@ -65,8 +64,6 @@ public class DigipostClientMock {
 		}
 
 		String host = "http://localhost:" + PORT;
-
-		init();
 
 		HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 
@@ -118,31 +115,21 @@ public class DigipostClientMock {
 	}
 
 	public void addExpectedResponse(Method method, CloseableHttpResponse response) {
-		ApiServiceMock.RequestsAndResponses requestsAndResponses = requestsAndResponsesMap.get(method);
+		RequestsAndResponses requestsAndResponses = requestsAndResponsesMap.get(method);
 
 		requestsAndResponses.addExpectedResponse(response);
 	}
 
 	public void addExpectedException(Method method, RuntimeException exception) {
-		ApiServiceMock.RequestsAndResponses requestsAndResponses = requestsAndResponsesMap.get(method);
+		RequestsAndResponses requestsAndResponses = requestsAndResponsesMap.get(method);
 
 		requestsAndResponses.addExpectedException(exception);
 	}
 
 	public void reset() {
-		init();
+		digipostApiMock.init();
 	}
 
-	private void init() {
-		requestsAndResponsesMap.clear();
-		requestsAndResponsesMap.put(Method.GET_CONTENT, new RequestsAndResponses());
-		requestsAndResponsesMap.put(Method.GET_DOCUMENTS_EVENTS, new RequestsAndResponses());
-		requestsAndResponsesMap.put(Method.GET_DOCUMENT_STATUS, new RequestsAndResponses());
-		requestsAndResponsesMap.put(Method.GET_PRINT_KEY, new RequestsAndResponses());
-		requestsAndResponsesMap.put(Method.GET_SENDER_INFORMATION, new RequestsAndResponses());
-		requestsAndResponsesMap.put(Method.SEND_MULTIPART_MESSAGE, new RequestsAndResponses());
-		requestsAndResponsesMap.put(Method.MULTIPART_MESSAGE, new RequestsAndResponses(new MultipartRequestMatcher()));
-	}
 
 	/**
 	 * Threadsafe instance for marshalling and validating.
