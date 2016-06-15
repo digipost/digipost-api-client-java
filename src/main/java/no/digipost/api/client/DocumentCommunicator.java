@@ -19,6 +19,7 @@ import no.digipost.api.client.representations.DocumentEvents;
 import no.digipost.api.client.representations.DocumentStatus;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MessageDelivery;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.joda.time.DateTime;
 

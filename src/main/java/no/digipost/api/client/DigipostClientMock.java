@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client;
 
-import io.undertow.Undertow;
 import no.digipost.api.client.ApiServiceMock.Method;
 import no.digipost.api.client.ApiServiceMock.MultipartRequestMatcher;
 import no.digipost.api.client.ApiServiceMock.RequestsAndResponses;
@@ -26,7 +25,6 @@ import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.DigipostApiMock;
 import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.xml.sax.ContentHandler;
@@ -59,23 +57,20 @@ public class DigipostClientMock {
 	private static DigipostApiMock digipostApiMock = new DigipostApiMock();
 	private static final String KEY_STORE_PASSWORD = "Qwer12345";
 	private static final String KEY_STORE_ALIAS = "apiTest";
+	private static final int PORT = 9999;
 
 	public DigipostClientMock(ApiFlavor apiFlavor) {
 		if (apiFlavor == ApiFlavor.STEPWISE_REST) {
 			throw new RuntimeException("Stepwise REST is not yet supported by " + DigipostClientMock.class.getName());
 		}
 
-		int port = 9999;
-		String host = "http://localhost:" + port;
-
-		KeyPair keyPair = getKeyPair(KEY_STORE_ALIAS, KEY_STORE_PASSWORD);
+		String host = "http://localhost:" + PORT;
 
 		init();
-		digipostApiMock.start(port, requestsAndResponsesMap, keyPair);
 
 		HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 
-		apiService = new ApiServiceImpl(httpClientBuilder, port, null, host);
+		apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host);
 		apiService.buildApacheHttpClientBuilder();
 		client = new DigipostClient(newBuilder().build(),apiFlavor, "digipostmock-url", 1, new Signer() {
 
@@ -84,6 +79,11 @@ public class DigipostClientMock {
 				return new byte[0];
 			}
 		}, apiService);
+	}
+
+	public void start(){
+		KeyPair keyPair = getKeyPair(KEY_STORE_ALIAS, KEY_STORE_PASSWORD);
+		digipostApiMock.start(PORT, requestsAndResponsesMap, keyPair);
 	}
 
 	public static KeyPair getKeyPair(final String alias, final String password) {

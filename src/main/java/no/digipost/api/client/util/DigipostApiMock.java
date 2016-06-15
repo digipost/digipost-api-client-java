@@ -40,6 +40,9 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXB;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,49 +100,74 @@ public class DigipostApiMock implements HttpHandler {
 
 	@Override
 	public void handleRequest(HttpServerExchange httpContext) throws Exception {
+		String httpResponse = "200";
 		HttpString method = httpContext.getRequestMethod();
 
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 
 		if(method.equals(new HttpString("POST"))){
 			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE).getResponse(httpContext.getRequestPath());
-			if(response.getStatusLine().getStatusCode() != 200){
-				httpContext.setStatusCode(response.getStatusLine().getStatusCode());
-				IOUtils.copy(response.getEntity().getContent(), bao);
-			} else {
-				String multipart = new String(IOUtils.toByteArray(httpContext.getInputStream()));
-				String messageString = multipart.substring(multipart.indexOf("<?xml"));
-				messageString = messageString.substring(0, messageString.indexOf("</message>") + 10);
+			httpContext.setStatusCode(response.getStatusLine().getStatusCode());
+			httpResponse = response.getStatusLine().getStatusCode() + "";
+			IOUtils.copy(response.getEntity().getContent(), bao);
 
-				ByteArrayInputStream messageStream = new ByteArrayInputStream(messageString.getBytes());
+			String multipart = new String(IOUtils.toByteArray(httpContext.getInputStream()));
+			String messageString = multipart.substring(multipart.indexOf("<?xml"));
+			messageString = messageString.substring(0, messageString.indexOf("</message>") + 10);
 
-				Message message = JAXB.unmarshal(messageStream, Message.class);
+			ByteArrayInputStream messageStream = new ByteArrayInputStream(messageString.getBytes());
 
-				RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
-				requestsAndResponses.addRequest(new ApiServiceMock.DigipostRequest(message, getContentparts(multipart)));
-			}
-		}
+			Message message = JAXB.unmarshal(messageStream, Message.class);
 
-		if(httpContext.getRequestPath().equals("/printkey")) {
+			RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
+			requestsAndResponses.addRequest(new ApiServiceMock.DigipostRequest(message, getContentparts(multipart)));
+
+		} else if(httpContext.getRequestPath().toLowerCase().equals("/printkey")) {
 			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_PRINT_KEY).getResponse(httpContext.getRequestPath());
 			EncryptionKey encryptionKey = new EncryptionKey();
 			encryptionKey.setKeyId(PRINT_ID);
 			encryptionKey.setValue(PRINT_KEY);
 			JAXB.marshal(encryptionKey, bao);
-		}
-		else if(httpContext.getRequestPath().equals("/getsenderinformation")) {
+
+		} else if(httpContext.getRequestPath().toLowerCase().equals("/getsenderinformation")) {
 			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_SENDER_INFORMATION).getResponse(httpContext.getRequestPath());
-			List<SenderFeature> senderFeatures = new ArrayList<>();
-			senderFeatures.add(SenderFeature.DELIVERY_DIRECT_TO_PRINT);
-			senderFeatures.add(SenderFeature.DIGIPOST_DELIVERY);
-			JAXB.marshal(new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
-		} else {
+			if(response == null) {
+				List<SenderFeature> senderFeatures = new ArrayList<>();
+				senderFeatures.add(SenderFeature.DELIVERY_DIRECT_TO_PRINT);
+				senderFeatures.add(SenderFeature.DIGIPOST_DELIVERY);
+				JAXB.marshal(new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
+			} else {
+				httpContext.setStatusCode(response.getStatusLine().getStatusCode());
+				httpResponse = response.getStatusLine().getStatusCode() + "";
+				IOUtils.copy(response.getEntity().getContent(), bao);
+			}
+
+		} else if(httpContext.getRequestPath().toLowerCase().equals("/getdocumentstatus")) {
+			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_DOCUMENT_STATUS).getResponse(httpContext.getRequestPath());
+			httpContext.setStatusCode(response.getStatusLine().getStatusCode());
+			httpResponse = response.getStatusLine().getStatusCode() + "";
+			IOUtils.copy(response.getEntity().getContent(), bao);
+
+		} else if(httpContext.getRequestPath().toLowerCase().equals("/getdocumentevents")) {
+			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_DOCUMENTS_EVENTS).getResponse(httpContext.getRequestPath());
+			httpContext.setStatusCode(response.getStatusLine().getStatusCode());
+			httpResponse = response.getStatusLine().getStatusCode() + "";
+			IOUtils.copy(response.getEntity().getContent(), bao);
+
+		} else if(httpContext.getRequestPath().toLowerCase().equals("/")){
 			JAXB.marshal(new EntryPoint(certificate, new Link(Relation.CREATE_MESSAGE, new DigipostUri("http://localhost:9999/create")),
 					new Link(Relation.GET_PRINT_ENCRYPTION_KEY, new DigipostUri("http://localhost:9999/printkey")),
-					new Link(Relation.GET_SENDER_INFORMATION, new DigipostUri("http://localhost:9999/getsenderinformation"))), bao);
-		}
-		byte[] bytes = bao.toByteArray();
+					new Link(Relation.GET_SENDER_INFORMATION, new DigipostUri("http://localhost:9999/getsenderinformation")),
+					new Link(Relation.DOCUMENT_EVENTS, new DigipostUri("http://localhost:9999/getdocumentevents"))), bao);
 
+		} else {
+			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_CONTENT).getResponse(httpContext.getRequestPath());
+			httpContext.setStatusCode(response.getStatusLine().getStatusCode());
+			httpResponse = response.getStatusLine().getStatusCode() + "";
+			IOUtils.copy(response.getEntity().getContent(), bao);
+		}
+
+		byte[] bytes = bao.toByteArray();
 		HeaderMap responseHeaders = httpContext.getResponseHeaders();
 		String dateOnRFC1123Format = DateUtils.formatDate(now());
 
@@ -147,7 +175,7 @@ public class DigipostApiMock implements HttpHandler {
 		String xContentSHA256 = generateXContentSHA256(bytes);
 		responseHeaders.add(new HttpString(Headers.X_Content_SHA256), xContentSHA256);
 
-		String signature =  "200\n" + httpContext.getRequestPath().toLowerCase() + "\n" +
+		String signature =  httpResponse + "\n" + httpContext.getRequestPath().toLowerCase() + "\n" +
 				"date: " + dateOnRFC1123Format + "\n" + "x-content-sha256: " + xContentSHA256 + "\n";
 
 		responseHeaders.add(new HttpString(Headers.X_Digipost_Signature), generateXDigipostSignature(keyPair, signature));

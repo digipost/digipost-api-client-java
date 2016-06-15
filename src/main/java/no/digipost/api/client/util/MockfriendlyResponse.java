@@ -16,6 +16,7 @@
 package no.digipost.api.client.util;
 
 import no.digipost.api.client.representations.MessageDelivery;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.*;
@@ -28,6 +29,7 @@ import org.joda.time.DateTime;
 import javax.ws.rs.ProcessingException;
 import javax.xml.bind.JAXB;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.*;
 
@@ -218,6 +220,23 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 			return this;
 		}
 
+		public MockedResponseBuilder entity(final Object object) {
+			try {
+				ByteArrayOutputStream bao = new ByteArrayOutputStream();
+				if(object instanceof InputStream){
+					IOUtils.copy((InputStream)object, bao);
+				}
+				else {
+					JAXB.marshal(object, bao);
+				}
+
+				this.entity = new ByteArrayEntity(bao.toByteArray());
+				return this;
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		}
+
 		public MockfriendlyResponse build() {
 			return new MockfriendlyResponse() {
 				@Override
@@ -237,9 +256,18 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 		}
 
 		public static CloseableHttpResponse ok(Object object) {
-			ByteArrayOutputStream bao = new ByteArrayOutputStream();
-			JAXB.marshal(object, bao);
-			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new ByteArrayEntity(bao.toByteArray())).build();
+			try{
+				ByteArrayOutputStream bao = new ByteArrayOutputStream();
+				if(object instanceof InputStream){
+					IOUtils.copy((InputStream)object, bao);
+				}
+				else {
+					JAXB.marshal(object, bao);
+				}
+				return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new ByteArrayEntity(bao.toByteArray())).build();
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
 		}
 	}
 }
