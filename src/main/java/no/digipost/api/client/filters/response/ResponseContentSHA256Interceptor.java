@@ -18,8 +18,10 @@ package no.digipost.api.client.filters.response;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.util.LoggingUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.*;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.Header;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -27,8 +29,6 @@ import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.ClientResponseContext;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import static no.digipost.api.client.Headers.X_Content_SHA256;

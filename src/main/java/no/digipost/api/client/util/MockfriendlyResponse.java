@@ -26,16 +26,15 @@ import org.apache.http.message.BasicStatusLine;
 import org.apache.http.params.HttpParams;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.ProcessingException;
 import javax.xml.bind.JAXB;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.*;
 
-import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
+import static org.apache.http.HttpStatus.SC_OK;
 
 public class MockfriendlyResponse implements CloseableHttpResponse {
 
@@ -50,12 +49,12 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 		JAXB.marshal(messageDelivery, bao);
 
 		return MockedResponseBuilder.create()
-				.status(OK.getStatusCode())
+				.status(HttpStatus.SC_OK)
 				.entity(new ByteArrayEntity(bao.toByteArray()))
 				.build();
 	}
 
-	public static ProcessingException CONNECTION_REFUSED = new ProcessingException(new ConnectException("Connection refused"));
+	public static RuntimeException CONNECTION_REFUSED = new RuntimeException(new ConnectException("Connection refused"));
 
 	static {
 		responses.put("200:OK", DEFAULT_RESPONSE);
@@ -264,7 +263,7 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 				else {
 					JAXB.marshal(object, bao);
 				}
-				return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new ByteArrayEntity(bao.toByteArray())).build();
+				return MockedResponseBuilder.create().status(SC_OK).entity(new ByteArrayEntity(bao.toByteArray())).build();
 			} catch (IOException e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}

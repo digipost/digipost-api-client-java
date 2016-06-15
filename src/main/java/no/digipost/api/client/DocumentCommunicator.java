@@ -18,12 +18,9 @@ package no.digipost.api.client;
 import no.digipost.api.client.representations.DocumentEvents;
 import no.digipost.api.client.representations.DocumentStatus;
 import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MessageDelivery;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXB;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,8 +35,7 @@ public class DocumentCommunicator extends Communicator {
 		try(CloseableHttpResponse response = apiService.getDocumentEvents(organisation, partId, from, to, offset, maxResults)){;
 
 			checkResponse(response, eventLogger);
-			DocumentEvents documentEvents = JAXB.unmarshal(response.getEntity().getContent(), DocumentEvents.class);
-			return documentEvents;
+			return JAXB.unmarshal(response.getEntity().getContent(), DocumentEvents.class);
 
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
@@ -60,8 +56,7 @@ public class DocumentCommunicator extends Communicator {
 		try(CloseableHttpResponse response = apiService.getDocumentStatus(linkToDocumentStatus)){
 			checkResponse(response, eventLogger);
 
-			DocumentStatus documentStatus = JAXB.unmarshal(response.getEntity().getContent(), DocumentStatus.class);
-			return documentStatus;
+			return JAXB.unmarshal(response.getEntity().getContent(), DocumentStatus.class);
 
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);

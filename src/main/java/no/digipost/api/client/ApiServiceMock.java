@@ -33,10 +33,8 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXB;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -50,10 +48,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 import static no.digipost.api.client.representations.sender.SenderFeature.*;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
+import static org.apache.http.HttpStatus.SC_OK;
 
 public class ApiServiceMock implements ApiService {
 
@@ -142,7 +140,7 @@ public class ApiServiceMock implements ApiService {
 		JAXB.marshal(mockEntity, bao);
 
 		return MockedResponseBuilder.create()
-				.status(OK.getStatusCode())
+				.status(SC_OK)
 				.entity(new ByteArrayEntity(bao.toByteArray()))
 				.build();
 	}
@@ -154,7 +152,7 @@ public class ApiServiceMock implements ApiService {
 		JAXB.marshal(fakeEncryptionKey, bao);
 
 		return MockedResponseBuilder.create()
-				.status(OK.getStatusCode())
+				.status(SC_OK)
 				.entity(new ByteArrayEntity(bao.toByteArray()))
 				.build();
 	}
@@ -222,7 +220,7 @@ public class ApiServiceMock implements ApiService {
 		if (response != null) {
 			return response;
 		} else {
-			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new ByteArrayEntity(bao.toByteArray())).build();
+			return MockedResponseBuilder.create().status(SC_OK).entity(new ByteArrayEntity(bao.toByteArray())).build();
 		}
 	}
 
@@ -242,7 +240,7 @@ public class ApiServiceMock implements ApiService {
 		if (response != null) {
 			return response;
 		} else {
-			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(new ByteArrayEntity(bao.toByteArray())).build();
+			return MockedResponseBuilder.create().status(SC_OK).entity(new ByteArrayEntity(bao.toByteArray())).build();
 		}
 	}
 
@@ -254,7 +252,7 @@ public class ApiServiceMock implements ApiService {
 		if (response != null) {
 			return response;
 		} else {
-			return MockedResponseBuilder.create().status(NOT_FOUND.getStatusCode()).build();
+			return MockedResponseBuilder.create().status(SC_NOT_FOUND).build();
 		}
 	}
 
@@ -376,7 +374,7 @@ public class ApiServiceMock implements ApiService {
 	public static class MultipartRequestMatcher extends RequestMatcher {
 
 		public static CloseableHttpResponse DEFAULT_RESPONSE = getDefaultResponse();
-		public static ProcessingException CONNECTION_REFUSED = new ProcessingException(new ConnectException("Connection refused"));
+		public static RuntimeException CONNECTION_REFUSED = new RuntimeException(new ConnectException("Connection refused"));
 
 		public static final Map<String, CloseableHttpResponse> responses = new HashMap<>();
 		public static final Map<String, RuntimeException> errors = new HashMap<>();
@@ -388,7 +386,7 @@ public class ApiServiceMock implements ApiService {
 			JAXB.marshal(messageDelivery, bao);
 
 			return MockedResponseBuilder.create()
-					.status(OK.getStatusCode())
+					.status(SC_OK)
 					.entity(new ByteArrayEntity(bao.toByteArray()))
 					.build();
 		}
@@ -427,8 +425,7 @@ public class ApiServiceMock implements ApiService {
 		}
 	}
 
-	public static class DigipostRequest extends MockRequest {
-
+	public static class DigipostRequest extends ApiServiceMock.MockRequest {
 		public final Message message;
 		public final List<ContentPart> contentParts;
 

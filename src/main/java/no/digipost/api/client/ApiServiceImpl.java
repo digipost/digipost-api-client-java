@@ -27,27 +27,29 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXB;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
-import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
@@ -76,7 +78,7 @@ public class ApiServiceImpl implements ApiService {
 
 			try(CloseableHttpResponse execute = send(httpGet)) {
 
-				if (execute.getStatusLine().getStatusCode() == OK.getStatusCode()) {
+				if (execute.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 					EntryPoint entryPoint = JAXB.unmarshal(execute.getEntity().getContent(), EntryPoint.class);
 					return entryPoint;
 				} else {
@@ -182,7 +184,7 @@ public class ApiServiceImpl implements ApiService {
 
 		HttpPost httpPost = new HttpPost(digipostUrl + addContentLink.getUri().getPath());
 		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
-		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_OCTET_STREAM_TYPE.toString());
+		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_OCTET_STREAM.toString());
 		httpPost.setEntity(new ByteArrayEntity(content));
 		return send(httpPost);
 	}
@@ -351,10 +353,10 @@ public class ApiServiceImpl implements ApiService {
 
 	@Override
     public SenderInformation getSenderInformation(String orgnr, String avsenderenhet) {
-		MultivaluedMap<String, String> queryParams = new MultivaluedHashMap<>();
-		queryParams.putSingle("org_id", orgnr);
+		Map<String, String> queryParams = new HashMap<>();
+		queryParams.put("org_id", orgnr);
 		if (avsenderenhet != null) {
-			queryParams.putSingle("part_id", avsenderenhet);
+			queryParams.put("part_id", avsenderenhet);
 		}
 
 		return senderInformation.get(orgnr + optional(avsenderenhet).map(prepend("-")).orElse(""),
@@ -373,16 +375,16 @@ public class ApiServiceImpl implements ApiService {
 
 
 	private <R> Callable<R> getResource(final String path, final Class<R> entityType) {
-		return getResource(path, new MultivaluedHashMap<String, Object>(), entityType);
+		return getResource(path, new HashMap<String, Object>(), entityType);
 	}
 
-	private <R, P> Callable<R> getResource(final String path, final MultivaluedMap<String, P> queryParams, final Class<R> entityType) {
+	private <R, P> Callable<R> getResource(final String path, final Map<String, P> queryParams, final Class<R> entityType) {
 		return new Callable<R>() {
 			@Override
             public R call() {
 				HttpGet httpGet = new HttpGet(digipostUrl + path);
 
-				for (Entry<String, List<P>> param : queryParams.entrySet()) {
+				for (Entry<String, P> param : queryParams.entrySet()) {
 					httpGet.addHeader(param.getKey(), param.getValue().toString());
 				}
 				httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);

@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 
-import static javax.ws.rs.core.HttpHeaders.DATE;
 import static no.digipost.api.client.Headers.*;
+import static org.apache.http.HttpHeaders.DATE;
 
 public class ResponseMessageSignatureUtil2 {
 

@@ -18,8 +18,13 @@ package no.digipost.api.client;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery;
-import no.digipost.api.client.filters.request.*;
-import no.digipost.api.client.filters.response.*;
+import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
+import no.digipost.api.client.filters.request.RequestDateInterceptor;
+import no.digipost.api.client.filters.request.RequestSignatureInterceptor;
+import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
+import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
+import no.digipost.api.client.filters.response.ResponseDateInterceptor;
+import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.FileKeystoreSigner;
@@ -34,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXB;
-
 import java.io.IOException;
 import java.io.InputStream;
 
