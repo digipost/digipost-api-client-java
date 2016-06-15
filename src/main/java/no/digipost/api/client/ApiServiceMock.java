@@ -33,7 +33,6 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXB;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -439,9 +438,9 @@ public class ApiServiceMock implements ApiService {
 
 	public static class ContentPart {
 
-		public final MediaType mediaType;
+		public final String mediaType;
 
-		public ContentPart(MediaType mediaType) {
+		public ContentPart(String mediaType) {
 			this.mediaType = mediaType;
 		}
 	}

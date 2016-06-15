@@ -57,7 +57,7 @@ public class DigipostClientMock {
 	private static DigipostApiMock digipostApiMock = new DigipostApiMock();
 	private static final String KEY_STORE_PASSWORD = "Qwer12345";
 	private static final String KEY_STORE_ALIAS = "apiTest";
-	private static final int PORT = 9999;
+	private static final int PORT = 6666;
 
 	public DigipostClientMock(ApiFlavor apiFlavor) {
 		if (apiFlavor == ApiFlavor.STEPWISE_REST) {

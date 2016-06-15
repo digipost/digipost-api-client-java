@@ -33,23 +33,17 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Base64;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXB;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
-import static javax.ws.rs.core.HttpHeaders.DATE;
 import static org.joda.time.DateTime.*;
 
 public class DigipostApiMock implements HttpHandler {
@@ -106,11 +100,6 @@ public class DigipostApiMock implements HttpHandler {
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 
 		if(method.equals(new HttpString("POST"))){
-			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE).getResponse(httpContext.getRequestPath());
-			httpContext.setStatusCode(response.getStatusLine().getStatusCode());
-			httpResponse = response.getStatusLine().getStatusCode() + "";
-			IOUtils.copy(response.getEntity().getContent(), bao);
-
 			String multipart = new String(IOUtils.toByteArray(httpContext.getInputStream()));
 			String messageString = multipart.substring(multipart.indexOf("<?xml"));
 			messageString = messageString.substring(0, messageString.indexOf("</message>") + 10);
@@ -120,6 +109,12 @@ public class DigipostApiMock implements HttpHandler {
 			Message message = JAXB.unmarshal(messageStream, Message.class);
 
 			RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
+			CloseableHttpResponse response = requestsAndResponses.getResponse(message.primaryDocument.subject);
+
+			httpContext.setStatusCode(response.getStatusLine().getStatusCode());
+			httpResponse = response.getStatusLine().getStatusCode() + "";
+			response.getEntity().writeTo(bao);
+
 			requestsAndResponses.addRequest(new ApiServiceMock.DigipostRequest(message, getContentparts(multipart)));
 
 		} else if(httpContext.getRequestPath().toLowerCase().equals("/printkey")) {
@@ -135,24 +130,26 @@ public class DigipostApiMock implements HttpHandler {
 				List<SenderFeature> senderFeatures = new ArrayList<>();
 				senderFeatures.add(SenderFeature.DELIVERY_DIRECT_TO_PRINT);
 				senderFeatures.add(SenderFeature.DIGIPOST_DELIVERY);
+				senderFeatures.add(SenderFeature.PRINTVALIDATION_FONTS);
+				senderFeatures.add(SenderFeature.PRINTVALIDATION_PDFVERSION);
 				JAXB.marshal(new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
 			} else {
 				httpContext.setStatusCode(response.getStatusLine().getStatusCode());
 				httpResponse = response.getStatusLine().getStatusCode() + "";
-				IOUtils.copy(response.getEntity().getContent(), bao);
+				response.getEntity().writeTo(bao);
 			}
 
 		} else if(httpContext.getRequestPath().toLowerCase().equals("/getdocumentstatus")) {
 			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_DOCUMENT_STATUS).getResponse(httpContext.getRequestPath());
 			httpContext.setStatusCode(response.getStatusLine().getStatusCode());
 			httpResponse = response.getStatusLine().getStatusCode() + "";
-			IOUtils.copy(response.getEntity().getContent(), bao);
+			response.getEntity().writeTo(bao);
 
 		} else if(httpContext.getRequestPath().toLowerCase().equals("/getdocumentevents")) {
 			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_DOCUMENTS_EVENTS).getResponse(httpContext.getRequestPath());
 			httpContext.setStatusCode(response.getStatusLine().getStatusCode());
 			httpResponse = response.getStatusLine().getStatusCode() + "";
-			IOUtils.copy(response.getEntity().getContent(), bao);
+			response.getEntity().writeTo(bao);
 
 		} else if(httpContext.getRequestPath().toLowerCase().equals("/")){
 			JAXB.marshal(new EntryPoint(certificate, new Link(Relation.CREATE_MESSAGE, new DigipostUri("http://localhost:9999/create")),
@@ -164,14 +161,14 @@ public class DigipostApiMock implements HttpHandler {
 			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_CONTENT).getResponse(httpContext.getRequestPath());
 			httpContext.setStatusCode(response.getStatusLine().getStatusCode());
 			httpResponse = response.getStatusLine().getStatusCode() + "";
-			IOUtils.copy(response.getEntity().getContent(), bao);
+			response.getEntity().writeTo(bao);
 		}
 
 		byte[] bytes = bao.toByteArray();
 		HeaderMap responseHeaders = httpContext.getResponseHeaders();
 		String dateOnRFC1123Format = DateUtils.formatDate(now());
 
-		responseHeaders.add(new HttpString(DATE), dateOnRFC1123Format);
+		responseHeaders.add(new HttpString("Date"), dateOnRFC1123Format);
 		String xContentSHA256 = generateXContentSHA256(bytes);
 		responseHeaders.add(new HttpString(Headers.X_Content_SHA256), xContentSHA256);
 
@@ -180,7 +177,8 @@ public class DigipostApiMock implements HttpHandler {
 
 		responseHeaders.add(new HttpString(Headers.X_Digipost_Signature), generateXDigipostSignature(keyPair, signature));
 
-		httpContext.getResponseSender().send(new String(bytes));
+		httpContext.startBlocking();
+		IOUtils.copy(new ByteArrayInputStream(bytes), httpContext.getOutputStream());
 	}
 
 	private static String generateXContentSHA256(byte[] bytes){
@@ -232,7 +230,7 @@ public class DigipostApiMock implements HttpHandler {
 				String contentType = bodyPart.substring(bodyPart.indexOf("Content-Type: ") + 14);
 				contentType = contentType.substring(0, contentType.indexOf("\r\n"));
 				if (!contentType.equals(MediaTypes.DIGIPOST_MEDIA_TYPE_V6)) {
-					contentParts.add(new ApiServiceMock.ContentPart(MediaType.valueOf(contentType)));
+					contentParts.add(new ApiServiceMock.ContentPart(contentType));
 				}
 			}
 		}

@@ -38,7 +38,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXB;
 import java.io.IOException;
 import java.io.InputStream;
