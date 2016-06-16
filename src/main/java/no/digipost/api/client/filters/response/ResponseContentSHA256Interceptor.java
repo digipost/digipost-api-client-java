@@ -61,7 +61,7 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 
 	private boolean hasHeader(final HttpResponse response, final String x_content_sha256) {
 		final String sha256Header = findHeader(response, X_Content_SHA256);
-		return isBlank(sha256Header);
+		return !isBlank(sha256Header);
 	}
 
 	private void validerContentHash(final HttpResponse response) {
