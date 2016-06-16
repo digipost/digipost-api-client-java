@@ -48,7 +48,8 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-		if (response.getEntity() != null) {
+		final boolean hasContent = response.getEntity() != null && response.getEntity().getContentLength() != 0;
+		if (hasHeader(response, X_Content_SHA256) || hasContent) {
 			try {
 				validerContentHash(response);
 			} catch (Exception e) {
@@ -58,15 +59,14 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 		}
 	}
 
+	private boolean hasHeader(final HttpResponse response, final String x_content_sha256) {
+		final String sha256Header = findHeader(response, X_Content_SHA256);
+		return isBlank(sha256Header);
+	}
+
 	private void validerContentHash(final HttpResponse response) {
 		try {
-			String hashHeader = null;
-			for(Header head : response.getAllHeaders()){
-				if(head.getName().equals(X_Content_SHA256)){
-					hashHeader = head.getValue();
-					break;
-				}
-			}
+			String hashHeader = findHeader(response, X_Content_SHA256);
 
 			if (isBlank(hashHeader)) {
 				throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
@@ -79,6 +79,17 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
 					"Det skjedde en feil under uthenting av innhold for validering av X-Content-SHA256-header - server-signatur kunne ikke valideres");
 		}
+	}
+
+	private String findHeader(final HttpResponse response, final String header) {
+		String hashHeader = null;
+		for(Header head : response.getAllHeaders()){
+			if(head.getName().equals(header)){
+				hashHeader = head.getValue();
+				break;
+			}
+		}
+		return hashHeader;
 	}
 
 	private void validerBytesMotHashHeader(final String serverHash, final byte[] entityBytes) {
