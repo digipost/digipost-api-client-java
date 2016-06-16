@@ -94,7 +94,7 @@ public class MessageSender extends Communicator {
 			ByteArrayOutputStream bao = new ByteArrayOutputStream();
 			JAXB.marshal(singleChannelMessage, bao);
 			ByteArrayBody attachment = new ByteArrayBody(bao.toByteArray(),
-					ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V6),"message");
+					ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V6), "message");
 
 			MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create().setMode(HttpMultipartMode.STRICT).setMimeSubtype("mixed")
 					.addPart(FormBodyPartBuilder.create("message", attachment).addField("Content-Disposition", "attachment;" + " filename=\"message\"").build());

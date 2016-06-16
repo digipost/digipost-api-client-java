@@ -18,23 +18,26 @@ package no.digipost.api.client.userdocuments;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
 
-@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Agreements {
+public class Attribute {
+	@XmlElement(required = true)
+	private String key;
+	@XmlElement(required = true)
+	private String value;
 
-	@XmlElement(name = "agreement")
-	private List<Agreement> agreements;
+	private Attribute() {}
 
-	private Agreements() {}
-
-	public Agreements(List<Agreement> agreements) {
-		this.agreements = agreements;
+	public Attribute(final String key, final String value) {
+		this.key = key;
+		this.value = value;
 	}
 
-	public List<Agreement> getAgreements() {
-		return agreements;
+	public String getKey() {
+		return key;
+	}
+
+	public String getValue() {
+		return value;
 	}
 }

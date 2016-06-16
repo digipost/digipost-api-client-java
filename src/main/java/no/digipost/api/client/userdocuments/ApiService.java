@@ -40,6 +40,7 @@ import java.util.concurrent.Callable;
 
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
 import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -79,7 +80,7 @@ public class ApiService {
 					.setPath(USER_AGREEMENTS)
 					.setParameter("user-id", userId.getFnr());
 			HttpGet httpGet = new HttpGet(uriBuilder.build());
-			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 			return send(httpGet);
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
@@ -93,7 +94,7 @@ public class ApiService {
 					.setParameter(UserId.QUERY_PARAM_NAME, userId.getFnr())
 					.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 			HttpGet httpGet = new HttpGet(uriBuilder.build());
-			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 			return send(httpGet);
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
@@ -102,8 +103,8 @@ public class ApiService {
 
 	private HttpPost prepareHttpPost(final String path) {
 		HttpPost httpPost = new HttpPost(serviceEndpoint.resolve(path));
-		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
-		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V6);
+		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
+		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
 		return httpPost;
 	}
 
