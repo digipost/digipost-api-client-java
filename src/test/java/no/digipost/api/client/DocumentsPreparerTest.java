@@ -22,6 +22,7 @@ import no.digipost.api.client.representations.PrintDetails.PostType;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
+import no.digipost.api.client.util.FakeEncryptionKey;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import org.hamcrest.CustomTypeSafeMatcher;
@@ -71,7 +72,7 @@ public class DocumentsPreparerTest {
 
 	private final DocumentsPreparer preparer = new DocumentsPreparer(new PdfValidator());
 
-	private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(ApiServiceMock.createFakeEncryptionKey()));
+	private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(FakeEncryptionKey.createFakeEncryptionKey()));
 
 	private final Document primaryDocument = new Document(UUID.randomUUID().toString(), "primary", PDF);
 	private final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{ put(primaryDocument, printablePdf1Page()); }};

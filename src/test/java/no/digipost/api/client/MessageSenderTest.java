@@ -24,6 +24,8 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
+import no.digipost.api.client.util.DigipostApiMock;
+import no.digipost.api.client.util.FakeEncryptionKey;
 import no.digipost.api.client.util.MockfriendlyResponse;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
@@ -111,7 +113,7 @@ public class MessageSenderTest {
 
 	@Before
 	public void setup() {
-		this.fakeEncryptionKey = ApiServiceMock.createFakeEncryptionKey();
+		this.fakeEncryptionKey = FakeEncryptionKey.createFakeEncryptionKey();
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		JAXB.marshal(fakeEncryptionKey, bao);
 

@@ -32,6 +32,7 @@ This software includes third party software subject to the following licenses:
   Hamcrest library under New BSD License
   javaruntype under The Apache Software License, Version 2.0
   Javassist under Mozilla Public License 1.1
+  JBoss Logging 3 under Apache License, version 2.0
   JCL 1.1.1 implemented over SLF4J under MIT License
   Joda-Time under Apache 2
   JUnit under Eclipse Public License 1.0
@@ -45,4 +46,7 @@ This software includes third party software subject to the following licenses:
   Objenesis under Apache 2
   OGNL - Object Graph Navigation Library under The Apache Software License, Version 2.0
   SLF4J API Module under MIT License
+  Undertow Core under Apache License Version 2.0
+  XNIO API under Public Domain
+  XNIO NIO Implementation under Public Domain
 

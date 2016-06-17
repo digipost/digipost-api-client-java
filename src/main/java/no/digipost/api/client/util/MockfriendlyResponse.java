@@ -16,6 +16,7 @@
 package no.digipost.api.client.util;
 
 import no.digipost.api.client.representations.MessageDelivery;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.*;
@@ -27,11 +28,13 @@ import org.joda.time.DateTime;
 
 import javax.xml.bind.JAXB;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.*;
 
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
+import static org.apache.http.HttpStatus.SC_OK;
 
 public class MockfriendlyResponse implements CloseableHttpResponse {
 
@@ -216,6 +219,23 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 			return this;
 		}
 
+		public MockedResponseBuilder entity(final Object object) {
+			try {
+				ByteArrayOutputStream bao = new ByteArrayOutputStream();
+				if(object instanceof InputStream){
+					IOUtils.copy((InputStream)object, bao);
+				}
+				else {
+					JAXB.marshal(object, bao);
+				}
+
+				this.entity = new ByteArrayEntity(bao.toByteArray());
+				return this;
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		}
+
 		public MockfriendlyResponse build() {
 			return new MockfriendlyResponse() {
 				@Override
@@ -234,8 +254,19 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 			};
 		}
 
-		public static CloseableHttpResponse ok(HttpEntity entity) {
-			return MockedResponseBuilder.create().status(200).entity(entity).build();
+		public static CloseableHttpResponse ok(Object object) {
+			try{
+				ByteArrayOutputStream bao = new ByteArrayOutputStream();
+				if(object instanceof InputStream){
+					IOUtils.copy((InputStream)object, bao);
+				}
+				else {
+					JAXB.marshal(object, bao);
+				}
+				return MockedResponseBuilder.create().status(SC_OK).entity(new ByteArrayEntity(bao.toByteArray())).build();
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
 		}
 	}
 }
