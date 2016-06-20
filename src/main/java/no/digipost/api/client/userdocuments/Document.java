@@ -18,14 +18,18 @@ package no.digipost.api.client.userdocuments;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "user-document")
 public class Document {
 
 	@XmlElement
-	private final long id;
+	private long id;
 	@XmlElement
-	private final Invoice invoice;
+	private Invoice invoice;
+
+	private Document() {}
 
 	public Document(final long id, final Invoice invoice) {
 		this.id = id;
