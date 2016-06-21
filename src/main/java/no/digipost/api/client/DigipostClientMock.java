@@ -67,7 +67,7 @@ public class DigipostClientMock {
 
 		HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 
-		apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host);
+		apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host, null);
 		apiService.buildApacheHttpClientBuilder();
 		client = new DigipostClient(newBuilder().build(),apiFlavor, "digipostmock-url", 1, new Signer() {
 
