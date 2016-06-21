@@ -18,6 +18,6 @@ package no.digipost.api.client.representations;
 public class MediaTypes {
 
 	public static final String DIGIPOST_MEDIA_TYPE_V6 = "application/vnd.digipost-v6+xml";
-	public static final String DIGIPOST_MEDIA_TYPE_USERS_V7 = "application/vnd.digipost.users-v7+xml";
+	public static final String DIGIPOST_MEDIA_TYPE_USERS_V1 = "application/vnd.digipost.user-v1+xml";
 
 }
