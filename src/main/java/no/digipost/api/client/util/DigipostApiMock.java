@@ -32,7 +32,6 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.util.encoders.Base64;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -41,8 +40,6 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXB;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.ConnectException;
 import java.security.*;
 import java.util.*;
@@ -118,41 +115,13 @@ public class DigipostApiMock implements HttpHandler {
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 
 		if(method.equals(new HttpString("POST"))){
-			String multipart = new String(IOUtils.toByteArray(httpContext.getInputStream()));
-			String messageString = getMessageFromXMLString(multipart);
-
-			ByteArrayInputStream messageStream = new ByteArrayInputStream(messageString.getBytes());
-
-			Message message = JAXB.unmarshal(messageStream, Message.class);
-
-			RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
-			CloseableHttpResponse response = requestsAndResponses.getResponse(message.primaryDocument.subject);
-
-			httpResponse = response.getStatusLine().getStatusCode();
-			response.getEntity().writeTo(bao);
-
-			requestsAndResponses.addRequest(new DigipostRequest(message, getContentparts(multipart)));
+			httpResponse = serviceMultipartrequest(httpContext, bao);
 
 		} else if(requestPath.equals("/printkey")) {
-			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_PRINT_KEY).getResponse(httpContext.getRequestPath());
-			EncryptionKey encryptionKey = new EncryptionKey();
-			encryptionKey.setKeyId(PRINT_ID);
-			encryptionKey.setValue(PRINT_KEY);
-			JAXB.marshal(encryptionKey, bao);
+			httpResponse = servicePrintKey(httpContext, bao);
 
 		} else if(requestPath.equals("/getsenderinformation")) {
-			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_SENDER_INFORMATION).getResponse(httpContext.getRequestPath());
-			if(response == null) {
-				List<SenderFeature> senderFeatures = new ArrayList<>();
-				senderFeatures.add(SenderFeature.DELIVERY_DIRECT_TO_PRINT);
-				senderFeatures.add(SenderFeature.DIGIPOST_DELIVERY);
-				senderFeatures.add(SenderFeature.PRINTVALIDATION_FONTS);
-				senderFeatures.add(SenderFeature.PRINTVALIDATION_PDFVERSION);
-				JAXB.marshal(new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
-			} else {
-				httpResponse = response.getStatusLine().getStatusCode();
-				response.getEntity().writeTo(bao);
-			}
+			serviceSenderInformation(httpContext, bao);
 
 		} else if(requestPath.equals("/getdocumentstatus")) {
 			CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_DOCUMENT_STATUS).getResponse(httpContext.getRequestPath());
@@ -178,7 +147,7 @@ public class DigipostApiMock implements HttpHandler {
 
 		byte[] bytes = bao.toByteArray();
 		HeaderMap responseHeaders = httpContext.getResponseHeaders();
-		
+
 		String dateOnRFC1123Format = DateUtils.formatDate(now());
 		String xContentSHA256 = generateXContentSHA256(bytes);
 		String signature =  httpResponse + "\n" + httpContext.getRequestPath().toLowerCase() + "\n" +
@@ -192,6 +161,51 @@ public class DigipostApiMock implements HttpHandler {
 
 		httpContext.startBlocking();
 		IOUtils.copy(new ByteArrayInputStream(bytes), httpContext.getOutputStream());
+	}
+
+	private int serviceSenderInformation(HttpServerExchange httpContext, ByteArrayOutputStream bao) throws IOException {
+		CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_SENDER_INFORMATION).getResponse(httpContext.getRequestPath());
+		if(response == null) {
+			List<SenderFeature> senderFeatures = new ArrayList<>();
+			senderFeatures.add(SenderFeature.DELIVERY_DIRECT_TO_PRINT);
+			senderFeatures.add(SenderFeature.DIGIPOST_DELIVERY);
+			senderFeatures.add(SenderFeature.PRINTVALIDATION_FONTS);
+			senderFeatures.add(SenderFeature.PRINTVALIDATION_PDFVERSION);
+			JAXB.marshal(new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
+
+			return 200;
+		} else {
+			response.getEntity().writeTo(bao);
+			return response.getStatusLine().getStatusCode();
+		}
+	}
+
+	private int servicePrintKey(HttpServerExchange httpContext, ByteArrayOutputStream bao){
+		requestsAndResponsesMap.get(Method.GET_PRINT_KEY).getResponse(httpContext.getRequestPath());
+		EncryptionKey encryptionKey = new EncryptionKey();
+		encryptionKey.setKeyId(PRINT_ID);
+		encryptionKey.setValue(PRINT_KEY);
+		JAXB.marshal(encryptionKey, bao);
+
+		return 200;
+	}
+
+	private int serviceMultipartrequest(HttpServerExchange httpContext, ByteArrayOutputStream bao) throws IOException {
+		String multipart = new String(IOUtils.toByteArray(httpContext.getInputStream()));
+		String messageString = getMessageFromXMLString(multipart);
+
+		ByteArrayInputStream messageStream = new ByteArrayInputStream(messageString.getBytes());
+
+		Message message = JAXB.unmarshal(messageStream, Message.class);
+
+		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
+		CloseableHttpResponse response = requestsAndResponses.getResponse(message.primaryDocument.subject);
+
+		response.getEntity().writeTo(bao);
+
+		requestsAndResponses.addRequest(new DigipostRequest(message, getContentparts(multipart)));
+
+		return response.getStatusLine().getStatusCode();
 	}
 
 	private static String getMessageFromXMLString(String multipart) throws IOException {
@@ -225,13 +239,13 @@ public class DigipostApiMock implements HttpHandler {
 		this.server = Undertow.builder().addHttpListener(port, "localhost", new BlockingHandler(this)).build();
 		init();
 		server.start();
-		LOG.info("Evry SMS service mock running on port {}", port);
+		LOG.info("Digipost API client running on port {}", port);
 		return this;
 	}
 
 	public void stop() {
 		server.stop();
-		LOG.info("Shutting down Evry SMS service mock on port {}", port);
+		LOG.info("Shutting down Digipost API client mock on port {}", port);
 	}
 
 	public void init() {

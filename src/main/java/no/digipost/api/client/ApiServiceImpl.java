@@ -44,7 +44,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -65,7 +64,6 @@ public class ApiServiceImpl implements ApiService {
 	private CloseableHttpClient httpClient;
 	private final String digipostUrl;
 	private final RequestConfig config;
-	private final boolean qaEnvironment;
 	private final HttpClientBuilder httpClientBuilder;
 
 	private final Callable<EntryPoint> entryPoint = new Callable<EntryPoint>() {
@@ -93,14 +91,19 @@ public class ApiServiceImpl implements ApiService {
 	private final Cache<String, SenderInformation> senderInformation = new Cache<>("sender-information", expireAfterAccess(standardMinutes(5)), useSoftValues);
 	private final EventLogger eventLogger;
 
-	public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long senderAccountId, EventLogger eventLogger, String digipostUrl) {
+	public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long senderAccountId, EventLogger eventLogger, String digipostUrl,
+						  HttpHost proxy) {
 		this.brokerId = senderAccountId;
 		this.eventLogger = eventLogger;
 		this.digipostUrl = digipostUrl;
-		this.config = RequestConfig.custom()
-				.setProxy(new HttpHost("sig-web.posten.no", 3128, "http"))
-				.build();
-		this.qaEnvironment = digipostUrl.contains("qa");
+		if(proxy != null) {
+			this.config = RequestConfig.custom()
+					.setProxy(proxy)
+					.build();
+		} else {
+			this.config = null;
+		}
+
 		this.httpClientBuilder = httpClientBuilder;
 	}
 
@@ -333,7 +336,7 @@ public class ApiServiceImpl implements ApiService {
 
 	private CloseableHttpResponse send(HttpRequestBase request){
 		try {
-			if(qaEnvironment){
+			if(config != null){
 				request.setConfig(config);
 			}
 			request.setHeader(X_Digipost_UserId, brokerId + "");
@@ -381,19 +384,27 @@ public class ApiServiceImpl implements ApiService {
 		return new Callable<R>() {
 			@Override
             public R call() {
-				HttpGet httpGet = new HttpGet(digipostUrl + path);
 
-				for (Entry<String, P> param : queryParams.entrySet()) {
-					httpGet.addHeader(param.getKey(), param.getValue().toString());
-				}
-				httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+				try {
+					HttpGet httpGet = new HttpGet(digipostUrl + path);
+					URIBuilder uriBuilder = new URIBuilder(httpGet.getURI());
 
-				try (CloseableHttpResponse execute = send(httpGet)){
-					ApiCommons.checkResponse(execute, eventLogger);
-					R unmarshal = JAXB.unmarshal(execute.getEntity().getContent(), entityType);
-					return unmarshal;
+					for (Entry<String, P> param : queryParams.entrySet()) {
+						uriBuilder.setParameter(param.getKey(), param.getValue().toString());
+					}
 
-				} catch (IOException e) {
+					httpGet.setURI(uriBuilder.build());
+					httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+
+					try (CloseableHttpResponse execute = send(httpGet)){
+						ApiCommons.checkResponse(execute, eventLogger);
+						R unmarshal = JAXB.unmarshal(execute.getEntity().getContent(), entityType);
+						return unmarshal;
+
+					} catch (IOException e) {
+						throw new RuntimeException(e.getMessage(), e);
+					}
+				} catch (URISyntaxException e) {
 					throw new RuntimeException(e.getMessage(), e);
 				}
             }
