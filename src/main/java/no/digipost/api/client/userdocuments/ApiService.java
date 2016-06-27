@@ -101,6 +101,33 @@ public class ApiService {
 		}
 	}
 
+	public CloseableHttpResponse getDocument(final long documentId) {
+		try {
+			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+					.setPath(USER_DOCUMENTS + "/" + documentId)
+					.setParameter(AgreementType.QUERY_PARAM_NAME, AgreementType.INVOICE_BANK.getType());
+			HttpGet httpGet = new HttpGet(uriBuilder.build());
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+			return send(httpGet);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public CloseableHttpResponse updateInvoice(final long documentId, final Invoice invoice) {
+		try {
+			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+					.setPath(USER_DOCUMENTS + "/" + documentId + "/invoice");
+			HttpPost httpPost = new HttpPost(uriBuilder.build());
+			httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
+			httpPost.setEntity(marshallJaxbEntity(invoice));
+			return send(httpPost);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private HttpPost prepareHttpPost(final String path) {
 		HttpPost httpPost = new HttpPost(serviceEndpoint.resolve(path));
 		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);

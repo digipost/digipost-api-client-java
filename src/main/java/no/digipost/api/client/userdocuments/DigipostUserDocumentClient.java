@@ -90,6 +90,24 @@ public class DigipostUserDocumentClient {
 		return documents.getDocuments();
 	}
 
+	public Document getDocument(final long documentId) {
+		return handle(new Callable<CloseableHttpResponse>() {
+			@Override
+			public CloseableHttpResponse call() throws Exception {
+				return apiService.getDocument(documentId);
+			}
+		}, Document.class);
+	}
+
+	public Document updateInvoice(final long documentId, final Invoice invoice) {
+		return handle(new Callable<CloseableHttpResponse>() {
+			@Override
+			public CloseableHttpResponse call() throws Exception {
+				return apiService.updateInvoice(documentId, invoice);
+			}
+		}, Document.class);
+	}
+
 	private <T> T handle(final Callable<CloseableHttpResponse> action, Class<T> resultType) {
 		try (final CloseableHttpResponse response = action.call()) {
 			ApiCommons.checkResponse(response);
