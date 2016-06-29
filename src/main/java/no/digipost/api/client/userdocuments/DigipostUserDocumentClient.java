@@ -32,12 +32,15 @@ import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.ssl.SSLContextBuilder;
 
 import javax.xml.bind.JAXB;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -130,7 +133,8 @@ public class DigipostUserDocumentClient {
 	}
 
 	public static class Builder {
-		private static final String PRODUCTION_ENDPOINT = "https://api.digipost.no";
+
+		private static final URI PRODUCTION_ENDPOINT = URI.create("https://api.digipost.no");
 
 		private URI serviceEndpoint;
 		private final long accountId;
@@ -143,11 +147,7 @@ public class DigipostUserDocumentClient {
 			this.accountId = accountId;
 			this.certificateP12File = certificateP12File;
 			this.certificatePassword = certificatePassword;
-			try {
-				serviceEndpoint(new URI(PRODUCTION_ENDPOINT));
-			} catch (URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
+			serviceEndpoint(PRODUCTION_ENDPOINT);
 			httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 		}
 
@@ -158,6 +158,22 @@ public class DigipostUserDocumentClient {
 
 		public Builder serviceEndpoint(URI endpointUri) {
 			this.serviceEndpoint = endpointUri;
+			return this;
+		}
+
+		public Builder veryDangerouslyDisableCertificateVerificationWhichIsAbsolutelyUnfitForProductionCode() {
+			if (this.serviceEndpoint.compareTo(PRODUCTION_ENDPOINT) == 0) {
+				throw new RuntimeException("You should never ever disable certificate verification when connecting to the production endpoint");
+			}
+			SSLContextBuilder sslContextBuilder= new SSLContextBuilder();
+			try {
+				sslContextBuilder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
+				SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build(), NoopHostnameVerifier.INSTANCE);
+				httpClientBuilder.setSSLSocketFactory(sslConnectionSocketFactory);
+			} catch (Exception e) {
+				throw new RuntimeException("Could not disable certificate verification: " + e);
+			}
+			System.err.println("Not checking validity of certificates for any hostnames");
 			return this;
 		}
 
