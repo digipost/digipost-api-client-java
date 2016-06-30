@@ -88,9 +88,9 @@ public class DigipostClientMock {
 			KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 			keystore.load(DigipostClientMock.class.getClass().getResourceAsStream("/mockKeystore.jks"), KEY_STORE_PASSWORD.toCharArray());
 
-			final Key key = (PrivateKey) keystore.getKey(alias, password.toCharArray());
-			final Certificate cert = keystore.getCertificate(alias);
-			final PublicKey publicKey = cert.getPublicKey();
+			Key key = keystore.getKey(alias, password.toCharArray());
+			Certificate cert = keystore.getCertificate(alias);
+			PublicKey publicKey = cert.getPublicKey();
 
 			return new KeyPair(publicKey, (PrivateKey) key);
 		} catch (Exception e) {

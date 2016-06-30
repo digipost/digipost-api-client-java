@@ -12,12 +12,12 @@ This software includes third party software subject to the following licenses:
   Apache Commons Codec under The Apache Software License, Version 2.0
   Apache Commons Lang under Apache License, Version 2.0
   Apache Commons Logging under The Apache Software License, Version 2.0
-  Apache FontBox under The Apache Software License, Version 2.0
+  Apache FontBox under Apache License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
   Apache HttpClient Mime under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
-  Apache JempBox under The Apache Software License, Version 2.0
-  Apache PDFBox under The Apache Software License, Version 2.0
+  Apache JempBox under Apache License, Version 2.0
+  Apache PDFBox under Apache License, Version 2.0
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
   Byte Buddy (without dependencies) under The Apache Software License, Version 2.0

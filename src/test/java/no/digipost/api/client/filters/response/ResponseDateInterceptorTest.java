@@ -74,6 +74,7 @@ public class ResponseDateInterceptorTest {
 		List<BasicHeader> headers = new ArrayList<>();
 		headers.add(new BasicHeader("Date", "16. januar 2012 - 16:14:23"));
 		when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
+		when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
 		try {
 			responseDateInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle kastet feil grunnet feilaktig Date header format");
@@ -88,6 +89,7 @@ public class ResponseDateInterceptorTest {
 		List<BasicHeader> headers = new ArrayList<>();
 		headers.add(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
 		when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
+		when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
 		try {
 			responseDateInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle kastet feil grunnet for ny Date header");
@@ -102,6 +104,7 @@ public class ResponseDateInterceptorTest {
 		List<BasicHeader> headers = new ArrayList<>();
 		headers.add(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
 		when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
+		when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
 		try {
 			responseDateInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle kastet feil grunnet for gammel Date header");

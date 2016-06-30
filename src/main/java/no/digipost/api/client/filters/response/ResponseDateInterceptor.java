@@ -47,14 +47,12 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-		String dateHeader = "";
-		for(Header header : response.getAllHeaders()){
-			if(header.getName().equals(DATE)){
-				dateHeader = header.getValue();
-				break;
-			}
+		String dateHeader = null;
+		Header firstHeader = response.getFirstHeader(DATE);
+		if(firstHeader != null){
+			dateHeader = firstHeader.getValue();
 		}
-
+			
 		try {
 			if (isNotBlank(dateHeader)) {
 				sjekkDato(dateHeader);

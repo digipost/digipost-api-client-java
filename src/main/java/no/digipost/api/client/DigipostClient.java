@@ -18,6 +18,8 @@ package no.digipost.api.client;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery;
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
 import no.digipost.api.client.filters.request.RequestDateInterceptor;
 import no.digipost.api.client.filters.request.RequestSignatureInterceptor;
@@ -29,6 +31,7 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.util.JAXBContextUtils;
 import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
 import no.digipost.print.validate.PdfValidator;
@@ -160,16 +163,12 @@ public class DigipostClient {
 	}
 
 	public IdentificationResult identifyRecipient(final Identification identification) {
-		CloseableHttpResponse response = apiService.identifyRecipient(identification);
-		Communicator.checkResponse(response, eventLogger);
-
-		try {
-			IdentificationResult identificationResult = JAXB.unmarshal(response.getEntity().getContent(), IdentificationResult.class);
-			response.close();
-			return identificationResult;
-
+		try(CloseableHttpResponse response = apiService.identifyRecipient(identification))
+		{
+			Communicator.checkResponse(response, eventLogger);
+			return JAXBContextUtils.unmarshal(JAXBContextUtils.identificationContext, response.getEntity().getContent(), IdentificationResult.class);
 		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new DigipostClientException(ErrorCode.SERVER_ERROR, e);
 		}
 	}
 

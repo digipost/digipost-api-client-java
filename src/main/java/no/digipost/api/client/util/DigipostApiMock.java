@@ -134,7 +134,7 @@ public class DigipostApiMock implements HttpHandler {
 			response.getEntity().writeTo(bao);
 
 		} else if(requestPath.equals("/")){
-			JAXB.marshal(new EntryPoint(certificate, new Link(Relation.CREATE_MESSAGE, new DigipostUri("http://localhost:9999/create")),
+			JAXBContextUtils.marshal(JAXBContextUtils.entryPointContext, new EntryPoint(certificate, new Link(Relation.CREATE_MESSAGE, new DigipostUri("http://localhost:9999/create")),
 					new Link(Relation.GET_PRINT_ENCRYPTION_KEY, new DigipostUri("http://localhost:9999/printkey")),
 					new Link(Relation.GET_SENDER_INFORMATION, new DigipostUri("http://localhost:9999/getsenderinformation")),
 					new Link(Relation.DOCUMENT_EVENTS, new DigipostUri("http://localhost:9999/getdocumentevents"))), bao);
@@ -171,7 +171,8 @@ public class DigipostApiMock implements HttpHandler {
 			senderFeatures.add(SenderFeature.DIGIPOST_DELIVERY);
 			senderFeatures.add(SenderFeature.PRINTVALIDATION_FONTS);
 			senderFeatures.add(SenderFeature.PRINTVALIDATION_PDFVERSION);
-			JAXB.marshal(new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
+			JAXBContextUtils.marshal(JAXBContextUtils.senderInformationContext,
+					new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
 
 			return 200;
 		} else {
@@ -185,7 +186,7 @@ public class DigipostApiMock implements HttpHandler {
 		EncryptionKey encryptionKey = new EncryptionKey();
 		encryptionKey.setKeyId(PRINT_ID);
 		encryptionKey.setValue(PRINT_KEY);
-		JAXB.marshal(encryptionKey, bao);
+		JAXBContextUtils.marshal(JAXBContextUtils.encryptionKeyContext, encryptionKey, bao);
 
 		return 200;
 	}
@@ -196,8 +197,7 @@ public class DigipostApiMock implements HttpHandler {
 
 		ByteArrayInputStream messageStream = new ByteArrayInputStream(messageString.getBytes());
 
-		Message message = JAXB.unmarshal(messageStream, Message.class);
-
+		Message message = JAXBContextUtils.unmarshal(JAXBContextUtils.messageContext, messageStream, Message.class);
 		RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
 		CloseableHttpResponse response = requestsAndResponses.getResponse(message.primaryDocument.subject);
 
@@ -386,7 +386,7 @@ public class DigipostApiMock implements HttpHandler {
 			MessageDelivery messageDelivery = new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, COMPLETE, DateTime.now());
 
 			org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
-			JAXB.marshal(messageDelivery, bao);
+			JAXBContextUtils.marshal(JAXBContextUtils.messageDeliveryContext, messageDelivery, bao);
 
 			return MockfriendlyResponse.MockedResponseBuilder.create()
 					.status(SC_OK)
@@ -414,7 +414,9 @@ public class DigipostApiMock implements HttpHandler {
 					ErrorType translated = EnumUtils.getEnum(ErrorType.class, errorCode.getOverriddenErrorType().name());
 
 					org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
-					JAXB.marshal(new ErrorMessage(translated != null ? translated : ErrorType.SERVER, errorCode.name(), "Generic error-message from digipost-api-client-mock"), bao);
+					JAXBContextUtils.marshal(JAXBContextUtils.errorMessageContext,
+							new ErrorMessage(translated != null ? translated : ErrorType.SERVER, errorCode.name(),
+									"Generic error-message from digipost-api-client-mock"), bao);
 
 					return MockfriendlyResponse.MockedResponseBuilder.create().status(parseInt(split[0]))
 							.entity(new ByteArrayEntity(bao.toByteArray())).build();

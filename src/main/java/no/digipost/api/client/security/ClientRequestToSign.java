@@ -58,12 +58,13 @@ public class ClientRequestToSign implements RequestToSign {
 
 	@Override
 	public String getParameters() {
-		int index = clientRequest.getRequestLine().getUri().indexOf('?');
-		if(index == -1){
-			return "";
-		}
-		String query = clientRequest.getRequestLine().getUri().substring(index + 1);
-		return query != null ? query : "";
+		return queryParametersFromURI(clientRequest.getRequestLine().getUri());
+	}
+
+	static String queryParametersFromURI(String uri){
+		int index = uri.indexOf('?');
+
+		return index == -1 ? "" : uri.substring(index + 1);
 	}
 
 }

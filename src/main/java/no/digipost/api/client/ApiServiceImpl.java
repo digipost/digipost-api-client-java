@@ -16,6 +16,7 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
@@ -51,6 +52,7 @@ import java.util.concurrent.Callable;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
+import static no.digipost.api.client.util.JAXBContextUtils.*;
 import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
 import static no.motif.Singular.optional;
@@ -66,6 +68,7 @@ public class ApiServiceImpl implements ApiService {
 	private final RequestConfig config;
 	private final HttpClientBuilder httpClientBuilder;
 
+
 	private final Callable<EntryPoint> entryPoint = new Callable<EntryPoint>() {
 		@Override
         public EntryPoint call() throws Exception {
@@ -76,10 +79,10 @@ public class ApiServiceImpl implements ApiService {
 			try(CloseableHttpResponse execute = send(httpGet)) {
 
 				if (execute.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-					EntryPoint entryPoint = JAXB.unmarshal(execute.getEntity().getContent(), EntryPoint.class);
+					EntryPoint entryPoint = unmarshal(entryPointContext, execute.getEntity().getContent(), EntryPoint.class);
 					return entryPoint;
 				} else {
-					ErrorMessage errorMessage = JAXB.unmarshal(execute.getEntity().getContent(), ErrorMessage.class);
+					ErrorMessage errorMessage = unmarshal(errorMessageContext, execute.getEntity().getContent(), ErrorMessage.class);
 					throw new DigipostClientException(errorMessage);
 				}
 			}
@@ -136,7 +139,7 @@ public class ApiServiceImpl implements ApiService {
 		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V6);
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXB.marshal(identification, bao);
+		marshal(identificationContext,identification, bao);
 		httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
 		return send(httpPost);
 	}
@@ -150,7 +153,7 @@ public class ApiServiceImpl implements ApiService {
 		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V6);
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXB.marshal(message, bao);
+		marshal(messageContext, message, bao);
 		httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
 		return send(httpPost);
 	}
@@ -285,10 +288,9 @@ public class ApiServiceImpl implements ApiService {
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 
 		try(CloseableHttpResponse response = send(httpGet)){
-			Recipients recipients = JAXB.unmarshal(response.getEntity().getContent(), Recipients.class);
-			return recipients;
+			return unmarshal(recipientsContext, response.getEntity().getContent(), Recipients.class);
 		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new DigipostClientException(ErrorCode.SERVER_ERROR, e.getMessage());
 		}
 	}
 
@@ -298,11 +300,10 @@ public class ApiServiceImpl implements ApiService {
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 
 
-		try(CloseableHttpResponse response = send(httpGet);) {
-			Autocomplete autocomplete = JAXB.unmarshal(response.getEntity().getContent(), Autocomplete.class);
-			return  autocomplete;
+		try(CloseableHttpResponse response = send(httpGet)) {
+			return unmarshal(autocompleteContext, response.getEntity().getContent(), Autocomplete.class);
 		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new DigipostClientException(ErrorCode.SERVER_ERROR, e.getMessage());
 		}
 	}
 
@@ -328,7 +329,7 @@ public class ApiServiceImpl implements ApiService {
 		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V6);
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXB.marshal(identification, bao);
+		marshal(identificationContext, identification, bao);
 		httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
 
 		return send(httpPost);
@@ -402,13 +403,12 @@ public class ApiServiceImpl implements ApiService {
 						return unmarshal;
 
 					} catch (IOException e) {
-						throw new RuntimeException(e.getMessage(), e);
+						throw new DigipostClientException(ErrorCode.SERVER_ERROR, e.getMessage());
 					}
 				} catch (URISyntaxException e) {
 					throw new RuntimeException(e.getMessage(), e);
 				}
-            }
+		  	}
 		};
 	}
-
 }

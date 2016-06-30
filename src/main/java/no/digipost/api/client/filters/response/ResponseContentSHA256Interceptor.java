@@ -61,11 +61,9 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 	private void validerContentHash(final HttpResponse response) {
 		try {
 			String hashHeader = null;
-			for(Header head : response.getAllHeaders()){
-				if(head.getName().equals(X_Content_SHA256)){
-					hashHeader = head.getValue();
-					break;
-				}
+			Header firstHeader = response.getFirstHeader(X_Content_SHA256);
+			if(firstHeader != null){
+				hashHeader = firstHeader.getValue();
 			}
 
 			if (isBlank(hashHeader)) {

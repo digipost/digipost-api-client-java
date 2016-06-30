@@ -38,20 +38,7 @@ public class ReceivedRequest {
 
 	@Override
 	public String toString() {
-		return method + " " + path + queryParams; //ofNullable(queryParams).map(s -> "?" + s).orElse("");
-	}
-
-	public String getQueryParamValueFor(String paramName) {
-		/*return Stream.of(queryParams.split("&"))
-				.map(keyValue -> Tuple.of(keyValue, keyValue.indexOf('=')))
-				.map(keyValueAndDelimPos -> Tuple.of(
-						keyValueAndDelimPos.first().substring(0, keyValueAndDelimPos.second()),
-						keyValueAndDelimPos.first().substring(keyValueAndDelimPos.second() + 1)))
-				.filter(t -> paramName.equals(t.first()))
-				.findAny()
-				.map(Tuple::second)
-				.orElseThrow(() -> new IllegalStateException("No " + paramName + " query param found in " + this));*/
-		return "";
+		return method + " " + path + queryParams;
 	}
 
 	public InputStream getBody() {

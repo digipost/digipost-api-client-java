@@ -20,6 +20,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.util.JAXBContextUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public abstract class Communicator {
 
 	protected static ErrorMessage fetchErrorMessageString(final CloseableHttpResponse response) {
 		try {
-			ErrorMessage errorMessage = JAXB.unmarshal(response.getEntity().getContent(), ErrorMessage.class);
+			ErrorMessage errorMessage = JAXBContextUtils.unmarshal(JAXBContextUtils.errorMessageContext, response.getEntity().getContent(), ErrorMessage.class);
 			response.close();
 			return errorMessage != null ? errorMessage : ErrorMessage.EMPTY;
 		} catch (IllegalStateException | DataBindingException e) {
