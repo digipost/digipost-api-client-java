@@ -91,11 +91,6 @@
 			<version>3.4</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.2</version>
-		</dependency>
-		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
 			<version>${bouncycastle.version}</version>
@@ -266,6 +261,7 @@
 						<exclude>**/*.txt</exclude>
 						<exclude>**/*.xml</exclude>
 						<exclude>**/*.xsd</exclude>
+						<exclude>**/*.jks</exclude>
 						<exclude>**/user-agent.properties</exclude>
 					</excludes>
 				</configuration>
