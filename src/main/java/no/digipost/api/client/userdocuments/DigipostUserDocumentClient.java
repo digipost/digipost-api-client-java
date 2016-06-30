@@ -42,6 +42,7 @@ import javax.net.ssl.SSLSession;
 import javax.xml.bind.JAXB;
 import java.io.InputStream;
 import java.net.URI;
+import java.security.PrivateKey;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -143,11 +144,24 @@ public class DigipostUserDocumentClient {
 		private final String certificatePassword;
 		private HttpClientBuilder httpClientBuilder;
 		private HttpHost proxyHost;
+		private PrivateKey privateKey;
 
 		public Builder(long accountId, InputStream certificateP12File, String certificatePassword){
+			this(accountId, certificateP12File, certificatePassword, null);
+		}
+
+		public Builder(long accountId, PrivateKey privateKey) {
+			this(accountId, null, null, privateKey);
+		}
+
+		private Builder(long accountId, InputStream certificateP12File, String certificatePassword, PrivateKey privateKey) {
 			this.accountId = accountId;
+			if (certificateP12File == null && certificatePassword == null && privateKey == null) {
+				throw new IllegalArgumentException();
+			}
 			this.certificateP12File = certificateP12File;
 			this.certificatePassword = certificatePassword;
+			this.privateKey = privateKey;
 			serviceEndpoint(PRODUCTION_ENDPOINT);
 			httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 		}
@@ -194,7 +208,11 @@ public class DigipostUserDocumentClient {
 
 			httpClientBuilder.addInterceptorLast(new RequestDateInterceptor(null));
 			httpClientBuilder.addInterceptorLast(new RequestUserAgentInterceptor());
-			httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new Pkcs12KeySigner(certificateP12File, certificatePassword), null, new RequestContentSHA256Filter(null)));
+			if (privateKey == null) {
+				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new Pkcs12KeySigner(certificateP12File, certificatePassword), null, new RequestContentSHA256Filter(null)));
+			} else {
+				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new Pkcs12KeySigner(privateKey), null, new RequestContentSHA256Filter(null)));
+			}
 			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor());
 			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor());
 			httpClientBuilder.addInterceptorLast(responseSignatureInterceptor);

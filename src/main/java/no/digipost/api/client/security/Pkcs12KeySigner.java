@@ -27,6 +27,10 @@ public class Pkcs12KeySigner implements Signer {
 		privateKey = CryptoUtil.loadKeyFromP12(certificate, password);
 	}
 
+	public Pkcs12KeySigner(final PrivateKey privateKey) {
+		this.privateKey = privateKey;
+	}
+
 	@Override
 	public byte[] sign(final String dataToSign) {
 		return CryptoUtil.sign(privateKey, dataToSign);
