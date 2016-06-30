@@ -22,10 +22,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "user-documents")
+@XmlRootElement(name = "documents")
 public class Documents {
 
-	@XmlElement(name = "user-document")
+	@XmlElement(name = "document")
 	private List<Document> documents;
 
 	private Documents() {}
