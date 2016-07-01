@@ -290,7 +290,7 @@ public class ApiServiceImpl implements ApiService {
 		try(CloseableHttpResponse response = send(httpGet)){
 			return unmarshal(recipientsContext, response.getEntity().getContent(), Recipients.class);
 		} catch (IOException e) {
-			throw new DigipostClientException(ErrorCode.SERVER_ERROR, e.getMessage());
+			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
 		}
 	}
 
@@ -303,7 +303,7 @@ public class ApiServiceImpl implements ApiService {
 		try(CloseableHttpResponse response = send(httpGet)) {
 			return unmarshal(autocompleteContext, response.getEntity().getContent(), Autocomplete.class);
 		} catch (IOException e) {
-			throw new DigipostClientException(ErrorCode.SERVER_ERROR, e.getMessage());
+			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
 		}
 	}
 
@@ -403,7 +403,7 @@ public class ApiServiceImpl implements ApiService {
 						return unmarshal;
 
 					} catch (IOException e) {
-						throw new DigipostClientException(ErrorCode.SERVER_ERROR, e.getMessage());
+						throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
 					}
 				} catch (URISyntaxException e) {
 					throw new RuntimeException(e.getMessage(), e);

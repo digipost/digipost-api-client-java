@@ -72,6 +72,8 @@ import static no.digipost.api.client.representations.Relation.SEND;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static no.digipost.api.client.representations.sender.SenderFeature.*;
 import static no.digipost.api.client.representations.sender.SenderStatus.VALID_SENDER;
+import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.motif.Singular.the;
 import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -116,7 +118,7 @@ public class MessageSenderTest {
 	public void setup() {
 		this.fakeEncryptionKey = FakeEncryptionKey.createFakeEncryptionKey();
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXBContextUtils.marshal(JAXBContextUtils.encryptionKeyContext, fakeEncryptionKey, bao);
+		marshal(encryptionKeyContext, fakeEncryptionKey, bao);
 
 		encryptionKeyResponse = MockfriendlyResponse.MockedResponseBuilder.create()
 				.status(SC_OK)
@@ -143,7 +145,7 @@ public class MessageSenderTest {
 		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXBContextUtils.marshal(JAXBContextUtils.messageDeliveryContext, eksisterendeForsendelse, bao);
+		marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
 		HttpEntity forsendelse = new ByteArrayEntity(bao.toByteArray());
 
 		when(mockClientResponse2.getEntity()).thenReturn(forsendelse);
@@ -165,7 +167,7 @@ public class MessageSenderTest {
 
 		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, Channel.DIGIPOST, DELIVERED, now());
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXBContextUtils.marshal(JAXBContextUtils.messageDeliveryContext, eksisterendeForsendelse, bao);
+		marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
 
 		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 		when(mockClientResponse2.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
@@ -190,7 +192,7 @@ public class MessageSenderTest {
 
 		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, PRINT, DELIVERED_TO_PRINT, now());
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXBContextUtils.marshal(JAXBContextUtils.messageDeliveryContext, eksisterendeForsendelse, bao);
+		marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
 
 		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 		when(mockClientResponse2.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
@@ -244,7 +246,7 @@ public class MessageSenderTest {
 		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(200));
 
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXBContextUtils.marshal(JAXBContextUtils.identificationResultWithEncryptionKeyContext, identificationResultWithEncryptionKey, bao);
+		marshal(identificationResultWithEncryptionKeyContext, identificationResultWithEncryptionKey, bao);
 
 		when(mockClientResponse.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
 
@@ -258,7 +260,7 @@ public class MessageSenderTest {
 
 		CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
 		ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
-		JAXBContextUtils.marshal(JAXBContextUtils.messageDeliveryContext,
+		marshal(messageDeliveryContext,
 				new MessageDelivery(UUID.randomUUID().toString(), Channel.PRINT, MessageStatus.COMPLETE, DateTime.now()), bao2);
 
 		when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray()));
@@ -370,10 +372,10 @@ public class MessageSenderTest {
 
 
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		JAXBContextUtils.marshal(JAXBContextUtils.messageDeliveryContext, incompleteDelivery, bao);
+		marshal(messageDeliveryContext, incompleteDelivery, bao);
 		byte[] bytes = bao.toByteArray();
 		ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
-		JAXBContextUtils.marshal(JAXBContextUtils.messageDeliveryContext,
+		marshal(messageDeliveryContext,
 				new MessageDelivery(messageId, PRINT, DELIVERED_TO_PRINT, now()), bao2);
 
 		when(mockClientResponse.getEntity())

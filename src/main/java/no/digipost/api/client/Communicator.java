@@ -33,6 +33,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static no.digipost.api.client.representations.ErrorType.SERVER;
+import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
 /**
  * Superklasse for MessageSender som har funksjonalitet for å snakke med
@@ -73,7 +75,7 @@ public abstract class Communicator {
 
 	protected static ErrorMessage fetchErrorMessageString(final CloseableHttpResponse response) {
 		try {
-			ErrorMessage errorMessage = JAXBContextUtils.unmarshal(JAXBContextUtils.errorMessageContext, response.getEntity().getContent(), ErrorMessage.class);
+			ErrorMessage errorMessage = unmarshal(errorMessageContext, response.getEntity().getContent(), ErrorMessage.class);
 			response.close();
 			return errorMessage != null ? errorMessage : ErrorMessage.EMPTY;
 		} catch (IllegalStateException | DataBindingException e) {
@@ -81,7 +83,7 @@ public abstract class Communicator {
 					e.getClass().getSimpleName() + ": Det skjedde en feil på serveren (" + e.getMessage() +
 							"), men klienten kunne ikke lese responsen.");
 		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
 		}
 	}
 

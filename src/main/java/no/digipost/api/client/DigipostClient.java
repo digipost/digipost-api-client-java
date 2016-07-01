@@ -168,7 +168,7 @@ public class DigipostClient {
 			Communicator.checkResponse(response, eventLogger);
 			return JAXBContextUtils.unmarshal(JAXBContextUtils.identificationContext, response.getEntity().getContent(), IdentificationResult.class);
 		} catch (IOException e) {
-			throw new DigipostClientException(ErrorCode.SERVER_ERROR, e);
+			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
 		}
 	}
 
