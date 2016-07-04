@@ -23,6 +23,8 @@ import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -54,11 +56,17 @@ public class ApiService {
 	private final URI serviceEndpoint;
 	private final long accountId;
 	private final CloseableHttpClient httpClient;
+	private final RequestConfig config;
 
-	public ApiService(final URI serviceEndpoint, final long accountId, final CloseableHttpClient httpClient) {
+	public ApiService(final URI serviceEndpoint, final long accountId, final CloseableHttpClient httpClient, final HttpHost proxy) {
 		this.serviceEndpoint = serviceEndpoint;
 		this.accountId = accountId;
 		this.httpClient = httpClient;
+		if (proxy != null) {
+			this.config = RequestConfig.custom().setProxy(proxy).build();
+		} else {
+			this.config = null;
+		}
 	}
 
 	public CloseableHttpResponse identifyUser(final UserId userId) {
@@ -146,6 +154,9 @@ public class ApiService {
 
 	private CloseableHttpResponse send(HttpRequestBase request){
 		try {
+			if(config != null){
+				request.setConfig(config);
+			}
 			request.setHeader(X_Digipost_UserId, String.valueOf(accountId));
 			return httpClient.execute(request);
 		} catch (IOException e) {
