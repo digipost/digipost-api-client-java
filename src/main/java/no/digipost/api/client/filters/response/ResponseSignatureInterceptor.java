@@ -18,7 +18,7 @@ package no.digipost.api.client.filters.response;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.security.ClientResponseToVerify;
-import no.digipost.api.client.security.ResponseMessageSignatureUtil2;
+import no.digipost.api.client.security.ResponseMessageSignatureUtil;
 import no.digipost.api.client.util.Supplier;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
@@ -77,7 +77,7 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 			String serverSignaturBase64 = getServerSignaturFromResponse(response);
 			byte[] serverSignaturBytes = Base64.decode(serverSignaturBase64.getBytes());
 
-			String signatureString = ResponseMessageSignatureUtil2.getCanonicalResponseRepresentation(new ClientResponseToVerify(context, response));
+			String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ClientResponseToVerify(context, response));
 
 			Signature instance = Signature.getInstance("SHA256WithRSAEncryption");
 			instance.initVerify(lastSertifikat());
@@ -90,7 +90,6 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 						+ " var OK: " + serverSignaturBase64);
 			}
 		} catch (Exception e) {
-			//LoggingUtil.logResponse(clientResponseContext);
 			if (shouldThrow) {
 				if (e instanceof DigipostClientException) {
 					throw (DigipostClientException) e;
@@ -108,16 +107,13 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 
 
 	private String getServerSignaturFromResponse(final HttpResponse response) {
-		String serverSignaturString = "";
-
-		for(Header head : response.getAllHeaders()){
-			if(head.getName().equals(X_Digipost_Signature)){
-				serverSignaturString = head.getValue();
-				break;
-			}
+		String serverSignaturString = null;
+		Header firstHeader = response.getFirstHeader(X_Digipost_Signature);
+		if(firstHeader != null){
+			serverSignaturString = firstHeader.getValue();
 		}
 
-		if (serverSignaturString.equals("") || isBlank(serverSignaturString)) {
+		if (isBlank(serverSignaturString)) {
 			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
 					"Mangler " + X_Digipost_Signature + "-header - server-signatur kunne ikke sjekkes");
 		}

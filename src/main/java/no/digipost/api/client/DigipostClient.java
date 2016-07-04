@@ -18,6 +18,8 @@ package no.digipost.api.client;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery;
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
 import no.digipost.api.client.filters.request.RequestDateInterceptor;
 import no.digipost.api.client.filters.request.RequestSignatureInterceptor;
@@ -175,7 +177,7 @@ public class DigipostClient {
 			return identificationResult;
 
 		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
 		}
 	}
 
