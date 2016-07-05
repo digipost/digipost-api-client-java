@@ -16,6 +16,7 @@
 package no.digipost.api.client.userdocuments;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
@@ -24,6 +25,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -152,15 +154,17 @@ public class ApiService {
 		return cachedEntryPoint.get();
 	}
 
-	private CloseableHttpResponse send(HttpRequestBase request){
+	private CloseableHttpResponse send(HttpRequestBase request) {
 		try {
-			if(config != null){
+			if (config != null) {
 				request.setConfig(config);
 			}
 			request.setHeader(X_Digipost_UserId, String.valueOf(accountId));
 			return httpClient.execute(request);
+		} catch (ClientProtocolException e) {
+			throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, e);
 		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new DigipostClientException(ErrorCode.CONNECTION_ERROR, e);
 		}
 	}
 
