@@ -25,6 +25,8 @@ public class UserId {
 	private final String fnr;
 
 	public UserId(final String fnr) {
+		if (fnr == null || fnr.length() != 11)
+			throw new IllegalArgumentException("fnr must be an 11-digit string");
 		this.fnr = fnr;
 	}
 
