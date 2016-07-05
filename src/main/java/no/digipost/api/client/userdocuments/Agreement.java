@@ -15,8 +15,6 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import com.google.common.base.Strings;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -43,9 +41,6 @@ public class Agreement {
 	public Agreement(final AgreementType type, final UserId userId, final HashMap<String, String> attributes) {
 		this.type = type.getType();
 		this.userId = userId.getFnr();
-		if (Strings.isNullOrEmpty(this.userId)) {
-			throw new NullPointerException("userId is required!");
-		}
 		this.attributes = attributes;
 	}
 
