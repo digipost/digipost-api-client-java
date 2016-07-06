@@ -15,34 +15,24 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import java.util.Objects;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
 
-public class InvoiceStatus {
+@XmlType(name = "status")
+@XmlEnum
+public enum InvoiceStatus {
 
-	public static final InvoiceStatus UNPAID = new InvoiceStatus("unpaid");
-	public static final InvoiceStatus PAID = new InvoiceStatus("paid");
-	public static final InvoiceStatus DELETED = new InvoiceStatus("deleted");
+	UNPAID("unpaid"),
+	PAID("paid"),
+	DELETED("deleted");
 
 	private final String status;
 
-	public InvoiceStatus(final String status) {
+	InvoiceStatus(final String status) {
 		this.status = status;
 	}
 
 	public String getStatus() {
 		return status;
-	}
-
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		final InvoiceStatus that = (InvoiceStatus) o;
-		return Objects.equals(status, that.status);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(status);
 	}
 }

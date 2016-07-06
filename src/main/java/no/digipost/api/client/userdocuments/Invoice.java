@@ -38,7 +38,8 @@ public class Invoice {
 	@XmlSchemaType(name = "date")
 	private LocalDate dueDate;
 	@XmlElement
-	private String status;
+	@XmlJavaTypeAdapter(InvoiceStatusXmlAdapter.class)
+	private InvoiceStatus status;
 
 	public Invoice() {}
 
@@ -46,7 +47,7 @@ public class Invoice {
 		this.kid = kid;
 		this.amount = amount;
 		this.dueDate = dueDate;
-		this.status = status.getStatus();
+		this.status = status;
 		this.account = account;
 	}
 
@@ -63,7 +64,7 @@ public class Invoice {
 	}
 
 	public InvoiceStatus getStatus() {
-		return new InvoiceStatus(status);
+		return status;
 	}
 
 	public String getAccount() {

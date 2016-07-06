@@ -15,19 +15,20 @@
  */
 package no.digipost.api.client.userdocuments;
 
-public enum AgreementType {
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-	INVOICE_BANK("invoice-bank");
+public class AgreementTypeXmlAdapter extends XmlAdapter<String,AgreementType> {
+    @Override
+    public AgreementType unmarshal(String v) {
+        for (AgreementType t : AgreementType.values()) {
+            if ( t.getType().compareTo(v) == 0 )
+                return t;
+        }
+        throw new IllegalArgumentException("Value " + v + " is illegal for " + AgreementType.class);
+    }
 
-	public static final String QUERY_PARAM_NAME = "agreement-type";
-
-	private final String type;
-
-	AgreementType(final String type) {
-		this.type = type;
-	}
-
-	public String getType() {
-		return type;
-	}
+    @Override
+    public String marshal(AgreementType v) {
+        return v.getType();
+    }
 }

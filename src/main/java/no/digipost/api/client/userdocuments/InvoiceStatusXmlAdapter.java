@@ -15,19 +15,16 @@
  */
 package no.digipost.api.client.userdocuments;
 
-public enum AgreementType {
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-	INVOICE_BANK("invoice-bank");
+public class InvoiceStatusXmlAdapter extends XmlAdapter<String,InvoiceStatus> {
+    @Override
+    public InvoiceStatus unmarshal(String v) {
+        return InvoiceStatus.valueOf(v.toUpperCase());
+    }
 
-	public static final String QUERY_PARAM_NAME = "agreement-type";
-
-	private final String type;
-
-	AgreementType(final String type) {
-		this.type = type;
-	}
-
-	public String getType() {
-		return type;
-	}
+    @Override
+    public String marshal(InvoiceStatus v) {
+        return v.name().toLowerCase();
+    }
 }

@@ -27,7 +27,8 @@ import java.util.HashMap;
 public class Agreement {
 
 	@XmlElement(required = true)
-	private String type;
+	@XmlJavaTypeAdapter(AgreementTypeXmlAdapter.class)
+	private AgreementType type;
 	@XmlElement(name = "user-id", required = true)
 	private String userId;
 	//TODO: Include BankId session identifier?
@@ -39,7 +40,7 @@ public class Agreement {
 	public Agreement() {}
 
 	public Agreement(final AgreementType type, final UserId userId, final HashMap<String, String> attributes) {
-		this.type = type.getType();
+		this.type = type;
 		this.userId = userId.getPersonalIdentificationNumber();
 		this.attributes = attributes;
 	}
