@@ -40,7 +40,7 @@ public class Agreement {
 
 	public Agreement(final AgreementType type, final UserId userId, final HashMap<String, String> attributes) {
 		this.type = type.getType();
-		this.userId = userId.getFnr();
+		this.userId = userId.getPersonalIdentificationNumber();
 		this.attributes = attributes;
 	}
 

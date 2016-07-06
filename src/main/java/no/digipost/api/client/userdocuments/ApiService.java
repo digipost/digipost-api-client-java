@@ -73,7 +73,7 @@ public class ApiService {
 
 	public CloseableHttpResponse identifyUser(final UserId userId) {
 		HttpPost httpPost = prepareHttpPost(getEntryPoint().getIdentificationUri().getPath());
-		httpPost.setEntity(marshallJaxbEntity(new Identification(new PersonalIdentificationNumber(userId.getFnr()))));
+		httpPost.setEntity(marshallJaxbEntity(new Identification(userId)));
 		return send(httpPost);
 	}
 
@@ -87,7 +87,7 @@ public class ApiService {
 		try {
 			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 					.setPath(USER_AGREEMENTS)
-					.setParameter("user-id", userId.getFnr());
+					.setParameter("user-id", userId.getPersonalIdentificationNumber());
 			HttpGet httpGet = new HttpGet(uriBuilder.build());
 			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 			return send(httpGet);
@@ -100,7 +100,7 @@ public class ApiService {
 		try {
 			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 					.setPath(USER_DOCUMENTS)
-					.setParameter(UserId.QUERY_PARAM_NAME, userId.getFnr())
+					.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
 					.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 			HttpGet httpGet = new HttpGet(uriBuilder.build());
 			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);

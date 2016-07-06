@@ -16,21 +16,31 @@
 package no.digipost.api.client.userdocuments;
 
 /**
- * User id represented by fødselsnummer
+ * User id represented by personal identification number
  */
-public class UserId {
+public class UserId extends JustAValid<String> {
 
 	public static final String QUERY_PARAM_NAME = "user-id";
 
-	private final String fnr;
-
-	public UserId(final String fnr) {
-		if (fnr == null || fnr.length() != 11)
-			throw new IllegalArgumentException("fnr must be an 11-digit string");
-		this.fnr = fnr;
+	public UserId(final String personalIdentificationNumber) {
+		super(personalIdentificationNumber, "UserID ", "Personal Identification Number must be an 11-digit string");
 	}
 
+	public boolean isValid(String personalIdentificationNumber) {
+		return personalIdentificationNumber != null && personalIdentificationNumber.length() == 11;
+	}
+
+	public String serialize() {
+		return this.value;
+	}
+
+	@Deprecated
 	public String getFnr() {
-		return fnr;
+		return getPersonalIdentificationNumber();
 	}
+
+	public String getPersonalIdentificationNumber() {
+		return this.value;
+	}
+
 }

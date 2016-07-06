@@ -15,23 +15,23 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-
 import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "identification", propOrder = {
-		"personalIdentificationNumber"
+		"userId"
 })
 @XmlRootElement(name = "identification")
 public class Identification {
 
-	@XmlElement(name = "personal-identification-number", nillable = false)
-	protected String personalIdentificationNumber;
+	@XmlElement(name = "personal-identification-number", type = String.class )
+	@XmlJavaTypeAdapter(UserIdXmlAdapter.class)
+	protected UserId userId;
 
-	public Identification(final PersonalIdentificationNumber personalIdentificationNumber) {
-		this.personalIdentificationNumber = personalIdentificationNumber.asString();
+	public Identification(final UserId userId) {
+		this.userId = userId;
 	}
 
 	//JAXB
@@ -39,13 +39,18 @@ public class Identification {
 
 	}
 
+	@Deprecated
 	public String getPersonalIdentificationNumber() {
-		return personalIdentificationNumber;
+		return userId.getPersonalIdentificationNumber();
+	}
+
+	public UserId getUserId() {
+		return userId;
 	}
 
 	@Override
 	public String toString() {
-		return personalIdentificationNumber;
+		return userId.getPersonalIdentificationNumber();
 	}
 }
 
