@@ -26,8 +26,9 @@ import java.math.BigDecimal;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Invoice {
 
-	@XmlElement
-	private String kid;
+	@XmlElement(type = String.class)
+	@XmlJavaTypeAdapter(KidXmlAdapter.class)
+	private Kid kid;
 	@XmlElement
 	private BigDecimal amount;
 	@XmlElement
@@ -41,7 +42,7 @@ public class Invoice {
 
 	public Invoice() {}
 
-	public Invoice(final String kid, final BigDecimal amount, final LocalDate dueDate, final InvoiceStatus status, final String account) {
+	public Invoice(final Kid kid, final BigDecimal amount, final LocalDate dueDate, final InvoiceStatus status, final String account) {
 		this.kid = kid;
 		this.amount = amount;
 		this.dueDate = dueDate;
@@ -49,7 +50,7 @@ public class Invoice {
 		this.account = account;
 	}
 
-	public String getKid() {
+	public Kid getKid() {
 		return kid;
 	}
 
