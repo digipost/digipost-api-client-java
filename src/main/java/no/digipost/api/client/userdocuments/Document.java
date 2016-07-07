@@ -35,4 +35,12 @@ public class Document {
 		this.id = id;
 		this.invoice = invoice;
 	}
+
+	public Invoice getInvoice() {
+		return invoice;
+	}
+
+	public long getId() {
+		return id;
+	}
 }

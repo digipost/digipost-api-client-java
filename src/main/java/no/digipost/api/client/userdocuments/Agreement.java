@@ -29,12 +29,15 @@ public class Agreement {
 	@XmlElement(required = true)
 	@XmlJavaTypeAdapter(AgreementTypeXmlAdapter.class)
 	private AgreementType type;
+
 	@XmlElement(name = "user-id", required = true)
 	private String userId;
 	//TODO: Include BankId session identifier?
 	//private String sessionId;
+
 	@XmlElement
 	@XmlJavaTypeAdapter(AttributesMapAdapter.class)
+	// TODO: switch to EnumMap?
 	private HashMap<String, String> attributes;
 
 	public Agreement() {}
@@ -49,5 +52,17 @@ public class Agreement {
 		HashMap<String, String> attribs = new HashMap<>();
 		attribs.put("sms-notification", String.valueOf(smsNotification));
 		return new Agreement(AgreementType.INVOICE_BANK, userId, attribs);
+	}
+
+	public AgreementType getType() {
+		return type;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public HashMap<String, String> getAttributes() {
+		return attributes;
 	}
 }
