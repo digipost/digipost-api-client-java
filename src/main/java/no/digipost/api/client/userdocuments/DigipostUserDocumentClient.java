@@ -36,11 +36,13 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 
+import javax.crypto.Cipher;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import javax.xml.bind.JAXB;
 import java.io.InputStream;
 import java.net.URI;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -54,6 +56,15 @@ public class DigipostUserDocumentClient {
 
 	public DigipostUserDocumentClient(final ApiService apiService) {
 		this.apiService = apiService;
+		// TODO: should this be more elegantly handled?
+		try {
+			int keyLength = Cipher.getMaxAllowedKeyLength("AES");
+			if (keyLength < 256) {
+				throw new DigipostClientException(ErrorCode.CLIENT_ERROR, "FATAL: System does not support large enough keys. HINT: is the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy installed on the system?");
+			}
+		} catch (NoSuchAlgorithmException e) {
+			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, "FATAL: System does not support AES. HINT: is the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy installed on the system?");
+		}
 	}
 
 	public IdentificationResult identifyUser(final UserId userId) {
