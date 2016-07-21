@@ -32,18 +32,16 @@ import no.digipost.http.client.DigipostHttpClientSettings;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.conn.ssl.SSLContextBuilder;
 
-import javax.crypto.Cipher;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.xml.bind.JAXB;
 import java.io.InputStream;
 import java.net.URI;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.List;
@@ -60,21 +58,21 @@ public class DigipostUserDocumentClient {
 		this.apiService = apiService;
 		// TODO: should this be more elegantly handled?
 
-        verifyThatNeccessaryCiphersAreAvailable();
+		verifyThatNeccessaryCiphersAreAvailable();
 	}
 
 	private static void verifyThatNeccessaryCiphersAreAvailable() {
 		SSLServerSocketFactory ssf = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 		String[] supportedCiphers = ssf.getSupportedCipherSuites();
 		String[] requiredCiphers = {
-				"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
-				"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-				"TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
-				"TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
-				"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
-				"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-				"TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
-				"TLS_DHE_RSA_WITH_AES_256_CBC_SHA"};
+			"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+			"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+			"TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+			"TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+			"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+			"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+			"TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
+			"TLS_DHE_RSA_WITH_AES_256_CBC_SHA"};
 
 		for (String cipher : supportedCiphers) {
 			for (String requiredCipher : requiredCiphers) {
@@ -86,57 +84,79 @@ public class DigipostUserDocumentClient {
 	}
 
 	public IdentificationResult identifyUser(final UserId userId) {
+		return identifyUser(userId, null); }
+
+	public IdentificationResult identifyUser(final UserId userId, final String requestTrackingId) {
 		return handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.identifyUser(userId);
+				return apiService.identifyUser(userId, requestTrackingId);
 			}
 		}, IdentificationResult.class);
 	}
 
 	public void createAgreement(final Agreement agreement) {
+		createAgreement(agreement, null); }
+
+	public void createAgreement(final Agreement agreement, final String requestTrackingId) {
 		handleVoid(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.createAgreement(agreement);
+				return apiService.createAgreement(agreement, requestTrackingId);
 			}
 		});
 	}
 
 	public List<Agreement> getAgreements(final UserId userId) {
+		return getAgreements(userId, null);
+	}
+
+	public List<Agreement> getAgreements(final UserId userId, final String requestTrackingId) {
 		final Agreements agreements = handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.getAgreements(userId);
+				return apiService.getAgreements(userId, requestTrackingId);
 			}
 		}, Agreements.class);
 		return agreements.getAgreements();
 	}
 
 	public List<Document> getDocuments(final UserId userId, final AgreementType agreementType) {
+		return getDocuments(userId, agreementType, null);
+	}
+
+	public List<Document> getDocuments(final UserId userId, final AgreementType agreementType, final String requestTrackingId) {
 		final Documents documents = handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.getDocuments(userId, agreementType);
+				return apiService.getDocuments(userId, agreementType, requestTrackingId);
 			}
 		}, Documents.class);
 		return documents.getDocuments();
 	}
 
 	public Document getDocument(final long documentId) {
+		return getDocument(documentId, null);
+	}
+
+	public Document getDocument(final long documentId, final String requestTrackingId) {
 		return handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.getDocument(documentId);
+				return apiService.getDocument(documentId, requestTrackingId);
 			}
 		}, Document.class);
 	}
 
 	public Document updateInvoice(final long documentId, final Invoice invoice) {
+		return updateInvoice(documentId, invoice, null);
+	}
+
+	public Document updateInvoice(final long documentId, final Invoice invoice, final String requestTrackingId) {
 		return handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.updateInvoice(documentId, invoice);
+				return apiService.updateInvoice(documentId, invoice, requestTrackingId);
 			}
 		}, Document.class);
 	}
@@ -184,8 +204,8 @@ public class DigipostUserDocumentClient {
 
 		private Builder(long accountId, InputStream certificateP12File, String certificatePassword, PrivateKey privateKey) {
 			this.accountId = accountId;
-			if (certificateP12File == null && certificatePassword == null && privateKey == null) {
-				throw new IllegalArgumentException();
+			if (privateKey == null && (certificateP12File == null || certificatePassword == null)) {
+				throw new IllegalArgumentException("Client must be supplied either PrivateKey, or Certificate and password for certificate");
 			}
 			this.certificateP12File = certificateP12File;
 			this.certificatePassword = certificatePassword;

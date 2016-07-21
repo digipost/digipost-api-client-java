@@ -19,7 +19,6 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
@@ -42,8 +41,8 @@ import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
 
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
-import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_USERS_V1;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
 import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -71,32 +70,35 @@ public class ApiService {
 		}
 	}
 
-	public CloseableHttpResponse identifyUser(final UserId userId) {
+	public CloseableHttpResponse identifyUser(final UserId userId, final String requestTrackingId) {
 		HttpPost httpPost = prepareHttpPost(getEntryPoint().getIdentificationUri().getPath());
 		httpPost.setEntity(marshallJaxbEntity(new Identification(userId)));
+		addRequestTrackingHeader(httpPost, requestTrackingId);
 		return send(httpPost);
 	}
 
-	public CloseableHttpResponse createAgreement(final Agreement agreement) {
+	public CloseableHttpResponse createAgreement(final Agreement agreement, final String requestTrackingId) {
 		HttpPost httpPost = prepareHttpPost(USER_AGREEMENTS);
 		httpPost.setEntity(marshallJaxbEntity(agreement));
+		addRequestTrackingHeader(httpPost, requestTrackingId);
 		return send(httpPost);
 	}
 
-	public CloseableHttpResponse getAgreements(final UserId userId) {
+	public CloseableHttpResponse getAgreements(final UserId userId, final String requestTrackingId) {
 		try {
 			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 					.setPath(USER_AGREEMENTS)
 					.setParameter("user-id", userId.getPersonalIdentificationNumber());
 			HttpGet httpGet = new HttpGet(uriBuilder.build());
 			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+			addRequestTrackingHeader(httpGet, requestTrackingId);
 			return send(httpGet);
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public CloseableHttpResponse getDocuments(final UserId userId, final AgreementType agreementType) {
+	public CloseableHttpResponse getDocuments(final UserId userId, final AgreementType agreementType, final String requestTrackingId) {
 		try {
 			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 					.setPath(USER_DOCUMENTS)
@@ -104,32 +106,35 @@ public class ApiService {
 					.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 			HttpGet httpGet = new HttpGet(uriBuilder.build());
 			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+			addRequestTrackingHeader(httpGet, requestTrackingId);
 			return send(httpGet);
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public CloseableHttpResponse getDocument(final long documentId) {
+	public CloseableHttpResponse getDocument(final long documentId, final String requestTrackingId) {
 		try {
 			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 					.setPath(USER_DOCUMENTS + "/" + documentId)
 					.setParameter(AgreementType.QUERY_PARAM_NAME, AgreementType.INVOICE_BANK.getType());
 			HttpGet httpGet = new HttpGet(uriBuilder.build());
 			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+			addRequestTrackingHeader(httpGet, requestTrackingId);
 			return send(httpGet);
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public CloseableHttpResponse updateInvoice(final long documentId, final Invoice invoice) {
+	public CloseableHttpResponse updateInvoice(final long documentId, final Invoice invoice, final String requestTrackingId) {
 		try {
 			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 					.setPath(USER_DOCUMENTS + "/" + documentId + "/invoice");
 			HttpPost httpPost = new HttpPost(uriBuilder.build());
 			httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
+			addRequestTrackingHeader(httpPost, requestTrackingId);
 			httpPost.setEntity(marshallJaxbEntity(invoice));
 			return send(httpPost);
 		} catch (URISyntaxException e) {
@@ -166,6 +171,13 @@ public class ApiService {
 		} catch (IOException e) {
 			throw new DigipostClientException(ErrorCode.CONNECTION_ERROR, e);
 		}
+	}
+
+	private HttpRequestBase addRequestTrackingHeader(HttpRequestBase request, final String requestTrackingId) {
+		if (requestTrackingId != null && requestTrackingId.length() > 0) {
+			request.setHeader("X-Digipost-Request-Id", requestTrackingId);
+		}
+		return request;
 	}
 
 	private final Callable<EntryPoint> entryPoint = new Callable<EntryPoint>() {
