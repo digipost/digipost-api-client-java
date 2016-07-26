@@ -25,6 +25,7 @@ import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
+import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.Pkcs12KeySigner;
 import no.digipost.api.client.util.Supplier;
 import no.digipost.http.client.DigipostHttpClientFactory;
@@ -37,13 +38,11 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.xml.bind.JAXB;
 import java.io.InputStream;
 import java.net.URI;
 import java.security.PrivateKey;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -56,31 +55,7 @@ public class DigipostUserDocumentClient {
 
 	public DigipostUserDocumentClient(final ApiService apiService) {
 		this.apiService = apiService;
-		// TODO: should this be more elegantly handled?
-
-		verifyThatNeccessaryCiphersAreAvailable();
-	}
-
-	private static void verifyThatNeccessaryCiphersAreAvailable() {
-		SSLServerSocketFactory ssf = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-		String[] supportedCiphers = ssf.getSupportedCipherSuites();
-		String[] requiredCiphers = {
-			"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
-			"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-			"TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
-			"TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
-			"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
-			"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-			"TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
-			"TLS_DHE_RSA_WITH_AES_256_CBC_SHA"};
-
-		for (String cipher : supportedCiphers) {
-			for (String requiredCipher : requiredCiphers) {
-				if (cipher.compareTo(requiredCipher) == 0) return;
-			}
-		}
-		throw new DigipostClientException(ErrorCode.CLIENT_ERROR, "Could not load any required TLS-ciphers. The client needs one of these ciphers to connect to the server: " + Arrays.toString(requiredCiphers) + ".\n"
-				+ "Hint: is the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy installed on the system?");
+		CryptoUtil.verifyTLSCiphersAvailable();
 	}
 
 	public IdentificationResult identifyUser(final UserId userId) {

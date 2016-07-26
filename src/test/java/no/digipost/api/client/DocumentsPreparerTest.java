@@ -58,7 +58,7 @@ public class DocumentsPreparerTest {
 
 	private static final byte[] pdf20Pages;
 	static {
-		CryptoUtil.verifyJCE();
+		CryptoUtil.verify_AES256_CBC_Support();
 		try {
 	        pdf20Pages = toByteArray(pdf20Pages());
         } catch (IOException e) {

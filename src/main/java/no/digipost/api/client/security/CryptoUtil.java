@@ -15,17 +15,21 @@
  */
 package no.digipost.api.client.security;
 
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
+import org.bouncycastle.cms.CMSAlgorithm;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateCrtKey;
-
-import org.bouncycastle.cms.CMSAlgorithm;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import java.util.Arrays;
 
 public class CryptoUtil {
 	public static PrivateKey loadKeyFromP12(final InputStream certificateStream, final String passord) {
@@ -56,7 +60,7 @@ public class CryptoUtil {
 		}
 	}
 
-	public static void verifyJCE() {
+	public static void verify_AES256_CBC_Support() {
 		try {
 			if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
 				Security.addProvider(new BouncyCastleProvider());
@@ -67,4 +71,26 @@ public class CryptoUtil {
 		}
 	}
 
+
+	public static void verifyTLSCiphersAvailable() {
+		SSLServerSocketFactory ssf = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+		String[] supportedCiphers = ssf.getSupportedCipherSuites();
+		String[] requiredCiphers = {
+			"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+			"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+			"TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+			"TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+			"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+			"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+			"TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
+			"TLS_DHE_RSA_WITH_AES_256_CBC_SHA"};
+
+		for (String cipher : supportedCiphers) {
+			for (String requiredCipher : requiredCiphers) {
+				if (cipher.compareTo(requiredCipher) == 0) return;
+			}
+		}
+		throw new DigipostClientException(ErrorCode.CLIENT_ERROR, "Could not load any required TLS-ciphers. The client needs one of these ciphers to connect to the server: " + Arrays.toString(requiredCiphers) + ".\n"
+				+ "Hint: is the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy installed on the system?");
+	}
 }
