@@ -26,10 +26,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -84,59 +81,81 @@ public class ApiService {
 		return send(httpPost);
 	}
 
-	public CloseableHttpResponse getAgreements(final UserId userId, final String requestTrackingId) {
-		try {
-			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-					.setPath(USER_AGREEMENTS)
-					.setParameter("user-id", userId.getPersonalIdentificationNumber());
-			HttpGet httpGet = new HttpGet(uriBuilder.build());
-			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-			addRequestTrackingHeader(httpGet, requestTrackingId);
-			return send(httpGet);
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
+	public CloseableHttpResponse getAgreement(final URI agreementURI, final String requestTrackingId) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(agreementURI.getPath());
+		return doGetRequest(requestTrackingId, uriBuilder);
 	}
 
-	public CloseableHttpResponse getDocuments(final UserId userId, final AgreementType agreementType, final String requestTrackingId) {
-		try {
-			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-					.setPath(USER_DOCUMENTS)
-					.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
-					.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
-			HttpGet httpGet = new HttpGet(uriBuilder.build());
-			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-			addRequestTrackingHeader(httpGet, requestTrackingId);
-			return send(httpGet);
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
+	public CloseableHttpResponse getAgreement(final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(USER_AGREEMENTS)
+				.setParameter("user-id", userId.getPersonalIdentificationNumber())
+				.setParameter("agreement-type", agreementType.getType());
+		return doGetRequest(requestTrackingId, uriBuilder);
+	}
+
+	public CloseableHttpResponse getAgreements(final UserId userId, final String requestTrackingId) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(USER_AGREEMENTS)
+				.setParameter("user-id", userId.getPersonalIdentificationNumber());
+		return doGetRequest(requestTrackingId, uriBuilder);
+	}
+
+	public CloseableHttpResponse deleteAgrement(final URI agreementPath, final String requestTrackingId) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(agreementPath.getPath());
+		HttpDelete httpDelete = new HttpDelete(buildUri(uriBuilder));
+		addRequestTrackingHeader(httpDelete, requestTrackingId);
+		return send(httpDelete);
+	}
+
+	public CloseableHttpResponse deleteAgrement(final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(USER_AGREEMENTS)
+				.setParameter("user-id", userId.getPersonalIdentificationNumber())
+				.setParameter("agreement-type", agreementType.getType());
+		HttpDelete httpDelete = new HttpDelete(buildUri(uriBuilder));
+		addRequestTrackingHeader(httpDelete, requestTrackingId);
+		return send(httpDelete);
+	}
+
+	public CloseableHttpResponse getDocuments(final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(USER_DOCUMENTS)
+				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
+				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
+		return doGetRequest(requestTrackingId, uriBuilder);
 	}
 
 	public CloseableHttpResponse getDocument(final long documentId, final String requestTrackingId) {
-		try {
-			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-					.setPath(USER_DOCUMENTS + "/" + documentId)
-					.setParameter(AgreementType.QUERY_PARAM_NAME, AgreementType.INVOICE_BANK.getType());
-			HttpGet httpGet = new HttpGet(uriBuilder.build());
-			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-			addRequestTrackingHeader(httpGet, requestTrackingId);
-			return send(httpGet);
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(USER_DOCUMENTS + "/" + documentId)
+				.setParameter(AgreementType.QUERY_PARAM_NAME, AgreementType.INVOICE_BANK.getType());
+		return doGetRequest(requestTrackingId, uriBuilder);
+	}
+
+	private CloseableHttpResponse doGetRequest(final String requestTrackingId, final URIBuilder uriBuilder) {
+		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		addRequestTrackingHeader(httpGet, requestTrackingId);
+		return send(httpGet);
 	}
 
 	public CloseableHttpResponse updateInvoice(final long documentId, final Invoice invoice, final String requestTrackingId) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(USER_DOCUMENTS + "/" + documentId + "/invoice");
+		HttpPost httpPost = new HttpPost(buildUri(uriBuilder));
+		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		addRequestTrackingHeader(httpPost, requestTrackingId);
+		httpPost.setEntity(marshallJaxbEntity(invoice));
+		return send(httpPost);
+	}
+
+	private URI buildUri(URIBuilder builder) {
 		try {
-			URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-					.setPath(USER_DOCUMENTS + "/" + documentId + "/invoice");
-			HttpPost httpPost = new HttpPost(uriBuilder.build());
-			httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
-			addRequestTrackingHeader(httpPost, requestTrackingId);
-			httpPost.setEntity(marshallJaxbEntity(invoice));
-			return send(httpPost);
+			return builder.build();
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}

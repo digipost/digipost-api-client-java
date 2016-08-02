@@ -30,6 +30,7 @@ import no.digipost.api.client.security.Pkcs12KeySigner;
 import no.digipost.api.client.util.Supplier;
 import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -42,6 +43,7 @@ import javax.net.ssl.SSLSession;
 import javax.xml.bind.JAXB;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -70,16 +72,35 @@ public class DigipostUserDocumentClient {
 		}, IdentificationResult.class);
 	}
 
-	public void createAgreement(final Agreement agreement) {
-		createAgreement(agreement, null); }
+	public URI createOrReplaceAgreement(final Agreement agreement) {
+		return createOrReplaceAgreement(agreement, null); }
 
-	public void createAgreement(final Agreement agreement, final String requestTrackingId) {
-		handleVoid(new Callable<CloseableHttpResponse>() {
+	public URI createOrReplaceAgreement(final Agreement agreement, final String requestTrackingId) {
+		final CloseableHttpResponse response = apiService.createAgreement(agreement, requestTrackingId);
+		ApiCommons.checkResponse(response);
+		try {
+			return new URI(response.getFirstHeader(HttpHeaders.LOCATION).getValue());
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public Agreement getAgreement(final URI agreementUri, final String requestTrackingId) {
+		return handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.createAgreement(agreement, requestTrackingId);
+				return apiService.getAgreement(agreementUri, requestTrackingId);
 			}
-		});
+		}, Agreement.class);
+	}
+
+	public Agreement getAgreement(final AgreementType type, final UserId userId, final String requestTrackingId) {
+		return handle(new Callable<CloseableHttpResponse>() {
+			@Override
+			public CloseableHttpResponse call() throws Exception {
+				return apiService.getAgreement(type, userId, requestTrackingId);
+			}
+		}, Agreement.class);
 	}
 
 	public List<Agreement> getAgreements(final UserId userId) {
@@ -96,15 +117,33 @@ public class DigipostUserDocumentClient {
 		return agreements.getAgreements();
 	}
 
-	public List<Document> getDocuments(final UserId userId, final AgreementType agreementType) {
-		return getDocuments(userId, agreementType, null);
+	public void deleteAgreement(final URI agreementPath, final String requestTrackingId) {
+		handleVoid(new Callable<CloseableHttpResponse>() {
+			@Override
+			public CloseableHttpResponse call() throws Exception {
+				return apiService.deleteAgrement(agreementPath, requestTrackingId);
+			}
+		});
 	}
 
-	public List<Document> getDocuments(final UserId userId, final AgreementType agreementType, final String requestTrackingId) {
+	public void deleteAgreement(final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
+		handleVoid(new Callable<CloseableHttpResponse>() {
+			@Override
+			public CloseableHttpResponse call() throws Exception {
+				return apiService.deleteAgrement(agreementType, userId, requestTrackingId);
+			}
+		});
+	}
+
+	public List<Document> getDocuments(final AgreementType agreementType, final UserId userId) {
+		return getDocuments(agreementType, userId, null);
+	}
+
+	public List<Document> getDocuments(final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
 		final Documents documents = handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.getDocuments(userId, agreementType, requestTrackingId);
+				return apiService.getDocuments(agreementType, userId, requestTrackingId);
 			}
 		}, Documents.class);
 		return documents.getDocuments();

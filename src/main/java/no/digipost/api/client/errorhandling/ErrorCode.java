@@ -15,18 +15,14 @@
  */
 package no.digipost.api.client.errorhandling;
 
-import static java.util.Arrays.asList;
-import static no.digipost.api.client.errorhandling.ErrorType.CLIENT_DATA;
-import static no.digipost.api.client.errorhandling.ErrorType.CLIENT_TECHNICAL;
-import static no.digipost.api.client.errorhandling.ErrorType.CONFIGURATION;
-import static no.digipost.api.client.errorhandling.ErrorType.SERVER;
-import static no.digipost.api.client.errorhandling.ErrorType.UNKNOWN;
-import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCause;
-
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Arrays.asList;
+import static no.digipost.api.client.errorhandling.ErrorType.*;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCause;
 
 public enum ErrorCode {
 
@@ -116,7 +112,10 @@ public enum ErrorCode {
 	INVALID_RETURN_ADDRESS(CLIENT_DATA),
 	INVALID_PDF_CONTENT(CLIENT_DATA),
 	INVALID_MONETARY_AMOUNT(CLIENT_DATA),
-	AUTHENTICATION_LEVEL_TOO_LOW(CLIENT_DATA)
+	AUTHENTICATION_LEVEL_TOO_LOW(CLIENT_DATA),
+
+	//User documents
+	AGREEMENT_NOT_FOUND(CLIENT_DATA)
 	;
 
 	private static final Map<String, ErrorCode> errorByName = new HashMap<>(); static {

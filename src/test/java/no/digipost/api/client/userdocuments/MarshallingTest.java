@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.userdocuments;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,18 +23,26 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXB;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
+
+import static org.hamcrest.core.Is.is;
 
 public class MarshallingTest {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	@Test
-	public void shouldMarshallUnmarshallAgreement() {
+	public void shouldMarshallUnmarshallAgreement() throws URISyntaxException {
 		final StringWriter xml = new StringWriter();
-		JAXB.marshal(Agreement.createInvoiceBankAgreement(new UserId("01017012345"), true), xml);
+		final Agreement agreement = Agreement.createInvoiceBankAgreement(new UserId("01017012345"), true);
+		final URI href = new URI("/user-agreements/123");
+		agreement.setHref(href);
+		JAXB.marshal(agreement, xml);
 		log.debug(xml.toString());
-		JAXB.unmarshal(new StringReader(xml.toString()), Agreement.class);
+		final Agreement unmarshal = JAXB.unmarshal(new StringReader(xml.toString()), Agreement.class);
+		Assert.assertThat(unmarshal.getHref(), is(href));
 	}
 
 	@Test

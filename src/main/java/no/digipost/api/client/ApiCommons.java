@@ -47,7 +47,7 @@ public class ApiCommons {
 	public static void checkResponse(final CloseableHttpResponse response, EventLogger eventLogger) {
 		int status = response.getStatusLine().getStatusCode();
 		if (!responseOk(status)) {
-			ErrorMessage error = fetchErrorMessageString(response);
+			ErrorMessage error = readErrorMessageFromResponse(response);
 			log(error.toString(), eventLogger);
 			switch (status) {
 				case HttpStatus.SC_INTERNAL_SERVER_ERROR:
@@ -64,13 +64,15 @@ public class ApiCommons {
 		switch (status) {
 		case HttpStatus.SC_CREATED:
 		case HttpStatus.SC_OK:
+		case HttpStatus.SC_NO_CONTENT:
+		case HttpStatus.SC_ACCEPTED:
 			return true;
 		default:
 			return false;
 		}
 	}
 
-	protected static ErrorMessage fetchErrorMessageString(final CloseableHttpResponse response) {
+	protected static ErrorMessage readErrorMessageFromResponse(final CloseableHttpResponse response) {
 		try {
 			final String body = EntityUtils.toString(response.getEntity());
 			try {
@@ -84,7 +86,7 @@ public class ApiCommons {
 				response.close();
 			}
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
 		}
 	}
 

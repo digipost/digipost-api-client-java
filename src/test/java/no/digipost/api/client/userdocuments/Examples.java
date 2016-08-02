@@ -34,10 +34,10 @@ public class Examples {
 		final IdentificationResult identificationResult = client.identifyUser(userId);
 		boolean isDigipost = identificationResult.getResult() == IdentificationResultCode.DIGIPOST;
 
-		client.createAgreement(Agreement.createInvoiceBankAgreement(userId, true));
+		client.createOrReplaceAgreement(Agreement.createInvoiceBankAgreement(userId, true));
 
 		final List<Agreement> agreements = client.getAgreements(userId);
 
-		final List<Document> documents = client.getDocuments(userId, AgreementType.INVOICE_BANK);
+		final List<Document> documents = client.getDocuments(AgreementType.INVOICE_BANK, userId);
 	}
 }

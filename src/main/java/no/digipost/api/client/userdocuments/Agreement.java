@@ -15,16 +15,17 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.net.URI;
 import java.util.HashMap;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Agreement {
+
+	@XmlAttribute
+	private URI href;
 
 	@XmlElement(required = true)
 	@XmlJavaTypeAdapter(AgreementTypeXmlAdapter.class)
@@ -58,11 +59,19 @@ public class Agreement {
 		return type;
 	}
 
-	public String getUserId() {
-		return userId;
+	public UserId getUserId() {
+		return new UserId(userId);
 	}
 
 	public HashMap<String, String> getAttributes() {
 		return attributes;
+	}
+
+	public URI getHref() {
+		return href;
+	}
+
+	public void setHref(final URI href) {
+		this.href = href;
 	}
 }
