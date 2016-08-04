@@ -74,4 +74,15 @@ public class Agreement {
 	public void setHref(final URI href) {
 		this.href = href;
 	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Agreement{");
+		sb.append("href=").append(href);
+		sb.append(", type=").append(type);
+		sb.append(", userId='").append(userId).append('\'');
+		sb.append(", attributes=").append(attributes);
+		sb.append('}');
+		return sb.toString();
+	}
 }
