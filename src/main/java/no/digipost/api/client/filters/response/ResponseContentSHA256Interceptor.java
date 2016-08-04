@@ -18,10 +18,7 @@ package no.digipost.api.client.filters.response;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.util.LoggingUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -48,14 +45,11 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-		final boolean hasContent = response.getEntity() != null && response.getEntity().getContentLength() != 0;
-		if (hasHeader(response, X_Content_SHA256) || hasContent) {
-			try {
-				validerContentHash(response);
-			} catch (Exception e) {
-				LoggingUtil.logResponse(response);
-				logOrThrow("Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
-			}
+		try {
+			validerContentHash(response);
+		} catch (Exception e) {
+			LoggingUtil.logResponse(response);
+			logOrThrow("Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
 		}
 	}
 
@@ -66,15 +60,19 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 
 	private void validerContentHash(final HttpResponse response) {
 		try {
-			String hashHeader = findHeader(response, X_Content_SHA256);
-
-			if (isBlank(hashHeader)) {
-				throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-						"Mangler X-Content-SHA256-header - server-signatur kunne ikke valideres");
+			final HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				byte[] entityBytes = IOUtils.toByteArray(entity.getContent());
+				if (entityBytes.length > 0) {
+					String hashHeader = findHeader(response, X_Content_SHA256);
+					if (isBlank(hashHeader)) {
+						throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+								"Mangler X-Content-SHA256-header - server-signatur kunne ikke valideres");
+					}
+					validerBytesMotHashHeader(hashHeader, entityBytes);
+				}
+				response.setEntity(new ByteArrayEntity(entityBytes));
 			}
-			byte[] entityBytes = IOUtils.toByteArray(response.getEntity().getContent());
-			validerBytesMotHashHeader(hashHeader, entityBytes);
-			response.setEntity(new ByteArrayEntity(entityBytes));
 		} catch (IOException e) {
 			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
 					"Det skjedde en feil under uthenting av innhold for validering av X-Content-SHA256-header - server-signatur kunne ikke valideres");
@@ -110,7 +108,7 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 			if (e instanceof DigipostClientException) {
 				throw (DigipostClientException) e;
 			} else {
-				throw new DigipostClientException(SERVER_SIGNATURE_ERROR, message);
+				throw new DigipostClientException(SERVER_SIGNATURE_ERROR, message, e);
 			}
 		} else {
 			LOG.warn("Feil under validering av server signatur: '" + e.getMessage() + "'. " +
