@@ -18,6 +18,8 @@ package no.digipost.api.client.userdocuments;
 import org.apache.http.HttpHost;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class Examples {
@@ -39,5 +41,33 @@ public class Examples {
 		final List<Agreement> agreements = client.getAgreements(userId);
 
 		final List<Document> documents = client.getDocuments(AgreementType.INVOICE_BANK, userId);
+	}
+
+	public void agreementExamples() throws URISyntaxException {
+		InputStream key = getClass().getResourceAsStream("certificate.p12");
+
+		final DigipostUserDocumentClient.Builder builder = new DigipostUserDocumentClient.Builder(1005, key, "password")
+				.serviceEndpoint(new URI("https://api.test.digipost.no"))
+				.useProxy(new HttpHost("proxy.example.com", 8080))
+				.veryDangerouslyDisableCertificateVerificationWhichIsAbsolutelyUnfitForProductionCode();
+		final DigipostUserDocumentClient client = builder.build();
+
+		final String requestTrackingId = "testing-testing-testing";
+		final UserId userId = new UserId("01017012345");
+
+		//CreateAgreement
+		client.createOrReplaceAgreement(Agreement.createInvoiceBankAgreement(userId, false), requestTrackingId);
+
+		//GetAgreement
+		final Agreement agreement = client.getAgreement(AgreementType.INVOICE_BANK, userId, requestTrackingId);
+		System.out.println(agreement);
+
+		//UpdateAgreement
+		client.createOrReplaceAgreement(Agreement.createInvoiceBankAgreement(userId, true), requestTrackingId);
+		final Agreement modifiedAgreement = client.getAgreement(AgreementType.INVOICE_BANK, userId, requestTrackingId);
+		System.out.println(modifiedAgreement);
+
+		//DeleteAgreement
+		client.deleteAgreement(AgreementType.INVOICE_BANK, userId, requestTrackingId);
 	}
 }
