@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement
@@ -28,7 +29,9 @@ public class Agreements {
 	@XmlElement(name = "agreement")
 	private List<Agreement> agreements;
 
-	private Agreements() {}
+	private Agreements() {
+		this(new ArrayList<Agreement>());
+	}
 
 	public Agreements(List<Agreement> agreements) {
 		this.agreements = agreements;
