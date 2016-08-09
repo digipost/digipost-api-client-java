@@ -29,24 +29,30 @@ public class Examples {
 
 		HttpHost proxy = new HttpHost("proxy.example.com", 8080, "http");
 
-		DigipostUserDocumentClient client = new DigipostUserDocumentClient.Builder(1234L, key, "password").useProxy(proxy).build();
+		final BrokerId brokerId = new BrokerId(1234L);
+		final SenderId senderId = new SenderId(1234L);
+
+		DigipostUserDocumentClient client = new DigipostUserDocumentClient.Builder(brokerId, key, "password").useProxy(proxy).build();
 
 		final UserId userId = new UserId("01017012345");
 
-		final IdentificationResult identificationResult = client.identifyUser(userId);
+		final IdentificationResult identificationResult = client.identifyUser(senderId, userId);
 		boolean isDigipost = identificationResult.getResult() == IdentificationResultCode.DIGIPOST;
 
-		client.createOrReplaceAgreement(Agreement.createInvoiceBankAgreement(userId, true));
+		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, true));
 
-		final List<Agreement> agreements = client.getAgreements(userId);
+		final List<Agreement> agreements = client.getAgreements(senderId, userId);
 
-		final List<Document> documents = client.getDocuments(AgreementType.INVOICE_BANK, userId);
+		final List<Document> documents = client.getDocuments(senderId, AgreementType.INVOICE_BANK, userId);
 	}
 
 	public void agreementExamples() throws URISyntaxException {
 		InputStream key = getClass().getResourceAsStream("certificate.p12");
 
-		final DigipostUserDocumentClient.Builder builder = new DigipostUserDocumentClient.Builder(1005, key, "password")
+		final BrokerId brokerId = new BrokerId(1005);
+		final SenderId senderId = new SenderId(1005);
+
+		final DigipostUserDocumentClient.Builder builder = new DigipostUserDocumentClient.Builder(brokerId, key, "password")
 				.serviceEndpoint(new URI("https://api.test.digipost.no"))
 				.useProxy(new HttpHost("proxy.example.com", 8080))
 				.veryDangerouslyDisableCertificateVerificationWhichIsAbsolutelyUnfitForProductionCode();
@@ -56,18 +62,18 @@ public class Examples {
 		final UserId userId = new UserId("01017012345");
 
 		//CreateAgreement
-		client.createOrReplaceAgreement(Agreement.createInvoiceBankAgreement(userId, false), requestTrackingId);
+		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, false), requestTrackingId);
 
 		//GetAgreement
-		final Agreement agreement = client.getAgreement(AgreementType.INVOICE_BANK, userId, requestTrackingId);
+		final Agreement agreement = client.getAgreement(senderId, AgreementType.INVOICE_BANK, userId, requestTrackingId);
 		System.out.println(agreement);
 
 		//UpdateAgreement
-		client.createOrReplaceAgreement(Agreement.createInvoiceBankAgreement(userId, true), requestTrackingId);
-		final Agreement modifiedAgreement = client.getAgreement(AgreementType.INVOICE_BANK, userId, requestTrackingId);
+		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, true), requestTrackingId);
+		final Agreement modifiedAgreement = client.getAgreement(senderId, AgreementType.INVOICE_BANK, userId, requestTrackingId);
 		System.out.println(modifiedAgreement);
 
 		//DeleteAgreement
-		client.deleteAgreement(AgreementType.INVOICE_BANK, userId, requestTrackingId);
+		client.deleteAgreement(senderId, AgreementType.INVOICE_BANK, userId, requestTrackingId);
 	}
 }

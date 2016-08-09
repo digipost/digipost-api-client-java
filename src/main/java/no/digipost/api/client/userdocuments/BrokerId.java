@@ -15,16 +15,18 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+public class BrokerId {
+	private final long id;
 
-public class InvoiceStatusXmlAdapter extends XmlAdapter<String, InvoiceStatus> {
-    @Override
-    public InvoiceStatus unmarshal(String v) {
-        return InvoiceStatus.valueOf(v.toUpperCase());
-    }
+	public BrokerId(final long id) {
+		this.id = id;
+	}
 
-    @Override
-    public String marshal(InvoiceStatus v) {
-        return v.name().toLowerCase();
-    }
+	public long getId() {
+		return id;
+	}
+
+	public String getIdAsString() {
+		return String.valueOf(getId());
+	}
 }

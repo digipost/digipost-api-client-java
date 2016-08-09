@@ -60,23 +60,23 @@ public class DigipostUserDocumentClient {
 		CryptoUtil.verifyTLSCiphersAvailable();
 	}
 
-	public IdentificationResult identifyUser(final UserId userId) {
-		return identifyUser(userId, null); }
+	public IdentificationResult identifyUser(final SenderId senderId, final UserId userId) {
+		return identifyUser(senderId, userId, null); }
 
-	public IdentificationResult identifyUser(final UserId userId, final String requestTrackingId) {
+	public IdentificationResult identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId) {
 		return handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.identifyUser(userId, requestTrackingId);
+				return apiService.identifyUser(senderId, userId, requestTrackingId);
 			}
 		}, IdentificationResult.class);
 	}
 
-	public URI createOrReplaceAgreement(final Agreement agreement) {
-		return createOrReplaceAgreement(agreement, null); }
+	public URI createOrReplaceAgreement(final SenderId senderId, final Agreement agreement) {
+		return createOrReplaceAgreement(senderId, agreement, null); }
 
-	public URI createOrReplaceAgreement(final Agreement agreement, final String requestTrackingId) {
-		final CloseableHttpResponse response = apiService.createAgreement(agreement, requestTrackingId);
+	public URI createOrReplaceAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId) {
+		final CloseableHttpResponse response = apiService.createAgreement(senderId, agreement, requestTrackingId);
 		ApiCommons.checkResponse(response);
 		try {
 			return new URI(response.getFirstHeader(HttpHeaders.LOCATION).getValue());
@@ -94,24 +94,24 @@ public class DigipostUserDocumentClient {
 		}, Agreement.class);
 	}
 
-	public Agreement getAgreement(final AgreementType type, final UserId userId, final String requestTrackingId) {
+	public Agreement getAgreement(final SenderId senderId, final AgreementType type, final UserId userId, final String requestTrackingId) {
 		return handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.getAgreement(type, userId, requestTrackingId);
+				return apiService.getAgreement(senderId, type, userId, requestTrackingId);
 			}
 		}, Agreement.class);
 	}
 
-	public List<Agreement> getAgreements(final UserId userId) {
-		return getAgreements(userId, null);
+	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId) {
+		return getAgreements(senderId, userId, null);
 	}
 
-	public List<Agreement> getAgreements(final UserId userId, final String requestTrackingId) {
+	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId, final String requestTrackingId) {
 		final Agreements agreements = handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.getAgreements(userId, requestTrackingId);
+				return apiService.getAgreements(senderId, userId, requestTrackingId);
 			}
 		}, Agreements.class);
 		return agreements.getAgreements();
@@ -126,51 +126,51 @@ public class DigipostUserDocumentClient {
 		});
 	}
 
-	public void deleteAgreement(final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
+	public void deleteAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
 		handleVoid(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.deleteAgrement(agreementType, userId, requestTrackingId);
+				return apiService.deleteAgrement(senderId, agreementType, userId, requestTrackingId);
 			}
 		});
 	}
 
-	public List<Document> getDocuments(final AgreementType agreementType, final UserId userId) {
-		return getDocuments(agreementType, userId, null);
+	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId) {
+		return getDocuments(senderId, agreementType, userId, null);
 	}
 
-	public List<Document> getDocuments(final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
+	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
 		final Documents documents = handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.getDocuments(agreementType, userId, requestTrackingId);
+				return apiService.getDocuments(senderId, agreementType, userId, requestTrackingId);
 			}
 		}, Documents.class);
 		return documents.getDocuments();
 	}
 
-	public Document getDocument(final long documentId) {
-		return getDocument(documentId, null);
+	public Document getDocument(final SenderId senderId, final long documentId) {
+		return getDocument(senderId, documentId, null);
 	}
 
-	public Document getDocument(final long documentId, final String requestTrackingId) {
+	public Document getDocument(final SenderId senderId, final long documentId, final String requestTrackingId) {
 		return handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.getDocument(documentId, requestTrackingId);
+				return apiService.getDocument(senderId, documentId, requestTrackingId);
 			}
 		}, Document.class);
 	}
 
-	public Document updateInvoice(final long documentId, final Invoice invoice) {
-		return updateInvoice(documentId, invoice, null);
+	public Document updateInvoice(final SenderId senderId, final long documentId, final Invoice invoice) {
+		return updateInvoice(senderId, documentId, invoice, null);
 	}
 
-	public Document updateInvoice(final long documentId, final Invoice invoice, final String requestTrackingId) {
+	public Document updateInvoice(final SenderId senderId, final long documentId, final Invoice invoice, final String requestTrackingId) {
 		return handle(new Callable<CloseableHttpResponse>() {
 			@Override
 			public CloseableHttpResponse call() throws Exception {
-				return apiService.updateInvoice(documentId, invoice, requestTrackingId);
+				return apiService.updateInvoice(senderId, documentId, invoice, requestTrackingId);
 			}
 		}, Document.class);
 	}
@@ -201,23 +201,23 @@ public class DigipostUserDocumentClient {
 		private static final URI PRODUCTION_ENDPOINT = URI.create("https://api.digipost.no");
 
 		private URI serviceEndpoint;
-		private final long accountId;
+		private final BrokerId brokerId;
 		private final InputStream certificateP12File;
 		private final String certificatePassword;
 		private HttpClientBuilder httpClientBuilder;
 		private HttpHost proxyHost;
 		private PrivateKey privateKey;
 
-		public Builder(long accountId, InputStream certificateP12File, String certificatePassword){
-			this(accountId, certificateP12File, certificatePassword, null);
+		public Builder(final BrokerId brokerId, InputStream certificateP12File, String certificatePassword){
+			this(brokerId, certificateP12File, certificatePassword, null);
 		}
 
-		public Builder(long accountId, PrivateKey privateKey) {
-			this(accountId, null, null, privateKey);
+		public Builder(BrokerId brokerId, PrivateKey privateKey) {
+			this(brokerId, null, null, privateKey);
 		}
 
-		private Builder(long accountId, InputStream certificateP12File, String certificatePassword, PrivateKey privateKey) {
-			this.accountId = accountId;
+		private Builder(BrokerId brokerId, InputStream certificateP12File, String certificatePassword, PrivateKey privateKey) {
+			this.brokerId = brokerId;
 			if (privateKey == null && (certificateP12File == null || certificatePassword == null)) {
 				throw new IllegalArgumentException("Client must be supplied either PrivateKey, or Certificate and password for certificate");
 			}
@@ -279,7 +279,7 @@ public class DigipostUserDocumentClient {
 			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor());
 			httpClientBuilder.addInterceptorLast(responseSignatureInterceptor);
 
-			final ApiService apiService = new ApiService(serviceEndpoint, accountId, httpClientBuilder.build(), proxyHost);
+			final ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build(), proxyHost);
 			apiServiceProvider.setApiService(apiService);
 			return new DigipostUserDocumentClient(apiService);
 		}

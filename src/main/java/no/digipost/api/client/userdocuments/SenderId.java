@@ -15,16 +15,22 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+public class SenderId {
+	private final long id;
 
-public class InvoiceStatusXmlAdapter extends XmlAdapter<String, InvoiceStatus> {
-    @Override
-    public InvoiceStatus unmarshal(String v) {
-        return InvoiceStatus.valueOf(v.toUpperCase());
-    }
+	public SenderId(final long id) {
+		this.id = id;
+	}
 
-    @Override
-    public String marshal(InvoiceStatus v) {
-        return v.name().toLowerCase();
-    }
+	public long getId() {
+		return id;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("SenderId{");
+		sb.append("id=").append(id);
+		sb.append('}');
+		return sb.toString();
+	}
 }

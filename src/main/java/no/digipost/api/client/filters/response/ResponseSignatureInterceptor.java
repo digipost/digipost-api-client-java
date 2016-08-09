@@ -91,17 +91,23 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 			}
 		} catch (Exception e) {
 			if (shouldThrow) {
-				if (e instanceof DigipostClientException) {
-					throw (DigipostClientException) e;
-				} else {
-					throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-							"Det skjedde en feil under signatursjekk: " + e.getMessage());
-				}
+				unwrapAndThrowException(e);
 			} else {
 				LOG.warn("Feil under validering av server signatur: '" + e.getMessage() + "'. " +
 						(LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));
 				LOG.debug(e.getMessage(), e);
 			}
+		}
+	}
+
+	static void unwrapAndThrowException(final Exception e) {
+		if (e instanceof DigipostClientException) {
+			throw (DigipostClientException) e;
+		} else if (e.getCause() instanceof DigipostClientException) {
+			throw (DigipostClientException) e.getCause();
+		} else {
+			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+					"Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
 		}
 	}
 

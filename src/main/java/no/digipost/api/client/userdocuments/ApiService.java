@@ -48,17 +48,17 @@ import static org.joda.time.Duration.standardMinutes;
 public class ApiService {
 
 	private static final String ROOT = "/";
-	private static final String USER_DOCUMENTS = "/user-documents";
-	private static final String USER_AGREEMENTS = "/user-agreements";
+	private static final String USER_DOCUMENTS_PATH = "/user-documents";
+	private static final String USER_AGREEMENTS_PATH = "/user-agreements";
 
 	private final URI serviceEndpoint;
-	private final long accountId;
+	private final BrokerId brokerId;
 	private final CloseableHttpClient httpClient;
 	private final RequestConfig config;
 
-	public ApiService(final URI serviceEndpoint, final long accountId, final CloseableHttpClient httpClient, final HttpHost proxy) {
+	public ApiService(final URI serviceEndpoint, final BrokerId brokerId, final CloseableHttpClient httpClient, final HttpHost proxy) {
 		this.serviceEndpoint = serviceEndpoint;
-		this.accountId = accountId;
+		this.brokerId = brokerId;
 		this.httpClient = httpClient;
 		if (proxy != null) {
 			this.config = RequestConfig.custom().setProxy(proxy).build();
@@ -67,18 +67,30 @@ public class ApiService {
 		}
 	}
 
-	public CloseableHttpResponse identifyUser(final UserId userId, final String requestTrackingId) {
+	public CloseableHttpResponse identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId) {
 		HttpPost httpPost = prepareHttpPost(getEntryPoint().getIdentificationUri().getPath());
 		httpPost.setEntity(marshallJaxbEntity(new Identification(userId)));
 		addRequestTrackingHeader(httpPost, requestTrackingId);
 		return send(httpPost);
 	}
 
-	public CloseableHttpResponse createAgreement(final Agreement agreement, final String requestTrackingId) {
-		HttpPost httpPost = prepareHttpPost(USER_AGREEMENTS);
+	public CloseableHttpResponse createAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId) {
+		HttpPost httpPost = prepareHttpPost(userAgreementsPath(senderId));
 		httpPost.setEntity(marshallJaxbEntity(agreement));
 		addRequestTrackingHeader(httpPost, requestTrackingId);
 		return send(httpPost);
+	}
+
+	private String userAgreementsPath(final SenderId senderId) {
+		return prependSenderIdToPath(senderId, USER_AGREEMENTS_PATH);
+	}
+
+	private String userDocumentsPath(final SenderId senderId) {
+		return prependSenderIdToPath(senderId, USER_DOCUMENTS_PATH);
+	}
+
+	private String prependSenderIdToPath(final SenderId senderId, final String path) {
+		return ROOT + senderId.getId() + path;
 	}
 
 	public CloseableHttpResponse getAgreement(final URI agreementURI, final String requestTrackingId) {
@@ -87,17 +99,17 @@ public class ApiService {
 		return doGetRequest(requestTrackingId, uriBuilder);
 	}
 
-	public CloseableHttpResponse getAgreement(final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
+	public CloseableHttpResponse getAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(USER_AGREEMENTS)
+				.setPath(userAgreementsPath(senderId))
 				.setParameter("user-id", userId.getPersonalIdentificationNumber())
 				.setParameter("agreement-type", agreementType.getType());
 		return doGetRequest(requestTrackingId, uriBuilder);
 	}
 
-	public CloseableHttpResponse getAgreements(final UserId userId, final String requestTrackingId) {
+	public CloseableHttpResponse getAgreements(final SenderId senderId, final UserId userId, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(USER_AGREEMENTS)
+				.setPath(userAgreementsPath(senderId))
 				.setParameter("user-id", userId.getPersonalIdentificationNumber());
 		return doGetRequest(requestTrackingId, uriBuilder);
 	}
@@ -110,9 +122,9 @@ public class ApiService {
 		return send(httpDelete);
 	}
 
-	public CloseableHttpResponse deleteAgrement(final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
+	public CloseableHttpResponse deleteAgrement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(USER_AGREEMENTS)
+				.setPath(userAgreementsPath(senderId))
 				.setParameter("user-id", userId.getPersonalIdentificationNumber())
 				.setParameter("agreement-type", agreementType.getType());
 		HttpDelete httpDelete = new HttpDelete(buildUri(uriBuilder));
@@ -120,17 +132,17 @@ public class ApiService {
 		return send(httpDelete);
 	}
 
-	public CloseableHttpResponse getDocuments(final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
+	public CloseableHttpResponse getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(USER_DOCUMENTS)
+				.setPath(userDocumentsPath(senderId))
 				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		return doGetRequest(requestTrackingId, uriBuilder);
 	}
 
-	public CloseableHttpResponse getDocument(final long documentId, final String requestTrackingId) {
+	public CloseableHttpResponse getDocument(final SenderId senderId, final long documentId, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(USER_DOCUMENTS + "/" + documentId)
+				.setPath(userDocumentsPath(senderId) + "/" + documentId)
 				.setParameter(AgreementType.QUERY_PARAM_NAME, AgreementType.INVOICE_BANK.getType());
 		return doGetRequest(requestTrackingId, uriBuilder);
 	}
@@ -142,9 +154,9 @@ public class ApiService {
 		return send(httpGet);
 	}
 
-	public CloseableHttpResponse updateInvoice(final long documentId, final Invoice invoice, final String requestTrackingId) {
+	public CloseableHttpResponse updateInvoice(final SenderId senderId, final long documentId, final Invoice invoice, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(USER_DOCUMENTS + "/" + documentId + "/invoice");
+				.setPath(userDocumentsPath(senderId) + "/" + documentId + "/invoice");
 		HttpPost httpPost = new HttpPost(buildUri(uriBuilder));
 		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
@@ -183,7 +195,7 @@ public class ApiService {
 			if (config != null) {
 				request.setConfig(config);
 			}
-			request.setHeader(X_Digipost_UserId, String.valueOf(accountId));
+			request.setHeader(X_Digipost_UserId, brokerId.getIdAsString());
 			return httpClient.execute(request);
 		} catch (ClientProtocolException e) {
 			throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, e);

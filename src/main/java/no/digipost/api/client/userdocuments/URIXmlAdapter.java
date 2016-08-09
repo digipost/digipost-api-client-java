@@ -16,15 +16,24 @@
 package no.digipost.api.client.userdocuments;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.net.URI;
 
-public class InvoiceStatusXmlAdapter extends XmlAdapter<String, InvoiceStatus> {
+public class URIXmlAdapter extends XmlAdapter<String, URI> {
     @Override
-    public InvoiceStatus unmarshal(String v) {
-        return InvoiceStatus.valueOf(v.toUpperCase());
+    public URI unmarshal(final String v) throws Exception {
+        if (v != null) {
+            return new URI(v);
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public String marshal(InvoiceStatus v) {
-        return v.name().toLowerCase();
+    public String marshal(final URI v) throws Exception {
+        if (v != null) {
+            return v.toString();
+        } else {
+            return null;
+        }
     }
 }

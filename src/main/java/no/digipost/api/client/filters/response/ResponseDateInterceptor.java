@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
+import static no.digipost.api.client.filters.response.ResponseSignatureInterceptor.unwrapAndThrowException;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.http.HttpHeaders.DATE;
 import static org.joda.time.DateTime.now;
@@ -63,12 +64,7 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 		} catch (Exception e) {
 			LoggingUtil.logResponse(response);
 			if (shouldThrow) {
-				if (e instanceof DigipostClientException) {
-					throw (DigipostClientException) e;
-				} else {
-					throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-							"Det skjedde en feil under signatursjekk: " + e.getMessage());
-				}
+				unwrapAndThrowException(e);
 			} else {
 				LOG.warn("Feil under validering av server-signatur: '" + e.getMessage() + "'. " +
 						(LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));

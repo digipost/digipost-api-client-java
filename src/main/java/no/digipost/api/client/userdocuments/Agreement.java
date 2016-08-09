@@ -25,6 +25,7 @@ import java.util.HashMap;
 public class Agreement {
 
 	@XmlAttribute
+	@XmlJavaTypeAdapter(URIXmlAdapter.class)
 	private URI href;
 
 	@XmlElement(required = true)
