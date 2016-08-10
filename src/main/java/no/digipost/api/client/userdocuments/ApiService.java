@@ -54,17 +54,11 @@ public class ApiService {
 	private final URI serviceEndpoint;
 	private final BrokerId brokerId;
 	private final CloseableHttpClient httpClient;
-	private final RequestConfig config;
 
-	public ApiService(final URI serviceEndpoint, final BrokerId brokerId, final CloseableHttpClient httpClient, final HttpHost proxy) {
+	public ApiService(final URI serviceEndpoint, final BrokerId brokerId, final CloseableHttpClient httpClient) {
 		this.serviceEndpoint = serviceEndpoint;
 		this.brokerId = brokerId;
 		this.httpClient = httpClient;
-		if (proxy != null) {
-			this.config = RequestConfig.custom().setProxy(proxy).build();
-		} else {
-			this.config = null;
-		}
 	}
 
 	public CloseableHttpResponse identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId) {
@@ -192,9 +186,6 @@ public class ApiService {
 
 	private CloseableHttpResponse send(HttpRequestBase request) {
 		try {
-			if (config != null) {
-				request.setConfig(config);
-			}
 			request.setHeader(X_Digipost_UserId, brokerId.getIdAsString());
 			return httpClient.execute(request);
 		} catch (ClientProtocolException e) {

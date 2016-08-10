@@ -279,7 +279,11 @@ public class DigipostUserDocumentClient {
 			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor());
 			httpClientBuilder.addInterceptorLast(responseSignatureInterceptor);
 
-			final ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build(), proxyHost);
+			if (proxyHost != null) {
+				httpClientBuilder.setProxy(proxyHost);
+			}
+
+			final ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build());
 			apiServiceProvider.setApiService(apiService);
 			return new DigipostUserDocumentClient(apiService);
 		}
