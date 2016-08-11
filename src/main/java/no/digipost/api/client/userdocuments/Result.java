@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.userdocuments;
 
+import no.digipost.api.client.util.Supplier;
+
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -48,7 +50,7 @@ public abstract class Result<V, E> {
 
 		@Override
 		public E getError() {
-			throw new NoSuchElementException("No error value. It is a programming error to call getError() without checking isSuccess()");
+			throw new NoSuchElementException("No error value. This success object contains: " + String.valueOf(value));
 		}
 
 		@Override
@@ -75,8 +77,16 @@ public abstract class Result<V, E> {
 
 	static final class Failure<V, E> extends Result<V, E> {
 		private final E error;
+		private final Supplier<? extends RuntimeException> valueMissingExceptionSupplier;
 
 		public Failure(final E error) {
+			Objects.requireNonNull(error);
+			this.error = error;
+			this.valueMissingExceptionSupplier = null;
+		}
+
+		public Failure(final E error, Supplier<? extends RuntimeException> valueMissingExceptionSupplier) {
+			this.valueMissingExceptionSupplier = valueMissingExceptionSupplier;
 			Objects.requireNonNull(error);
 			this.error = error;
 		}
@@ -88,7 +98,11 @@ public abstract class Result<V, E> {
 
 		@Override
 		public V getValue() {
-			throw new NoSuchElementException("No value. It is a programming error to call getValue() without checking isSuccess()");
+			if (valueMissingExceptionSupplier != null) {
+				throw valueMissingExceptionSupplier.get();
+			} else {
+				throw new NoSuchElementException("No value. This error object contains: " + error);
+			}
 		}
 
 		@Override

@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.userdocuments;
 
+import no.digipost.api.client.util.Supplier;
+
 public class GetAgreementResult {
 
 	public enum FailedReason {
@@ -27,8 +29,8 @@ public class GetAgreementResult {
 		this.result = new Result.Success<>(agreement);
 	}
 
-	public GetAgreementResult(final FailedReason failedReason) {
-		this.result = new Result.Failure<>(failedReason);
+	public GetAgreementResult(final FailedReason failedReason, final Supplier<UnexpectedResponseException> agreementMissingExceptionSupplier) {
+		this.result = new Result.Failure<>(failedReason, agreementMissingExceptionSupplier);
 	}
 
 	public boolean isSuccess() {

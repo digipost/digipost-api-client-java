@@ -92,12 +92,18 @@ public class DigipostUserDocumentClient {
 					return new GetAgreementResult(unmarshall(response.getEntity().getContent(), Agreement.class));
 				} else if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND){
 					final Error error = readErrorFromResponse(response);
+					final Supplier<UnexpectedResponseException> agreementMissingExceptionSupplier = new Supplier<UnexpectedResponseException>() {
+						@Override
+						public UnexpectedResponseException get() {
+							return new UnexpectedResponseException(status, error);
+						}
+					};
 					if (error.is(Error.UNKNOWN_USER_ID)) {
-						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER);
+						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER, agreementMissingExceptionSupplier);
 					} else if (error.is(Error.AGREEMENT_NOT_FOUND)) {
-						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT);
+						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT, agreementMissingExceptionSupplier);
 					} else if (error.is(Error.AGREEMENT_DELETED)) {
-						return new GetAgreementResult(GetAgreementResult.FailedReason.AGREEMENT_DELETED);
+						return new GetAgreementResult(GetAgreementResult.FailedReason.AGREEMENT_DELETED, agreementMissingExceptionSupplier);
 					} else {
 						throw new UnexpectedResponseException(status, error);
 					}
