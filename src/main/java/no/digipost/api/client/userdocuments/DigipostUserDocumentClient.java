@@ -15,9 +15,6 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import no.digipost.api.client.ApiCommons;
-import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
 import no.digipost.api.client.filters.request.RequestDateInterceptor;
 import no.digipost.api.client.filters.request.RequestSignatureInterceptor;
@@ -33,7 +30,6 @@ import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
 import org.apache.http.*;
 import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -50,7 +46,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.PrivateKey;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * API client for managing Digipost documents on behalf of users
@@ -89,7 +84,7 @@ public class DigipostUserDocumentClient {
 				final StatusLine status = response.getStatusLine();
 
 				if (status.getStatusCode() == HttpStatus.SC_OK) {
-					return new GetAgreementResult(unmarshall(response.getEntity().getContent(), Agreement.class));
+					return new GetAgreementResult(unmarshallEntity(response, Agreement.class));
 				} else if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND){
 					final Error error = readErrorFromResponse(response);
 					final Supplier<UnexpectedResponseException> agreementMissingExceptionSupplier = new Supplier<UnexpectedResponseException>() {
@@ -206,42 +201,16 @@ public class DigipostUserDocumentClient {
 		return status / 100 == 2;
 	}
 
-	private static <T> T unmarshall(InputStream contentStream, Class<T> resultType) throws IOException {
-		//TODO: exception handling when reading response
-		return JAXB.unmarshal(contentStream, resultType);
-	}
-
-	private <T> T handle(final Callable<CloseableHttpResponse> action, Class<T> resultType) {
-		try (final CloseableHttpResponse response = action.call()) {
-			ApiCommons.checkResponse(response);
-			return JAXB.unmarshal(response.getEntity().getContent(), resultType);
-		} catch (DigipostClientException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, e);
-		}
-	}
-
-	private void handleVoid(final Callable<CloseableHttpResponse> action) {
-		try (final CloseableHttpResponse response = action.call()) {
-			ApiCommons.checkResponse(response);
-		} catch (DigipostClientException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, e);
-		}
-	}
-
-	public static Error readErrorFromResponse(final HttpResponse response) {
+	public static <T> T unmarshallEntity(final HttpResponse response, final Class<T> returnType) {
 		final StatusLine statusLine = response.getStatusLine();
 		try {
 			final String body = EntityUtils.toString(response.getEntity());
 			try {
-				ErrorMessage errorMessage = unmarshall(response.getEntity().getContent(), ErrorMessage.class);
-				if (errorMessage == null) {
+				T result = JAXB.unmarshal(response.getEntity().getContent(), returnType);
+				if (result == null) {
 					throw new UnexpectedResponseException(statusLine, body);
 				} else {
-					return Error.fromErrorMessage(errorMessage);
+					return result;
 				}
 			} catch (IllegalStateException | DataBindingException e) {
 				throw new UnexpectedResponseException(statusLine, body, e);
@@ -249,6 +218,11 @@ public class DigipostUserDocumentClient {
 		} catch (IOException e) {
 			throw new UnexpectedResponseException(statusLine, e);
 		}
+	}
+
+	public static Error readErrorFromResponse(final HttpResponse response) {
+		final ErrorMessage errorMessage = unmarshallEntity(response, ErrorMessage.class);
+		return Error.fromErrorMessage(errorMessage);
 	}
 
 	public static class Builder {
