@@ -169,7 +169,7 @@ public class ApiService {
 
 	private <T> T executeHttpRequest(final HttpRequestBase request, final ResponseHandler<T> handler) {
 		try {
-			request.setHeader(X_Digipost_UserId, brokerId.getIdAsString());
+			request.setHeader(X_Digipost_UserId, brokerId.serialize());
 			return httpClient.execute(request, handler);
 		} catch (IOException e) {
 			throw new RuntimeIOException(e);

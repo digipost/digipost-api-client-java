@@ -26,14 +26,11 @@ public abstract class JustAValid<T> {
 
     protected final T value;
 
-    private final String description;
-
-    protected JustAValid(T value, String description, String invalidMessage) {
+    protected JustAValid(T value, String message) {
         if (!isValid(value)) {
-            throw new IllegalArgumentException("Invalid value " + value + " for " + description + " (" + getClass() + "): " + invalidMessage);
+            throw new IllegalArgumentException("Invalid value " + value + " for " + getClass().getName() + " : " + message);
         }
         this.value = value;
-        this.description = description;
     }
 
     @Override
@@ -54,7 +51,7 @@ public abstract class JustAValid<T> {
 
     @Override
     public String toString() {
-        return description + " '" + value.toString() + "'";
+        return getClass() + ": '" + value.toString() + "'";
     }
 
     public abstract String serialize();

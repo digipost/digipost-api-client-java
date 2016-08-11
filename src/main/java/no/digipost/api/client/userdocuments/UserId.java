@@ -23,7 +23,7 @@ public class UserId extends JustAValid<String> {
 	public static final String QUERY_PARAM_NAME = "user-id";
 
 	public UserId(final String personalIdentificationNumber) {
-		super(personalIdentificationNumber, "UserID ", "Personal Identification Number must be an 11-digit string");
+		super(personalIdentificationNumber, "Personal Identification Number must be an 11-digit string");
 	}
 
 	public boolean isValid(String personalIdentificationNumber) {

@@ -15,22 +15,23 @@
  */
 package no.digipost.api.client.userdocuments;
 
-public class SenderId {
-	private final long id;
+public class SenderId extends JustAValid<Long> {
 
 	public SenderId(final long id) {
-		this.id = id;
+		super(id, "SenderId must be numeric > 0");
 	}
 
 	public long getId() {
-		return id;
+		return value;
 	}
 
 	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder("SenderId{");
-		sb.append("id=").append(id);
-		sb.append('}');
-		return sb.toString();
+	public String serialize() {
+		return String.valueOf(value);
+	}
+
+	@Override
+	public boolean isValid(final Long value) {
+		return value > 0;
 	}
 }

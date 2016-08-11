@@ -46,6 +46,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.PrivateKey;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * API client for managing Digipost documents on behalf of users
@@ -63,6 +64,8 @@ public class DigipostUserDocumentClient {
 		return identifyUser(senderId, userId, null); }
 
 	public IdentificationResult identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(userId, "userId cannot be null");
 		return apiService.identifyUser(senderId, userId, requestTrackingId, simpleJAXBEntityHandler(IdentificationResult.class));
 	}
 
@@ -70,6 +73,8 @@ public class DigipostUserDocumentClient {
 		return createOrReplaceAgreement(senderId, agreement, null); }
 
 	public URI createOrReplaceAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(agreement, "agreement cannot be null");
 		return apiService.createAgreement(senderId, agreement, requestTrackingId, createdWithLocationHandler());
 	}
 
@@ -78,6 +83,9 @@ public class DigipostUserDocumentClient {
 	}
 
 	public GetAgreementResult getAgreement(final SenderId senderId, final AgreementType type, final UserId userId, final String requestTrackingId) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(type, "agreementType cannot be null");
+		Objects.requireNonNull(userId, "userId cannot be null");
 		return apiService.getAgreement(senderId, type, userId, requestTrackingId, new ResponseHandler<GetAgreementResult>() {
 			@Override
 			public GetAgreementResult handleResponse(final HttpResponse response) throws IOException {

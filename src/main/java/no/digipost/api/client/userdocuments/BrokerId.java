@@ -15,18 +15,23 @@
  */
 package no.digipost.api.client.userdocuments;
 
-public class BrokerId {
-	private final long id;
+public class BrokerId extends JustAValid<Long> {
 
 	public BrokerId(final long id) {
-		this.id = id;
+		super(id, "BrokerId must be numeric > 0");
 	}
 
 	public long getId() {
-		return id;
+		return value;
 	}
 
-	public String getIdAsString() {
-		return String.valueOf(getId());
+	@Override
+	public String serialize() {
+		return String.valueOf(value);
+	}
+
+	@Override
+	public boolean isValid(final Long value) {
+		return value > 0;
 	}
 }
