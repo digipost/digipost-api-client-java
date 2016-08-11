@@ -36,7 +36,7 @@ public class UnexpectedResponseException extends UserDocumentsApiException {
 	}
 
 	public UnexpectedResponseException(final StatusLine status, final String body, final Exception cause) {
-		super(String.format("Unexpected response: status [%s - %s], response body [%s - %s]", status.getStatusCode(), status.getReasonPhrase(), body), cause);
+		super(String.format("Unexpected response: status [%s - %s], response body [%s]", status.getStatusCode(), status.getReasonPhrase(), body), cause);
 		this.error = null;
 		this.rawBody = body;
 	}
