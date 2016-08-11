@@ -44,4 +44,12 @@ public class GetAgreementResult {
 	public FailedReason getFailedReason() {
 		return result.getError();
 	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("GetAgreementResult{");
+		sb.append("result=").append(result);
+		sb.append('}');
+		return sb.toString();
+	}
 }
