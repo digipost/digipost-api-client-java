@@ -15,9 +15,6 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import no.digipost.api.client.ApiCommons;
-import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
 import no.digipost.api.client.filters.request.RequestDateInterceptor;
 import no.digipost.api.client.filters.request.RequestSignatureInterceptor;
@@ -25,28 +22,30 @@ import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
+import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.Pkcs12KeySigner;
 import no.digipost.api.client.util.Supplier;
 import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpHost;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.*;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
+import javax.xml.bind.DataBindingException;
 import javax.xml.bind.JAXB;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.PrivateKey;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * API client for managing Digipost documents on behalf of users
@@ -64,43 +63,50 @@ public class DigipostUserDocumentClient {
 		return identifyUser(senderId, userId, null); }
 
 	public IdentificationResult identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId) {
-		return handle(new Callable<CloseableHttpResponse>() {
-			@Override
-			public CloseableHttpResponse call() throws Exception {
-				return apiService.identifyUser(senderId, userId, requestTrackingId);
-			}
-		}, IdentificationResult.class);
+		return apiService.identifyUser(senderId, userId, requestTrackingId, simpleJAXBEntityHandler(IdentificationResult.class));
 	}
 
 	public URI createOrReplaceAgreement(final SenderId senderId, final Agreement agreement) {
 		return createOrReplaceAgreement(senderId, agreement, null); }
 
 	public URI createOrReplaceAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId) {
-		final CloseableHttpResponse response = apiService.createAgreement(senderId, agreement, requestTrackingId);
-		ApiCommons.checkResponse(response);
-		try {
-			return new URI(response.getFirstHeader(HttpHeaders.LOCATION).getValue());
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
+		return apiService.createAgreement(senderId, agreement, requestTrackingId, createdWithLocationHandler());
 	}
 
 	public Agreement getAgreement(final URI agreementUri, final String requestTrackingId) {
-		return handle(new Callable<CloseableHttpResponse>() {
-			@Override
-			public CloseableHttpResponse call() throws Exception {
-				return apiService.getAgreement(agreementUri, requestTrackingId);
-			}
-		}, Agreement.class);
+		return apiService.getAgreement(agreementUri, requestTrackingId, simpleJAXBEntityHandler(Agreement.class));
 	}
 
-	public Agreement getAgreement(final SenderId senderId, final AgreementType type, final UserId userId, final String requestTrackingId) {
-		return handle(new Callable<CloseableHttpResponse>() {
+	public GetAgreementResult getAgreement(final SenderId senderId, final AgreementType type, final UserId userId, final String requestTrackingId) {
+		return apiService.getAgreement(senderId, type, userId, requestTrackingId, new ResponseHandler<GetAgreementResult>() {
 			@Override
-			public CloseableHttpResponse call() throws Exception {
-				return apiService.getAgreement(senderId, type, userId, requestTrackingId);
+			public GetAgreementResult handleResponse(final HttpResponse response) throws IOException {
+				final StatusLine status = response.getStatusLine();
+
+				if (status.getStatusCode() == HttpStatus.SC_OK) {
+					return new GetAgreementResult(unmarshallEntity(response, Agreement.class));
+				} else if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND){
+					final Error error = readErrorFromResponse(response);
+					final Supplier<UnexpectedResponseException> agreementMissingExceptionSupplier = new Supplier<UnexpectedResponseException>() {
+						@Override
+						public UnexpectedResponseException get() {
+							return new UnexpectedResponseException(status, error);
+						}
+					};
+					if (error.is(Error.UNKNOWN_USER_ID)) {
+						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER, agreementMissingExceptionSupplier);
+					} else if (error.is(Error.AGREEMENT_NOT_FOUND)) {
+						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT, agreementMissingExceptionSupplier);
+					} else if (error.is(Error.AGREEMENT_DELETED)) {
+						return new GetAgreementResult(GetAgreementResult.FailedReason.AGREEMENT_DELETED, agreementMissingExceptionSupplier);
+					} else {
+						throw new UnexpectedResponseException(status, error);
+					}
+				} else {
+					throw new UnexpectedResponseException(status, readErrorFromResponse(response));
+				}
 			}
-		}, Agreement.class);
+		});
 	}
 
 	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId) {
@@ -108,31 +114,16 @@ public class DigipostUserDocumentClient {
 	}
 
 	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId, final String requestTrackingId) {
-		final Agreements agreements = handle(new Callable<CloseableHttpResponse>() {
-			@Override
-			public CloseableHttpResponse call() throws Exception {
-				return apiService.getAgreements(senderId, userId, requestTrackingId);
-			}
-		}, Agreements.class);
+		final Agreements agreements = apiService.getAgreements(senderId, userId, requestTrackingId, simpleJAXBEntityHandler(Agreements.class));
 		return agreements.getAgreements();
 	}
 
 	public void deleteAgreement(final URI agreementPath, final String requestTrackingId) {
-		handleVoid(new Callable<CloseableHttpResponse>() {
-			@Override
-			public CloseableHttpResponse call() throws Exception {
-				return apiService.deleteAgrement(agreementPath, requestTrackingId);
-			}
-		});
+		apiService.deleteAgrement(agreementPath, requestTrackingId, voidOkHandler());
 	}
 
 	public void deleteAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
-		handleVoid(new Callable<CloseableHttpResponse>() {
-			@Override
-			public CloseableHttpResponse call() throws Exception {
-				return apiService.deleteAgrement(senderId, agreementType, userId, requestTrackingId);
-			}
-		});
+		apiService.deleteAgrement(senderId, agreementType, userId, requestTrackingId, voidOkHandler());
 	}
 
 	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId) {
@@ -140,12 +131,7 @@ public class DigipostUserDocumentClient {
 	}
 
 	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
-		final Documents documents = handle(new Callable<CloseableHttpResponse>() {
-			@Override
-			public CloseableHttpResponse call() throws Exception {
-				return apiService.getDocuments(senderId, agreementType, userId, requestTrackingId);
-			}
-		}, Documents.class);
+		final Documents documents = apiService.getDocuments(senderId, agreementType, userId, requestTrackingId, simpleJAXBEntityHandler(Documents.class));
 		return documents.getDocuments();
 	}
 
@@ -154,12 +140,7 @@ public class DigipostUserDocumentClient {
 	}
 
 	public Document getDocument(final SenderId senderId, final long documentId, final String requestTrackingId) {
-		return handle(new Callable<CloseableHttpResponse>() {
-			@Override
-			public CloseableHttpResponse call() throws Exception {
-				return apiService.getDocument(senderId, documentId, requestTrackingId);
-			}
-		}, Document.class);
+		return apiService.getDocument(senderId, documentId, requestTrackingId, simpleJAXBEntityHandler(Document.class));
 	}
 
 	public Document updateInvoice(final SenderId senderId, final long documentId, final Invoice invoice) {
@@ -167,33 +148,81 @@ public class DigipostUserDocumentClient {
 	}
 
 	public Document updateInvoice(final SenderId senderId, final long documentId, final Invoice invoice, final String requestTrackingId) {
-		return handle(new Callable<CloseableHttpResponse>() {
+		return apiService.updateInvoice(senderId, documentId, invoice, requestTrackingId, simpleJAXBEntityHandler(Document.class));
+	}
+
+	private ResponseHandler<Void> voidOkHandler() {
+		return new ResponseHandler<Void>() {
 			@Override
-			public CloseableHttpResponse call() throws Exception {
-				return apiService.updateInvoice(senderId, documentId, invoice, requestTrackingId);
+			public Void handleResponse(final HttpResponse response) throws IOException {
+				final StatusLine statusLine = response.getStatusLine();
+				if (isOkResponse(statusLine.getStatusCode())) {
+					return null;
+				} else {
+					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
+				}
 			}
-		}, Document.class);
+		};
 	}
 
-	private <T> T handle(final Callable<CloseableHttpResponse> action, Class<T> resultType) {
-		try (final CloseableHttpResponse response = action.call()) {
-			ApiCommons.checkResponse(response);
-			return JAXB.unmarshal(response.getEntity().getContent(), resultType);
-		} catch (DigipostClientException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, e);
+	private ResponseHandler<URI> createdWithLocationHandler() {
+		return new ResponseHandler<URI>() {
+			@Override
+			public URI handleResponse(final HttpResponse response) throws IOException {
+				final StatusLine statusLine = response.getStatusLine();
+				if (statusLine.getStatusCode() == HttpStatus.SC_CREATED) {
+					try {
+						return new URI(response.getFirstHeader(HttpHeaders.LOCATION).getValue());
+					} catch (URISyntaxException e) {
+						throw new UserDocumentsApiException("Invalid location header. Response code was " + HttpStatus.SC_CREATED, e);
+					}
+				} else {
+					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
+				}
+			}
+		};
+	}
+
+	private <T> ResponseHandler<T> simpleJAXBEntityHandler(final Class<T> responseType){
+		return new ResponseHandler<T>() {
+			@Override
+			public T handleResponse(final HttpResponse response) throws IOException {
+				final StatusLine statusLine = response.getStatusLine();
+				if (isOkResponse(statusLine.getStatusCode())) {
+					return JAXB.unmarshal(response.getEntity().getContent(), responseType);
+				} else {
+					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
+				}
+			}
+		};
+	}
+
+	public static boolean isOkResponse(final int status) {
+		return status / 100 == 2;
+	}
+
+	public static <T> T unmarshallEntity(final HttpResponse response, final Class<T> returnType) {
+		final StatusLine statusLine = response.getStatusLine();
+		try {
+			final String body = EntityUtils.toString(response.getEntity());
+			try {
+				T result = JAXB.unmarshal(response.getEntity().getContent(), returnType);
+				if (result == null) {
+					throw new UnexpectedResponseException(statusLine, body);
+				} else {
+					return result;
+				}
+			} catch (IllegalStateException | DataBindingException e) {
+				throw new UnexpectedResponseException(statusLine, body, e);
+			}
+		} catch (IOException e) {
+			throw new UnexpectedResponseException(statusLine, e);
 		}
 	}
 
-	private void handleVoid(final Callable<CloseableHttpResponse> action) {
-		try (final CloseableHttpResponse response = action.call()) {
-			ApiCommons.checkResponse(response);
-		} catch (DigipostClientException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, e);
-		}
+	public static Error readErrorFromResponse(final HttpResponse response) {
+		final ErrorMessage errorMessage = unmarshallEntity(response, ErrorMessage.class);
+		return Error.fromErrorMessage(errorMessage);
 	}
 
 	public static class Builder {
@@ -279,7 +308,11 @@ public class DigipostUserDocumentClient {
 			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor());
 			httpClientBuilder.addInterceptorLast(responseSignatureInterceptor);
 
-			final ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build(), proxyHost);
+			if (proxyHost != null) {
+				httpClientBuilder.setProxy(proxyHost);
+			}
+
+			final ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build());
 			apiServiceProvider.setApiService(apiService);
 			return new DigipostUserDocumentClient(apiService);
 		}

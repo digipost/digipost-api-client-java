@@ -65,12 +65,12 @@ public class Examples {
 		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, false), requestTrackingId);
 
 		//GetAgreement
-		final Agreement agreement = client.getAgreement(senderId, AgreementType.INVOICE_BANK, userId, requestTrackingId);
+		final GetAgreementResult agreement = client.getAgreement(senderId, AgreementType.INVOICE_BANK, userId, requestTrackingId);
 		System.out.println(agreement);
 
 		//UpdateAgreement
 		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, true), requestTrackingId);
-		final Agreement modifiedAgreement = client.getAgreement(senderId, AgreementType.INVOICE_BANK, userId, requestTrackingId);
+		final GetAgreementResult modifiedAgreement = client.getAgreement(senderId, AgreementType.INVOICE_BANK, userId, requestTrackingId);
 		System.out.println(modifiedAgreement);
 
 		//DeleteAgreement
