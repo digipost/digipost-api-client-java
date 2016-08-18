@@ -16,6 +16,7 @@
 package no.digipost.api.client.userdocuments;
 
 import org.apache.http.HttpHost;
+import org.joda.time.LocalDate;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -43,7 +44,11 @@ public class Examples {
 
 		final List<Agreement> agreements = client.getAgreements(senderId, userId);
 
-		final List<Document> documents = client.getDocuments(senderId, AgreementType.INVOICE_BANK, userId);
+		final List<Document> documents = client.getDocuments(senderId, AgreementType.INVOICE_BANK, userId, null, null);
+
+		final List<Document> moreDocuments = client.getDocuments(senderId, AgreementType.INVOICE_BANK, userId, InvoiceStatus.UNPAID, null);
+
+		final List<Document> evenMoreDocuments = client.getDocuments(senderId, AgreementType.INVOICE_BANK, userId, null, new LocalDate(2016, 1, 1));
 	}
 
 	public void agreementExamples() throws URISyntaxException {

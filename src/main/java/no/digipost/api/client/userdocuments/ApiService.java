@@ -31,6 +31,8 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.joda.time.LocalDate;
+import org.joda.time.format.ISODateTimeFormat;
 
 import javax.xml.bind.JAXB;
 import java.io.IOException;
@@ -135,11 +137,17 @@ public class ApiService {
 		executeHttpRequest(httpDelete, handler);
 	}
 
-	public Documents getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<Documents> handler) {
+	public Documents getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate minDueDate, final String requestTrackingId, final ResponseHandler<Documents> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId))
 				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
+		if (status != null) {
+			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, status.getStatus());
+		}
+		if (minDueDate != null) {
+			uriBuilder.setParameter("invoice-due-date-from", minDueDate.toString(ISODateTimeFormat.basicDate()));
+		}
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		addRequestTrackingHeader(httpGet, requestTrackingId);

@@ -35,6 +35,7 @@ import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.joda.time.LocalDate;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
@@ -134,12 +135,15 @@ public class DigipostUserDocumentClient {
 		apiService.deleteAgrement(senderId, agreementType, userId, requestTrackingId, voidOkHandler());
 	}
 
-	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId) {
-		return getDocuments(senderId, agreementType, userId, null);
+	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {
+		return getDocuments(senderId, agreementType, userId, status, invoiceDueDateFrom, null);
 	}
 
-	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
-		final Documents documents = apiService.getDocuments(senderId, agreementType, userId, requestTrackingId, simpleJAXBEntityHandler(Documents.class));
+	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom, final String requestTrackingId) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(agreementType, "agreementType cannot be null");
+		Objects.requireNonNull(userId, "userId cannot be null");
+		final Documents documents = apiService.getDocuments(senderId, agreementType, userId, status, invoiceDueDateFrom, requestTrackingId, simpleJAXBEntityHandler(Documents.class));
 		return documents.getDocuments();
 	}
 

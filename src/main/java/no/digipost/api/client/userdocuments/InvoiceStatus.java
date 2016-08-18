@@ -26,6 +26,8 @@ public enum InvoiceStatus {
 	PAID("paid"),
 	DELETED("deleted");
 
+	public static final String QUERY_PARAM_NAME = "invoice-status";
+
 	private final String status;
 
 	InvoiceStatus(final String status) {
