@@ -15,41 +15,24 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import no.digipost.api.client.representations.InvalidReason;
-import no.digipost.api.client.representations.UnidentifiedReason;
-
 import javax.xml.bind.annotation.*;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "identification-result", propOrder = {
-		"result",
-		"invalidReason",
-		"unidentifiedReason"
+		"result"
 })
 @XmlRootElement(name = "identification-result")
 public class IdentificationResult {
 
 	@XmlElement(required = true)
 	protected IdentificationResultCode result;
-	@XmlElement(name = "invalid-reason")
-	protected InvalidReason invalidReason;
-	@XmlElement(name = "unidentified-reason")
-	protected UnidentifiedReason unidentifiedReason;
 
 	public IdentificationResult() {
 	}
 
 	public IdentificationResultCode getResult() {
 		return result;
-	}
-
-	public InvalidReason getInvalidReason() {
-		return invalidReason;
-	}
-
-	public UnidentifiedReason getUnidentifiedReason() {
-		return unidentifiedReason;
 	}
 
 	public static IdentificationResult digipost() {
@@ -62,8 +45,6 @@ public class IdentificationResult {
 	public String toString() {
 		return "IdentificationResult{" +
 				"result=" + result +
-				", invalidReason=" + invalidReason +
-				", unidentifiedReason=" + unidentifiedReason +
 				'}';
 	}
 }

@@ -23,9 +23,7 @@ import javax.xml.bind.annotation.XmlType;
 public enum IdentificationResultCode {
 
 	DIGIPOST,
-	IDENTIFIED,
-	UNIDENTIFIED,
-	INVALID;
+	UNIDENTIFIED;
 
 	public String value() {
 		return name();
