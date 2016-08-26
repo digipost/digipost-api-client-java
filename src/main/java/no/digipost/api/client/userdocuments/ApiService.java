@@ -164,7 +164,7 @@ public class ApiService {
 		return executeHttpRequest(httpGet, handler);
 	}
 
-	public Document updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final Invoice invoice, final String requestTrackingId, final ResponseHandler<Document> handler) {
+	public Document updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoice, final String requestTrackingId, final ResponseHandler<Document> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/" + documentId + "/invoice")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
