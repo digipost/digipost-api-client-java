@@ -21,7 +21,7 @@ import org.joda.time.DateTime;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-@XmlRootElement
+@XmlRootElement(name = "invoice-payment")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class InvoicePayment {
 
