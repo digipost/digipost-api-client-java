@@ -155,11 +155,11 @@ public class DigipostUserDocumentClient {
 		return apiService.getDocument(senderId, documentId, requestTrackingId, simpleJAXBEntityHandler(Document.class));
 	}
 
-	public Document updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final Invoice invoice) {
+	public Document updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoice) {
 		return updateInvoice(senderId, agreementType, documentId, invoice, null);
 	}
 
-	public Document updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final Invoice invoice, final String requestTrackingId) {
+	public Document updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoice, final String requestTrackingId) {
 		return apiService.updateInvoice(senderId, agreementType, documentId, invoice, requestTrackingId, simpleJAXBEntityHandler(Document.class));
 	}
 
