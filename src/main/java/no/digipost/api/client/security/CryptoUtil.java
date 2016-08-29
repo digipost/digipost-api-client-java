@@ -87,7 +87,7 @@ public class CryptoUtil {
 
 		for (String cipher : supportedCiphers) {
 			for (String requiredCipher : requiredCiphers) {
-				if (cipher.compareTo(requiredCipher) == 0) return;
+				if (cipher.substring(3).compareTo(requiredCipher.substring(3)) == 0) return;
 			}
 		}
 		throw new DigipostClientException(ErrorCode.CLIENT_ERROR, "Could not load any required TLS-ciphers. The client needs one of these ciphers to connect to the server: " + Arrays.toString(requiredCiphers) + ".\n"
