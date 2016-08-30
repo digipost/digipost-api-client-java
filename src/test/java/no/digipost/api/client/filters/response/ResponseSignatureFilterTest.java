@@ -60,15 +60,8 @@ public class ResponseSignatureFilterTest {
 				return apiServiceMock.getEntryPoint().getCertificate().getBytes();
 			}
 		});
-		responseSignatureInterceptor.setThrowOnError(true);
 		when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
 		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
-	}
-
-	@Test
-	public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
-		responseSignatureInterceptor.setThrowOnError(false);
-		responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
 	}
 
 	@Test

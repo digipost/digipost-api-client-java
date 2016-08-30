@@ -279,6 +279,11 @@ public class DigipostUserDocumentClient {
 			return this;
 		}
 
+        public Builder setHttpClientBuilder(final HttpClientBuilder HttpClientBuilder) {
+            this.httpClientBuilder = httpClientBuilder;
+            return this;
+        }
+
 		public Builder veryDangerouslyDisableCertificateVerificationWhichIsAbsolutelyUnfitForProductionCode() {
 			if (this.serviceEndpoint.compareTo(PRODUCTION_ENDPOINT) == 0) {
 				throw new RuntimeException("You should never ever disable certificate verification when connecting to the production endpoint");
