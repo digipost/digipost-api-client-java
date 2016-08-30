@@ -67,7 +67,6 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-		// TODO configure this on relevant WebTarget instead
 		if ("/".equals(((CookieOrigin)(context.getAttribute("http.cookie-origin"))).getPath())) {
 			eventLogger.log("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
 			return;

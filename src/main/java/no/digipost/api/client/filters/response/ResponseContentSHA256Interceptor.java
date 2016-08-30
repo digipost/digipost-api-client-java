@@ -19,6 +19,7 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.util.LoggingUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
+import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -45,17 +46,16 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+		if ("/".equals(((CookieOrigin)(context.getAttribute("http.cookie-origin"))).getPath())) {
+			return;
+		}
+
 		try {
 			validerContentHash(response);
 		} catch (Exception e) {
 			LoggingUtil.logResponse(response);
 			logOrThrow("Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
 		}
-	}
-
-	private boolean hasHeader(final HttpResponse response, final String x_content_sha256) {
-		final String sha256Header = findHeader(response, X_Content_SHA256);
-		return !isBlank(sha256Header);
 	}
 
 	private void validerContentHash(final HttpResponse response) {
