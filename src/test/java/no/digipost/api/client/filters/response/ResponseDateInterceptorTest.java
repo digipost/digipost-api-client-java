@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client.filters.response;
 
-import no.digipost.api.client.MessageSenderTest;
 import no.digipost.api.client.MessageSenderTest.StatusLineMock;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import org.apache.http.HttpException;
@@ -54,7 +53,6 @@ public class ResponseDateInterceptorTest {
 	@Before
 	public void setUp() {
 		responseDateInterceptor = new ResponseDateInterceptor();
-		responseDateInterceptor.setThrowOnError(true);
 		when(httpResponseMock.getStatusLine()).thenReturn(new StatusLineMock(200));
 	}
 
@@ -65,7 +63,7 @@ public class ResponseDateInterceptorTest {
 			responseDateInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle ha kastet feil grunnet manglende Date-header");
 		} catch (DigipostClientException e) {
-			assertThat(e.getMessage(), containsString("Mangler Date-header"));
+			assertThat(e.getMessage(), containsString("Respons mangler Date-header"));
 		}
 	}
 
@@ -112,12 +110,4 @@ public class ResponseDateInterceptorTest {
 			assertThat(e.getMessage(), containsString("Date-header fra server er for gammel"));
 		}
 	}
-
-	@Test
-	public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
-		responseDateInterceptor.setThrowOnError(false);
-		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
-		responseDateInterceptor.process(httpResponseMock, httpContextMock);
-	}
-
 }

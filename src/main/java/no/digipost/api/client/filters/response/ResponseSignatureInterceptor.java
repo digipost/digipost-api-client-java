@@ -21,21 +21,16 @@ import no.digipost.api.client.security.ClientResponseToVerify;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil;
 import no.digipost.api.client.util.Supplier;
 import org.apache.http.Header;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.security.GeneralSecurityException;
-import java.security.Signature;
+import java.security.*;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -45,13 +40,6 @@ import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ER
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
-
-	private static final Logger LOG = LoggerFactory.getLogger(ResponseSignatureInterceptor.class);
-	private boolean shouldThrow = true;
-
-	public void setThrowOnError(final boolean shouldThrow) {
-		this.shouldThrow = shouldThrow;
-	}
 
 	private final EventLogger eventLogger;
 	private final Supplier<byte[]> certificateSupplier;
@@ -66,7 +54,7 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 	}
 
 	@Override
-	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+	public void process(HttpResponse response, HttpContext context) {
 		if ("/".equals(((CookieOrigin)(context.getAttribute("http.cookie-origin"))).getPath())) {
 			eventLogger.log("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
 			return;
@@ -88,28 +76,10 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 				eventLogger.log("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren " + X_Digipost_Signature
 						+ " var OK: " + serverSignaturBase64);
 			}
-		} catch (Exception e) {
-			if (shouldThrow) {
-				unwrapAndThrowException(e);
-			} else {
-				LOG.warn("Feil under validering av server signatur: '" + e.getMessage() + "'. " +
-						(LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));
-				LOG.debug(e.getMessage(), e);
-			}
+		} catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+			throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
 		}
 	}
-
-	static void unwrapAndThrowException(final Exception e) {
-		if (e instanceof DigipostClientException) {
-			throw (DigipostClientException) e;
-		} else if (e.getCause() instanceof DigipostClientException) {
-			throw (DigipostClientException) e.getCause();
-		} else {
-			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-					"Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
-		}
-	}
-
 
 	private String getServerSignaturFromResponse(final HttpResponse response) {
 		String serverSignaturString = null;

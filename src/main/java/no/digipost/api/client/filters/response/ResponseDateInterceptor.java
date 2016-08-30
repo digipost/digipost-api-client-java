@@ -17,59 +17,33 @@ package no.digipost.api.client.filters.response;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.util.DateUtils;
-import no.digipost.api.client.util.LoggingUtil;
 import org.apache.http.Header;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.protocol.HttpContext;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
-import static no.digipost.api.client.filters.response.ResponseSignatureInterceptor.unwrapAndThrowException;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.http.HttpHeaders.DATE;
 import static org.joda.time.DateTime.now;
 
 public class ResponseDateInterceptor implements HttpResponseInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ResponseDateInterceptor.class);
 	private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
 
-	private boolean shouldThrow = true;
-
-	public void setThrowOnError(final boolean shouldThrow) {
-		this.shouldThrow = shouldThrow;
-	}
-
 	@Override
-	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+	public void process(HttpResponse response, HttpContext context) {
 		String dateHeader = null;
 		Header firstHeader = response.getFirstHeader(DATE);
 		if(firstHeader != null){
 			dateHeader = firstHeader.getValue();
 		}
 			
-		try {
-			if (isNotBlank(dateHeader)) {
-				sjekkDato(dateHeader);
-			} else {
-				throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-						"Mangler Date-header - server-signatur kunne ikke sjekkes");
-			}
-		} catch (Exception e) {
-			LoggingUtil.logResponse(response);
-			if (shouldThrow) {
-				unwrapAndThrowException(e);
-			} else {
-				LOG.warn("Feil under validering av server-signatur: '" + e.getMessage() + "'. " +
-						(LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));
-				LOG.debug(e.getMessage(), e);
-			}
+		if (isNotBlank(dateHeader)) {
+			sjekkDato(dateHeader);
+		} else {
+			throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Respons mangler Date-header - server-signatur kunne ikke sjekkes");
 		}
 	}
 
@@ -79,9 +53,7 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 			sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date);
 			sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date);
 		} catch (IllegalArgumentException e) {
-			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-					"Date-header kunne ikke parses - server-signatur kunne ikke sjekkes");
-
+			throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header kunne ikke parses - server-signatur kunne ikke sjekkes");
 		}
 	}
 
