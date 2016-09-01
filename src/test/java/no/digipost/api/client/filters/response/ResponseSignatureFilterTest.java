@@ -16,7 +16,10 @@
 package no.digipost.api.client.filters.response;
 
 import no.digipost.api.client.ApiService;
+import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.MessageSenderTest;
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.userdocuments.ServerSignatureException;
 import no.digipost.api.client.util.Supplier;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
@@ -62,6 +65,7 @@ public class ResponseSignatureFilterTest {
 		});
 		when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
 		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
+		when(httpResponseMock.getStatusLine()).thenReturn(new MessageSenderTest.StatusLineMock(200));
 	}
 
 	@Test
@@ -70,6 +74,22 @@ public class ResponseSignatureFilterTest {
 			responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle kastet feil grunnet manglende signatur header");
 		} catch (DigipostClientException e) {
+			assertThat(e.getMessage(), containsString("Mangler X-Digipost-Signature-header"));
+		}
+	}
+
+	@Test
+	public void skal_kaste_custom_feil_om_server_signatur_mangler() throws IOException, HttpException {
+		try {
+			ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(DigipostClient.NOOP_EVENT_LOGGER, new Supplier<byte[]>() {
+				@Override
+				public byte[] get() {
+					return apiServiceMock.getEntryPoint().getCertificate().getBytes();
+				}
+			}, ServerSignatureException.getExceptionSupplier());
+			responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
+			fail("Skulle kastet feil grunnet manglende signatur header");
+		} catch (ServerSignatureException e) {
 			assertThat(e.getMessage(), containsString("Mangler X-Digipost-Signature-header"));
 		}
 	}

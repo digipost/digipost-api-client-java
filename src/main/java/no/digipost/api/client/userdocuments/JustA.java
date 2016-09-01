@@ -20,14 +20,36 @@
  */
 package no.digipost.api.client.userdocuments;
 
-public abstract class JustAValid<T> extends JustA<T> {
+import java.util.Objects;
 
-    protected JustAValid(T value, String message) {
-    	super(value);
-        if (!isValid(value)) {
-            throw new IllegalArgumentException("Invalid value " + value + " for " + getClass().getName() + " : " + message);
-        }
+public abstract class JustA<T> {
+
+    protected final T value;
+
+    protected JustA(T value) {
+        this.value = value;
     }
 
-    public abstract boolean isValid(T value);
+    @Override
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj instanceof JustA && getClass().isInstance(obj)) {
+            JustA<?> that = (JustA<?>) obj;
+            return Objects.equals(this.value, that.value);
+        }
+        return false;
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hashCode(value);
+    }
+
+    @Override
+    public String toString() {
+        return getClass() + ": '" + value.toString() + "'";
+    }
+
+    public abstract String serialize();
 }

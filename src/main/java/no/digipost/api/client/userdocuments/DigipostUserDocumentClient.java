@@ -49,6 +49,8 @@ import java.security.PrivateKey;
 import java.util.List;
 import java.util.Objects;
 
+import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
+
 /**
  * API client for managing Digipost documents on behalf of users
  */
@@ -102,11 +104,11 @@ public class DigipostUserDocumentClient {
 							return new UnexpectedResponseException(status, error);
 						}
 					};
-					if (error.is(Error.UNKNOWN_USER_ID)) {
+					if (error.hasCode(ErrorCode.UNKNOWN_USER_ID)) {
 						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER, agreementMissingExceptionSupplier);
-					} else if (error.is(Error.AGREEMENT_NOT_FOUND)) {
+					} else if (error.hasCode(ErrorCode.AGREEMENT_NOT_FOUND)) {
 						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT, agreementMissingExceptionSupplier);
-					} else if (error.is(Error.AGREEMENT_DELETED)) {
+					} else if (error.hasCode(ErrorCode.AGREEMENT_DELETED)) {
 						return new GetAgreementResult(GetAgreementResult.FailedReason.AGREEMENT_DELETED, agreementMissingExceptionSupplier);
 					} else {
 						throw new UnexpectedResponseException(status, error);
@@ -186,7 +188,7 @@ public class DigipostUserDocumentClient {
 					try {
 						return new URI(response.getFirstHeader(HttpHeaders.LOCATION).getValue());
 					} catch (URISyntaxException e) {
-						throw new UserDocumentsApiException("Invalid location header. Response code was " + HttpStatus.SC_CREATED, e);
+						throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, "Invalid location header", e);
 					}
 				} else {
 					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
@@ -220,15 +222,15 @@ public class DigipostUserDocumentClient {
 			try {
 				T result = JAXB.unmarshal(response.getEntity().getContent(), returnType);
 				if (result == null) {
-					throw new UnexpectedResponseException(statusLine, body);
+					throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, body);
 				} else {
 					return result;
 				}
 			} catch (IllegalStateException | DataBindingException e) {
-				throw new UnexpectedResponseException(statusLine, body, e);
+				throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, body, e);
 			}
 		} catch (IOException e) {
-			throw new UnexpectedResponseException(statusLine, e);
+			throw new UnexpectedResponseException(statusLine, ErrorCode.IO_EXCEPTION, e.getMessage(), e);
 		}
 	}
 
@@ -307,12 +309,12 @@ public class DigipostUserDocumentClient {
 
 		public DigipostUserDocumentClient build() {
 			final ApiServiceProvider apiServiceProvider = new ApiServiceProvider();
-			final ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(new Supplier<byte[]>() {
+			final ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(NOOP_EVENT_LOGGER, new Supplier<byte[]>() {
 				@Override
 				public byte[] get() {
 					return apiServiceProvider.getApiService().getEntryPoint().getCertificate().getBytes();
 				}
-			});
+			}, ServerSignatureException.getExceptionSupplier());
 
 			httpClientBuilder.addInterceptorLast(new RequestDateInterceptor(null));
 			httpClientBuilder.addInterceptorLast(new RequestUserAgentInterceptor());
@@ -321,8 +323,8 @@ public class DigipostUserDocumentClient {
 			} else {
 				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new Pkcs12KeySigner(privateKey), null, new RequestContentSHA256Filter(null)));
 			}
-			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor());
-			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor());
+			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor(ServerSignatureException.getExceptionSupplier()));
+			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor(ServerSignatureException.getExceptionSupplier()));
 			httpClientBuilder.addInterceptorLast(responseSignatureInterceptor);
 
 			if (proxyHost != null) {

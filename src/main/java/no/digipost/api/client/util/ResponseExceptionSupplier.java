@@ -13,21 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /*
- * An implementation of the JustA-pattern from github.com/digipost/digg,
- * with added support for validation, that will also work with JDK7
- *
- */
-package no.digipost.api.client.userdocuments;
+package no.digipost.api.client.util;
 
-public abstract class JustAValid<T> extends JustA<T> {
+import org.apache.http.StatusLine;
 
-    protected JustAValid(T value, String message) {
-    	super(value);
-        if (!isValid(value)) {
-            throw new IllegalArgumentException("Invalid value " + value + " for " + getClass().getName() + " : " + message);
-        }
-    }
-
-    public abstract boolean isValid(T value);
+public interface ResponseExceptionSupplier<T extends RuntimeException> {
+	T get(StatusLine line, String message);
 }
