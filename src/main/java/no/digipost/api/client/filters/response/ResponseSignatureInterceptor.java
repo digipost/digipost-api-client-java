@@ -19,6 +19,7 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.security.ClientResponseToVerify;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil;
+import no.digipost.api.client.util.ResponseExceptionSupplier;
 import no.digipost.api.client.util.Supplier;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -43,14 +44,16 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 
 	private final EventLogger eventLogger;
 	private final Supplier<byte[]> certificateSupplier;
+	private final ResponseExceptionSupplier<?> exceptionSupplier;
 
 	public ResponseSignatureInterceptor(final Supplier<byte[]> certificateSupplier) {
-		this(NOOP_EVENT_LOGGER, certificateSupplier);
+		this(NOOP_EVENT_LOGGER, certificateSupplier, DigipostClientException.getExceptionSupplier(SERVER_SIGNATURE_ERROR));
 	}
 
-	public ResponseSignatureInterceptor(final EventLogger eventLogger, final Supplier<byte[]> certificateSupplier) {
+	public ResponseSignatureInterceptor(final EventLogger eventLogger, final Supplier<byte[]> certificateSupplier, final ResponseExceptionSupplier<?> exceptionSupplier) {
 		this.eventLogger = eventLogger;
 		this.certificateSupplier = certificateSupplier;
+		this.exceptionSupplier = exceptionSupplier;
 	}
 
 	@Override
@@ -67,11 +70,11 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 			String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ClientResponseToVerify(context, response));
 
 			Signature instance = Signature.getInstance("SHA256WithRSAEncryption");
-			instance.initVerify(lastSertifikat());
+			instance.initVerify(lastSertifikat(response));
 			instance.update(signatureString.getBytes());
 			boolean verified = instance.verify(serverSignaturBytes);
 			if (!verified) {
-				throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Melding fra server matcher ikke signatur.");
+				throw exceptionSupplier.get(response.getStatusLine(), "Melding fra server matcher ikke signatur.");
 			} else {
 				eventLogger.log("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren " + X_Digipost_Signature
 						+ " var OK: " + serverSignaturBase64);
@@ -89,25 +92,25 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 		}
 
 		if (isBlank(serverSignaturString)) {
-			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+			throw exceptionSupplier.get(response.getStatusLine(),
 					"Mangler " + X_Digipost_Signature + "-header - server-signatur kunne ikke sjekkes");
 		}
 		return serverSignaturString;
 	}
 
-	public X509Certificate lastSertifikat() {
+	private X509Certificate lastSertifikat(HttpResponse response) {
 		try {
 			InputStream certStream = new ByteArrayInputStream(certificateSupplier.get());
 
 			CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 			X509Certificate sertifikat = (X509Certificate) cf.generateCertificate(certStream);
 			if (sertifikat == null) {
-				throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+				throw exceptionSupplier.get(response.getStatusLine(),
 						"Kunne ikke laste Digipost's public key - server-signatur kunne ikke sjekkes");
 			}
 			return sertifikat;
 		} catch (GeneralSecurityException e) {
-			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+			throw exceptionSupplier.get(response.getStatusLine(),
 					"Kunne ikke laste Digiposts public key - server-signatur kunne ikke sjekkes");
 		}
 	}

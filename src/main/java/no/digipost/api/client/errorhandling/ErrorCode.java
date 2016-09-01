@@ -112,11 +112,7 @@ public enum ErrorCode {
 	INVALID_RETURN_ADDRESS(CLIENT_DATA),
 	INVALID_PDF_CONTENT(CLIENT_DATA),
 	INVALID_MONETARY_AMOUNT(CLIENT_DATA),
-	AUTHENTICATION_LEVEL_TOO_LOW(CLIENT_DATA),
-
-	//User documents
-	AGREEMENT_NOT_FOUND(CLIENT_DATA)
-	;
+	AUTHENTICATION_LEVEL_TOO_LOW(CLIENT_DATA);
 
 	private static final Map<String, ErrorCode> errorByName = new HashMap<>(); static {
 		for (ErrorCode errorCode : values()) {

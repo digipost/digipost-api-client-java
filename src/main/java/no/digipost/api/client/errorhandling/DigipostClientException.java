@@ -18,9 +18,10 @@ package no.digipost.api.client.errorhandling;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Relation;
+import no.digipost.api.client.util.ResponseExceptionSupplier;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.StatusLine;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -111,4 +112,12 @@ public class DigipostClientException extends RuntimeException {
 		return prefix + error.getErrorMessage();
 	}
 
+	public static ResponseExceptionSupplier<DigipostClientException> getExceptionSupplier(final ErrorCode errorCode) {
+		return new ResponseExceptionSupplier<DigipostClientException>() {
+			@Override
+			public DigipostClientException get(final StatusLine line, final String message) {
+				return new DigipostClientException(errorCode, message);
+			}
+		};
+	}
 }

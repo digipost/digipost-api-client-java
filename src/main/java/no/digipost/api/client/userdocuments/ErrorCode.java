@@ -27,6 +27,7 @@ public class ErrorCode extends JustA<String> implements IsEqual<ErrorCode> {
 	public static final ErrorCode SIGNATURE_ERROR = new ErrorCode("SIGNATURE_ERROR");
 	public static final ErrorCode GENERAL_ERROR = new ErrorCode("GENERAL_ERROR");
 	public static final ErrorCode IO_EXCEPTION = new ErrorCode("IO_EXCEPTION_ERROR");
+	public static final ErrorCode SERVER_SIGNATURE_ERROR = new ErrorCode("SERVER_SIGNATURE_ERROR");
 
 	public ErrorCode(final String errorCode) {
 		super(errorCode.toUpperCase());

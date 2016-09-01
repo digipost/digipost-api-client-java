@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.userdocuments;
+package no.digipost.api.client.util;
 
-public interface IsEqual<T> {
-	boolean isEqual(T that);
+import org.apache.http.StatusLine;
+
+public interface ResponseExceptionSupplier<T extends RuntimeException> {
+	T get(StatusLine line, String message);
 }

@@ -49,6 +49,8 @@ import java.security.PrivateKey;
 import java.util.List;
 import java.util.Objects;
 
+import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
+
 /**
  * API client for managing Digipost documents on behalf of users
  */
@@ -307,12 +309,12 @@ public class DigipostUserDocumentClient {
 
 		public DigipostUserDocumentClient build() {
 			final ApiServiceProvider apiServiceProvider = new ApiServiceProvider();
-			final ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(new Supplier<byte[]>() {
+			final ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(NOOP_EVENT_LOGGER, new Supplier<byte[]>() {
 				@Override
 				public byte[] get() {
 					return apiServiceProvider.getApiService().getEntryPoint().getCertificate().getBytes();
 				}
-			});
+			}, ServerSignatureException.getExceptionSupplier());
 
 			httpClientBuilder.addInterceptorLast(new RequestDateInterceptor(null));
 			httpClientBuilder.addInterceptorLast(new RequestUserAgentInterceptor());
@@ -321,8 +323,8 @@ public class DigipostUserDocumentClient {
 			} else {
 				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new Pkcs12KeySigner(privateKey), null, new RequestContentSHA256Filter(null)));
 			}
-			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor());
-			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor());
+			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor(ServerSignatureException.getExceptionSupplier()));
+			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor(ServerSignatureException.getExceptionSupplier()));
 			httpClientBuilder.addInterceptorLast(responseSignatureInterceptor);
 
 			if (proxyHost != null) {
