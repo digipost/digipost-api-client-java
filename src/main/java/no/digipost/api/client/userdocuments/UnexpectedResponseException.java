@@ -17,35 +17,23 @@ package no.digipost.api.client.userdocuments;
 
 import org.apache.http.StatusLine;
 
+import static java.lang.String.format;
+
 public class UnexpectedResponseException extends UserDocumentsApiException {
-	private final Error error;
-	private final String rawBody;
+
+	public UnexpectedResponseException(final StatusLine status, final ErrorCode errorCode, final String errorMessage) {
+		this(status, errorCode, errorMessage, null);
+	}
+
+	public UnexpectedResponseException(final StatusLine status, final ErrorCode errorCode, final String errorMessage, final Throwable cause) {
+		super(errorCode, format("Unexpected response: status [%s - %s], error [%s - %s]",
+				status.getStatusCode(),
+				status.getReasonPhrase(),
+				errorCode,
+				errorMessage), cause);
+	}
 
 	public UnexpectedResponseException(final StatusLine status, final Error error) {
-		super(String.format("Unexpected response: status [%s - %s], error [%s - %s]", status.getStatusCode(), status.getReasonPhrase(), error.getCode(), error.getMessage()));
-		this.error = error;
-		this.rawBody = null;
-	}
-
-	public UnexpectedResponseException(final StatusLine status, final Exception cause) {
-		this(status, null, cause);
-	}
-
-	public UnexpectedResponseException(final StatusLine status, final String body) {
-		this(status, body, null);
-	}
-
-	public UnexpectedResponseException(final StatusLine status, final String body, final Exception cause) {
-		super(String.format("Unexpected response: status [%s - %s], response body [%s]", status.getStatusCode(), status.getReasonPhrase(), body), cause);
-		this.error = null;
-		this.rawBody = body;
-	}
-
-	public Error getError() {
-		return error;
-	}
-
-	public String getRawBody() {
-		return rawBody;
+		this(status, error.getCode(), error.getMessage());
 	}
 }

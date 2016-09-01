@@ -102,11 +102,11 @@ public class DigipostUserDocumentClient {
 							return new UnexpectedResponseException(status, error);
 						}
 					};
-					if (error.is(Error.UNKNOWN_USER_ID)) {
+					if (error.hasCode(ErrorCode.UNKNOWN_USER_ID)) {
 						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER, agreementMissingExceptionSupplier);
-					} else if (error.is(Error.AGREEMENT_NOT_FOUND)) {
+					} else if (error.hasCode(ErrorCode.AGREEMENT_NOT_FOUND)) {
 						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT, agreementMissingExceptionSupplier);
-					} else if (error.is(Error.AGREEMENT_DELETED)) {
+					} else if (error.hasCode(ErrorCode.AGREEMENT_DELETED)) {
 						return new GetAgreementResult(GetAgreementResult.FailedReason.AGREEMENT_DELETED, agreementMissingExceptionSupplier);
 					} else {
 						throw new UnexpectedResponseException(status, error);
@@ -186,7 +186,7 @@ public class DigipostUserDocumentClient {
 					try {
 						return new URI(response.getFirstHeader(HttpHeaders.LOCATION).getValue());
 					} catch (URISyntaxException e) {
-						throw new UserDocumentsApiException("Invalid location header. Response code was " + HttpStatus.SC_CREATED, e);
+						throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, "Invalid location header", e);
 					}
 				} else {
 					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
@@ -220,15 +220,15 @@ public class DigipostUserDocumentClient {
 			try {
 				T result = JAXB.unmarshal(response.getEntity().getContent(), returnType);
 				if (result == null) {
-					throw new UnexpectedResponseException(statusLine, body);
+					throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, body);
 				} else {
 					return result;
 				}
 			} catch (IllegalStateException | DataBindingException e) {
-				throw new UnexpectedResponseException(statusLine, body, e);
+				throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, body, e);
 			}
 		} catch (IOException e) {
-			throw new UnexpectedResponseException(statusLine, e);
+			throw new UnexpectedResponseException(statusLine, ErrorCode.IO_EXCEPTION, e.getMessage(), e);
 		}
 	}
 

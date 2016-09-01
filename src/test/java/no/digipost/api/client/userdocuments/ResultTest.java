@@ -37,7 +37,7 @@ public class ResultTest {
 		new Result.Failure<>("Failure", new Supplier<RuntimeException>() {
 			@Override
 			public RuntimeException get() {
-				return new UserDocumentsApiException("Custome exception");
+				return new UserDocumentsApiException(ErrorCode.GENERAL_ERROR, "Custom exception");
 			}
 		}).getValue();
 	}

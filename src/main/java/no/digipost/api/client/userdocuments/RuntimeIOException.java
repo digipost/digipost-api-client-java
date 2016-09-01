@@ -18,14 +18,14 @@ package no.digipost.api.client.userdocuments;
 public class RuntimeIOException extends UserDocumentsApiException {
 
 	public RuntimeIOException(final String message) {
-		super(message);
+		super(ErrorCode.IO_EXCEPTION, message);
 	}
 
 	public RuntimeIOException(final String message, final Throwable cause) {
-		super(message, cause);
+		super(ErrorCode.IO_EXCEPTION, message, cause);
 	}
 
 	public RuntimeIOException(final Throwable cause) {
-		super(cause);
+		super(ErrorCode.IO_EXCEPTION, cause);
 	}
 }

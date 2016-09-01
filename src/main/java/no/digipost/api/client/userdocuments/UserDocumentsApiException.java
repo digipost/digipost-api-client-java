@@ -17,15 +17,24 @@ package no.digipost.api.client.userdocuments;
 
 public class UserDocumentsApiException extends RuntimeException {
 
-	public UserDocumentsApiException(final String message) {
+	private final ErrorCode errorCode;
+
+	public UserDocumentsApiException(final ErrorCode errorCode, final String message) {
 		super(message);
+		this.errorCode = errorCode;
 	}
 
-	public UserDocumentsApiException(final String message, final Throwable cause) {
+	public UserDocumentsApiException(final ErrorCode errorCode, final String message, final Throwable cause) {
 		super(message, cause);
+		this.errorCode = errorCode;
 	}
 
-	public UserDocumentsApiException(final Throwable cause) {
+	public UserDocumentsApiException(final ErrorCode errorCode, final Throwable cause) {
 		super(cause);
+		this.errorCode = errorCode;
+	}
+
+	public ErrorCode getErrorCode() {
+		return errorCode;
 	}
 }
