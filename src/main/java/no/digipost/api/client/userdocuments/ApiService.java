@@ -176,6 +176,23 @@ public class ApiService {
 		return executeHttpRequest(httpPost, handler);
 	}
 
+	public DocumentCount getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate minDueDate, final String requestTrackingId, final ResponseHandler<DocumentCount> handler) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(userDocumentsPath(senderId) + "/count")
+				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
+				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
+		if (status != null) {
+			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, status.getStatus());
+		}
+		if (minDueDate != null) {
+			uriBuilder.setParameter("invoice-due-date-from", minDueDate.toString(ISODateTimeFormat.basicDate()));
+		}
+		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		addRequestTrackingHeader(httpGet, requestTrackingId);
+		return executeHttpRequest(httpGet, handler);
+	}
+
 	private <T> T executeHttpRequest(final HttpRequestBase request, final ResponseHandler<T> handler) {
 		try {
 			request.setHeader(X_Digipost_UserId, brokerId.serialize());
