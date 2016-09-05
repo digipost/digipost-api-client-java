@@ -24,7 +24,7 @@ public class ServerSignatureException extends UnexpectedResponseException {
 	}
 
 	public ServerSignatureException(final StatusLine status, final String errorMessage, final Throwable cause) {
-		super(status, ErrorCode.SERVER_SIGNATURE_ERROR, errorMessage, cause);
+		super(status, ErrorCode.SIGNATURE_ERROR, errorMessage, cause);
 	}
 
 	public static ResponseExceptionSupplier<ServerSignatureException> getExceptionSupplier() {

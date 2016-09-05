@@ -15,36 +15,23 @@
  */
 package no.digipost.api.client.userdocuments;
 
-public class ErrorCode extends JustA<String> implements IsEqual<ErrorCode> {
+public enum ErrorCode {
+	DOCUMENT_NOT_FOUND,
+	AGREEMENT_TYPE_NOT_AVAILABLE,
+	UNKNOWN_USER_ID,
+	NOT_AUTHORIZED,
+	AGREEMENT_NOT_FOUND,
+	AGREEMENT_DELETED,
+	CLIENT_TECHNICAL_ERROR,
+	SIGNATURE_ERROR,
+	IO_EXCEPTION,
+	GENERAL_ERROR;
 
-	public static final ErrorCode DOCUMENT_NOT_FOUND = new ErrorCode("DOCUMENT_NOT_FOUND");
-	public static final ErrorCode AGREEMENT_TYPE_NOT_AVAILABLE = new ErrorCode("AGREEMENT_TYPE_NOT_AVAILABLE");
-	public static final ErrorCode UNKNOWN_USER_ID = new ErrorCode("UNKNOWN_USER_ID");
-	public static final ErrorCode NOT_AUTHORIZED = new ErrorCode("NOT_AUTHORIZED");
-	public static final ErrorCode AGREEMENT_NOT_FOUND = new ErrorCode("AGREEMENT_NOT_FOUND");
-	public static final ErrorCode AGREEMENT_DELETED = new ErrorCode("AGREEMENT_DELETED");
-	public static final ErrorCode CLIENT_TECHNICAL_ERROR = new ErrorCode("CLIENT_TECHNICAL_ERROR");
-	public static final ErrorCode SIGNATURE_ERROR = new ErrorCode("SIGNATURE_ERROR");
-	public static final ErrorCode GENERAL_ERROR = new ErrorCode("GENERAL_ERROR");
-	public static final ErrorCode IO_EXCEPTION = new ErrorCode("IO_EXCEPTION_ERROR");
-	public static final ErrorCode SERVER_SIGNATURE_ERROR = new ErrorCode("SERVER_SIGNATURE_ERROR");
-
-	public ErrorCode(final String errorCode) {
-		super(errorCode.toUpperCase());
-	}
-
-	@Override
-	public String toString() {
-		return serialize();
-	}
-
-	@Override
-	public String serialize() {
-		return value;
-	}
-
-	@Override
-	public boolean isEqual(final ErrorCode that) {
-		return this.equals(that);
+	public static ErrorCode parse(final String error) {
+		try {
+			return valueOf(error.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			return GENERAL_ERROR;
+		}
 	}
 }
