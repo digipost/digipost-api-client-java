@@ -26,6 +26,8 @@ public class Document {
 
 	@XmlElement
 	private long id;
+	@XmlElement(name = "sender-name")
+	private String senderName;
 	@XmlElement
 	private Invoice invoice;
 
@@ -40,7 +42,21 @@ public class Document {
 		return invoice;
 	}
 
+	public String getSenderName() {
+		return senderName;
+	}
+
 	public long getId() {
 		return id;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Document{");
+		sb.append("id=").append(id);
+		sb.append(", senderName='").append(senderName).append('\'');
+		sb.append(", invoice=").append(invoice);
+		sb.append('}');
+		return sb.toString();
 	}
 }
