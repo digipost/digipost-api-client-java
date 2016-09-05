@@ -29,7 +29,7 @@ public class Error {
 	}
 
 	public static Error fromErrorMessage(final ErrorMessage errorMessage) {
-		return new Error(new ErrorCode(errorMessage.getErrorCode()), errorMessage.getErrorMessage());
+		return new Error(ErrorCode.parse(errorMessage.getErrorCode()), errorMessage.getErrorMessage());
 	}
 
 	@Override
@@ -49,6 +49,6 @@ public class Error {
 	}
 
 	public boolean hasCode(final ErrorCode errorCode) {
-		return code.isEqual(errorCode);
+		return code == errorCode;
 	}
 }
