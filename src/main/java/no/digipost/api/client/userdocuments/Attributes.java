@@ -35,4 +35,9 @@ public class Attributes {
 	public List<Attribute> getAttributes() {
 		return attributes;
 	}
+
+	@Override
+	public String toString() {
+		return attributes.toString();
+	}
 }

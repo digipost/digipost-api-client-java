@@ -40,4 +40,13 @@ public class Attribute {
 	public String getValue() {
 		return value;
 	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Attribute{");
+		sb.append("key='").append(key).append('\'');
+		sb.append(", value='").append(value).append('\'');
+		sb.append('}');
+		return sb.toString();
+	}
 }

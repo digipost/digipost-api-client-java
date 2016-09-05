@@ -70,4 +70,16 @@ public class Invoice {
 	public String getAccount() {
 		return account;
 	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Invoice{");
+		sb.append("kid=").append(kid);
+		sb.append(", amount=").append(amount);
+		sb.append(", account='").append(account).append('\'');
+		sb.append(", dueDate=").append(dueDate);
+		sb.append(", status=").append(status);
+		sb.append('}');
+		return sb.toString();
+	}
 }
