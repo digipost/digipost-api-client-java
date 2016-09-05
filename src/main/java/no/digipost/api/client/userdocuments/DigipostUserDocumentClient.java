@@ -165,6 +165,17 @@ public class DigipostUserDocumentClient {
 		return apiService.updateInvoice(senderId, agreementType, documentId, invoice, requestTrackingId, simpleJAXBEntityHandler(Document.class));
 	}
 
+	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {
+		return getDocumentCount(senderId, agreementType, userId, status, invoiceDueDateFrom, null);
+	}
+
+	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom, final String requestTrackingId) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(agreementType, "agreementType cannot be null");
+		Objects.requireNonNull(userId, "userId cannot be null");
+		return apiService.getDocumentCount(senderId, agreementType, userId, status, invoiceDueDateFrom, requestTrackingId, simpleJAXBEntityHandler(DocumentCount.class)).getCount();
+	}
+
 	private ResponseHandler<Void> voidOkHandler() {
 		return new ResponseHandler<Void>() {
 			@Override
