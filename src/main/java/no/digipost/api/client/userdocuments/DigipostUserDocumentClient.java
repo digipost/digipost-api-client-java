@@ -157,14 +157,21 @@ public class DigipostUserDocumentClient {
 		return apiService.getDocument(senderId, documentId, requestTrackingId, simpleJAXBEntityHandler(Document.class));
 	}
 
-	public Document updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoice) {
-		return updateInvoice(senderId, agreementType, documentId, invoice, null);
+	public Document payInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoicePayment) {
+		return payInvoice(senderId, agreementType, documentId, invoicePayment, null);
 	}
 
-	public Document updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoice, final String requestTrackingId) {
-		return apiService.updateInvoice(senderId, agreementType, documentId, invoice, requestTrackingId, simpleJAXBEntityHandler(Document.class));
+	public Document payInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoicePayment, final String requestTrackingId) {
+		return apiService.updateInvoice(senderId, agreementType, documentId, invoicePayment.asInvoiceUpdate(), requestTrackingId, simpleJAXBEntityHandler(Document.class));
 	}
 
+	public Document deleteInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId) {
+		return deleteInvoice(senderId, agreementType, documentId, null);
+	}
+
+	public Document deleteInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
+		return apiService.updateInvoice(senderId, agreementType, documentId, new InvoiceUpdate(InvoiceStatus.DELETED, null, null), requestTrackingId, simpleJAXBEntityHandler(Document.class));
+	}
 	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {
 		return getDocumentCount(senderId, agreementType, userId, status, invoiceDueDateFrom, null);
 	}

@@ -15,14 +15,33 @@
  */
 package no.digipost.api.client.userdocuments;
 
-public class InvoicePayment {
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement(name = "invoice-update")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class InvoiceUpdate {
+
+	@XmlElement
+	private String status;
+	@XmlElement(name = "payment-id")
 	private Integer paymentId;
-	private BankAccountNumber fromAccount;
+	@XmlElement(name = "from-account")
+	private String fromAccount;
 
-	public InvoicePayment(final InvoiceStatus status, final Integer paymentId, final BankAccountNumber fromAccount) {
+	public InvoiceUpdate() {
+	}
+
+	public InvoiceUpdate(final InvoiceStatus status, final Integer paymentId, final BankAccountNumber fromAccount) {
+		this.status = status.getStatus();
 		this.paymentId = paymentId;
-		this.fromAccount = fromAccount;
+		this.fromAccount = fromAccount.getAccountNumber();
+	}
+
+	public InvoiceStatus getStatus () {
+		return InvoiceStatus.valueOf(status);
 	}
 
 	public int getPaymentId() {
@@ -30,10 +49,6 @@ public class InvoicePayment {
 	}
 
 	public BankAccountNumber getFromAccount() {
-		return fromAccount;
-	}
-
-	public InvoiceUpdate asInvoiceUpdate() {
-		return new InvoiceUpdate(InvoiceStatus.PAID, paymentId, fromAccount);
+		return new BankAccountNumber(fromAccount);
 	}
 }
