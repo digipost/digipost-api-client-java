@@ -20,7 +20,7 @@ public class InvoicePayment {
 	private Integer paymentId;
 	private BankAccountNumber fromAccount;
 
-	public InvoicePayment(final InvoiceStatus status, final Integer paymentId, final BankAccountNumber fromAccount) {
+	public InvoicePayment(final Integer paymentId, final BankAccountNumber fromAccount) {
 		this.paymentId = paymentId;
 		this.fromAccount = fromAccount;
 	}
