@@ -15,43 +15,25 @@
  */
 package no.digipost.api.client.userdocuments;
 
-import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.DateTime;
-
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-@XmlRootElement(name = "invoice-payment")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class InvoicePayment {
 
-	@XmlElement(name = "payment-id")
-	private int paymentId;
-	@XmlElement(name = "paid-at", required = true, type = String.class)
-	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
-	@XmlSchemaType(name = "dateTime")
-	private DateTime paidAt;
-	@XmlElement(name = "from-account")
-	private String fromAccount;
+	private Integer paymentId;
+	private BankAccountNumber fromAccount;
 
-	public InvoicePayment() {
-	}
-
-	public InvoicePayment(final int paymentId, final DateTime paidAt, final BankAccountNumber fromAccount) {
+	public InvoicePayment(final Integer paymentId, final BankAccountNumber fromAccount) {
 		this.paymentId = paymentId;
-		this.paidAt = paidAt;
-		this.fromAccount = fromAccount.getAccountNumber();
+		this.fromAccount = fromAccount;
 	}
 
 	public int getPaymentId() {
 		return paymentId;
 	}
 
-	public DateTime getPaidAt() {
-		return paidAt;
+	public BankAccountNumber getFromAccount() {
+		return fromAccount;
 	}
 
-	public BankAccountNumber getFromAccount() {
-		return new BankAccountNumber(fromAccount);
+	public InvoiceUpdate asInvoiceUpdate() {
+		return new InvoiceUpdate(InvoiceStatus.PAID, paymentId, fromAccount);
 	}
 }
