@@ -164,7 +164,7 @@ public class ApiService {
 		return executeHttpRequest(httpGet, handler);
 	}
 
-	public Document updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoiceUpdate invoice, final String requestTrackingId, final ResponseHandler<Document> handler) {
+	public void updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoiceUpdate invoice, final String requestTrackingId, final ResponseHandler<Void> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/" + documentId + "/invoice")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
@@ -173,7 +173,7 @@ public class ApiService {
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		addRequestTrackingHeader(httpPost, requestTrackingId);
 		httpPost.setEntity(marshallJaxbEntity(invoice));
-		return executeHttpRequest(httpPost, handler);
+		executeHttpRequest(httpPost, handler);
 	}
 
 	public DocumentCount getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate minDueDate, final String requestTrackingId, final ResponseHandler<DocumentCount> handler) {

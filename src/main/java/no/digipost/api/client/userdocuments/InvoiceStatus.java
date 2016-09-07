@@ -22,19 +22,13 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum InvoiceStatus {
 
-	UNPAID("unpaid"),
-	PAID("paid"),
-	DELETED("deleted");
+	UNPAID,
+	PAID,
+	DELETED;
 
 	public static final String QUERY_PARAM_NAME = "invoice-status";
 
-	private final String status;
-
-	InvoiceStatus(final String status) {
-		this.status = status;
-	}
-
 	public String getStatus() {
-		return status;
+		return name().toLowerCase();
 	}
 }
