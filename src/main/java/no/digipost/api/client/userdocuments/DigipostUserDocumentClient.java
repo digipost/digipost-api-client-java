@@ -165,12 +165,20 @@ public class DigipostUserDocumentClient {
 		apiService.updateInvoice(senderId, agreementType, documentId, invoicePayment.asInvoiceUpdate(), requestTrackingId, voidOkHandler());
 	}
 
+	public void updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoiceUpdate invoiceUpdate) {
+		updateInvoice(senderId, agreementType, documentId, invoiceUpdate, null);
+	}
+
+	public void updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoiceUpdate invoiceUpdate, final String requestTrackingId) {
+		apiService.updateInvoice(senderId, agreementType, documentId, invoiceUpdate, requestTrackingId, voidOkHandler());
+	}
+
 	public void deleteInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId) {
 		deleteInvoice(senderId, agreementType, documentId, null);
 	}
 
 	public void deleteInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
-		apiService.updateInvoice(senderId, agreementType, documentId, new InvoiceUpdate(InvoiceStatus.DELETED, null, null), requestTrackingId, voidOkHandler());
+		apiService.updateInvoice(senderId, agreementType, documentId, new InvoiceUpdate(InvoiceStatus.DELETED), requestTrackingId, voidOkHandler());
 	}
 
 	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {

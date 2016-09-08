@@ -34,6 +34,10 @@ public class InvoiceUpdate {
 	public InvoiceUpdate() {
 	}
 
+	public InvoiceUpdate(final InvoiceStatus status) {
+		this(status, null, null);
+	}
+
 	public InvoiceUpdate(final InvoiceStatus status, final Integer paymentId, final BankAccountNumber fromAccount) {
 		this.status = status.getStatus();
 		this.paymentId = paymentId;
