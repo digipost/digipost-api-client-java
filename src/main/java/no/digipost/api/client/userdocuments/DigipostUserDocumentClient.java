@@ -149,12 +149,12 @@ public class DigipostUserDocumentClient {
 		return documents.getDocuments();
 	}
 
-	public Document getDocument(final SenderId senderId, final long documentId) {
-		return getDocument(senderId, documentId, null);
+	public Document getDocument(final SenderId senderId, final AgreementType agreementType, final long documentId) {
+		return getDocument(senderId, agreementType, documentId, null);
 	}
 
-	public Document getDocument(final SenderId senderId, final long documentId, final String requestTrackingId) {
-		return apiService.getDocument(senderId, documentId, requestTrackingId, simpleJAXBEntityHandler(Document.class));
+	public Document getDocument(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
+		return apiService.getDocument(senderId, agreementType, documentId, requestTrackingId, simpleJAXBEntityHandler(Document.class));
 	}
 
 	public void payInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoicePayment) {
@@ -172,8 +172,17 @@ public class DigipostUserDocumentClient {
 	public void deleteInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
 		apiService.updateInvoice(senderId, agreementType, documentId, new InvoiceUpdate(InvoiceStatus.DELETED, null, null), requestTrackingId, voidOkHandler());
 	}
+
 	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {
 		return getDocumentCount(senderId, agreementType, userId, status, invoiceDueDateFrom, null);
+	}
+
+	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId) {
+		return getDocumentContent(senderId, agreementType, documentId, null);
+	}
+
+	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
+		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, simpleJAXBEntityHandler(DocumentContent.class));
 	}
 
 	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom, final String requestTrackingId) {
