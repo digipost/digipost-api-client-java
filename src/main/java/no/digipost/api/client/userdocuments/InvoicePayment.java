@@ -23,7 +23,7 @@ public class InvoicePayment {
 		this.paymentId = paymentId;
 	}
 
-	public int getPaymentId() {
+	public Integer getPaymentId() {
 		return paymentId;
 	}
 
