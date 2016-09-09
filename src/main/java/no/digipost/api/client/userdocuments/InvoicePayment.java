@@ -18,22 +18,16 @@ package no.digipost.api.client.userdocuments;
 public class InvoicePayment {
 
 	private Integer paymentId;
-	private BankAccountNumber fromAccount;
 
-	public InvoicePayment(final Integer paymentId, final BankAccountNumber fromAccount) {
+	public InvoicePayment(final Integer paymentId) {
 		this.paymentId = paymentId;
-		this.fromAccount = fromAccount;
 	}
 
 	public int getPaymentId() {
 		return paymentId;
 	}
 
-	public BankAccountNumber getFromAccount() {
-		return fromAccount;
-	}
-
 	public InvoiceUpdate asInvoiceUpdate() {
-		return new InvoiceUpdate(InvoiceStatus.PAID, paymentId, fromAccount);
+		return new InvoiceUpdate(InvoiceStatus.PAID, paymentId);
 	}
 }

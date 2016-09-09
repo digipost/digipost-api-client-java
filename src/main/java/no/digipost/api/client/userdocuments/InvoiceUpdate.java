@@ -28,20 +28,17 @@ public class InvoiceUpdate {
 	private String status;
 	@XmlElement(name = "payment-id")
 	private Integer paymentId;
-	@XmlElement(name = "from-account")
-	private String fromAccount;
 
 	public InvoiceUpdate() {
 	}
 
 	public InvoiceUpdate(final InvoiceStatus status) {
-		this(status, null, null);
+		this(status, null);
 	}
 
-	public InvoiceUpdate(final InvoiceStatus status, final Integer paymentId, final BankAccountNumber fromAccount) {
+	public InvoiceUpdate(final InvoiceStatus status, final Integer paymentId) {
 		this.status = status.getStatus();
 		this.paymentId = paymentId;
-		this.fromAccount = fromAccount != null ? fromAccount.getAccountNumber() : null;
 	}
 
 	public InvoiceStatus getStatus () {
@@ -50,9 +47,5 @@ public class InvoiceUpdate {
 
 	public int getPaymentId() {
 		return paymentId;
-	}
-
-	public BankAccountNumber getFromAccount() {
-		return new BankAccountNumber(fromAccount);
 	}
 }
