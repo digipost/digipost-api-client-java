@@ -19,40 +19,41 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.net.URI;
 
-@XmlRootElement(name = "invoice-update")
+@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class InvoiceUpdate {
+public class DocumentContent {
 
-	@XmlElement
-	private String status;
-	@XmlElement(name = "payment-id")
-	private Integer paymentId;
-	@XmlElement(name = "from-account")
-	private String fromAccount;
+	@XmlElement(name = "content-type")
+	private String contentType;
 
-	public InvoiceUpdate() {
+	@XmlElement(name = "uri")
+	@XmlJavaTypeAdapter(URIXmlAdapter.class)
+	private URI uri;
+
+	private DocumentContent() {}
+
+	public DocumentContent(final String contentType, final URI uri) {
+		this.contentType = contentType;
+		this.uri = uri;
 	}
 
-	public InvoiceUpdate(final InvoiceStatus status) {
-		this(status, null, null);
+	public String getContentType() {
+		return contentType;
 	}
 
-	public InvoiceUpdate(final InvoiceStatus status, final Integer paymentId, final BankAccountNumber fromAccount) {
-		this.status = status.getStatus();
-		this.paymentId = paymentId;
-		this.fromAccount = fromAccount != null ? fromAccount.getAccountNumber() : null;
+	public URI getTempUri() {
+		return uri;
 	}
 
-	public InvoiceStatus getStatus () {
-		return InvoiceStatus.valueOf(status);
-	}
-
-	public int getPaymentId() {
-		return paymentId;
-	}
-
-	public BankAccountNumber getFromAccount() {
-		return new BankAccountNumber(fromAccount);
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("DocumentContent{");
+		sb.append("contentType='").append(contentType).append('\'');
+		sb.append(", uri=").append(uri);
+		sb.append('}');
+		return sb.toString();
 	}
 }

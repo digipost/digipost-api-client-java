@@ -104,12 +104,12 @@ public class DigipostClient {
 	}
 
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
-						  final long senderAccountId, final Signer signer, final EventLogger eventLogger,
+						  final long brokerId, final Signer signer, final EventLogger eventLogger,
 						  final HttpClientBuilder clientBuilder, final ApiService overriddenApiService, final HttpHost proxy) {
 		HttpClientBuilder httpClientBuilder = clientBuilder == null ? DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT) : clientBuilder;
 
 		this.apiService = overriddenApiService == null ?
-				new ApiServiceImpl(httpClientBuilder, senderAccountId, eventLogger, digipostUrl, proxy) : overriddenApiService;
+				new ApiServiceImpl(httpClientBuilder, brokerId, eventLogger, digipostUrl, proxy) : overriddenApiService;
 
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 		this.messageSender = new MessageSender(config, apiService, eventLogger, new PdfValidator());
@@ -242,7 +242,7 @@ public class DigipostClient {
 	public static class DigipostClientBuilder{
 		private ApiFlavor deliveryType = ApiFlavor.ATOMIC_REST;
 		private final String digipostURL;
-		private final long senderAccountId;
+		private final long brokerId;
 		private final InputStream certificateP12File;
 		private final String certificatePassword;
 		private final Signer signer;
@@ -252,19 +252,19 @@ public class DigipostClient {
 		private ApiService apiService = null;
 		private HttpHost proxy = null;
 
-		public DigipostClientBuilder(String digipostURL, long senderAccountId, InputStream certificateP12File,
+		public DigipostClientBuilder(String digipostURL, long brokerId, InputStream certificateP12File,
 									 String certificatePassword, DigipostClientConfig config){
 			this.digipostURL = digipostURL;
-			this.senderAccountId = senderAccountId;
+			this.brokerId = brokerId;
 			this.certificateP12File = certificateP12File;
 			this.certificatePassword = certificatePassword;
 			this.signer = null;
 			this.config = config;
 		}
 
-		public DigipostClientBuilder(String digipostURL, long senderAccountId, Signer signer, DigipostClientConfig config){
+		public DigipostClientBuilder(String digipostURL, long brokerId, Signer signer, DigipostClientConfig config){
 			this.digipostURL = digipostURL;
-			this.senderAccountId = senderAccountId;
+			this.brokerId = brokerId;
 			this.certificateP12File = null;
 			this.certificatePassword = null;
 			this.signer = signer;
@@ -297,8 +297,8 @@ public class DigipostClient {
 		}
 
 		public DigipostClient build(){
-			return signer == null ? new DigipostClient(config, deliveryType, digipostURL, senderAccountId, certificateP12File, certificatePassword, eventLogger, clientBuilder, proxy)
-					: new DigipostClient(config, deliveryType, digipostURL, senderAccountId, signer, eventLogger, clientBuilder, apiService, proxy);
+			return signer == null ? new DigipostClient(config, deliveryType, digipostURL, brokerId, certificateP12File, certificatePassword, eventLogger, clientBuilder, proxy)
+					: new DigipostClient(config, deliveryType, digipostURL, brokerId, signer, eventLogger, clientBuilder, apiService, proxy);
 		}
 
 	}

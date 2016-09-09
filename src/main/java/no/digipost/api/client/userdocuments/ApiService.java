@@ -154,10 +154,10 @@ public class ApiService {
 		return executeHttpRequest(httpGet, handler);
 	}
 
-	public Document getDocument(final SenderId senderId, final long documentId, final String requestTrackingId, final ResponseHandler<Document> handler) {
+	public Document getDocument(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId, final ResponseHandler<Document> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/" + documentId)
-				.setParameter(AgreementType.QUERY_PARAM_NAME, AgreementType.INVOICE_BANK.getType());
+				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		addRequestTrackingHeader(httpGet, requestTrackingId);
@@ -187,6 +187,16 @@ public class ApiService {
 		if (minDueDate != null) {
 			uriBuilder.setParameter("invoice-due-date-from", minDueDate.toString(ISODateTimeFormat.basicDate()));
 		}
+		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		addRequestTrackingHeader(httpGet, requestTrackingId);
+		return executeHttpRequest(httpGet, handler);
+	}
+
+	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId, final ResponseHandler<DocumentContent> handler) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(userDocumentsPath(senderId) + "/" + documentId + "/content")
+				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		addRequestTrackingHeader(httpGet, requestTrackingId);

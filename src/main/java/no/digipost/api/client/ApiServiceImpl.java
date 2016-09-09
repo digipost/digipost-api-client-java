@@ -94,9 +94,9 @@ public class ApiServiceImpl implements ApiService {
 	private final Cache<String, SenderInformation> senderInformation = new Cache<>("sender-information", expireAfterAccess(standardMinutes(5)), useSoftValues);
 	private final EventLogger eventLogger;
 
-	public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long senderAccountId, EventLogger eventLogger, String digipostUrl,
+	public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long brokerId, EventLogger eventLogger, String digipostUrl,
 						  HttpHost proxy) {
-		this.brokerId = senderAccountId;
+		this.brokerId = brokerId;
 		this.eventLogger = eventLogger;
 		this.digipostUrl = digipostUrl;
 		if(proxy != null) {
