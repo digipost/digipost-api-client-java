@@ -32,6 +32,7 @@ public enum ErrorCode {
 	CLIENT_TECHNICAL_ERROR,
 	SIGNATURE_ERROR,
 	IO_EXCEPTION,
+	NO_ENTITY,
 	GENERAL_ERROR;
 
 	public static ErrorCode parse(final String error) {
