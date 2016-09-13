@@ -37,6 +37,9 @@ public class InvoiceUpdate {
 	}
 
 	public InvoiceUpdate(final InvoiceStatus status, final Integer paymentId) {
+		if (status == InvoiceStatus.PAID && paymentId == null) {
+			throw new IllegalArgumentException("paymentId is required when status == PAID");
+		}
 		this.status = status.getStatus();
 		this.paymentId = paymentId;
 	}
