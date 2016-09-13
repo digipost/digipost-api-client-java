@@ -253,14 +253,13 @@ public class DigipostUserDocumentClient {
 	public static <T> T unmarshallEntity(final HttpResponse response, final Class<T> returnType) {
 		final StatusLine statusLine = response.getStatusLine();
 		try {
+			if (response.getEntity() == null) {
+				throw new UnexpectedResponseException(statusLine, ErrorCode.NO_ENTITY, "Message body is empty");
+			}
 			final String body = EntityUtils.toString(response.getEntity());
 			try {
 				T result = JAXB.unmarshal(response.getEntity().getContent(), returnType);
-				if (result == null) {
-					throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, body);
-				} else {
-					return result;
-				}
+				return result;
 			} catch (IllegalStateException | DataBindingException e) {
 				throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, body, e);
 			}
