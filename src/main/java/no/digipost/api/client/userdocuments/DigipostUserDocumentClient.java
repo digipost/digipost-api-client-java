@@ -253,10 +253,10 @@ public class DigipostUserDocumentClient {
 	public static <T> T unmarshallEntity(final HttpResponse response, final Class<T> returnType) {
 		final StatusLine statusLine = response.getStatusLine();
 		try {
-			if (response.getEntity() == null) {
+			final String body = EntityUtils.toString(response.getEntity());
+			if (body.length() == 0) {
 				throw new UnexpectedResponseException(statusLine, ErrorCode.NO_ENTITY, "Message body is empty");
 			}
-			final String body = EntityUtils.toString(response.getEntity());
 			try {
 				T result = JAXB.unmarshal(response.getEntity().getContent(), returnType);
 				return result;
