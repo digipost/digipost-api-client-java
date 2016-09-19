@@ -20,7 +20,7 @@ import no.digipost.api.client.util.Supplier;
 public class GetAgreementResult {
 
 	public enum FailedReason {
-		UNKNOWN_USER, NO_AGREEMENT, AGREEMENT_DELETED
+		UNKNOWN_USER, NO_AGREEMENT
 	}
 
 	private final Result<Agreement, FailedReason> result;

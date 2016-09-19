@@ -108,8 +108,6 @@ public class DigipostUserDocumentClient {
 						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER, agreementMissingExceptionSupplier);
 					} else if (error.hasCode(ErrorCode.AGREEMENT_NOT_FOUND)) {
 						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT, agreementMissingExceptionSupplier);
-					} else if (error.hasCode(ErrorCode.AGREEMENT_DELETED)) {
-						return new GetAgreementResult(GetAgreementResult.FailedReason.AGREEMENT_DELETED, agreementMissingExceptionSupplier);
 					} else {
 						throw new UnexpectedResponseException(status, error);
 					}
