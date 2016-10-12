@@ -226,8 +226,7 @@ public class ApiService {
 
 	public AgreementUsers getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId, final ResponseHandler<AgreementUsers> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(userAgreementsPath(senderId))
-				.setPath("/agreement-users")
+				.setPath(userAgreementsPath(senderId) + "/agreement-users")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		if (smsNotificationsEnabled != null) {
 			uriBuilder
