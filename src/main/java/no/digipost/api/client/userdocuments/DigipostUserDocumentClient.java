@@ -36,6 +36,7 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.Instant;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
@@ -196,6 +197,22 @@ public class DigipostUserDocumentClient {
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
 		return apiService.getDocumentCount(senderId, agreementType, userId, status, invoiceDueDateFrom, requestTrackingId, simpleJAXBEntityHandler(DocumentCount.class)).getCount();
+	}
+
+	public List<Document> getNewDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final Instant newSince, final Instant notNewerThan) {
+		return getNewDocuments(senderId, agreementType, userId, status, newSince, notNewerThan, null);
+	}
+
+	public List<Document> getNewDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final Instant receivedAfter, final Instant receivedBefore, final String requestTrackingId) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(agreementType, "agreementType cannot be null");
+		Objects.requireNonNull(userId, "userId cannot be null");
+		Objects.requireNonNull(receivedAfter, "receivedAfter must be specified");
+		if (receivedBefore != null && receivedAfter.isAfter(receivedBefore)) {
+			throw new IllegalArgumentException("receivedAfter must be before receivedBefore");
+		}
+		final Documents documents = apiService.getNewDocuments(senderId, agreementType, userId, status, receivedAfter, receivedBefore, requestTrackingId, simpleJAXBEntityHandler(Documents.class));
+		return documents.getDocuments();
 	}
 
 	private ResponseHandler<Void> voidOkHandler() {

@@ -31,6 +31,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -197,6 +198,26 @@ public class ApiService {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/" + documentId + "/content")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
+		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		addRequestTrackingHeader(httpGet, requestTrackingId);
+		return executeHttpRequest(httpGet, handler);
+	}
+
+	public Documents getNewDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final Instant newSince, final Instant notNewerThan, final String requestTrackingId, final ResponseHandler<Documents> handler) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(userDocumentsPath(senderId))
+				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
+				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
+		if (status != null) {
+			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, status.getStatus());
+		}
+		if (newSince != null) {
+			uriBuilder.setParameter("create-time-min", Long.toString(newSince.getMillis()));
+		}
+		if (notNewerThan != null) {
+			uriBuilder.setParameter("create-time-max", Long.toString(notNewerThan.getMillis()));
+		}
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		addRequestTrackingHeader(httpGet, requestTrackingId);
