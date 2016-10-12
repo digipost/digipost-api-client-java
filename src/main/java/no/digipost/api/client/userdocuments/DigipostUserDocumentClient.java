@@ -215,6 +215,17 @@ public class DigipostUserDocumentClient {
 		return documents.getDocuments();
 	}
 
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
+		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null);
+	}
+
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(agreementType, "agreementType cannot be null");
+		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId, simpleJAXBEntityHandler(AgreementUsers.class));
+		return agreementUsers.getUsers();
+	}
+
 	private ResponseHandler<Void> voidOkHandler() {
 		return new ResponseHandler<Void>() {
 			@Override

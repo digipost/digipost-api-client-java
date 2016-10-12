@@ -224,6 +224,22 @@ public class ApiService {
 		return executeHttpRequest(httpGet, handler);
 	}
 
+	public AgreementUsers getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId, final ResponseHandler<AgreementUsers> handler) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(userAgreementsPath(senderId))
+				.setPath("/agreement-users")
+				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
+		if (smsNotificationsEnabled != null) {
+			uriBuilder
+				.setParameter("invoice-sms-notification", smsNotificationsEnabled.toString());
+		}
+
+		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		addRequestTrackingHeader(httpGet, requestTrackingId);
+		return executeHttpRequest(httpGet, handler);
+	}
+
 	private <T> T executeHttpRequest(final HttpRequestBase request, final ResponseHandler<T> handler) {
 		try {
 			request.setHeader(X_Digipost_UserId, brokerId.serialize());
