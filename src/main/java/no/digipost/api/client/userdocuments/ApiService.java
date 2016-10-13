@@ -147,7 +147,7 @@ public class ApiService {
 			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, status.getStatus());
 		}
 		if (minDueDate != null) {
-			uriBuilder.setParameter("invoice-due-date-from", minDueDate.toString(ISODateTimeFormat.basicDate()));
+			uriBuilder.setParameter("invoice-due-date-from", minDueDate.toString(ISODateTimeFormat.date()));
 		}
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
@@ -186,7 +186,7 @@ public class ApiService {
 			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, status.getStatus());
 		}
 		if (minDueDate != null) {
-			uriBuilder.setParameter("invoice-due-date-from", minDueDate.toString(ISODateTimeFormat.basicDate()));
+			uriBuilder.setParameter("invoice-due-date-from", minDueDate.toString(ISODateTimeFormat.date()));
 		}
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
