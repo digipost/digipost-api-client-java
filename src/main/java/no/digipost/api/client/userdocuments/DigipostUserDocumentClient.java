@@ -36,7 +36,6 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.LocalDate;
-import org.joda.time.Instant;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
@@ -136,15 +135,15 @@ public class DigipostUserDocumentClient {
 		apiService.deleteAgrement(senderId, agreementType, userId, requestTrackingId, voidOkHandler());
 	}
 
-	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {
-		return getDocuments(senderId, agreementType, userId, status, invoiceDueDateFrom, null);
+	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query) {
+		return getDocuments(senderId, agreementType, userId, query, null);
 	}
 
-	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom, final String requestTrackingId) {
+	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
-		final Documents documents = apiService.getDocuments(senderId, agreementType, userId, status, invoiceDueDateFrom, requestTrackingId, simpleJAXBEntityHandler(Documents.class));
+		final Documents documents = apiService.getDocuments(senderId, agreementType, userId, query, requestTrackingId, simpleJAXBEntityHandler(Documents.class));
 		return documents.getDocuments();
 	}
 
@@ -180,8 +179,15 @@ public class DigipostUserDocumentClient {
 		apiService.updateInvoice(senderId, agreementType, documentId, new InvoiceUpdate(InvoiceStatus.DELETED), requestTrackingId, voidOkHandler());
 	}
 
-	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {
-		return getDocumentCount(senderId, agreementType, userId, status, invoiceDueDateFrom, null);
+	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query) {
+		return getDocumentCount(senderId, agreementType, userId, query, null);
+	}
+
+	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(agreementType, "agreementType cannot be null");
+		Objects.requireNonNull(userId, "userId cannot be null");
+		return apiService.getDocumentCount(senderId, agreementType, userId, query, requestTrackingId, simpleJAXBEntityHandler(DocumentCount.class)).getCount();
 	}
 
 	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId) {
@@ -190,29 +196,6 @@ public class DigipostUserDocumentClient {
 
 	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
 		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, simpleJAXBEntityHandler(DocumentContent.class));
-	}
-
-	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom, final String requestTrackingId) {
-		Objects.requireNonNull(senderId, "senderId cannot be null");
-		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		Objects.requireNonNull(userId, "userId cannot be null");
-		return apiService.getDocumentCount(senderId, agreementType, userId, status, invoiceDueDateFrom, requestTrackingId, simpleJAXBEntityHandler(DocumentCount.class)).getCount();
-	}
-
-	public List<Document> getNewDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final Instant newSince, final Instant notNewerThan) {
-		return getNewDocuments(senderId, agreementType, userId, status, newSince, notNewerThan, null);
-	}
-
-	public List<Document> getNewDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final Instant receivedAfter, final Instant receivedBefore, final String requestTrackingId) {
-		Objects.requireNonNull(senderId, "senderId cannot be null");
-		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		Objects.requireNonNull(userId, "userId cannot be null");
-		Objects.requireNonNull(receivedAfter, "receivedAfter must be specified");
-		if (receivedBefore != null && receivedAfter.isAfter(receivedBefore)) {
-			throw new IllegalArgumentException("receivedAfter must be before receivedBefore");
-		}
-		final Documents documents = apiService.getNewDocuments(senderId, agreementType, userId, status, receivedAfter, receivedBefore, requestTrackingId, simpleJAXBEntityHandler(Documents.class));
-		return documents.getDocuments();
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {

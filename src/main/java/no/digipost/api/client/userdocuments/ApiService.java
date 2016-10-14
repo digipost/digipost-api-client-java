@@ -31,8 +31,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.joda.time.Instant;
-import org.joda.time.LocalDate;
 import org.joda.time.format.ISODateTimeFormat;
 
 import javax.xml.bind.JAXB;
@@ -138,21 +136,34 @@ public class ApiService {
 		executeHttpRequest(httpDelete, handler);
 	}
 
-	public Documents getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate minDueDate, final String requestTrackingId, final ResponseHandler<Documents> handler) {
+	public Documents getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final ResponseHandler<Documents> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId))
 				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
-		if (status != null) {
-			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, status.getStatus());
-		}
-		if (minDueDate != null) {
-			uriBuilder.setParameter("invoice-due-date-from", minDueDate.toString(ISODateTimeFormat.date()));
-		}
+		setGetDocumentsQueryParams(uriBuilder, query);
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		addRequestTrackingHeader(httpGet, requestTrackingId);
 		return executeHttpRequest(httpGet, handler);
+	}
+
+	private void setGetDocumentsQueryParams(final URIBuilder uriBuilder, final GetDocumentsQuery query) {
+		if (query.getInvoiceStatus() != null) {
+			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, query.getInvoiceStatus().getStatus());
+		}
+		if (query.getInvoiceDueDateFrom() != null) {
+			uriBuilder.setParameter("invoice-due-date-from", query.getInvoiceDueDateFrom().toString(ISODateTimeFormat.date()));
+		}
+		if (query.getInvoiceDueDateTo() != null) {
+			uriBuilder.setParameter("invoice-due-date-to", query.getInvoiceDueDateTo().toString(ISODateTimeFormat.date()));
+		}
+		if (query.getDeliveryTimeFrom() != null) {
+			uriBuilder.setParameter("delivery-time-from", query.getDeliveryTimeFrom().toString(ISODateTimeFormat.dateTime()));
+		}
+		if (query.getDeliveryTimeTo() != null) {
+			uriBuilder.setParameter("delivery-time-to", query.getDeliveryTimeTo().toString(ISODateTimeFormat.dateTime()));
+		}
 	}
 
 	public Document getDocument(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId, final ResponseHandler<Document> handler) {
@@ -177,17 +188,12 @@ public class ApiService {
 		executeHttpRequest(httpPost, handler);
 	}
 
-	public DocumentCount getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate minDueDate, final String requestTrackingId, final ResponseHandler<DocumentCount> handler) {
+	public DocumentCount getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final ResponseHandler<DocumentCount> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/count")
 				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
-		if (status != null) {
-			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, status.getStatus());
-		}
-		if (minDueDate != null) {
-			uriBuilder.setParameter("invoice-due-date-from", minDueDate.toString(ISODateTimeFormat.date()));
-		}
+		setGetDocumentsQueryParams(uriBuilder, query);
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		addRequestTrackingHeader(httpGet, requestTrackingId);
@@ -198,26 +204,6 @@ public class ApiService {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/" + documentId + "/content")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
-		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		addRequestTrackingHeader(httpGet, requestTrackingId);
-		return executeHttpRequest(httpGet, handler);
-	}
-
-	public Documents getNewDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final Instant newSince, final Instant notNewerThan, final String requestTrackingId, final ResponseHandler<Documents> handler) {
-		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(userDocumentsPath(senderId))
-				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
-				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
-		if (status != null) {
-			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, status.getStatus());
-		}
-		if (newSince != null) {
-			uriBuilder.setParameter("create-time-min", Long.toString(newSince.getMillis()));
-		}
-		if (notNewerThan != null) {
-			uriBuilder.setParameter("create-time-max", Long.toString(notNewerThan.getMillis()));
-		}
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		addRequestTrackingHeader(httpGet, requestTrackingId);
