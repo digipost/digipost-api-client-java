@@ -18,13 +18,11 @@ package no.digipost.api.client.representations;
 
 import no.motif.f.Fn;
 import no.motif.f.Predicate;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static no.motif.Singular.optional;
@@ -48,6 +46,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 })
 @XmlSeeAlso({ Invoice.class })
 public class Document extends Representation {
+
 	private final static Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
 
@@ -71,10 +70,7 @@ public class Document extends Representation {
 	public final SensitivityLevel sensitivityLevel;
 	@XmlElement(name = "encrypted")
 	protected Encrypted encrypted;
-	/*@XmlElement(name = "pre-encrypt")
-	protected Boolean preEncrypt;
-	@XmlElement(name = "number-of-pages")
-	protected Integer noEncryptedPages;*/
+
 	@XmlElement(name = "content-hash", nillable = false)
 	protected ContentHash contentHash;
 
@@ -106,7 +102,7 @@ public class Document extends Representation {
 	public Document(String uuid, String subject, FileType fileType, String openingReceipt,
 					SmsNotification smsNotification, EmailNotification emailNotification,
 					AuthenticationLevel authenticationLevel,
-					SensitivityLevel sensitivityLevel, Boolean opened, String technicalType) {
+					SensitivityLevel sensitivityLevel, Boolean opened, String... technicalType) {
 		this.uuid = lowerCase(uuid);
 		this.subject = subject;
 		this.digipostFileType = Objects.toString(fileType, null);
@@ -116,8 +112,40 @@ public class Document extends Representation {
 		this.emailNotification = emailNotification;
 		this.authenticationLevel = authenticationLevel;
 		this.sensitivityLevel = sensitivityLevel;
-		this.technicalType = technicalType;
+		this.technicalType = parseTechnicalTypes(technicalType);
 		validate();
+	}
+
+	static String parseTechnicalTypes(String... technicalTypes){
+		if(technicalTypes == null || technicalTypes.length == 0){
+			return null;
+		}
+
+		Set<String> cleanedStrings = new HashSet<>();
+		for(String st : technicalTypes){
+			if(st != null && !st.isEmpty()){
+				cleanedStrings.add(st.trim());
+			}
+		}
+
+		return cleanedStrings.size() != 0 ? StringUtils.join(cleanedStrings, ",") : null;
+
+	}
+
+	public static Document copyDocumentAndSetDigipostFileTypeToPdf(Document doc){
+		Document newDoc = new Document(doc.uuid, doc.subject, new FileType("pdf"), doc.openingReceipt, doc.smsNotification, doc.emailNotification,
+				doc.authenticationLevel, doc.sensitivityLevel, doc.opened, doc.getTechnicalType());
+
+		if(doc.isPreEncrypt()){
+			newDoc.setPreEncrypt();
+		}
+		if(doc.getNoEncryptedPages() != null) {
+			newDoc.setNoEncryptedPages(doc.getNoEncryptedPages());
+		}
+
+		newDoc.setContentHash(doc.contentHash);
+
+		return newDoc;
 	}
 
 	private void validate() {
@@ -135,10 +163,14 @@ public class Document extends Representation {
 		}
     }
 
-	public static Document technicalAttachment(String type, FileType fileType) {
+	public static Document technicalAttachment(FileType fileType, String... type) {
 		Document document = new Document(UUID.randomUUID().toString(), null, fileType);
-		document.technicalType = type;
+		document.technicalType = parseTechnicalTypes(type);
 		return document;
+	}
+
+	public void setContentHash(ContentHash contentHash){
+		this.contentHash = contentHash;
 	}
 
 	public void setDigipostFileType(FileType fileType) {
@@ -198,8 +230,8 @@ public class Document extends Representation {
     	return new FileType(doc.digipostFileType);
     }};
 
-	public String getTechnicalType() {
-		return technicalType;
+	public String[] getTechnicalType() {
+		return technicalType != null ? technicalType.split(",") : null;
 	}
 
 	public boolean isOpened() {

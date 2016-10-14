@@ -17,12 +17,8 @@ package no.digipost.api.client.filters.request;
 
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.Headers;
-
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
-import javax.ws.rs.ext.Provider;
-
-@Provider
 public class RequestContentSHA256Filter extends RequestContentHashFilter {
 	public RequestContentSHA256Filter(final EventLogger eventListener) {
 		super(eventListener, SHA256Digest.class, Headers.X_Content_SHA256);

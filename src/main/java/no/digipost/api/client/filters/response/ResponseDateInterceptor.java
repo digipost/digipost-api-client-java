@@ -18,25 +18,25 @@ package no.digipost.api.client.filters.response;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.util.DateUtils;
 import no.digipost.api.client.util.LoggingUtil;
+import org.apache.http.Header;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.protocol.HttpContext;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.client.ClientResponseFilter;
-import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
-import static javax.ws.rs.core.HttpHeaders.DATE;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.http.HttpHeaders.DATE;
 import static org.joda.time.DateTime.now;
 
-@Provider
-public class ResponseDateFilter implements ClientResponseFilter {
+public class ResponseDateInterceptor implements HttpResponseInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ResponseDateFilter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ResponseDateInterceptor.class);
 	private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
 
 	private boolean shouldThrow = true;
@@ -46,8 +46,13 @@ public class ResponseDateFilter implements ClientResponseFilter {
 	}
 
 	@Override
-	public void filter(final ClientRequestContext clientRequestContext, final ClientResponseContext clientResponseContext) throws IOException {
-		String dateHeader = clientResponseContext.getHeaders().getFirst(DATE);
+	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+		String dateHeader = null;
+		Header firstHeader = response.getFirstHeader(DATE);
+		if(firstHeader != null){
+			dateHeader = firstHeader.getValue();
+		}
+			
 		try {
 			if (isNotBlank(dateHeader)) {
 				sjekkDato(dateHeader);
@@ -56,7 +61,7 @@ public class ResponseDateFilter implements ClientResponseFilter {
 						"Mangler Date-header - server-signatur kunne ikke sjekkes");
 			}
 		} catch (Exception e) {
-			LoggingUtil.logResponse(clientResponseContext);
+			LoggingUtil.logResponse(response);
 			if (shouldThrow) {
 				if (e instanceof DigipostClientException) {
 					throw (DigipostClientException) e;
@@ -71,7 +76,6 @@ public class ResponseDateFilter implements ClientResponseFilter {
 			}
 		}
 	}
-
 
 	private void sjekkDato(final String dateOnRFC1123Format) {
 		try {
@@ -96,5 +100,4 @@ public class ResponseDateFilter implements ClientResponseFilter {
 			throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for ny: " + headerDate);
 		}
 	}
-
 }

@@ -44,6 +44,10 @@ public class IdentificationResultWithEncryptionKey {
 		return result;
 	}
 
+	public IdentificationResultCode getResultCode(){
+		return result.getResult();
+	}
+
 	public EncryptionKey getEncryptionKey() {
 		return encryptionKey;
 	}

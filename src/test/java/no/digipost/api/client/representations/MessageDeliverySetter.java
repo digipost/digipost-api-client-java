@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.representations;
 
-import javax.ws.rs.core.MediaType;
+import java.util.List;
 
-public class FileMetadata {
-	public String fileName;
-	public MediaType mediaType;
+public class MessageDeliverySetter extends MessageDelivery {
 
-	public FileMetadata(String fileName, MediaType mediaType){
-		this.fileName = fileName;
-		this.mediaType = mediaType;
+	public static MessageDelivery setMessageDeliveryStatus(MessageDelivery messageDelivery, final Document primaryDocument, List<Document> attachments, final Link link){
+		messageDelivery.primaryDocument = primaryDocument;
+		messageDelivery.attachments = attachments;
+		messageDelivery.addLink(link);
+
+		return messageDelivery;
 	}
 }

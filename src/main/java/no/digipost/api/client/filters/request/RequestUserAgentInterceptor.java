@@ -15,23 +15,19 @@
  */
 package no.digipost.api.client.filters.request;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.ext.Provider;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.protocol.HttpContext;
+
 import java.io.IOException;
 
-import static javax.ws.rs.core.HttpHeaders.USER_AGENT;
 import static no.digipost.api.client.util.UserAgent.DIGIPOST_USER_AGENT;
+import static org.apache.http.HttpHeaders.USER_AGENT;
 
-@Provider
-@Priority(Priorities.HEADER_DECORATOR)
-public class RequestUserAgentFilter implements ClientRequestFilter {
-
-
+public class RequestUserAgentInterceptor implements HttpRequestInterceptor {
 	@Override
-	public void filter(ClientRequestContext clientRequestContext) throws IOException {
-		clientRequestContext.getHeaders().add(USER_AGENT, DIGIPOST_USER_AGENT);
+	public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+		httpRequest.setHeader(USER_AGENT, DIGIPOST_USER_AGENT);
 	}
 }

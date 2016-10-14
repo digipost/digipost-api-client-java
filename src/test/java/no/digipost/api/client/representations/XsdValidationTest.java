@@ -93,7 +93,7 @@ public class XsdValidationTest {
 		Message messageWithTechnicalAttachment = newMessage(UUID.randomUUID().toString(),
 					new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL))
 				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
-				.attachments(Collections.singleton(Document.technicalAttachment("tech-type", PDF)))
+				.attachments(Collections.singleton(Document.technicalAttachment(PDF, "tech-type")))
 				.build();
 
 

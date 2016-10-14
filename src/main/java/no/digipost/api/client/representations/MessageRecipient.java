@@ -47,6 +47,15 @@ public class MessageRecipient {
 	public MessageRecipient() {
 	}
 
+	MessageRecipient(NameAndAddress nameAndAddress, String digipostAddress, String personalIdentificationNumber,
+							String organisationNumber, PrintDetails printDetails){
+		this.nameAndAddress = nameAndAddress;
+		this.digipostAddress = digipostAddress;
+		this.personalIdentificationNumber = personalIdentificationNumber;
+		this.organisationNumber = organisationNumber;
+		this.printDetails = printDetails;
+	}
+
 	public MessageRecipient(final PersonalIdentificationNumber id) {
 		this.personalIdentificationNumber = id.asString();
 	}

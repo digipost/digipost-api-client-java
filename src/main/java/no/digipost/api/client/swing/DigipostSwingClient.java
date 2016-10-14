@@ -22,12 +22,10 @@ import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.PrintDetails.PostType;
-import no.digipost.api.client.util.JerseyClientProvider;
 import org.joda.time.LocalDate;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.ws.rs.client.Client;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,6 +36,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 import static java.nio.file.Files.newInputStream;
+import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
@@ -603,12 +602,9 @@ public class DigipostSwingClient {
 				CardLayout layout = (CardLayout) contentPane.getLayout();
 				layout.show(contentPane, BREV);
 
-				Client jerseyClient = turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(endpointField.getText());
-
 				try {
-					client = new DigipostClient(ApiFlavor.STEPWISE_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
-							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger,
-							jerseyClient);
+					client = new DigipostClient(newBuilder().build(),ApiFlavor.STEPWISE_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
+							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger, null, null);
 				} catch (NumberFormatException e1) {
 					eventLogger.log("FEIL: Avsenders ID må være et tall > 0");
 				} catch (IOException e1) {
@@ -709,18 +705,5 @@ public class DigipostSwingClient {
 		gbc.gridx = gridx;
 		gbc.gridy = gridy;
 		return gbc;
-	}
-
-	/**
-	 * Dersom vi tester mot et av Digiposts testmiljøer, vil vi ikke bruke
-	 * SSL-validering.
-	 */
-	private Client turnOffEndpointSslValidationIfWeAreTargetingDigipostTestEnvironment(final String endpoint) {
-		Client jerseyClient = JerseyClientProvider.newClient();
-		if (endpoint.contains("camelon")) {
-			eventLogger.log("Detekterte at vi går mot Digipost Testmiljø. Skrur derfor av SSL-sjekk");
-			jerseyClient = DigipostClient.createJerseyClientWithoutSSLValidation();
-		}
-		return jerseyClient;
 	}
 }

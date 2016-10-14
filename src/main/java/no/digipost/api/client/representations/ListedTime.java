@@ -33,6 +33,10 @@ public final class ListedTime implements ReadableInstant {
     @XmlSchemaType(name = "dateTime")
     public final DateTime time;
 
+	public ListedTime(){
+		this(null);
+	}
+
 	public ListedTime(DateTime atTime) {
 		this.time = atTime;
 	}

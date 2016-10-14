@@ -18,10 +18,16 @@ package no.digipost.api.client;
 import no.digipost.api.client.representations.DocumentEvents;
 import no.digipost.api.client.representations.DocumentStatus;
 import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.util.JAXBContextUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXB;
+import java.io.IOException;
 import java.io.InputStream;
+
+import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
 public class DocumentCommunicator extends Communicator {
 
@@ -30,26 +36,42 @@ public class DocumentCommunicator extends Communicator {
 	}
 
 	public DocumentEvents getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
-		Response response = apiService.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
-		checkResponse(response, eventLogger);
-		return response.readEntity(DocumentEvents.class);
+		try(CloseableHttpResponse response = apiService.getDocumentEvents(organisation, partId, from, to, offset, maxResults)){;
+			checkResponse(response, eventLogger);
+			return unmarshal(documentEventsContext, response.getEntity().getContent(), DocumentEvents.class);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	public InputStream getContent(String path) {
-		Response response = apiService.getContent(path);
-		checkResponse(response, eventLogger);
-		return response.readEntity(InputStream.class);
+		try(CloseableHttpResponse response = apiService.getContent(path)){
+			checkResponse(response, eventLogger);
+			return response.getEntity().getContent();
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	public DocumentStatus getDocumentStatus(Link linkToDocumentStatus) {
-		Response response = apiService.getDocumentStatus(linkToDocumentStatus);
-		checkResponse(response, eventLogger);
-		return response.readEntity(DocumentStatus.class);
+		try(CloseableHttpResponse response = apiService.getDocumentStatus(linkToDocumentStatus)){
+			checkResponse(response, eventLogger);
+			return unmarshal(documentStatusContext, response.getEntity().getContent(), DocumentStatus.class);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	public DocumentStatus getDocumentStatus(long senderId, String uuid) {
-		Response response = apiService.getDocumentStatus(senderId, uuid);
-		checkResponse(response, eventLogger);
-		return response.readEntity(DocumentStatus.class);
+		try(CloseableHttpResponse response = apiService.getDocumentStatus(senderId, uuid)) {
+			checkResponse(response, eventLogger);
+			return unmarshal(documentStatusContext, response.getEntity().getContent(), DocumentStatus.class);
+
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 }

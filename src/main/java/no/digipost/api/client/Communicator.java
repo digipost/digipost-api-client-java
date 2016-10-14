@@ -20,18 +20,21 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.util.JAXBContextUtils;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
+import javax.xml.bind.DataBindingException;
+import javax.xml.bind.JAXB;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static no.digipost.api.client.representations.ErrorType.SERVER;
+import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
 /**
  * Superklasse for MessageSender som har funksjonalitet for å snakke med
@@ -50,44 +53,44 @@ public abstract class Communicator {
 		this.eventLogger = eventLogger;
 	}
 
-	protected void checkResponse(Response response) {
+	protected void checkResponse(CloseableHttpResponse response) {
 		checkResponse(response, eventLogger);
 	}
 
-	public static void checkResponse(final Response response, EventLogger eventLogger) {
-		Status status = Status.fromStatusCode(response.getStatus());
+	public static void checkResponse(final CloseableHttpResponse response, EventLogger eventLogger) {
+		int status = response.getStatusLine().getStatusCode();
 		if (!responseOk(status)) {
 			ErrorMessage error = fetchErrorMessageString(response);
 			log(error.toString(), eventLogger);
 			switch (status) {
-			case INTERNAL_SERVER_ERROR:
-				throw new DigipostClientException(ErrorCode.SERVER_ERROR, error.getErrorMessage());
-			case SERVICE_UNAVAILABLE:
-				throw new DigipostClientException(ErrorCode.API_UNAVAILABLE, error.getErrorMessage());
-			default:
-				throw new DigipostClientException(error);
+				case HttpStatus.SC_INTERNAL_SERVER_ERROR:
+					throw new DigipostClientException(ErrorCode.SERVER_ERROR, error.getErrorMessage());
+				case HttpStatus.SC_SERVICE_UNAVAILABLE:
+					throw new DigipostClientException(ErrorCode.API_UNAVAILABLE, error.getErrorMessage());
+				default:
+					throw new DigipostClientException(error);
 			}
 		}
 	}
 
-	protected static ErrorMessage fetchErrorMessageString(final Response response) {
+	protected static ErrorMessage fetchErrorMessageString(final CloseableHttpResponse response) {
 		try {
-			ErrorMessage errorMessage = response.readEntity(ErrorMessage.class);
+			ErrorMessage errorMessage = unmarshal(errorMessageContext, response.getEntity().getContent(), ErrorMessage.class);
+			response.close();
 			return errorMessage != null ? errorMessage : ErrorMessage.EMPTY;
-		} catch (ProcessingException | IllegalStateException | WebApplicationException e) {
+		} catch (IllegalStateException | DataBindingException e) {
 			return new ErrorMessage(SERVER, ErrorCode.SERVER_ERROR.name(),
 					e.getClass().getSimpleName() + ": Det skjedde en feil på serveren (" + e.getMessage() +
-					"), men klienten kunne ikke lese responsen.");
+							"), men klienten kunne ikke lese responsen.");
+		} catch (IOException e) {
+			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
 		}
 	}
 
-	private static boolean responseOk(final Status status) {
-		if (status == null) {
-			return false;
-		}
+	private static boolean responseOk(final int status) {
 		switch (status) {
-		case CREATED:
-		case OK:
+		case HttpStatus.SC_CREATED:
+		case HttpStatus.SC_OK:
 			return true;
 		default:
 			return false;
@@ -111,8 +114,8 @@ public abstract class Communicator {
 		eventLogger.log(stacktrace.toString());
 	}
 
-	protected boolean resourceAlreadyExists(final Response response) {
-		return Status.CONFLICT.equals(Status.fromStatusCode(response.getStatus()));
+	protected boolean resourceAlreadyExists(final CloseableHttpResponse response) {
+		return response.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT;
 	}
 
 	protected void checkThatExistingMessageIsIdenticalToNewMessage(final MessageDelivery exisitingMessage, final Message message) {

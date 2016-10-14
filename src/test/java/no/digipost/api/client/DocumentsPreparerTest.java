@@ -22,6 +22,7 @@ import no.digipost.api.client.representations.PrintDetails.PostType;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
+import no.digipost.api.client.util.FakeEncryptionKey;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import org.hamcrest.CustomTypeSafeMatcher;
@@ -71,7 +72,7 @@ public class DocumentsPreparerTest {
 
 	private final DocumentsPreparer preparer = new DocumentsPreparer(new PdfValidator());
 
-	private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(ApiServiceMock.createFakeEncryptionKey()));
+	private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(FakeEncryptionKey.createFakeEncryptionKey()));
 
 	private final Document primaryDocument = new Document(UUID.randomUUID().toString(), "primary", PDF);
 	private final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{ put(primaryDocument, printablePdf1Page()); }};
@@ -100,7 +101,7 @@ public class DocumentsPreparerTest {
 	public void deniesNonValidatingPdfForBothPrintAndWeb() {
 		for (Channel deliveryMethod : Channel.values()) {
 			try {
-				preparer.validate(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[] {65, 65, 65, 65}, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
+				preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[]{65, 65, 65, 65}, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
 			} catch (DigipostClientException e) {
 				assertThat(e.getMessage(), containsString("Kunne ikke parse"));
 				continue;
@@ -111,11 +112,11 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
-		preparer.validate(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
+		preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
 
 		expectedException.expect(DigipostClientException.class);
 		expectedException.expectMessage("for mange sider");
-		preparer.validate(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
+		preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
 	}
 
 
@@ -128,57 +129,14 @@ public class DocumentsPreparerTest {
 	}
 
 	@Test
-	public void validatesAndEncryptsWithNoBlankPageInsertedAfterOddNumberOfPagesPrimaryDocument() throws IOException {
-		primaryDocument.setPreEncrypt();
-		Message message = messageBuilder.build();
-		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.SJEKK_ALLE));
-
-		assertThat(message.getAllDocuments(), hasSize(1));
-		assertThat(message.getAllDocuments(), contains(primaryDocument));
-		assertThat(preparedDocuments.keySet(), contains(primaryDocument));
-		assertThat(toByteArray(preparedDocuments.get(primaryDocument)), not(toByteArray(printablePdf1Page())));
-	}
-
-	@Test
-	public void insertsBlankPageAfterPrimaryDocumentForPreEncryptedDocuments() throws IOException {
+	public void dontInsertDocumentsPreparerTestBlankPageAfterPrimaryDocumentForPreEncryptedDocuments() throws IOException {
 		primaryDocument.setPreEncrypt();
 		Document attachment = addAttachment("attachment", PDF, printablePdf2Pages()).setPreEncrypt();
 		Message message = messageBuilder.build();
 		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.SJEKK_ALLE));
 
-		@SuppressWarnings("unchecked")
-        Matcher<Iterable<? extends Document>> primaryDocThenBlankPageThenAttachment = contains(is(primaryDocument), blankPdf, is(attachment));
-		assertThat(preparedDocuments.keySet(), primaryDocThenBlankPageThenAttachment);
-		assertThat(message.getAllDocuments(), primaryDocThenBlankPageThenAttachment);
+		assertThat(preparedDocuments.size(), is(2));
 	}
-
-	@Test
-	public void neverInsertsBlankPageAfterLastAttachment() throws IOException {
-		primaryDocument.setPreEncrypt();
-		documents.put(primaryDocument, printablePdf2Pages());
-		Document a1 = addAttachment("attachment", PDF, printablePdf1Page()).setPreEncrypt();
-		Document a2 = addAttachment("attachment", PDF, printablePdf1Page()).setPreEncrypt();
-		Message message = messageBuilder.build();
-		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.SJEKK_ALLE));
-
-		@SuppressWarnings("unchecked")
-        Matcher<Iterable<? extends Document>> blankPageOnlyAfterFirstAttachment = contains(is(primaryDocument), is(a1), blankPdf, is(a2));
-		assertThat(preparedDocuments.keySet(), blankPageOnlyAfterFirstAttachment);
-		assertThat(message.getAllDocuments(), blankPageOnlyAfterFirstAttachment);
-	}
-
-	@Test
-	public void nonPdfContentNeverInsertsBlankPage() throws IOException {
-		primaryDocument.setPreEncrypt();
-		Document a1 = addAttachment("attachment 1", HTML, toInputStream("content doesn't matter")).setPreEncrypt();
-		Document a2 = addAttachment("attachment 2", JPG, toInputStream("content doesn't matter")).setPreEncrypt();
-		Message message = messageBuilder.digipostAddress(new DigipostAddress("test#ABCD")).build();
-		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.SJEKK_ALLE));
-
-		assertThat(preparedDocuments.keySet(), contains(primaryDocument, a1, a2));
-		assertThat(message.getAllDocuments(), contains(primaryDocument, a1, a2));
-	}
-
 
 	private Document addAttachment(String subject, FileType fileType, InputStream content) {
 		Document document = new Document(UUID.randomUUID().toString(), subject, fileType);

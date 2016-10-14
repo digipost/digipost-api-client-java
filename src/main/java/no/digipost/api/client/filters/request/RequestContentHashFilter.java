@@ -15,29 +15,16 @@
  */
 package no.digipost.api.client.filters.request;
 
-import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
 import no.digipost.api.client.EventLogger;
-
-import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpRequest;
 import org.bouncycastle.crypto.ExtendedDigest;
-
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-
-@Priority(Priorities.HEADER_DECORATOR)
-public abstract class RequestContentHashFilter implements ClientRequestFilter {
+public abstract class RequestContentHashFilter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RequestContentHashFilter.class);
 	private final EventLogger eventLogger;
@@ -54,58 +41,22 @@ public abstract class RequestContentHashFilter implements ClientRequestFilter {
 		this(NOOP_EVENT_LOGGER, digestClass, header);
 	}
 
-	@Override
-	public void filter(ClientRequestContext clientRequestContext) {
-		clientRequestContext.setEntityStream(new ContentHashOutputStream(clientRequestContext, clientRequestContext.getEntityStream()));
-
-	}
-
 	private void log(final String stringToSignMsg) {
 		LOG.debug(stringToSignMsg);
 		eventLogger.log(stringToSignMsg);
 	}
 
-	private final class ContentHashOutputStream extends OutputStream {
-
-		private final ByteArrayOutputStream byteArrayOutputStream;
-		private final OutputStream jerseyStream;
-		private final ClientRequestContext request;
-
-		public ContentHashOutputStream(final ClientRequestContext request, final OutputStream jerseyStream) {
-			this.jerseyStream = jerseyStream;
-			this.request = request;
-
-			byteArrayOutputStream = new ByteArrayOutputStream();
-		}
-
-		@Override
-		public void write(final int b) throws IOException {
-			byteArrayOutputStream.write(b);
-		}
-
-		@Override
-		public void close() throws IOException {
-			byteArrayOutputStream.close();
-			byte[] byteArray = byteArrayOutputStream.toByteArray();
-			settContentHashHeader(byteArray);
-			IOUtils.write(byteArray, jerseyStream);
-			jerseyStream.close();
-		}
-
-		private void settContentHashHeader(final byte[] data) {
-			try {
-				ExtendedDigest instance = digestClass.newInstance();
-				byte[] result = new byte[instance.getDigestSize()];
-				instance.update(data, 0, data.length);
-				instance.doFinal(result, 0);
-				String hash = new String(Base64.encode(result));
-				request.getHeaders().add(header, hash);
-				log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
-			} catch (InstantiationException e) {
-				log("Feil ved generering av " + header + " : " + e.getMessage());
-			} catch (IllegalAccessException e) {
-				log("Feil ved generering av " + header + " : " + e.getMessage());
-			}
+	public void settContentHashHeader(final byte[] data, final HttpRequest httpRequest) {
+		try {
+			ExtendedDigest instance = digestClass.newInstance();
+			byte[] result = new byte[instance.getDigestSize()];
+			instance.update(data, 0, data.length);
+			instance.doFinal(result, 0);
+			String hash = new String(Base64.encode(result));
+			httpRequest.setHeader(header, hash);
+			log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
+		} catch (InstantiationException | IllegalAccessException e) {
+			log("Feil ved generering av " + header + " : " + e.getMessage());
 		}
 	}
 }

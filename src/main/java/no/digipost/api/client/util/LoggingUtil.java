@@ -15,33 +15,31 @@
  */
 package no.digipost.api.client.util;
 
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.core.MultivaluedMap;
-import java.util.List;
 
 public class LoggingUtil {
 
 	private static final Logger LOG = LoggerFactory.getLogger(LoggingUtil.class);
 
-	public static void logResponse(ClientResponseContext clientResponseContext) {
-		LOG.info("HTTP response status code: {}", clientResponseContext.getStatus());
-		LOG.info("HTTP response headers: {}", headersAsString(clientResponseContext.getHeaders()));
+	public static void logResponse(HttpResponse response) {
+		LOG.info("HTTP response status code: {}", response.getStatusLine().getStatusCode());
+		LOG.info("HTTP response headers: {}", headersAsString(response.getAllHeaders()));
 	}
 
-	public static String headersAsString(MultivaluedMap<String, String> httpHeaders) {
+	public static String headersAsString(Header[] httpHeaders) {
 
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 
-		for (String key : httpHeaders.keySet()) {
+		for (Header header : httpHeaders) {
 
-			result.append(key).append(" :");
+			result.append(header.getName()).append(" :");
 
-			List<String> values = httpHeaders.get(key);
-			for (String value : values) {
-				result.append(" ").append(value);
+			for (HeaderElement element : header.getElements()) {
+				result.append(" ").append(element.getValue());
 			}
 
 			result.append("; ");
@@ -50,5 +48,4 @@ public class LoggingUtil {
 		return result.toString();
 
 	}
-
 }

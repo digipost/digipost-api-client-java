@@ -18,38 +18,33 @@ package no.digipost.api.client;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery;
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
-import no.digipost.api.client.filters.request.RequestDateFilter;
-import no.digipost.api.client.filters.request.RequestSignatureFilter;
-import no.digipost.api.client.filters.request.RequestUserAgentFilter;
-import no.digipost.api.client.filters.response.ResponseContentSHA256Filter;
-import no.digipost.api.client.filters.response.ResponseDateFilter;
-import no.digipost.api.client.filters.response.ResponseSignatureFilter;
+import no.digipost.api.client.filters.request.RequestDateInterceptor;
+import no.digipost.api.client.filters.request.RequestSignatureInterceptor;
+import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
+import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
+import no.digipost.api.client.filters.response.ResponseDateInterceptor;
+import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
-import no.digipost.api.client.util.JerseyClientProvider;
+import no.digipost.api.client.util.JAXBContextUtils;
+import no.digipost.http.client.DigipostHttpClientFactory;
+import no.digipost.http.client.DigipostHttpClientSettings;
 import no.digipost.print.validate.PdfValidator;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.JerseyClient;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.glassfish.jersey.filter.LoggingFilter;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.message.GZipEncoder;
+import org.apache.http.HttpHost;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.*;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-
+import javax.xml.bind.JAXB;
+import java.io.IOException;
 import java.io.InputStream;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -76,57 +71,62 @@ public class DigipostClient {
 	private final MessageDeliverer deliverer;
 	private final DocumentCommunicator documentCommunicator;
 
-	private final ResponseSignatureFilter responseSignatureFilter;
-	private final ResponseContentSHA256Filter responseHashFilter = new ResponseContentSHA256Filter();
-	private final ResponseDateFilter responseDateFilter = new ResponseDateFilter();
+	private final ResponseSignatureInterceptor responseSignatureInterceptor;
+	private final ResponseContentSHA256Interceptor responseHashInterceptor = new ResponseContentSHA256Interceptor();
+	private final ResponseDateInterceptor responseDateInterceptor = new ResponseDateInterceptor();
 
 
-	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
-		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
+	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+						  final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
+		this(config, deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
 	}
 
-	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer) {
-		this(deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, null);
+	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+						  final long senderAccountId, final Signer signer, final ApiService apiService) {
+		this(config, deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, null, apiService, null);
 	}
 
-	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final ApiService apiService) {
-		this(deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, apiService);
+	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+						  final long senderAccountId, final Signer signer, final HttpClientBuilder clientBuilder) {
+		this(config, deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, clientBuilder, null, null);
 	}
 
-	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final Client jerseyClient) {
-		this(deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, jerseyClient, null);
+	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+						  final long senderAccountId, final Signer signer, final EventLogger eventLogger,
+						  final HttpClientBuilder clientBuilder) {
+		this(config, deliveryType, digipostUrl, senderAccountId, signer, eventLogger, clientBuilder, null, null);
 	}
 
-	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final ApiService apiService) {
-		this(deliveryType, digipostUrl, senderAccountId, signer, eventLogger, null, apiService);
+	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+						  final long senderAccountId, final InputStream certificateP12File, final String certificatePassword,
+						  final EventLogger eventLogger, final HttpClientBuilder clientBuilder, final HttpHost proxy) {
+		this(config, deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), eventLogger, clientBuilder, null, proxy);
 	}
 
-	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final InputStream certificateP12File, final String certificatePassword, final EventLogger eventLogger, final Client jerseyClient) {
-		this(deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), eventLogger, jerseyClient, null);
-	}
+	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+						  final long senderAccountId, final Signer signer, final EventLogger eventLogger,
+						  final HttpClientBuilder clientBuilder, final ApiService overriddenApiService, final HttpHost proxy) {
+		HttpClientBuilder httpClientBuilder = clientBuilder == null ? DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT) : clientBuilder;
 
-	public DigipostClient(final ApiFlavor deliveryType, final String digipostUrl, final long senderAccountId, final Signer signer, final EventLogger eventLogger, final Client jerseyClient, final ApiService overriddenApiService) {
+		this.apiService = overriddenApiService == null ?
+				new ApiServiceImpl(httpClientBuilder, senderAccountId, eventLogger, digipostUrl, proxy) : overriddenApiService;
 
-		WebTarget webTarget = (jerseyClient == null ? JerseyClientProvider.newClient() : jerseyClient).register(new GZipEncoder()).target(digipostUrl);
-
-		this.apiService = overriddenApiService == null ? new ApiServiceImpl(webTarget, senderAccountId, eventLogger) : overriddenApiService;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
-		this.messageSender = new MessageSender(apiService, eventLogger, new PdfValidator());
+		this.messageSender = new MessageSender(config, apiService, eventLogger, new PdfValidator());
 		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
 		this.documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
-		this.responseSignatureFilter = new ResponseSignatureFilter(apiService);
+		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
 
+		apiService.addFilter(new RequestDateInterceptor(eventLogger));
+		apiService.addFilter(new RequestUserAgentInterceptor());
+		apiService.addFilter(new RequestSignatureInterceptor(signer, eventLogger, new RequestContentSHA256Filter(eventLogger)));
+		apiService.addFilter(responseDateInterceptor);
+		apiService.addFilter(responseHashInterceptor);
+		apiService.addFilter(responseSignatureInterceptor);
 
-		webTarget.register(new LoggingFilter());
-		webTarget.register(new RequestContentSHA256Filter(eventLogger));
-		webTarget.register(new RequestDateFilter(eventLogger));
-		webTarget.register(new RequestUserAgentFilter());
-		webTarget.register(new RequestSignatureFilter(signer, eventLogger));
-		webTarget.register(responseDateFilter);
-		webTarget.register(responseHashFilter);
-		webTarget.register(responseSignatureFilter);
+		apiService.buildApacheHttpClientBuilder();
 
-		log("Initialiserte Jersey-klient mot " + digipostUrl);
+		log("Initialiserte apache-klient mot " + digipostUrl);
 	}
 
 	/**
@@ -136,9 +136,9 @@ public class DigipostClient {
 	 * @param throwOnError true hvis den skal kaste exception, false for warn logging
 	 */
 	public DigipostClient setThrowOnResponseValidationError(final boolean throwOnError) {
-		responseDateFilter.setThrowOnError(throwOnError);
-		responseHashFilter.setThrowOnError(throwOnError);
-		responseSignatureFilter.setThrowOnError(throwOnError);
+		responseDateInterceptor.setThrowOnError(throwOnError);
+		responseHashInterceptor.setThrowOnError(throwOnError);
+		responseSignatureInterceptor.setThrowOnError(throwOnError);
 		return this;
 	}
 
@@ -163,9 +163,13 @@ public class DigipostClient {
 	}
 
 	public IdentificationResult identifyRecipient(final Identification identification) {
-		Response response = apiService.identifyRecipient(identification);
-		Communicator.checkResponse(response, eventLogger);
-		return response.readEntity(IdentificationResult.class);
+		try(CloseableHttpResponse response = apiService.identifyRecipient(identification))
+		{
+			Communicator.checkResponse(response, eventLogger);
+			return JAXBContextUtils.unmarshal(JAXBContextUtils.identificationContext, response.getEntity().getContent(), IdentificationResult.class);
+		} catch (IOException e) {
+			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
+		}
 	}
 
 	public Recipients search(final String searchString) {
@@ -185,7 +189,6 @@ public class DigipostClient {
 	                                        final int offset, final int maxResults) {
 		return documentCommunicator.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
 	}
-
 
 	/**
 	 * Hent informasjon om en gitt avsender. Kan enten be om informasjon om
@@ -237,48 +240,71 @@ public class DigipostClient {
 		eventLogger.log(stringToSignMsg);
 	}
 
-	/**
-	 * Dersom vi tester mot et av Digiposts testmiljøer, vil vi ikke bruke
-	 * SSL-validering.
-	 */
-	public static JerseyClient createJerseyClientWithoutSSLValidation() {
-		TrustManager[] noopTrustManager = new TrustManager[]{new X509TrustManager() {
-			@Override
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return null;
-			}
-
-			@Override
-			public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-			}
-
-			@Override
-			public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-			}
-		}};
-
-		HostnameVerifier noopHostnameVerifier = new HostnameVerifier() {
-			@Override
-			public boolean verify(final String hostname, final SSLSession session) {
-				return true;
-			}
-		};
-
-		SSLContext sc;
-		try {
-			sc = SSLContext.getInstance("SSL");
-			sc.init(null, noopTrustManager, new SecureRandom());
-			ClientConfig c = new ClientConfig();
-			c.register(LoggingFilter.class);
-			c.register(MultiPartFeature.class);
-
-			return new JerseyClientBuilder().sslContext(sc).withConfig(c).hostnameVerifier(noopHostnameVerifier).build();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	public InputStream getContent(final String path) {
 		return documentCommunicator.getContent(path);
+	}
+
+	public static class DigipostClientBuilder{
+		private ApiFlavor deliveryType = ApiFlavor.ATOMIC_REST;
+		private final String digipostURL;
+		private final long senderAccountId;
+		private final InputStream certificateP12File;
+		private final String certificatePassword;
+		private final Signer signer;
+		private final DigipostClientConfig config;
+		private HttpClientBuilder clientBuilder = null;
+		private EventLogger eventLogger = NOOP_EVENT_LOGGER;
+		private ApiService apiService = null;
+		private HttpHost proxy = null;
+
+		public DigipostClientBuilder(String digipostURL, long senderAccountId, InputStream certificateP12File,
+									 String certificatePassword, DigipostClientConfig config){
+			this.digipostURL = digipostURL;
+			this.senderAccountId = senderAccountId;
+			this.certificateP12File = certificateP12File;
+			this.certificatePassword = certificatePassword;
+			this.signer = null;
+			this.config = config;
+		}
+
+		public DigipostClientBuilder(String digipostURL, long senderAccountId, Signer signer, DigipostClientConfig config){
+			this.digipostURL = digipostURL;
+			this.senderAccountId = senderAccountId;
+			this.certificateP12File = null;
+			this.certificatePassword = null;
+			this.signer = signer;
+			this.config = config;
+		}
+
+		public DigipostClientBuilder deliveryType(ApiFlavor deliveryType){
+			this.deliveryType = deliveryType;
+			return this;
+		}
+
+		public DigipostClientBuilder proxy(HttpHost proxy){
+			this.proxy = proxy;
+			return this;
+		}
+
+		public DigipostClientBuilder clientBuilder(HttpClientBuilder clientBuilder){
+			this.clientBuilder = clientBuilder;
+			return this;
+		}
+
+		public DigipostClientBuilder eventLogger(EventLogger eventLogger){
+			this.eventLogger = eventLogger;
+			return this;
+		}
+
+		public DigipostClientBuilder apiService(ApiService apiService){
+			this.apiService = apiService;
+			return this;
+		}
+
+		public DigipostClient build(){
+			return signer == null ? new DigipostClient(config, deliveryType, digipostURL, senderAccountId, certificateP12File, certificatePassword, eventLogger, clientBuilder, proxy)
+					: new DigipostClient(config, deliveryType, digipostURL, senderAccountId, signer, eventLogger, clientBuilder, apiService, proxy);
+		}
+
 	}
 }

@@ -16,40 +16,194 @@
 package no.digipost.api.client.util;
 
 import no.digipost.api.client.representations.MessageDelivery;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.http.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.message.BasicStatusLine;
+import org.apache.http.params.HttpParams;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.core.*;
-import java.lang.annotation.Annotation;
+import javax.xml.bind.JAXB;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
-import java.net.URI;
 import java.util.*;
 
-import static javax.ws.rs.core.Response.Status.OK;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
+import static org.apache.http.HttpStatus.SC_OK;
 
-public class MockfriendlyResponse extends Response {
+public class MockfriendlyResponse implements CloseableHttpResponse {
 
-	public static final Map<String, Response> responses = new HashMap<>();
+	public static final Map<String, CloseableHttpResponse> responses = new HashMap<>();
 	public static final Map<String, RuntimeException> errors = new HashMap<>();
 
-	public static Response DEFAULT_RESPONSE = MockedResponseBuilder.create()
-			.status(OK.getStatusCode())
-			.entity(new MessageDelivery(UUID.randomUUID().toString(), DIGIPOST, COMPLETE, DateTime.now()))
-			.build();
+	public static CloseableHttpResponse DEFAULT_RESPONSE = getDefaultResponse();
 
-	public static ProcessingException CONNECTION_REFUSED = new ProcessingException(new ConnectException("Connection refused"));
+	public static CloseableHttpResponse getDefaultResponse(){
+		MessageDelivery messageDelivery = new MessageDelivery(UUID.randomUUID().toString(), DIGIPOST, COMPLETE, DateTime.now());
+		ByteArrayOutputStream bao = new ByteArrayOutputStream();
+		JAXB.marshal(messageDelivery, bao);
+
+		return MockedResponseBuilder.create()
+				.status(HttpStatus.SC_OK)
+				.entity(new ByteArrayEntity(bao.toByteArray()))
+				.build();
+	}
+
+	public static RuntimeException CONNECTION_REFUSED = new RuntimeException(new ConnectException("Connection refused"));
 
 	static {
 		responses.put("200:OK", DEFAULT_RESPONSE);
 		errors.put("CONNECTION_REFUSED", CONNECTION_REFUSED);
 	}
 
+	@Override
+	public void close() throws IOException {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public StatusLine getStatusLine() {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setStatusLine(StatusLine statusline) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setStatusLine(ProtocolVersion ver, int code) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setStatusLine(ProtocolVersion ver, int code, String reason) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setStatusCode(int code) throws IllegalStateException {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setReasonPhrase(String reason) throws IllegalStateException {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public HttpEntity getEntity() {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setEntity(HttpEntity entity) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public Locale getLocale() {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setLocale(Locale loc) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public ProtocolVersion getProtocolVersion() {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public boolean containsHeader(String name) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public Header[] getHeaders(String name) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public Header getFirstHeader(String name) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public Header getLastHeader(String name) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public Header[] getAllHeaders() {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void addHeader(Header header) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void addHeader(String name, String value) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setHeader(Header header) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setHeader(String name, String value) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setHeaders(Header[] headers) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void removeHeader(Header header) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void removeHeaders(String name) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public HeaderIterator headerIterator() {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public HeaderIterator headerIterator(String name) {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public HttpParams getParams() {
+		throw new NotImplementedException("This is a mock");
+	}
+
+	@Override
+	public void setParams(HttpParams params) {
+		throw new NotImplementedException("This is a mock");
+	}
+
 	public static class MockedResponseBuilder {
 		private int status;
-		private Object entity;
+		private HttpEntity entity;
 
 		public static MockedResponseBuilder create() {
 			return new MockedResponseBuilder();
@@ -60,158 +214,59 @@ public class MockfriendlyResponse extends Response {
 			return this;
 		}
 
-		public MockedResponseBuilder entity(final Object entity) {
+		public MockedResponseBuilder entity(final HttpEntity entity) {
 			this.entity = entity;
 			return this;
+		}
+
+		public MockedResponseBuilder entity(final Object object) {
+			try {
+				ByteArrayOutputStream bao = new ByteArrayOutputStream();
+				if(object instanceof InputStream){
+					IOUtils.copy((InputStream)object, bao);
+				}
+				else {
+					JAXB.marshal(object, bao);
+				}
+
+				this.entity = new ByteArrayEntity(bao.toByteArray());
+				return this;
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
 		}
 
 		public MockfriendlyResponse build() {
 			return new MockfriendlyResponse() {
 				@Override
-				public int getStatus() {
-					return status;
+				public StatusLine getStatusLine() {
+					return new BasicStatusLine(new ProtocolVersion("1",2,3), status, "reason");
 				}
 
 				@Override
-				@SuppressWarnings("unchecked")
-				public <T> T readEntity(final Class<T> entityType) {
-					return (T) entity;
+				public HttpEntity getEntity() {
+					return entity;
+				}
+
+				@Override
+				public void close() throws IOException {
 				}
 			};
 		}
 
-		public static Response ok(Object entity) {
-			return MockedResponseBuilder.create().status(OK.getStatusCode()).entity(entity).build();
+		public static CloseableHttpResponse ok(Object object) {
+			try{
+				ByteArrayOutputStream bao = new ByteArrayOutputStream();
+				if(object instanceof InputStream){
+					IOUtils.copy((InputStream)object, bao);
+				}
+				else {
+					JAXB.marshal(object, bao);
+				}
+				return MockedResponseBuilder.create().status(SC_OK).entity(new ByteArrayEntity(bao.toByteArray())).build();
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
 		}
-	}
-
-	@Override
-	public int getStatus() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public StatusType getStatusInfo() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public Object getEntity() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public <T> T readEntity(final Class<T> entityType) {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public <T> T readEntity(final GenericType<T> entityType) {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public <T> T readEntity(final Class<T> entityType, final Annotation[] annotations) {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public <T> T readEntity(final GenericType<T> entityType, final Annotation[] annotations) {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public boolean hasEntity() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public boolean bufferEntity() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public void close() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public MediaType getMediaType() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public Locale getLanguage() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public int getLength() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public Set<String> getAllowedMethods() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public Map<String, NewCookie> getCookies() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public EntityTag getEntityTag() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public Date getDate() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public Date getLastModified() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public URI getLocation() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public Set<Link> getLinks() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public boolean hasLink(final String relation) {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public Link getLink(final String relation) {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public Link.Builder getLinkBuilder(final String relation) {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public MultivaluedMap<String, Object> getMetadata() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public MultivaluedMap<String, String> getStringHeaders() {
-		throw new NotImplementedException("This is a mock");
-	}
-
-	@Override
-	public String getHeaderString(final String name) {
-		throw new NotImplementedException("This is a mock");
 	}
 }

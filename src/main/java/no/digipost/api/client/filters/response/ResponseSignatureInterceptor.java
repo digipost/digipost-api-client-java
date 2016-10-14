@@ -19,16 +19,18 @@ import no.digipost.api.client.ApiService;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.security.ClientResponseToVerify;
-import no.digipost.api.client.util.LoggingUtil;
+import no.digipost.api.client.security.ResponseMessageSignatureUtil;
+import org.apache.http.Header;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.cookie.CookieOrigin;
+import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.glassfish.jersey.internal.util.Base64;
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.client.ClientResponseFilter;
-import javax.ws.rs.ext.Provider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,12 +42,11 @@ import java.security.cert.X509Certificate;
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 import static no.digipost.api.client.Headers.X_Digipost_Signature;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
-import static no.digipost.api.client.security.ResponseMessageSignatureUtil.getCanonicalResponseRepresentation;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-@Provider
-public class ResponseSignatureFilter implements ClientResponseFilter {
-	private static final Logger LOG = LoggerFactory.getLogger(ResponseSignatureFilter.class);
+public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ResponseSignatureInterceptor.class);
 	private boolean shouldThrow = true;
 
 	public void setThrowOnError(final boolean shouldThrow) {
@@ -55,29 +56,28 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 	private final EventLogger eventLogger;
 	private final ApiService apiService;
 
-	public ResponseSignatureFilter(final ApiService apiService) {
+	public ResponseSignatureInterceptor(final ApiService apiService) {
 		this(NOOP_EVENT_LOGGER, apiService);
 	}
 
-	public ResponseSignatureFilter(final EventLogger eventLogger, final ApiService apiService) {
+	public ResponseSignatureInterceptor(final EventLogger eventLogger, final ApiService apiService) {
 		this.eventLogger = eventLogger;
 		this.apiService = apiService;
 	}
 
 	@Override
-	public void filter(final ClientRequestContext clientRequestContext, final ClientResponseContext clientResponseContext) throws IOException {
-
+	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
 		// TODO configure this on relevant WebTarget instead
-		if ("/".equals(clientRequestContext.getUri().getPath())) {
+		if ("/".equals(((CookieOrigin)(context.getAttribute("http.cookie-origin"))).getPath())) {
 			eventLogger.log("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
 			return;
 		}
 
 		try {
-			String serverSignaturBase64 = getServerSignaturFromResponse(clientResponseContext);
+			String serverSignaturBase64 = getServerSignaturFromResponse(response);
 			byte[] serverSignaturBytes = Base64.decode(serverSignaturBase64.getBytes());
 
-			String signatureString = getCanonicalResponseRepresentation(new ClientResponseToVerify(clientRequestContext, clientResponseContext));
+			String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ClientResponseToVerify(context, response));
 
 			Signature instance = Signature.getInstance("SHA256WithRSAEncryption");
 			instance.initVerify(lastSertifikat());
@@ -90,7 +90,6 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 						+ " var OK: " + serverSignaturBase64);
 			}
 		} catch (Exception e) {
-			LoggingUtil.logResponse(clientResponseContext);
 			if (shouldThrow) {
 				if (e instanceof DigipostClientException) {
 					throw (DigipostClientException) e;
@@ -106,8 +105,14 @@ public class ResponseSignatureFilter implements ClientResponseFilter {
 		}
 	}
 
-	private String getServerSignaturFromResponse(final ClientResponseContext response) {
-		String serverSignaturString = response.getHeaders().getFirst(X_Digipost_Signature);
+
+	private String getServerSignaturFromResponse(final HttpResponse response) {
+		String serverSignaturString = null;
+		Header firstHeader = response.getFirstHeader(X_Digipost_Signature);
+		if(firstHeader != null){
+			serverSignaturString = firstHeader.getValue();
+		}
+
 		if (isBlank(serverSignaturString)) {
 			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
 					"Mangler " + X_Digipost_Signature + "-header - server-signatur kunne ikke sjekkes");

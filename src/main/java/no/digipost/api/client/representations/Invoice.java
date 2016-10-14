@@ -57,10 +57,23 @@ public class Invoice
 		this(uuid, subject, fileType, null, null, null, null, null, kid, amount, account, dueDate);
 	}
 
+	public Invoice(String uuid, String subject, FileType fileType, String kid, BigDecimal amount, String account, LocalDate dueDate,
+				   Boolean opened, String technicalType, AuthenticationLevel authenticationLevel) {
+		this(uuid, subject, fileType, null, null, null, authenticationLevel, null, kid, amount, account, dueDate, opened, technicalType);
+	}
+
 	public Invoice(String uuid, String subject, FileType fileType, String openingReceipt, SmsNotification smsNotification,
 	               EmailNotification emailNotification, AuthenticationLevel authenticationLevel, SensitivityLevel sensitivityLevel,
 				   String kid, BigDecimal amount, String account, LocalDate dueDate) {
-		super(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel);
+		this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel,
+				kid, amount, account, dueDate, null, null);
+	}
+
+	public Invoice(String uuid, String subject, FileType fileType, String openingReceipt, SmsNotification smsNotification,
+				   EmailNotification emailNotification, AuthenticationLevel authenticationLevel, SensitivityLevel sensitivityLevel,
+				   String kid, BigDecimal amount, String account, LocalDate dueDate, Boolean opened, String... technicalType) {
+		super(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel,
+				opened, technicalType);
 		this.kid = kid;
 		this.amount = amount;
 		this.account = account;

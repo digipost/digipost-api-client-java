@@ -28,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.UUID;
 
+import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
@@ -51,7 +52,7 @@ public class ForsendelseEksempel {
 		InputStream sertifikatInputStream = lesInnSertifikat();
 
 		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient(ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+		DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
 		// 3. Vi oppretter et fødselsnummerobjekt
 		PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");

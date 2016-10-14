@@ -603,6 +603,14 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="pre-encrypt-no-pages" type="xsd:int" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        If the document is pre-ecnrypted and may be delivered to print,
+                        this element is used specify the number of pages in the document.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="content-hash" type="content-hash" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>

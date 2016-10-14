@@ -20,5 +20,5 @@
         <artifactId>antlr-runtime</artifactId>
         <version>3.1.2</version>
         <license>BSD licence</license>
-    </artifact>    
+    </artifact>
 </license-lookup>

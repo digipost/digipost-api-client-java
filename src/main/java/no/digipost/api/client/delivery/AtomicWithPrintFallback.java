@@ -34,7 +34,7 @@ final class AtomicWithPrintFallback implements OngoingDelivery.SendableWithPrint
 
 	private final MessageSender sender;
 	private final Message message;
-	private final Map<Document, InputStream> documents = new LinkedHashMap<>();
+	private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
     AtomicWithPrintFallback(Message message, MessageSender sender) {
     	this.message = message;
@@ -47,28 +47,20 @@ final class AtomicWithPrintFallback implements OngoingDelivery.SendableWithPrint
      *
      * @return videre operasjoner for å fullføre leveransen.
      */
-    @Override
-    public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
-    	documents.put(document, content);
-    	return this;
-    }
+	@Override
+	public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
+		documents.put(document.uuid, DocumentContent.CreateBothStreamContent(content));
+		return this;
+	}
 
-
-    @Override
-    public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
-    	if (printContent == null) {
-    		return addContent(document, content);
-    	} else {
-    		throw new UnsupportedOperationException(
-    				"Adding separate content for print is not supported for " +
-					ApiFlavor.class.getSimpleName() + " " + ApiFlavor.ATOMIC_REST);
-    	}
-    }
-
+	@Override
+	public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
+		documents.put(document.uuid, DocumentContent.CreateMultiStreamContent(content, printContent));
+		return this;
+	}
 
 	@Override
     public MessageDelivery send() {
 		return sender.sendMultipartMessage(message, documents);
     }
-
 }

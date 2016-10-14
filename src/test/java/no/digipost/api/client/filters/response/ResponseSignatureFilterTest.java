@@ -17,57 +17,58 @@ package no.digipost.api.client.filters.response;
 
 import no.digipost.api.client.ApiService;
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.filters.response.ResponseSignatureFilter;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.cookie.CookieOrigin;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HttpContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.core.MultivaluedHashMap;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResponseSignatureFilterTest {
 
-	private ResponseSignatureFilter responseSignatureFilter;
+	private ResponseSignatureInterceptor responseSignatureInterceptor;
 
 	@Mock
 	private ApiService apiServiceMock;
 
 	@Mock
-	private ClientRequestContext clientRequestMock;
+	private HttpResponse httpResponseMock;
 
 	@Mock
-	private ClientResponseContext clientResponseMock;
+	private HttpContext httpContextMock;
 
 	@Before
 	public void setUp() throws URISyntaxException {
-		responseSignatureFilter = new ResponseSignatureFilter(apiServiceMock);
-		responseSignatureFilter.setThrowOnError(true);
-		when(clientRequestMock.getUri()).thenReturn(new URI("/some/resource"));
-		when(clientResponseMock.getHeaders()).thenReturn(new MultivaluedHashMap<String, String>());
+		responseSignatureInterceptor = new ResponseSignatureInterceptor(apiServiceMock);
+		responseSignatureInterceptor.setThrowOnError(true);
+		when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
+		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
 	}
 
 	@Test
-	public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException {
-		responseSignatureFilter.setThrowOnError(false);
-		responseSignatureFilter.filter(clientRequestMock, clientResponseMock);
+	public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
+		responseSignatureInterceptor.setThrowOnError(false);
+		responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
 	}
 
 	@Test
-	public void skal_kaste_feil_om_server_signatur_mangler() throws IOException {
+	public void skal_kaste_feil_om_server_signatur_mangler() throws IOException, HttpException {
 		try {
-			responseSignatureFilter.filter(clientRequestMock, clientResponseMock);
+			responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle kastet feil grunnet manglende signatur header");
 		} catch (DigipostClientException e) {
 			assertThat(e.getMessage(), containsString("Mangler X-Digipost-Signature-header"));

@@ -17,11 +17,11 @@ package no.digipost.api.client;
 
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
-import org.glassfish.jersey.media.multipart.MultiPart;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.joda.time.DateTime;
-
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.Response;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -59,23 +59,24 @@ import java.net.URI;
 public interface ApiService {
 	EntryPoint getEntryPoint();
 
+
 	/**
 	 * Oppretter og sender en multipartforsendelse
 	 */
-	Response multipartMessage(MultiPart multiPart);
+	CloseableHttpResponse multipartMessage(HttpEntity multipart);
 
 	/**
 	 * Oppretter en ny forsendelsesressurs på serveren ved å sende en
 	 * POST-forespørsel.
 	 */
-	Response createMessage(Message message);
+	CloseableHttpResponse createMessage(Message message);
 
 	/**
 	 * Henter en allerede eksisterende forsendelsesressurs fra serveren.
 	 */
-	Response fetchExistingMessage(URI location);
+	CloseableHttpResponse fetchExistingMessage(URI location);
 
-	Response getEncryptionKey(URI location);
+	CloseableHttpResponse getEncryptionKey(URI location);
 
 	/**
 	 * Angir innholdet i en allerede opprettet forsendelse
@@ -84,7 +85,7 @@ public interface ApiService {
 	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
 	 *
 	 */
-	Response addContent(Document document, InputStream letterContent);
+	CloseableHttpResponse addContent(Document document, InputStream letterContent);
 
 	/**
 	 * Sender innholdet i forsendelsen som en POST-forespørsel til serveren
@@ -95,15 +96,19 @@ public interface ApiService {
 	 * metoden {@code addContent}
 	 *
 	 */
-	Response send(MessageDelivery createdMessage);
+	CloseableHttpResponse send(MessageDelivery createdMessage);
 
 	Recipients search(String searchString);
 
 	Autocomplete searchSuggest(String searchString);
 
-	void addFilter(ClientRequestFilter filter);
+	void addFilter(HttpResponseInterceptor interceptor);
 
-	Response identifyRecipient(Identification identification);
+	void addFilter(HttpRequestInterceptor interceptor);
+
+	void buildApacheHttpClientBuilder();
+
+	CloseableHttpResponse identifyRecipient(Identification identification);
 
 	/**
 	 * Sjekker hvis spesifisert mottaker er Digipost-bruker.
@@ -112,7 +117,7 @@ public interface ApiService {
 	 * skal prekrypteres.
 	 * @param identification
 	 */
-	Response identifyAndGetEncryptionKey(Identification identification);
+	CloseableHttpResponse identifyAndGetEncryptionKey(Identification identification);
 
 	/**
 	 * Henter hendelser knyttet til tidligere sendte brev.
@@ -121,21 +126,21 @@ public interface ApiService {
 	 * @param partId Frivillig organisasjons-enhet, kan være {@code null}
 	 *
 	 */
-	Response getDocumentEvents(String organisation, String partId, DateTime from, DateTime to, int offset, int maxResults);
+	CloseableHttpResponse getDocumentEvents(String organisation, String partId, DateTime from, DateTime to, int offset, int maxResults);
 
 	/**
 	 * Henter status på dokumeter som tidligere blitt sendt i Digipost, både via digital og print-kanal.
 	 * @param linkToDocumentStatus
 	 */
-	Response getDocumentStatus(Link linkToDocumentStatus);
-	Response getDocumentStatus(long senderId, String uuid);
+	CloseableHttpResponse getDocumentStatus(Link linkToDocumentStatus);
+	CloseableHttpResponse getDocumentStatus(long senderId, String uuid);
 
-	Response getContent(String path);
+	CloseableHttpResponse getContent(String path);
 
 	/**
 	 * Henter publik krypteringsnøkkel for forsendelser som skal sendes til print.
 	 */
-	Response getEncryptionKeyForPrint();
+	CloseableHttpResponse getEncryptionKeyForPrint();
 
 
 	/**

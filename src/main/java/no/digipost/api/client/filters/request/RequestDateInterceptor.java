@@ -17,33 +17,29 @@ package no.digipost.api.client.filters.request;
 
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.util.DateUtils;
+import org.apache.http.*;
+import org.apache.http.protocol.HttpContext;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
-import static javax.ws.rs.core.HttpHeaders.DATE;
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
+import static org.apache.http.HttpHeaders.DATE;
 
-@Provider
-@Priority(Priorities.HEADER_DECORATOR)
-public class RequestDateFilter implements ClientRequestFilter {
-	private static final Logger LOG = LoggerFactory.getLogger(RequestDateFilter.class);
+public class RequestDateInterceptor implements HttpRequestInterceptor {
+
+	private static final Logger LOG = LoggerFactory.getLogger(RequestDateInterceptor.class);
 	private final EventLogger eventLogger;
 
-	public RequestDateFilter(final EventLogger eventListener) {
+	public RequestDateInterceptor(final EventLogger eventListener) {
 		this.eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
 	}
 
 	@Override
-	public void filter(ClientRequestContext clientRequestContext) throws IOException {
-		modifyRequest(clientRequestContext);
+	public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+		modifyRequest(httpRequest);
 	}
 
 	private void log(final String stringToSignMsg) {
@@ -51,12 +47,9 @@ public class RequestDateFilter implements ClientRequestFilter {
 		eventLogger.log(stringToSignMsg);
 	}
 
-	private ClientRequestContext modifyRequest(final ClientRequestContext cr) {
+	private void modifyRequest(final HttpRequest httpRequest) {
 		String dateOnRFC1123Format = DateUtils.formatDate(DateTime.now());
-		cr.getHeaders().add(DATE, dateOnRFC1123Format);
+		httpRequest.setHeader(DATE, dateOnRFC1123Format);
 		log(getClass().getSimpleName() + " satt headeren " + DATE + "=" + dateOnRFC1123Format);
-		return cr;
 	}
-
-
 }
