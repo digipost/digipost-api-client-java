@@ -189,6 +189,16 @@ public class DigipostUserDocumentClient {
 		apiService.updateInvoice(senderId, agreementType, documentId, new InvoiceUpdate(InvoiceStatus.DELETED), requestTrackingId, voidOkHandler());
 	}
 
+	@Deprecated
+	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {
+		return getDocumentCount(senderId, agreementType, userId, GetDocumentsQuery.builder().invoiceStatus(status).invoiceDueDateFrom(invoiceDueDateFrom).build(), null);
+	}
+
+	@Deprecated
+	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom, final String requestTrackingId) {
+		return getDocumentCount(senderId, agreementType, userId, GetDocumentsQuery.builder().invoiceStatus(status).invoiceDueDateFrom(invoiceDueDateFrom).build(), requestTrackingId);
+	}
+
 	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query) {
 		return getDocumentCount(senderId, agreementType, userId, query, null);
 	}
