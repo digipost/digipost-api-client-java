@@ -7,6 +7,8 @@
     ***********************************
             XML API for avsendere
     ***********************************
+
+    17.10.16 - Utvidet antal tillatt vedlegg fra 99 til 201
     -->
 
     <xsd:simpleType name="authentication-level">
@@ -551,7 +553,7 @@
             <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1" />
             <xsd:element name="delivery-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
+            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="201" nillable="false"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
@@ -661,7 +663,7 @@
                 </xsd:simpleType>
             </xsd:element>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
-            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
+            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="201" nillable="false"/>
         </xsd:sequence>
     </xsd:complexType>
 
