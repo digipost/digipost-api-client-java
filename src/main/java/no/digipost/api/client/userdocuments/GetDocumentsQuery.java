@@ -16,15 +16,15 @@
 package no.digipost.api.client.userdocuments;
 
 
-import org.joda.time.Instant;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 public class GetDocumentsQuery {
 	private final InvoiceStatus invoiceStatus;
 	private final LocalDate invoiceDueDateFrom;
 	private final LocalDate invoiceDueDateTo;
-	private final Instant deliveryTimeFrom;
-	private final Instant deliveryTimeTo;
+	private final DateTime deliveryTimeFrom;
+	private final DateTime deliveryTimeTo;
 
 	private GetDocumentsQuery(final Builder builder) {
 		this.invoiceStatus = builder.invoiceStatus;
@@ -46,11 +46,11 @@ public class GetDocumentsQuery {
 		return invoiceDueDateTo;
 	}
 
-	public Instant getDeliveryTimeFrom() {
+	public DateTime getDeliveryTimeFrom() {
 		return deliveryTimeFrom;
 	}
 
-	public Instant getDeliveryTimeTo() {
+	public DateTime getDeliveryTimeTo() {
 		return deliveryTimeTo;
 	}
 
@@ -66,8 +66,8 @@ public class GetDocumentsQuery {
 		private InvoiceStatus invoiceStatus;
 		private LocalDate invoiceDueDateFrom;
 		private LocalDate invoiceDueDateTo;
-		private Instant deliveryTimeFrom;
-		private Instant deliveryTimeTo;
+		private DateTime deliveryTimeFrom;
+		private DateTime deliveryTimeTo;
 
 		private Builder() {}
 
@@ -86,12 +86,12 @@ public class GetDocumentsQuery {
 			return this;
 		}
 
-		public Builder deliveryTimeFrom(final Instant deliveryTimeFrom) {
+		public Builder deliveryTimeFrom(final DateTime deliveryTimeFrom) {
 			this.deliveryTimeFrom = deliveryTimeFrom;
 			return this;
 		}
 
-		public Builder deliveryTimeTo(final Instant deliveryTimeTo) {
+		public Builder deliveryTimeTo(final DateTime deliveryTimeTo) {
 			this.deliveryTimeTo = deliveryTimeTo;
 			return this;
 		}

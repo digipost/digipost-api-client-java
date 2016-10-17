@@ -135,6 +135,16 @@ public class DigipostUserDocumentClient {
 		apiService.deleteAgrement(senderId, agreementType, userId, requestTrackingId, voidOkHandler());
 	}
 
+	@Deprecated
+	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {
+		return getDocuments(senderId, agreementType, userId, GetDocumentsQuery.builder().invoiceStatus(status).invoiceDueDateFrom(invoiceDueDateFrom).build(), null);
+	}
+
+	@Deprecated
+	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom, final String requestTrackingId) {
+		return getDocuments(senderId, agreementType, userId, GetDocumentsQuery.builder().invoiceStatus(status).invoiceDueDateFrom(invoiceDueDateFrom).build(), requestTrackingId);
+	}
+
 	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query) {
 		return getDocuments(senderId, agreementType, userId, query, null);
 	}
