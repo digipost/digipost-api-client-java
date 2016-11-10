@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
 import java.security.Security;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
@@ -86,6 +87,7 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 		} else {
 			setSignatureHeader(httpRequest);
 		}
+		httpContext.setAttribute("request-path", URI.create(httpRequest.getRequestLine().getUri()).getPath());
 
 
 	}

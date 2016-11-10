@@ -32,8 +32,8 @@ import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JAXBContextUtils;
-import no.digipost.http.client.DigipostHttpClientFactory;
-import no.digipost.http.client.DigipostHttpClientSettings;
+import no.digipost.http.client3.DigipostHttpClientFactory;
+import no.digipost.http.client3.DigipostHttpClientSettings;
 import no.digipost.print.validate.PdfValidator;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -42,7 +42,6 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXB;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -107,19 +106,19 @@ public class DigipostClient {
 						  final long senderAccountId, final Signer signer, final EventLogger eventLogger,
 						  final HttpClientBuilder clientBuilder, final ApiService overriddenApiService, final HttpHost proxy) {
 		HttpClientBuilder httpClientBuilder = clientBuilder == null ? DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT) : clientBuilder;
+		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 
 		this.apiService = overriddenApiService == null ?
-				new ApiServiceImpl(httpClientBuilder, senderAccountId, eventLogger, digipostUrl, proxy) : overriddenApiService;
+				new ApiServiceImpl(httpClientBuilder, senderAccountId, this.eventLogger, digipostUrl, proxy) : overriddenApiService;
 
-		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
-		this.messageSender = new MessageSender(config, apiService, eventLogger, new PdfValidator());
+		this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
 		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
-		this.documentCommunicator = new DocumentCommunicator(apiService, eventLogger);
+		this.documentCommunicator = new DocumentCommunicator(apiService, this.eventLogger);
 		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
 
-		apiService.addFilter(new RequestDateInterceptor(eventLogger));
+		apiService.addFilter(new RequestDateInterceptor(this.eventLogger));
 		apiService.addFilter(new RequestUserAgentInterceptor());
-		apiService.addFilter(new RequestSignatureInterceptor(signer, eventLogger, new RequestContentSHA256Filter(eventLogger)));
+		apiService.addFilter(new RequestSignatureInterceptor(signer, this.eventLogger, new RequestContentSHA256Filter(this.eventLogger)));
 		apiService.addFilter(responseDateInterceptor);
 		apiService.addFilter(responseHashInterceptor);
 		apiService.addFilter(responseSignatureInterceptor);
