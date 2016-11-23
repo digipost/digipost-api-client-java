@@ -71,8 +71,8 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 						"Mangler X-Content-SHA256-header - server-signatur kunne ikke valideres");
 			}
 			byte[] entityBytes = IOUtils.toByteArray(response.getEntity().getContent());
-			validerBytesMotHashHeader(hashHeader, entityBytes);
 			response.setEntity(new ByteArrayEntity(entityBytes));
+			validerBytesMotHashHeader(hashHeader, entityBytes);
 		} catch (IOException e) {
 			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
 					"Det skjedde en feil under uthenting av innhold for validering av X-Content-SHA256-header - server-signatur kunne ikke valideres");
