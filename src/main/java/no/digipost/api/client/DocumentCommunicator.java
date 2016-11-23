@@ -18,16 +18,13 @@ package no.digipost.api.client;
 import no.digipost.api.client.representations.DocumentEvents;
 import no.digipost.api.client.representations.DocumentStatus;
 import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.util.JAXBContextUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.joda.time.DateTime;
 
-import javax.xml.bind.JAXB;
 import java.io.IOException;
 import java.io.InputStream;
 
 import static no.digipost.api.client.util.JAXBContextUtils.*;
-import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
 public class DocumentCommunicator extends Communicator {
 
@@ -46,7 +43,8 @@ public class DocumentCommunicator extends Communicator {
 	}
 
 	public InputStream getContent(String path) {
-		try(CloseableHttpResponse response = apiService.getContent(path)){
+		try {
+			CloseableHttpResponse response = apiService.getContent(path);
 			checkResponse(response, eventLogger);
 			return response.getEntity().getContent();
 
