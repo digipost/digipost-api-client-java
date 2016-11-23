@@ -43,13 +43,21 @@ public class DocumentCommunicator extends Communicator {
 	}
 
 	public InputStream getContent(String path) {
+		CloseableHttpResponse response = null;
 		try {
-			CloseableHttpResponse response = apiService.getContent(path);
+			response = apiService.getContent(path);
 			checkResponse(response, eventLogger);
 			return response.getEntity().getContent();
 
-		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage(), e);
+		} catch (Exception e) {
+			if (response != null) {
+				try {
+					response.close();
+				} catch (IOException closingException) {
+					e.addSuppressed(closingException);
+				}
+			}
+			throw e instanceof RuntimeException ? (RuntimeException) e : new RuntimeException(e.getMessage(), e);
 		}
 	}
 
