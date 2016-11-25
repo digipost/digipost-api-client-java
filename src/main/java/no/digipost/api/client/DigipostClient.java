@@ -29,6 +29,7 @@ import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JAXBContextUtils;
@@ -54,6 +55,10 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  * gjøre søk og sende brev gjennom Digipost.
  */
 public class DigipostClient {
+
+	static {
+		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
+	}
 
 	public static final EventLogger NOOP_EVENT_LOGGER = new EventLogger() {
 		@Override
@@ -105,6 +110,7 @@ public class DigipostClient {
 	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
 						  final long senderAccountId, final Signer signer, final EventLogger eventLogger,
 						  final HttpClientBuilder clientBuilder, final ApiService overriddenApiService, final HttpHost proxy) {
+		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
 		HttpClientBuilder httpClientBuilder = clientBuilder == null ? DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT) : clientBuilder;
 		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 
