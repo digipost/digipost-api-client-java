@@ -17,13 +17,13 @@ package no.digipost.api.client.filters.response;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.util.LoggingUtil;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import static no.digipost.api.client.Headers.X_Content_SHA256;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
+import static no.motif.Singular.optional;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor {
@@ -70,7 +71,7 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 				throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
 						"Mangler X-Content-SHA256-header - server-signatur kunne ikke valideres");
 			}
-			byte[] entityBytes = IOUtils.toByteArray(response.getEntity().getContent());
+			byte[] entityBytes = optional(EntityUtils.toByteArray(response.getEntity())).orElse(new byte[0]);
 			response.setEntity(new ByteArrayEntity(entityBytes));
 			validerBytesMotHashHeader(hashHeader, entityBytes);
 		} catch (IOException e) {

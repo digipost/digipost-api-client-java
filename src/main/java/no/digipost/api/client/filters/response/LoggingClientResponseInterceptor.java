@@ -15,18 +15,19 @@
  */
 package no.digipost.api.client.filters.response;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static no.motif.Singular.optional;
 
 public class LoggingClientResponseInterceptor implements HttpResponseInterceptor {
 
@@ -34,10 +35,8 @@ public class LoggingClientResponseInterceptor implements HttpResponseInterceptor
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-		InputStream entityStream = response.getEntity().getContent();
-		byte[] bytes = IOUtils.toByteArray(entityStream);
-		LOG.info(new String(bytes, "UTF8"));
-		ByteArrayInputStream baos = new ByteArrayInputStream(bytes);
-		response.setEntity(new ByteArrayEntity(bytes));
+		byte[] entityBytes = optional(EntityUtils.toByteArray(response.getEntity())).orElse(new byte[0]);
+		LOG.info(new String(entityBytes, UTF_8));
+		response.setEntity(new ByteArrayEntity(entityBytes));
 	}
 }
