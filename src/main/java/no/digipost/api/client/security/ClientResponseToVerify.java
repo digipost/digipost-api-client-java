@@ -17,7 +17,6 @@ package no.digipost.api.client.security;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.protocol.HttpContext;
 
 import java.util.SortedMap;
@@ -40,7 +39,7 @@ public class ClientResponseToVerify implements ResponseToVerify{
 
 	@Override
 	public SortedMap<String, String> getHeaders() {
-		TreeMap<String, String> sortedHeaders = new TreeMap<String, String>();
+		TreeMap<String, String> sortedHeaders = new TreeMap<>();
 		for(Header header : response.getAllHeaders()){
 			sortedHeaders.put(header.getName(), header.getValue());
 		}
@@ -50,7 +49,6 @@ public class ClientResponseToVerify implements ResponseToVerify{
 
 	@Override
 	public String getPath() {
-		HttpRequestWrapper attribute = (HttpRequestWrapper)context.getAttribute("http.request");
-		return attribute.getURI().getPath();
+		return (String) context.getAttribute("request-path");
 	}
 }

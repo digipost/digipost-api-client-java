@@ -24,9 +24,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
-import no.digipost.api.client.util.DigipostApiMock;
 import no.digipost.api.client.util.FakeEncryptionKey;
-import no.digipost.api.client.util.JAXBContextUtils;
 import no.digipost.api.client.util.MockfriendlyResponse;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
@@ -51,7 +49,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXB;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -90,7 +87,7 @@ public class MessageSenderTest {
 	private static final Logger LOG = LoggerFactory.getLogger(MessageSenderTest.class);
 
 	static {
-		CryptoUtil.verifyJCE();
+		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
 	}
 
 	@Mock

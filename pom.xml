@@ -9,13 +9,13 @@
 	<parent>
 		<groupId>no.digipost</groupId>
 		<artifactId>digipost-open-super-pom</artifactId>
-		<version>0.3</version>
+		<version>1</version>
 		<relativePath />
 	</parent>
 
 	<artifactId>digipost-api-client-java</artifactId>
 
-	<version>7.1-SNAPSHOT</version>
+	<version>7.4-SNAPSHOT</version>
 
 	<name>Digipost API Client</name>
 	<description>Java library for interacting with the Digipost REST API</description>
@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
-			<version>4.4.4</version>
+			<version>4.4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -77,8 +77,8 @@
 		</dependency>
 		<dependency>
 			<groupId>no.digipost</groupId>
-			<artifactId>http-client-builder</artifactId>
-			<version>2.0</version>
+			<artifactId>http-client-builder3</artifactId>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -391,7 +391,7 @@
 										<include>no.digipost:printability-validator</include>
 										<include>no.digipost:cache</include>
                                         <include>com.google.guava:guava</include>
-										<include>no.digipost:http-client-builder</include>
+										<include>no.digipost:http-client-builder3</include>
 										<include>org.apache.httpcomponents:httpclient</include>
 										<include>commons-codec:commons-codec</include>
 										<include>commons-logging:commons-logging</include>

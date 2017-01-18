@@ -20,24 +20,28 @@ import no.digipost.api.client.Headers;
 import no.digipost.api.client.security.ClientRequestToSign;
 import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.security.Security;
+import java.net.URI;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
+import static no.motif.Singular.optional;
 
 public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RequestSignatureInterceptor.class);
 
 	private final Signer signer;
-	private final EventLogger eventListener;
 	private final RequestContentHashFilter hashFilter;
 	private final EventLogger eventLogger;
 
@@ -48,12 +52,10 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 	public RequestSignatureInterceptor(final Signer signer, final EventLogger eventListener, final RequestContentHashFilter hashFilter){
 		eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
 		this.signer = signer;
-		this.eventListener = eventListener;
 		this.hashFilter = hashFilter;
 	}
 
 	private void setSignatureHeader(final HttpRequest httpRequest) {
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ClientRequestToSign(httpRequest));
 		log(getClass().getSimpleName() + " beregnet streng som skal signeres:\n===START SIGNATURSTRENG===\n" + stringToSign
 				+ "===SLUTT SIGNATURSTRENG===");
@@ -79,13 +81,14 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 			if (rqEntity == null) {
 				setSignatureHeader(httpRequest);
 			} else {
-				byte[] entityBytes = IOUtils.toByteArray(rqEntity.getContent());
+				byte[] entityBytes = optional(EntityUtils.toByteArray(rqEntity)).orElse(new byte[0]);
 				hashFilter.settContentHashHeader(entityBytes, request);
 				setSignatureHeader(httpRequest);
 			}
 		} else {
 			setSignatureHeader(httpRequest);
 		}
+		httpContext.setAttribute("request-path", URI.create(httpRequest.getRequestLine().getUri()).getPath());
 
 
 	}
