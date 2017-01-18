@@ -14,6 +14,7 @@ package no.digipost.api.client.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -24,6 +25,7 @@ import no.digipost.api.client.Headers;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderFeature;
+import no.digipost.api.client.representations.sender.SenderFeatureName;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.representations.sender.SenderStatus;
 import org.apache.commons.io.IOUtils;
@@ -37,7 +39,6 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXB;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -50,9 +51,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import static java.lang.Integer.parseInt;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 import static no.digipost.api.client.util.JAXBContextUtils.*;
-import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static org.apache.http.HttpStatus.SC_OK;
-import static org.joda.time.DateTime.*;
+import static org.joda.time.DateTime.now;
 
 public class DigipostApiMock implements HttpHandler {
 
@@ -169,10 +169,10 @@ public class DigipostApiMock implements HttpHandler {
 		CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_SENDER_INFORMATION).getResponse(httpContext.getRequestPath());
 		if(response == null) {
 			List<SenderFeature> senderFeatures = new ArrayList<>();
-			senderFeatures.add(SenderFeature.DELIVERY_DIRECT_TO_PRINT);
-			senderFeatures.add(SenderFeature.DIGIPOST_DELIVERY);
-			senderFeatures.add(SenderFeature.PRINTVALIDATION_FONTS);
-			senderFeatures.add(SenderFeature.PRINTVALIDATION_PDFVERSION);
+			senderFeatures.add(SenderFeatureName.DELIVERY_DIRECT_TO_PRINT.withNoParam());
+			senderFeatures.add(SenderFeatureName.DIGIPOST_DELIVERY.withNoParam());
+			senderFeatures.add(SenderFeatureName.PRINTVALIDATION_FONTS.withNoParam());
+			senderFeatures.add(SenderFeatureName.PRINTVALIDATION_PDFVERSION.withNoParam());
 			marshal(senderInformationContext,
 					new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
 

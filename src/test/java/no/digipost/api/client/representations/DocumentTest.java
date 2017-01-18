@@ -45,11 +45,11 @@ public class DocumentTest {
 	@Test
 	public void assertThatDocumentClassHaveNotBeenChangedWithoutChangingDocumentCopyMethod() {
 		Field[] messageFields = Document.class.getDeclaredFields();
-		assertThat(messageFields.length, is(17));
+		assertThat(messageFields.length, is(16));
 
 		String[] allFieldsThatAreUsedForCopyInMessage = new String[]{"UUID_PATTERN", "uuid", "subject", "digipostFileType",
 				"opened", "openingReceipt", "smsNotification", "emailNotification", "authenticationLevel", "sensitivityLevel",
-				"preEncrypt", "preEncryptNoPages", "contentHash", "technicalType", "isPreEncrypt", "getUuid", "getFileType"};
+				"encrypted", "contentHash", "technicalType", "isEncrypted", "getUuid", "getFileType"};
 
 		for(int i = 0; i < messageFields.length; i++){
 			for(int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++){
@@ -80,8 +80,7 @@ public class DocumentTest {
 		assertThat(originalDoc.emailNotification, is(copyOfDoc.emailNotification));
 		assertThat(originalDoc.opened, is(copyOfDoc.opened));
 		assertThat(originalDoc.openingReceipt, is(copyOfDoc.openingReceipt));
-		assertThat(originalDoc.preEncrypt, is(copyOfDoc.preEncrypt));
-		assertThat(originalDoc.preEncryptNoPages, is(copyOfDoc.preEncryptNoPages));
+		assertThat(originalDoc.encrypted, is(copyOfDoc.encrypted));
 		assertThat(originalDoc.sensitivityLevel, is(copyOfDoc.sensitivityLevel));
 		assertThat(originalDoc.smsNotification, is(copyOfDoc.smsNotification));
 		assertThat(originalDoc.subject, is(copyOfDoc.subject));

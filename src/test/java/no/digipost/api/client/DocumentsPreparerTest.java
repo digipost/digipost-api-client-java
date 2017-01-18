@@ -81,7 +81,7 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void failsIfMessageHasAnyDocumentsRequiringPreEncryptionAndNoEncryptionKeyIsSupplied() throws IOException {
-		primaryDocument.setPreEncrypt();
+		primaryDocument.setEncrypted(new Encrypted(1));
 
 		expectedException.expect(DigipostClientException.class);
 		expectedException.expectMessage("no encryption key");
@@ -90,7 +90,7 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void cannotSendNonPdfFilesToPrint() throws IOException {
-		addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter")).setPreEncrypt();
+		addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter")).setEncrypted(new Encrypted(1));
 
 		expectedException.expect(DigipostClientException.class);
 		expectedException.expectMessage("filetype gif");
@@ -130,8 +130,8 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void dontInsertDocumentsPreparerTestBlankPageAfterPrimaryDocumentForPreEncryptedDocuments() throws IOException {
-		primaryDocument.setPreEncrypt();
-		Document attachment = addAttachment("attachment", PDF, printablePdf2Pages()).setPreEncrypt();
+		primaryDocument.setEncrypted(new Encrypted(1));
+		Document attachment = addAttachment("attachment", PDF, printablePdf2Pages()).setEncrypted(new Encrypted(1));
 		Message message = messageBuilder.build();
 		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.SJEKK_ALLE));
 
@@ -149,7 +149,7 @@ public class DocumentsPreparerTest {
 	private static final Matcher<Document> blankPdf = new CustomTypeSafeMatcher<Document>(Document.class.getSimpleName() + " for padding with a blank page") {
 		@Override
         protected boolean matchesSafely(Document doc) {
-			return doc.subject == null && doc.isPreEncrypt();
+			return doc.subject == null && doc.isEncrypted();
         }
 
 		@Override
@@ -157,8 +157,8 @@ public class DocumentsPreparerTest {
 			if (doc.subject != null) {
 				mismatchDescription.appendText("has subject '").appendText(doc.subject).appendText("' (should be null) ");
 			}
-			if (!doc.isPreEncrypt()) {
-				mismatchDescription.appendText("not marked as preencrypted");
+			if (!doc.isEncrypted()) {
+				mismatchDescription.appendText("not marked as encrypted");
 			}
 		};
 	};

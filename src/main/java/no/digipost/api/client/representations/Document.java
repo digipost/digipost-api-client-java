@@ -40,8 +40,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 		"emailNotification",
 		"authenticationLevel",
 		"sensitivityLevel",
-		"preEncrypt",
-		"preEncryptNoPages",
+		"encrypted",
 		"contentHash",
 		"links"
 })
@@ -69,10 +68,8 @@ public class Document extends Representation {
 	public final AuthenticationLevel authenticationLevel;
 	@XmlElement(name = "sensitivity-level")
 	public final SensitivityLevel sensitivityLevel;
-	@XmlElement(name = "pre-encrypt")
-	protected Boolean preEncrypt;
-	@XmlElement(name = "pre-encrypt-no-pages")
-	protected Integer preEncryptNoPages;
+	@XmlElement(name = "encrypted")
+	protected Encrypted encrypted;
 	@XmlElement(name = "content-hash", nillable = false)
 	protected ContentHash contentHash;
 
@@ -138,12 +135,7 @@ public class Document extends Representation {
 		Document newDoc = new Document(doc.uuid, doc.subject, new FileType("pdf"), doc.openingReceipt, doc.smsNotification, doc.emailNotification,
 				doc.authenticationLevel, doc.sensitivityLevel, doc.opened, doc.getTechnicalType());
 
-		if(doc.getPreEncryptNoPages() != null) {
-			newDoc.setNoEncryptedPages(doc.getPreEncryptNoPages());
-		}
-		if(doc.preEncrypt != null && doc.preEncrypt){
-			newDoc.setPreEncrypt();
-		}
+		newDoc.setEncrypted(doc.encrypted);
 		newDoc.setContentHash(doc.contentHash);
 
 		return newDoc;
@@ -186,26 +178,21 @@ public class Document extends Representation {
 		return fileType.equals(new FileType(digipostFileType));
 	}
 
-	public Document setPreEncrypt() {
-		this.preEncrypt = true;
+	public Document setEncrypted(Encrypted encrypted) {
+		this.encrypted = encrypted;
 		return this;
 	}
 
-	public Document setNoEncryptedPages(int noEncryptedPages){
-		this.preEncryptNoPages = noEncryptedPages;
-		return this;
-	}
-
-	public static final Predicate<Document> isPreEncrypt = new Predicate<Document>() { @Override public boolean $(Document document) {
-		return document.isPreEncrypt();
+	public static final Predicate<Document> isEncrypted = new Predicate<Document>() { @Override public boolean $(Document document) {
+		return document.isEncrypted();
     }};
 
-	public boolean isPreEncrypt() {
-		return preEncrypt != null && preEncrypt;
+	public boolean isEncrypted() {
+		return  encrypted != null;
 	}
 
-	public Integer getPreEncryptNoPages() {
-		return preEncryptNoPages;
+	public Encrypted getEncrypted() {
+		return encrypted;
 	}
 
 	public Link getAddContentLink() {
@@ -235,6 +222,6 @@ public class Document extends Representation {
 	public String toString() {
 		return getClass().getSimpleName() + " with uuid '" + uuid + "'" +
 				optional(technicalType).map(inBetween(", technicalType '", "'")).orElse("") +
-				(preEncrypt != Boolean.TRUE ? optional(subject).map(inBetween(", subject '", "'")).orElse(", no subject") : ", encrypted");
+				(isEncrypted() ? optional(subject).map(inBetween(", subject '", "'")).orElse(", no subject") : ", encrypted");
 	}
 }

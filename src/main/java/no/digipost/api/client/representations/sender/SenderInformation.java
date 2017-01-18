@@ -16,25 +16,22 @@
 package no.digipost.api.client.representations.sender;
 
 import no.digipost.print.validate.PdfValidationSettings;
-import no.motif.types.Elements;
 
 import javax.xml.bind.annotation.*;
-
 import java.util.List;
 
-import static no.digipost.api.client.representations.sender.SenderFeature.*;
-import static no.motif.Base.equalTo;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.*;
 import static no.motif.Iterate.on;
 
 /**
  * Informasjon om en avsender. Bruk
  * {@link #is(SenderStatus) is(}{@link SenderStatus#VALID_SENDER VALID_SENDER)}
  * for å avgjøre om avsenderen er gyldig, og eksempelvis
- * {@link #hasEnabled(SenderFeature) hasEnabled(}{@link SenderFeature#DIGIPOST_DELIVERY DIGIPOST_DELIVERY)}
+ * {@link #hasEnabled(SenderFeatureName) hasEnabled(}{@link SenderFeatureName#DIGIPOST_DELIVERY DIGIPOST_DELIVERY)}
  * for å sjekke om du kan sende post fra avsenderen med REST-APIet til Digipost.
  *
  * @see SenderStatus
- * @see SenderFeature
+ * @see SenderFeatureName
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sender-information", propOrder = {
@@ -55,14 +52,14 @@ public class SenderInformation
 
     @XmlElementWrapper(name = "supported-features")
     @XmlElement(name = "feature", nillable = false)
-    private List<String> supportedFeatures;
+    private List<SenderFeature> supportedFeatures;
 
     public SenderInformation() { }
 
     public SenderInformation(Long senderId, SenderStatus status, List<SenderFeature> supportedFeatures) {
     	this.senderId = senderId;
     	this.status = status;
-    	this.supportedFeatures = supportedFeatures == null || supportedFeatures.isEmpty() ? null : on(supportedFeatures).map(getIdentificator).collect();
+    	this.supportedFeatures = supportedFeatures == null || supportedFeatures.isEmpty() ? null : supportedFeatures;
     }
 
 
@@ -74,12 +71,17 @@ public class SenderInformation
         return this.status == status;
     }
 
-    public Elements<SenderFeature> getSupportedFeatures() {
-    	return on(supportedFeatures).map(SenderFeature.toSenderFeature);
+    public List<SenderFeature> getSupportedFeatures() {
+    	return supportedFeatures;
     }
 
-    public boolean hasEnabled(SenderFeature feature) {
-    	return getSupportedFeatures().exists(equalTo(feature));
+    public boolean hasEnabled(SenderFeatureName featureName) {
+    	for (SenderFeature feature : supportedFeatures ){
+            if (featureName.equals(feature.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

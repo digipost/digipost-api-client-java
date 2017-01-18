@@ -78,18 +78,15 @@ public final class AuthorialSender {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof AuthorialSender) {
-			AuthorialSender other = (AuthorialSender) obj;
-			if (this.is(Type.ACCOUNT_ID)) return Objects.equals(this.id, other.id);
-			if (this.is(Type.ORGANIZATION)) return Objects.equals(this.organization, other.organization);
+			AuthorialSender that = (AuthorialSender) obj;
+			return Objects.equals(this.id, that.id) && Objects.equals(this.organization, that.organization);
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		if (this.is(Type.ACCOUNT_ID)) return Objects.hashCode(id);
-		if (this.is(Type.ORGANIZATION)) return Objects.hashCode(organization);
-		else return super.hashCode();
+		return Objects.hash(id, organization);
 	}
 
 

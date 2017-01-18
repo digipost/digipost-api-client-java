@@ -67,7 +67,7 @@ import static no.digipost.api.client.representations.PrintDetails.PostType.A;
 import static no.digipost.api.client.representations.Relation.GET_ENCRYPTION_KEY;
 import static no.digipost.api.client.representations.Relation.SEND;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-import static no.digipost.api.client.representations.sender.SenderFeature.*;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.*;
 import static no.digipost.api.client.representations.sender.SenderStatus.VALID_SENDER;
 import static no.digipost.api.client.util.JAXBContextUtils.*;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
@@ -266,8 +266,8 @@ public class MessageSenderTest {
 		when(api.multipartMessage(any(HttpEntity.class))).thenReturn(response);
 
 		String messageId = UUID.randomUUID().toString();
-		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
-		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setPreEncrypt());
+		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setEncrypted(new Encrypted(1));
+		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setEncrypted(new Encrypted(1)));
 		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
 		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
@@ -287,12 +287,12 @@ public class MessageSenderTest {
 
 	@Test
 	public void setDigipostContentToUUIDTest(){
-		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
+		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setEncrypted(new Encrypted(1));
 		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
 		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
 		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-		List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setPreEncrypt());
+		List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setEncrypted(new Encrypted(1)));
 		Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
 				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
 
@@ -316,12 +316,12 @@ public class MessageSenderTest {
 
 	@Test
 	public void setPrintContentToUUIDTest(){
-		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setPreEncrypt();
+		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).setEncrypted(new Encrypted(1));
 		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
 		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
 		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-		List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setPreEncrypt());
+		List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).setEncrypted(new Encrypted(1)));
 		Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
 				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
 
@@ -354,8 +354,8 @@ public class MessageSenderTest {
 		when(api.send(any(MessageDelivery.class))).thenReturn(mockClientResponse);
 		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 
-		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).setPreEncrypt();
-		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).setPreEncrypt());
+		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).setEncrypted(new Encrypted(1));
+		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).setEncrypted(new Encrypted(1)));
 
 		MessageDelivery incompleteDelivery = MessageDeliverySetter.setMessageDeliveryStatus(new MessageDelivery(messageId, PRINT, NOT_COMPLETE, now()), printDocument,
 				printAttachments, new Link(SEND, new DigipostUri("/send")));
@@ -364,7 +364,7 @@ public class MessageSenderTest {
 
 		for (Document document : allDocuments) {
 			document.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt")));
-			document.setPreEncrypt();
+			document.setEncrypted(new Encrypted(1));
 		}
 
 
@@ -384,7 +384,10 @@ public class MessageSenderTest {
 		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
 		when(api.getSenderInformation(any(MayHaveSender.class))).thenReturn(new SenderInformation(1337L, VALID_SENDER,
-				asList(DIGIPOST_DELIVERY, DELIVERY_DIRECT_TO_PRINT, DELIVERY_DIRECT_TO_PRINT, PRINTVALIDATION_FONTS, PRINTVALIDATION_MARGINS_LEFT, PRINTVALIDATION_PDFVERSION)));
+				asList(
+						DIGIPOST_DELIVERY.withNoParam(), DELIVERY_DIRECT_TO_PRINT.withNoParam(), DELIVERY_DIRECT_TO_PRINT.withNoParam(),
+						PRINTVALIDATION_FONTS.withNoParam(), PRINTVALIDATION_MARGINS_LEFT.withNoParam(), PRINTVALIDATION_PDFVERSION.withNoParam())
+		));
 
 		for (ApiFlavor apiFlavor : asList(STEPWISE_REST, ATOMIC_REST)) {
 			LOG.debug("Tester direkte til print med " + apiFlavor);

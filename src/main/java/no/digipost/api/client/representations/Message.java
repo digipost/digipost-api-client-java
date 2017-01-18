@@ -18,7 +18,6 @@ package no.digipost.api.client.representations;
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 import org.joda.time.DateTime;
 
-import javax.print.Doc;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -237,7 +236,7 @@ public class Message implements MayHaveSender {
 	}
 
 	public boolean hasAnyDocumentRequiringPreEncryption() {
-		return the(primaryDocument).append(attachments).exists(Document.isPreEncrypt);
+		return the(primaryDocument).append(attachments).exists(Document.isEncrypted);
 	}
 
     public Channel getChannel() {

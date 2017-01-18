@@ -16,7 +16,6 @@
 package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.representations.*;
 import org.apache.commons.io.FileUtils;
@@ -79,7 +78,7 @@ public class FallbackTilPrintEksempel {
 		// 7. Foreløpig støtter Digipost kun å sende krypterte brev til print. Å
 		// spesifisere PreEncrypt gjør at klientbiblioteket krypterer filen for
 		// deg før den oversendes Digipost.
-		primaryDocument.setPreEncrypt();
+		primaryDocument.setEncrypted(new Encrypted(1));
 
 		// 8. Vi oppretter forsendelsen, legger til innhold og alternativt
 		// innhold for print, og til slutt sender forsendelsen. Alt håndteres

@@ -88,7 +88,7 @@ public class XsdValidationTest {
 				.senderId(10L)
 				.build();
 
-		primaryDocumentToPreEncrypt.setPreEncrypt();
+		primaryDocumentToPreEncrypt.setEncrypted(new Encrypted(1));
 
 		Message messageWithTechnicalAttachment = newMessage(UUID.randomUUID().toString(),
 					new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL))

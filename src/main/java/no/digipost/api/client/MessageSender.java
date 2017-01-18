@@ -21,7 +21,6 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
-import no.digipost.api.client.util.JAXBContextUtils;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import no.motif.f.Apply;
@@ -38,8 +37,6 @@ import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
-import javax.xml.bind.JAXB;
-import javax.xml.bind.JAXBContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -197,7 +194,7 @@ public class MessageSender extends Communicator {
 		}
 
 		MessageDelivery delivery;
-		if (document.isPreEncrypt()) {
+		if (document.isEncrypted()) {
 			log("*** DOKUMENTET SKAL PREKRYPTERES. VALIDERES, OG HENTER PUBLIC KEY VIA API ***");
 			byte[] byteContent;
             try {

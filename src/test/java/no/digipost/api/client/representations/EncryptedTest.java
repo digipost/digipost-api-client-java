@@ -13,5 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://api.digipost.no/schema/v7", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
-package no.digipost.api.client.representations.sender;
+package no.digipost.api.client.representations;
+
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Test;
+
+public class EncryptedTest {
+    @Test
+    public void correctHashCodeEquals() {
+        EqualsVerifier.forClass(Encrypted.class).verify();
+    }
+}
