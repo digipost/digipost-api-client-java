@@ -20,13 +20,13 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.cookie.CookieOrigin;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -34,11 +34,13 @@ import java.net.URISyntaxException;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ResponseSignatureFilterTest {
+
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
 
 	private ResponseSignatureInterceptor responseSignatureInterceptor;
 
@@ -56,7 +58,6 @@ public class ResponseSignatureFilterTest {
 		responseSignatureInterceptor = new ResponseSignatureInterceptor(apiServiceMock);
 		responseSignatureInterceptor.setThrowOnError(true);
 		when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
-		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
 	}
 
 	@Test

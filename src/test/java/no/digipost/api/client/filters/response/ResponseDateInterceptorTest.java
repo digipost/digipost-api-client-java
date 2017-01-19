@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client.filters.response;
 
-import no.digipost.api.client.MessageSenderTest;
 import no.digipost.api.client.MessageSenderTest.StatusLineMock;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import org.apache.http.HttpException;
@@ -25,10 +24,11 @@ import org.apache.http.protocol.HttpContext;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,8 +40,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ResponseDateInterceptorTest {
+
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
 
 	private ResponseDateInterceptor responseDateInterceptor;
 
