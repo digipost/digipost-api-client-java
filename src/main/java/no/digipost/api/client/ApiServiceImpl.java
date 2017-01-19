@@ -18,6 +18,7 @@ package no.digipost.api.client;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -407,5 +408,15 @@ public class ApiServiceImpl implements ApiService {
 				}
 		  	}
 		};
+	}
+
+	@Override
+	public Inbox getInbox(long organisation) {
+		EntryPoint entryPoint = getEntryPoint();
+		try {
+			return getResource("/"+Long.toString(organisation)+"/inbox", Inbox.class).call();
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 }

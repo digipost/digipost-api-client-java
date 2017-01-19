@@ -28,6 +28,7 @@ import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.FileKeystoreSigner;
@@ -74,6 +75,7 @@ public class DigipostClient {
 	private final MessageSender messageSender;
 	private final MessageDeliverer deliverer;
 	private final DocumentCommunicator documentCommunicator;
+	private final InboxCommunicator inboxCommunicator;
 
 	private final ResponseSignatureInterceptor responseSignatureInterceptor;
 	private final ResponseContentSHA256Interceptor responseHashInterceptor = new ResponseContentSHA256Interceptor();
@@ -120,6 +122,7 @@ public class DigipostClient {
 		this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
 		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
 		this.documentCommunicator = new DocumentCommunicator(apiService, this.eventLogger);
+		this.inboxCommunicator = new InboxCommunicator(apiService, this.eventLogger);
 		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
 
 		apiService.addFilter(new RequestDateInterceptor(this.eventLogger));
@@ -238,6 +241,10 @@ public class DigipostClient {
 
 	public DocumentStatus getDocumentStatus(long senderId, String uuid) {
 		return documentCommunicator.getDocumentStatus(senderId, uuid);
+	}
+
+	public Inbox getInbox(long senderAccountId) {
+		return inboxCommunicator.getInbox(senderAccountId);
 	}
 
 	private void log(final String stringToSignMsg) {

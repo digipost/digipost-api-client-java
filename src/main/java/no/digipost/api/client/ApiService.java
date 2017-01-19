@@ -16,6 +16,7 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequestInterceptor;
@@ -167,4 +168,8 @@ public interface ApiService {
 	 * @param avsenderenhet underenhet for et organisasjonsnummer.
 	 */
 	SenderInformation getSenderInformation(String orgnr, String avsenderenhet);
+
+	Inbox getInbox(long organisation);
+
 }
+

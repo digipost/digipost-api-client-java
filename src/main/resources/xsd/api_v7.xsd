@@ -1064,4 +1064,36 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+    <xsd:element name="inbox" type="inbox" />
+
+    <xsd:complexType name="inbox">
+        <xsd:sequence>
+            <xsd:element name="letter" type="letter" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="letter">
+        <xsd:sequence>
+            <xsd:element name="subject" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="sender" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="date" type="xsd:dateTime" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="read" type="xsd:boolean" minOccurs="1" maxOccurs="1" />
+            <xsd:sequence>
+                <xsd:element name="attachments" type="letter" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:sequence>
+            <xsd:sequence>
+                <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:sequence>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="letter-content" type="letter-content" />
+
+    <xsd:complexType name="letter-content">
+        <xsd:sequence>
+            <xsd:element name="uri" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="file-type" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
+        </xsd:sequence>
+    </xsd:complexType>
+
 </xsd:schema>

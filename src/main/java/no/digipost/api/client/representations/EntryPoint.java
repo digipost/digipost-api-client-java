@@ -19,7 +19,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
 import java.net.URI;
 import java.util.List;
 
@@ -84,4 +83,8 @@ public class EntryPoint extends Representation {
 	protected void setLink(final List<Link> links) {
 		this.links = links;
 	}
+
+    public URI getInboxLink() {
+        return getLinkByRelationName(GET_INBOX).getUri();
+    }
 }

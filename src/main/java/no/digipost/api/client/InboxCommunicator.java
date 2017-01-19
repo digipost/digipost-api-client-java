@@ -13,24 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations;
 
-public enum Relation {
-	SELF,
-	ADD_CONTENT,
-	SEND,
-	SEARCH,
-	AUTOCOMPLETE,
-	CREATE_MESSAGE,
-	API_DOCUMENTATION,
-	GET_ENCRYPTION_KEY,
-	GET_PRINT_ENCRYPTION_KEY,
-	IDENTIFY_RECIPIENT,
-	IDENTIFY_RECIPIENT_WITH_ENCRYPTION_KEY,
-	DOCUMENT_EVENTS,
-	UNSUPPORTED,
-	GET_DOCUMENT_CONTENT,
-	GET_SENDER_INFORMATION,
-    GET_INBOX,
-	DUPLICATE_DOCUMENT
+package no.digipost.api.client;
+
+import no.digipost.api.client.representations.inbox.Inbox;
+
+public class InboxCommunicator extends Communicator{
+
+    public InboxCommunicator(final ApiService apiService, final EventLogger eventLogger) {
+        super(apiService, eventLogger);
+    }
+
+    public Inbox getInbox(long organisation) {
+        return apiService.getInbox(organisation);
+    }
+
 }
