@@ -96,7 +96,7 @@ public class MessageSender extends Communicator {
 			ByteArrayOutputStream bao = new ByteArrayOutputStream();
 			marshal(messageContext, singleChannelMessage, bao);
 			ByteArrayBody attachment = new ByteArrayBody(bao.toByteArray(),
-					ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V6),"message");
+					ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V7),"message");
 
 			MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create()
 					.setMode(HttpMultipartMode.STRICT)
@@ -194,7 +194,7 @@ public class MessageSender extends Communicator {
 		}
 
 		MessageDelivery delivery;
-		if (document.isEncrypted()) {
+		if (document.willBeEncrypted()) {
 			log("*** DOKUMENTET SKAL PREKRYPTERES. VALIDERES, OG HENTER PUBLIC KEY VIA API ***");
 			byte[] byteContent;
             try {
@@ -367,12 +367,12 @@ public class MessageSender extends Communicator {
 			if (message.isDirectPrint()) {
 				singleChannelMessage = setMapAndMessageToPrint(message, documentsAndContent, documentsAndInputstream);
 
-				if (singleChannelMessage.hasAnyDocumentRequiringPreEncryption()) {
+				if (singleChannelMessage.hasAnyDocumentRequiringEncryption()) {
 					eventLogger.log("Direkte print. Bruker krypteringsnøkkel for print.");
 					publicKeys = optional(getEncryptionKeyForPrint());
 				}
 
-			} else if (!message.recipient.hasPrintDetails() && !message.hasAnyDocumentRequiringPreEncryption()) {
+			} else if (!message.recipient.hasPrintDetails() && !message.hasAnyDocumentRequiringEncryption()) {
 				singleChannelMessage = setMapAndMessageToDigipost(message, documentsAndContent, documentsAndInputstream);
 
 			} else {
@@ -380,14 +380,14 @@ public class MessageSender extends Communicator {
 				if (result.getResultCode() == IdentificationResultCode.DIGIPOST) {
 					singleChannelMessage = setMapAndMessageToDigipost(message, documentsAndContent, documentsAndInputstream);
 
-					if (singleChannelMessage.hasAnyDocumentRequiringPreEncryption()) {
+					if (singleChannelMessage.hasAnyDocumentRequiringEncryption()) {
 						eventLogger.log("Mottaker er Digipost-bruker. Bruker brukers krypteringsnøkkel.");
 						publicKeys = optional(new DigipostPublicKey(result.getEncryptionKey()));
 					}
 				} else if (message.recipient.hasPrintDetails()) {
 					singleChannelMessage = setMapAndMessageToPrint(message, documentsAndContent, documentsAndInputstream);
 
-					if (singleChannelMessage.hasAnyDocumentRequiringPreEncryption()) {
+					if (singleChannelMessage.hasAnyDocumentRequiringEncryption()) {
 						eventLogger.log("Mottaker er ikke Digipost-bruker. Bruker krypteringsnøkkel for print.");
 						publicKeys = optional(getEncryptionKeyForPrint());
 					}

@@ -51,7 +51,7 @@ import java.util.concurrent.Callable;
 
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
-import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
 import static no.digipost.api.client.util.JAXBContextUtils.*;
 import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
@@ -74,7 +74,7 @@ public class ApiServiceImpl implements ApiService {
         public EntryPoint call() throws Exception {
 
 			HttpGet httpGet = new HttpGet(digipostUrl + ENTRY_POINT);
-			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
 			try(CloseableHttpResponse execute = send(httpGet)) {
 
@@ -123,7 +123,7 @@ public class ApiServiceImpl implements ApiService {
 		EntryPoint entryPoint = getEntryPoint();
 
 		HttpPost httpPost = new HttpPost(digipostUrl + entryPoint.getCreateMessageUri().getPath());
-		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 		httpPost.setHeader("MIME-Version", "1.0");
 		httpPost.removeHeaders("Accept-Encoding");
 		httpPost.setEntity(multipartLengthCheckHttpEntity);
@@ -136,8 +136,8 @@ public class ApiServiceImpl implements ApiService {
 		EntryPoint entryPoint = getEntryPoint();
 
 		HttpPost httpPost = new HttpPost(digipostUrl + entryPoint.getIdentificationWithEncryptionKeyUri().getPath());
-		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
-		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V6);
+		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
+		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		marshal(identificationContext,identification, bao);
 		httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
@@ -150,8 +150,8 @@ public class ApiServiceImpl implements ApiService {
 		EntryPoint entryPoint = getEntryPoint();
 
 		HttpPost httpPost = new HttpPost(digipostUrl + entryPoint.getCreateMessageUri().getPath());
-		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
-		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V6);
+		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
+		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		marshal(messageContext, message, bao);
 		httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
@@ -161,14 +161,14 @@ public class ApiServiceImpl implements ApiService {
 	@Override
 	public CloseableHttpResponse fetchExistingMessage(final URI location) {
 		HttpGet httpGet = new HttpGet(digipostUrl + location.getPath());
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 		return send(httpGet);
 	}
 
 	@Override
 	public CloseableHttpResponse getEncryptionKey(final URI location) {
 		HttpGet httpGet = new HttpGet(location);
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 		return send(httpGet);
 	}
 
@@ -177,7 +177,7 @@ public class ApiServiceImpl implements ApiService {
 		EntryPoint entryPoint = getEntryPoint();
 
 		HttpGet httpGet = new HttpGet(digipostUrl + entryPoint.getPrintEncryptionKey().getPath());
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 		return send(httpGet);
 	}
 
@@ -188,7 +188,7 @@ public class ApiServiceImpl implements ApiService {
 		byte[] content = readLetterContent(letterContent);
 
 		HttpPost httpPost = new HttpPost(digipostUrl + addContentLink.getUri().getPath());
-		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_OCTET_STREAM.toString());
 		httpPost.setEntity(new ByteArrayEntity(content));
 		return send(httpPost);
@@ -199,7 +199,7 @@ public class ApiServiceImpl implements ApiService {
 		Link sendLink = fetchSendLink(createdMessage);
 
 		HttpPost httpPost = new HttpPost(digipostUrl + sendLink.getUri().getPath());
-		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 		httpPost.setEntity(null);
 		return send(httpPost);
 
@@ -250,7 +250,7 @@ public class ApiServiceImpl implements ApiService {
 
 		try {
 			HttpGet httpGet = new HttpGet(builder.build());
-			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+			httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 			return send(httpGet);
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e.getMessage(), e);
@@ -270,7 +270,7 @@ public class ApiServiceImpl implements ApiService {
 	private CloseableHttpResponse getDocumentStatus(String path) {
 
 		HttpGet httpGet = new HttpGet(digipostUrl + path);
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
 		return send(httpGet);
 	}
@@ -285,7 +285,7 @@ public class ApiServiceImpl implements ApiService {
 	@Override
 	public Recipients search(final String searchString) {
 		HttpGet httpGet = new HttpGet(digipostUrl + getEntryPoint().getSearchUri().getPath() + "/" + searchString);
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
 		try(CloseableHttpResponse response = send(httpGet)){
 			return unmarshal(recipientsContext, response.getEntity().getContent(), Recipients.class);
@@ -297,7 +297,7 @@ public class ApiServiceImpl implements ApiService {
 	@Override
 	public Autocomplete searchSuggest(final String searchString) {
 		HttpGet httpGet = new HttpGet(digipostUrl + getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString);
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
 
 		try(CloseableHttpResponse response = send(httpGet)) {
@@ -326,8 +326,8 @@ public class ApiServiceImpl implements ApiService {
 	public CloseableHttpResponse identifyRecipient(final Identification identification) {
 
 		HttpPost httpPost = new HttpPost(digipostUrl + getEntryPoint().getIdentificationUri().getPath());
-		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
-		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V6);
+		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
+		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		marshal(identificationContext, identification, bao);
 		httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
@@ -395,7 +395,7 @@ public class ApiServiceImpl implements ApiService {
 					}
 
 					httpGet.setURI(uriBuilder.build());
-					httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+					httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
 					try (CloseableHttpResponse execute = send(httpGet)){
 						Communicator.checkResponse(execute, eventLogger);

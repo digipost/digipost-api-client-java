@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.*;
 import java.util.List;
 
 import static no.digipost.api.client.representations.sender.SenderFeatureName.*;
+import static no.digipost.print.validate.PdfValidationSettings.DEFAULT_BLEED_MM;
 import static no.motif.Iterate.on;
 
 /**
@@ -76,12 +77,16 @@ public class SenderInformation
     }
 
     public boolean hasEnabled(SenderFeatureName featureName) {
-    	for (SenderFeature feature : supportedFeatures ){
+    	return get(featureName) != null;
+    }
+
+    public SenderFeature get(SenderFeatureName featureName) {
+        for (SenderFeature feature : supportedFeatures ){
             if (featureName.equals(feature.getName())) {
-                return true;
+                return feature;
             }
         }
-        return false;
+        return null;
     }
 
     @Override
@@ -95,10 +100,13 @@ public class SenderInformation
     }
 
     public PdfValidationSettings getPdfValidationSettings() {
+        SenderFeature bleed = get(PRINTVALIDATION_BLEED);
     	return new PdfValidationSettings(
     			hasEnabled(PRINTVALIDATION_MARGINS_LEFT),
     			hasEnabled(PRINTVALIDATION_FONTS),
     			hasEnabled(PRINTVALIDATION_PAGEAMOUNT),
-    			hasEnabled(PRINTVALIDATION_PDFVERSION));
+    			hasEnabled(PRINTVALIDATION_PDFVERSION),
+                bleed != null ? bleed.getIntParam() : DEFAULT_BLEED_MM
+        );
     }
 }

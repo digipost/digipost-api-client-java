@@ -17,7 +17,7 @@ package no.digipost.api.client.representations;
 
 public class MediaTypes {
 
-	public static final String DIGIPOST_MEDIA_TYPE_V6 = "application/vnd.digipost-v6+xml";
+	public static final String DIGIPOST_MEDIA_TYPE_V7 = "application/vnd.digipost-v7+xml";
 
 	public static final String APPLICATION_PDF = "application/pdf";
 

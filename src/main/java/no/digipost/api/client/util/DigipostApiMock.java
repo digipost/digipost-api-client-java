@@ -271,7 +271,7 @@ public class DigipostApiMock implements HttpHandler {
 			if(bodyPart.contains("Content-Type: ")) {
 				String contentType = bodyPart.substring(bodyPart.indexOf("Content-Type: ") + 14);
 				contentType = contentType.substring(0, contentType.indexOf("\r\n"));
-				if (!contentType.equals(MediaTypes.DIGIPOST_MEDIA_TYPE_V6)) {
+				if (!contentType.equals(MediaTypes.DIGIPOST_MEDIA_TYPE_V7)) {
 					contentParts.add(new ContentPart(contentType));
 				}
 			}

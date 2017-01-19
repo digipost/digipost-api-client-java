@@ -183,12 +183,12 @@ public class Message implements MayHaveSender {
 	public static Message copyMessageWithOnlyPrintDetails(Message messageToCopy){
 		List<Document> tmpAttachments = new ArrayList<>();
 		for(Document attachment : messageToCopy.attachments){
-			tmpAttachments.add(Document.copyDocumentAndSetDigipostFileTypeToPdf(attachment));
+			tmpAttachments.add(attachment.copyDocumentAndSetDigipostFileTypeToPdf());
 		}
 
 		return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
 				null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference,
-				Document.copyDocumentAndSetDigipostFileTypeToPdf(messageToCopy.primaryDocument), tmpAttachments, messageToCopy.recipient.getPrintDetails());
+				messageToCopy.primaryDocument.copyDocumentAndSetDigipostFileTypeToPdf(), tmpAttachments, messageToCopy.recipient.getPrintDetails());
 	}
 
 	public static Message copyMessageWithOnlyDigipostDetails(Message messageToCopy){
@@ -235,8 +235,13 @@ public class Message implements MayHaveSender {
 		return this.messageId != null && this.messageId.equals(message.messageId);
 	}
 
-	public boolean hasAnyDocumentRequiringPreEncryption() {
-		return the(primaryDocument).append(attachments).exists(Document.isEncrypted);
+	public boolean hasAnyDocumentRequiringEncryption() {
+		for (Document document: getAllDocuments()) {
+			if (document.willBeEncrypted()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
     public Channel getChannel() {

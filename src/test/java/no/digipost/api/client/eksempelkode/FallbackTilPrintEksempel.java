@@ -78,7 +78,7 @@ public class FallbackTilPrintEksempel {
 		// 7. Foreløpig støtter Digipost kun å sende krypterte brev til print. Å
 		// spesifisere PreEncrypt gjør at klientbiblioteket krypterer filen for
 		// deg før den oversendes Digipost.
-		primaryDocument.setEncrypted(new Encrypted(1));
+		primaryDocument.encrypt();
 
 		// 8. Vi oppretter forsendelsen, legger til innhold og alternativt
 		// innhold for print, og til slutt sender forsendelsen. Alt håndteres

@@ -19,7 +19,6 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.Channel;
 import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.Encrypted;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.util.Encrypter;
 import no.digipost.print.validate.PdfValidationResult;
@@ -68,7 +67,7 @@ class DocumentsPreparer {
 
 		for (Elem<Document> i : on(on(documentsAndContent.keySet()).sorted(message.documentOrder())).indexed()) {
 			Document document = i.value;
-			if (document.isEncrypted()) {
+			if (document.willBeEncrypted()) {
 				byte[] byteContent = toByteArray(documentsAndContent.get(document));
 				LOG.debug("Validerer dokument med uuid '{}' før kryptering", document.uuid);
 				validateAndSetNrOfPages(message.getChannel(), document, byteContent, pdfValidationSettings);
@@ -95,7 +94,9 @@ class DocumentsPreparer {
 		if (document.is(PDF)) {
 			LOG.debug("Validerer PDF-dokument med uuid '{}'", document.uuid);
 			pdfValidation = pdfValidator.validate(content, pdfValidationSettings.$());
-			document.setEncrypted(new Encrypted(pdfValidation.pages));
+			if (document.willBeEncrypted()) {
+				document.setNumberOfEncryptedPages(pdfValidation.pages);
+			}
 			pdfInfo = optional(new PdfInfo(pdfValidation.pages));
 		} else {
 			pdfValidation = EVERYTHING_OK;

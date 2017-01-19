@@ -45,11 +45,11 @@ public class DocumentTest {
 	@Test
 	public void assertThatDocumentClassHaveNotBeenChangedWithoutChangingDocumentCopyMethod() {
 		Field[] messageFields = Document.class.getDeclaredFields();
-		assertThat(messageFields.length, is(16));
+		assertThat(messageFields.length, is(15));
 
 		String[] allFieldsThatAreUsedForCopyInMessage = new String[]{"UUID_PATTERN", "uuid", "subject", "digipostFileType",
 				"opened", "openingReceipt", "smsNotification", "emailNotification", "authenticationLevel", "sensitivityLevel",
-				"encrypted", "contentHash", "technicalType", "isEncrypted", "getUuid", "getFileType"};
+				"encrypted", "contentHash", "technicalType", "getUuid", "getFileType"};
 
 		for(int i = 0; i < messageFields.length; i++){
 			for(int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++){
@@ -71,7 +71,7 @@ public class DocumentTest {
 				SensitivityLevel.NORMAL, false, "technicalType");
 
 
-		Document copyOfDoc = Document.copyDocumentAndSetDigipostFileTypeToPdf(originalDoc);
+		Document copyOfDoc = originalDoc.copyDocumentAndSetDigipostFileTypeToPdf();
 
 		assertThat(originalDoc.digipostFileType, is(HTML.toString()));
 		assertThat(copyOfDoc.digipostFileType, is(PDF.toString()));

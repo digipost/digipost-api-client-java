@@ -80,9 +80,15 @@ public final class SenderFeatureName {
 	 */
 	public static final SenderFeatureName PRINTVALIDATION_MARGINS_LEFT = new SenderFeatureName("no.digipost.feature.validation.print.margins.left", false);
 
+	/**
+	 * For brev som skal til print og fysisk levering vil dokumenter med
+	 * for smal venstremarg til å få plass til EA-strekkode bli avvist.
+	 */
+	public static final SenderFeatureName PRINTVALIDATION_BLEED = new SenderFeatureName("no.digipost.feature.validation.print.bleed", false);
+
 	private static final Elements<SenderFeatureName> KNOWN_FEATURES = on(
 			DIGIPOST_DELIVERY, DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK, DELIVERY_DIRECT_TO_PRINT,
-			PRINTVALIDATION_FONTS, PRINTVALIDATION_MARGINS_LEFT, PRINTVALIDATION_PAGEAMOUNT, PRINTVALIDATION_PDFVERSION);
+			PRINTVALIDATION_FONTS, PRINTVALIDATION_MARGINS_LEFT, PRINTVALIDATION_PAGEAMOUNT, PRINTVALIDATION_PDFVERSION, PRINTVALIDATION_BLEED);
 
 	public final String identificator;
 	private final boolean custom;

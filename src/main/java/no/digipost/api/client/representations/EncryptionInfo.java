@@ -27,7 +27,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
-import java.util.Objects;
 
 
 /**
@@ -49,31 +48,27 @@ import java.util.Objects;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "encrypted")
-public final class Encrypted
+public final class EncryptionInfo
 {
 
     @XmlAttribute(name = "number-of-pages")
-    private final Integer numberOfPages;
+    private Integer numberOfPages;
 
-    public Encrypted() {
-        this(null);
-    }
-
-    public Encrypted(final Integer numberOfPages) {
-        this.numberOfPages = numberOfPages;
-    }
-
-    public Integer getNumberOfPages() {
+    public int getNumberOfPages() {
         return numberOfPages;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof Encrypted && Objects.equals(((Encrypted) o).numberOfPages, this.numberOfPages);
+    public void setNumberOfPages(Integer numberOfPages) {
+        if (this.numberOfPages != null) {
+            throw new IllegalStateException("Tried to call setNumberOfPages on EncryptionInfo object, but number of pages is already set");
+        }
+        this.numberOfPages = numberOfPages;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(numberOfPages);
+    public EncryptionInfo copy(){
+        EncryptionInfo copy = new EncryptionInfo();
+        copy.setNumberOfPages(this.numberOfPages);
+        return copy;
     }
+
 }

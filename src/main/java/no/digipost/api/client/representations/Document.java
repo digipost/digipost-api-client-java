@@ -69,7 +69,7 @@ public class Document extends Representation {
 	@XmlElement(name = "sensitivity-level")
 	public final SensitivityLevel sensitivityLevel;
 	@XmlElement(name = "encrypted")
-	protected Encrypted encrypted;
+	protected EncryptionInfo encrypted;
 	@XmlElement(name = "content-hash", nillable = false)
 	protected ContentHash contentHash;
 
@@ -131,12 +131,12 @@ public class Document extends Representation {
 
 	}
 
-	public static Document copyDocumentAndSetDigipostFileTypeToPdf(Document doc){
-		Document newDoc = new Document(doc.uuid, doc.subject, new FileType("pdf"), doc.openingReceipt, doc.smsNotification, doc.emailNotification,
-				doc.authenticationLevel, doc.sensitivityLevel, doc.opened, doc.getTechnicalType());
+	public Document copyDocumentAndSetDigipostFileTypeToPdf(){
+		Document newDoc = new Document(this.uuid, this.subject, new FileType("pdf"), this.openingReceipt, this.smsNotification, this.emailNotification,
+				this.authenticationLevel, this.sensitivityLevel, this.opened, this.getTechnicalType());
 
-		newDoc.setEncrypted(doc.encrypted);
-		newDoc.setContentHash(doc.contentHash);
+		newDoc.encrypted  = this.encrypted == null ? null : this.encrypted.copy();
+		newDoc.setContentHash(this.contentHash);
 
 		return newDoc;
 	}
@@ -178,20 +178,19 @@ public class Document extends Representation {
 		return fileType.equals(new FileType(digipostFileType));
 	}
 
-	public Document setEncrypted(Encrypted encrypted) {
-		this.encrypted = encrypted;
+	public Document encrypt() {
+	    if (this.encrypted != null) {
+			throw new IllegalStateException("Document already set to encrypted, are you calling encrypt() twice?");
+		}
+		this.encrypted = new EncryptionInfo();
 		return this;
 	}
 
-	public static final Predicate<Document> isEncrypted = new Predicate<Document>() { @Override public boolean $(Document document) {
-		return document.isEncrypted();
-    }};
-
-	public boolean isEncrypted() {
+	public boolean willBeEncrypted() {
 		return  encrypted != null;
 	}
 
-	public Encrypted getEncrypted() {
+	public EncryptionInfo getEncrypted() {
 		return encrypted;
 	}
 
@@ -222,6 +221,13 @@ public class Document extends Representation {
 	public String toString() {
 		return getClass().getSimpleName() + " with uuid '" + uuid + "'" +
 				optional(technicalType).map(inBetween(", technicalType '", "'")).orElse("") +
-				(isEncrypted() ? optional(subject).map(inBetween(", subject '", "'")).orElse(", no subject") : ", encrypted");
+				(willBeEncrypted() ? optional(subject).map(inBetween(", subject '", "'")).orElse(", no subject") : ", encrypted");
+	}
+
+	public void setNumberOfEncryptedPages(int pages) {
+		if (this.encrypted == null) {
+			throw new IllegalStateException("Tried setting number of encrypted pages, but document is not set to be encrypted. Have you called Document.encrypt()?");
+		}
+		this.encrypted.setNumberOfPages(pages);
 	}
 }

@@ -27,6 +27,8 @@ import javax.xml.bind.annotation.*;
 import java.util.Objects;
 
 import static java.util.Objects.hash;
+import static no.motif.Singular.optional;
+import static no.motif.Strings.prepend;
 
 
 /**
@@ -60,23 +62,26 @@ public final class SenderFeature {
         this(null, null);
     }
 
-    public SenderFeature(SenderFeatureName name) {
-        this(name, null);
-    }
-
     public SenderFeature(SenderFeatureName name, String param) {
         this.value = name != null ? name.identificator : null;
         this.param = param;
     }
 
-
-
-    public String getName() {
-        return value;
+    public SenderFeatureName getName() {
+        return SenderFeatureName.from(value);
     }
 
     public String getParam() {
         return param;
+    }
+
+    public int getIntParam() {
+        try {
+            return Integer.parseInt(getParam());
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("The sender feature " + value + " has the parameter '" + param + "', " +
+                                            "which can not be converted to an int. (" + e.getMessage() + ")", e);
+        }
     }
 
     @Override
@@ -92,5 +97,9 @@ public final class SenderFeature {
     @Override
     public int hashCode() {
         return hash(value, param);
+    }
+
+    public String toString() {
+        return value + optional(param).map(prepend(": ")).orElse("");
     }
 }

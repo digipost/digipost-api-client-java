@@ -81,16 +81,16 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void failsIfMessageHasAnyDocumentsRequiringPreEncryptionAndNoEncryptionKeyIsSupplied() throws IOException {
-		primaryDocument.setEncrypted(new Encrypted(1));
+		primaryDocument.encrypt();
 
 		expectedException.expect(DigipostClientException.class);
 		expectedException.expectMessage("no encryption key");
-		preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.SJEKK_ALLE));
+		preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.CHECK_ALL));
 	}
 
 	@Test
 	public void cannotSendNonPdfFilesToPrint() throws IOException {
-		addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter")).setEncrypted(new Encrypted(1));
+		addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter")).encrypt();
 
 		expectedException.expect(DigipostClientException.class);
 		expectedException.expectMessage("filetype gif");
@@ -103,7 +103,7 @@ public class DocumentsPreparerTest {
 			try {
 				preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[]{65, 65, 65, 65}, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
 			} catch (DigipostClientException e) {
-				assertThat(e.getMessage(), containsString("Kunne ikke parse"));
+				assertThat(e.getMessage(), containsString("Could not parse"));
 				continue;
 			}
 			fail("Should fail validation for bogus PDF using " + Channel.class.getSimpleName() + "." + deliveryMethod);
@@ -112,17 +112,17 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
-		preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
+		preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.CHECK_ALL));
 
 		expectedException.expect(DigipostClientException.class);
-		expectedException.expectMessage("for mange sider");
-		preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
+		expectedException.expectMessage("too many pages");
+		preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.CHECK_ALL));
 	}
 
 
 	@Test
 	public void doesNothingForNonPreEncryptedDocuments() throws IOException {
-		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.SJEKK_ALLE));
+		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.CHECK_ALL));
 
 		assertThat(documents.keySet(), contains(primaryDocument));
 		assertThat(documents.get(primaryDocument), sameInstance(preparedDocuments.get(primaryDocument)));
@@ -130,10 +130,10 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void dontInsertDocumentsPreparerTestBlankPageAfterPrimaryDocumentForPreEncryptedDocuments() throws IOException {
-		primaryDocument.setEncrypted(new Encrypted(1));
-		Document attachment = addAttachment("attachment", PDF, printablePdf2Pages()).setEncrypted(new Encrypted(1));
+		primaryDocument.encrypt();
+		Document attachment = addAttachment("attachment", PDF, printablePdf2Pages()).encrypt();
 		Message message = messageBuilder.build();
-		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.SJEKK_ALLE));
+		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.CHECK_ALL));
 
 		assertThat(preparedDocuments.size(), is(2));
 	}
@@ -149,7 +149,7 @@ public class DocumentsPreparerTest {
 	private static final Matcher<Document> blankPdf = new CustomTypeSafeMatcher<Document>(Document.class.getSimpleName() + " for padding with a blank page") {
 		@Override
         protected boolean matchesSafely(Document doc) {
-			return doc.subject == null && doc.isEncrypted();
+			return doc.subject == null && doc.willBeEncrypted();
         }
 
 		@Override
@@ -157,7 +157,7 @@ public class DocumentsPreparerTest {
 			if (doc.subject != null) {
 				mismatchDescription.appendText("has subject '").appendText(doc.subject).appendText("' (should be null) ");
 			}
-			if (!doc.isEncrypted()) {
+			if (!doc.willBeEncrypted()) {
 				mismatchDescription.appendText("not marked as encrypted");
 			}
 		};
