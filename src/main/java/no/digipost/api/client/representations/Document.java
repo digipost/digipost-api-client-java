@@ -17,17 +17,28 @@
 package no.digipost.api.client.representations;
 
 import no.motif.f.Fn;
-import no.motif.f.Predicate;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static no.motif.Singular.optional;
 import static no.motif.Strings.inBetween;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.lowerCase;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "document", propOrder = {
@@ -87,14 +98,14 @@ public class Document extends Representation {
 	 * Constructor for just the required fields of a document.
 	 */
 	public Document(String uuid, String subject, FileType fileType) {
-		this(uuid, subject, fileType, null, null, null, null, null, null, null);
+		this(uuid, subject, fileType, null, null, null, null, null, null, (String[]) null);
 	}
 
 	public Document(String uuid, String subject, FileType fileType, String openingReceipt,
 					SmsNotification smsNotification, EmailNotification emailNotification,
 					AuthenticationLevel authenticationLevel,
 					SensitivityLevel sensitivityLevel) {
-		this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel, null, null);
+		this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel, null, (String[]) null);
 	}
 
 

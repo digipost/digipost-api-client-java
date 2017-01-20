@@ -18,7 +18,11 @@ package no.digipost.api.client.representations;
 import no.digipost.api.client.representations.xml.DateXmlAdapter;
 import org.joda.time.LocalDate;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.math.BigDecimal;
@@ -66,7 +70,7 @@ public class Invoice
 	               EmailNotification emailNotification, AuthenticationLevel authenticationLevel, SensitivityLevel sensitivityLevel,
 				   String kid, BigDecimal amount, String account, LocalDate dueDate) {
 		this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel,
-				kid, amount, account, dueDate, null, null);
+				kid, amount, account, dueDate, null, (String[]) null);
 	}
 
 	public Invoice(String uuid, String subject, FileType fileType, String openingReceipt, SmsNotification smsNotification,

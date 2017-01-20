@@ -18,7 +18,18 @@ package no.digipost.api.client;
 import no.digipost.api.client.delivery.DocumentContent;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.EncryptionKey;
+import no.digipost.api.client.representations.FileType;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResultCode;
+import no.digipost.api.client.representations.IdentificationResultWithEncryptionKey;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.MayHaveSender;
+import no.digipost.api.client.representations.MediaTypes;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.MessageStatus;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
 import no.digipost.print.validate.PdfValidationSettings;
@@ -50,10 +61,15 @@ import java.util.Map.Entry;
 import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
 import static no.digipost.api.client.util.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
 import static no.digipost.api.client.util.Encrypter.keyToEncrypter;
-import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.encryptionKeyContext;
+import static no.digipost.api.client.util.JAXBContextUtils.identificationResultWithEncryptionKeyContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
+import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
+import static no.digipost.api.client.util.JAXBContextUtils.messageDeliveryContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
-import static no.motif.Singular.*;
+import static no.motif.Singular.none;
+import static no.motif.Singular.optional;
+import static no.motif.Singular.the;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class MessageSender extends Communicator {
@@ -204,9 +220,9 @@ public class MessageSender extends Communicator {
             }
 			documentsPreparer.validateAndSetNrOfPages(message.getChannel(), document, byteContent, Apply.partially(resolvePdfValidationSettings).of(message));
 			InputStream encryptetContent = fetchKeyAndEncrypt(document, new ByteArrayInputStream(byteContent));
-			delivery = uploadContent(message, document, encryptetContent);
+			delivery = uploadContent(document, encryptetContent);
 		} else {
-			delivery = uploadContent(message, document, unencryptetContent);
+			delivery = uploadContent(document, unencryptetContent);
 		}
 		return delivery;
 	}
@@ -284,7 +300,7 @@ public class MessageSender extends Communicator {
 	}
 
 
-	private MessageDelivery uploadContent(MessageDelivery createdMessage, Document document, InputStream documentContent) {
+	private MessageDelivery uploadContent(Document document, InputStream documentContent) {
         log("*** STARTER INTERAKSJON MED API: LEGGE TIL FIL ***");
 
 		try(CloseableHttpResponse response = apiService.addContent(document, documentContent)){

@@ -16,18 +16,21 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Channel;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.FileType;
+import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.Message.MessageBuilder;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintDetails.PostType;
+import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
 import no.digipost.api.client.util.FakeEncryptionKey;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
-import org.hamcrest.CustomTypeSafeMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -38,16 +41,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static no.digipost.api.client.pdf.EksempelPdf.*;
+import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
+import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
+import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.Channel.PRINT;
-import static no.digipost.api.client.representations.FileType.*;
+import static no.digipost.api.client.representations.FileType.GIF;
+import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.util.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
 import static no.motif.Base.always;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.io.IOUtils.toInputStream;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Answers.RETURNS_SMART_NULLS;
@@ -90,7 +100,7 @@ public class DocumentsPreparerTest {
 
 	@Test
 	public void cannotSendNonPdfFilesToPrint() throws IOException {
-		addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter")).encrypt();
+		addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter", UTF_8)).encrypt();
 
 		expectedException.expect(DigipostClientException.class);
 		expectedException.expectMessage("filetype gif");
@@ -131,7 +141,7 @@ public class DocumentsPreparerTest {
 	@Test
 	public void dontInsertDocumentsPreparerTestBlankPageAfterPrimaryDocumentForPreEncryptedDocuments() throws IOException {
 		primaryDocument.encrypt();
-		Document attachment = addAttachment("attachment", PDF, printablePdf2Pages()).encrypt();
+		addAttachment("attachment", PDF, printablePdf2Pages()).encrypt();
 		Message message = messageBuilder.build();
 		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.CHECK_ALL));
 
@@ -144,24 +154,5 @@ public class DocumentsPreparerTest {
 		messageBuilder.attachments(asList(document));
 		return document;
 	}
-
-
-	private static final Matcher<Document> blankPdf = new CustomTypeSafeMatcher<Document>(Document.class.getSimpleName() + " for padding with a blank page") {
-		@Override
-        protected boolean matchesSafely(Document doc) {
-			return doc.subject == null && doc.willBeEncrypted();
-        }
-
-		@Override
-        protected void describeMismatchSafely(Document doc, Description mismatchDescription) {
-			if (doc.subject != null) {
-				mismatchDescription.appendText("has subject '").appendText(doc.subject).appendText("' (should be null) ");
-			}
-			if (!doc.willBeEncrypted()) {
-				mismatchDescription.appendText("not marked as encrypted");
-			}
-		};
-	};
-
 
 }

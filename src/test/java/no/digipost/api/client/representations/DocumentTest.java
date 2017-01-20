@@ -39,7 +39,8 @@ public class DocumentTest {
 		assertTrue(s.contains("TekniskType3"));
 		assertTrue(s.contains("TekniskType4"));
 
-		assertThat(Document.parseTechnicalTypes(null), nullValue());
+		assertThat(Document.parseTechnicalTypes((String[]) null), nullValue());
+		assertThat(Document.parseTechnicalTypes(), nullValue());
 	}
 
 	@Test

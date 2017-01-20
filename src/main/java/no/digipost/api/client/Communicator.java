@@ -20,26 +20,24 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.util.JAXBContextUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.DataBindingException;
-import javax.xml.bind.JAXB;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static no.digipost.api.client.representations.ErrorType.SERVER;
-import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
 /**
  * Superklasse for MessageSender som har funksjonalitet for å snakke med
  * ApiService.
- *
  */
 public abstract class Communicator {
 

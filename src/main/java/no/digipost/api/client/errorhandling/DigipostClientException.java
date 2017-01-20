@@ -20,11 +20,12 @@ import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Relation;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static no.digipost.api.client.errorhandling.ErrorType.*;
+import static no.digipost.api.client.errorhandling.ErrorType.NONE;
+import static no.digipost.api.client.errorhandling.ErrorType.UNKNOWN;
+import static no.digipost.api.client.errorhandling.ErrorType.resolve;
 
 public class DigipostClientException extends RuntimeException {
 	private static final long serialVersionUID = 1L;

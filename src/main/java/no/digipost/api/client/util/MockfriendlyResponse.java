@@ -18,8 +18,12 @@ package no.digipost.api.client.util;
 import no.digipost.api.client.representations.MessageDelivery;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.commons.lang3.NotImplementedException;
-import org.apache.http.*;
+import org.apache.http.Header;
+import org.apache.http.HeaderIterator;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicStatusLine;
@@ -27,10 +31,14 @@ import org.apache.http.params.HttpParams;
 import org.joda.time.DateTime;
 
 import javax.xml.bind.JAXB;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
@@ -63,142 +71,143 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 
 	@Override
 	public void close() throws IOException {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public StatusLine getStatusLine() {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void setStatusLine(StatusLine statusline) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void setStatusLine(ProtocolVersion ver, int code) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void setStatusLine(ProtocolVersion ver, int code, String reason) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void setStatusCode(int code) throws IllegalStateException {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void setReasonPhrase(String reason) throws IllegalStateException {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public HttpEntity getEntity() {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void setEntity(HttpEntity entity) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public Locale getLocale() {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void setLocale(Locale loc) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public ProtocolVersion getProtocolVersion() {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public boolean containsHeader(String name) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public Header[] getHeaders(String name) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public Header getFirstHeader(String name) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public Header getLastHeader(String name) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public Header[] getAllHeaders() {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void addHeader(Header header) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void addHeader(String name, String value) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void setHeader(Header header) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void setHeader(String name, String value) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void setHeaders(Header[] headers) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void removeHeader(Header header) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public void removeHeaders(String name) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public HeaderIterator headerIterator() {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
 	public HeaderIterator headerIterator(String name) {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
-	@Override
+    @Override
+    @SuppressWarnings("deprecation")
 	public HttpParams getParams() {
-		throw new NotImplementedException("This is a mock");
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	@Override
-	public void setParams(HttpParams params) {
-		throw new NotImplementedException("This is a mock");
+	public void setParams(@SuppressWarnings("deprecation") HttpParams params) {
+		throw new UnsupportedOperationException("This is a mock");
 	}
 
 	public static class MockedResponseBuilder {

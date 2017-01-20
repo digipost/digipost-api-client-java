@@ -23,7 +23,17 @@ import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import no.digipost.api.client.Headers;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Channel;
+import no.digipost.api.client.representations.DigipostUri;
+import no.digipost.api.client.representations.EncryptionKey;
+import no.digipost.api.client.representations.EntryPoint;
+import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.ErrorType;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.MediaTypes;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.Relation;
 import no.digipost.api.client.representations.sender.SenderFeature;
 import no.digipost.api.client.representations.sender.SenderFeatureName;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -42,15 +52,31 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.security.*;
-import java.util.*;
-import java.util.concurrent.BlockingDeque;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import static java.lang.Integer.parseInt;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
-import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.encryptionKeyContext;
+import static no.digipost.api.client.util.JAXBContextUtils.entryPointContext;
+import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
+import static no.digipost.api.client.util.JAXBContextUtils.marshal;
+import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
+import static no.digipost.api.client.util.JAXBContextUtils.messageDeliveryContext;
+import static no.digipost.api.client.util.JAXBContextUtils.senderInformationContext;
+import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.joda.time.DateTime.now;
 
@@ -104,7 +130,6 @@ public class DigipostApiMock implements HttpHandler {
 
 	private int port;
 	private Undertow server;
-	private final BlockingDeque<ReceivedRequest> receivedRequests = new LinkedBlockingDeque<>();
 	private Map<Method, RequestsAndResponses> requestsAndResponsesMap;
 	private KeyPair keyPair;
 
@@ -282,10 +307,13 @@ public class DigipostApiMock implements HttpHandler {
 
 
 
-	public static class RequestMatcher {
-		public CloseableHttpResponse findResponse(String requestString) {
-			return null;
-		}
+	public interface RequestMatcher {
+		CloseableHttpResponse findResponse(String requestString);
+		public static final RequestMatcher NO_OP = new RequestMatcher() {
+            @Override public CloseableHttpResponse findResponse(String requestString) {
+                return null;
+            }
+		};
 	}
 
 	public static class RequestsAndResponses {
@@ -294,7 +322,7 @@ public class DigipostApiMock implements HttpHandler {
 		private final Map<String, MockRequest> requestMap;
 
 		RequestsAndResponses() {
-			this(new RequestMatcher());
+			this(RequestMatcher.NO_OP);
 		}
 
 		RequestsAndResponses(RequestMatcher requestMatcher) {
@@ -376,7 +404,7 @@ public class DigipostApiMock implements HttpHandler {
 		}
 	}
 
-	public static class MultipartRequestMatcher extends RequestMatcher {
+	public static class MultipartRequestMatcher implements RequestMatcher {
 
 		public static CloseableHttpResponse DEFAULT_RESPONSE = getDefaultResponse();
 		public static RuntimeException CONNECTION_REFUSED = new RuntimeException(new ConnectException("Connection refused"));
