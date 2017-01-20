@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7;
 import static no.digipost.api.client.util.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
 import static no.digipost.api.client.util.Encrypter.keyToEncrypter;
 import static no.digipost.api.client.util.JAXBContextUtils.encryptionKeyContext;
@@ -116,7 +117,7 @@ public class MessageSender extends Communicator {
 
 			MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create()
 					.setMode(HttpMultipartMode.STRICT)
-					.setMimeSubtype("mixed")
+					.setMimeSubtype(DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7)
 					.addPart(FormBodyPartBuilder.create("message", attachment)
 							.addField("Content-Disposition", "attachment;" + " filename=\"message\"")
 							.build());
