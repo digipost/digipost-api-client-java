@@ -31,74 +31,74 @@ import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
 @XmlRootElement(name = "error")
 public class ErrorMessage extends Representation {
 
-	public static final ErrorMessage EMPTY = new ErrorMessage(ErrorType.NONE, "Empty error-message");
-	@XmlElement(name = "error-code", required = true)
-	private String errorCode;
+    public static final ErrorMessage EMPTY = new ErrorMessage(ErrorType.NONE, "Empty error-message");
+    @XmlElement(name = "error-code", required = true)
+    private String errorCode;
 
-	@XmlElement(name = "error-message", required = true)
-	private String errorMessage;
+    @XmlElement(name = "error-message", required = true)
+    private String errorMessage;
 
-	@XmlElement(name = "error-type", required = true)
-	private ErrorType errorType;
+    @XmlElement(name = "error-type", required = true)
+    private ErrorType errorType;
 
 
-	public ErrorMessage(ErrorType errorType, String errorMessage, Link... linker) {
-		this(errorType, GENERAL_ERROR.name(), errorMessage, linker);
-	}
+    public ErrorMessage(ErrorType errorType, String errorMessage, Link... linker) {
+        this(errorType, GENERAL_ERROR.name(), errorMessage, linker);
+    }
 
-	public ErrorMessage(ErrorType errorType, String errorCode, String errorMessage, Link... linker) {
-		super(linker);
-		this.errorType = errorType;
-		this.errorCode = errorCode;
-		this.errorMessage = errorMessage;
-	}
+    public ErrorMessage(ErrorType errorType, String errorCode, String errorMessage, Link... linker) {
+        super(linker);
+        this.errorType = errorType;
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+    }
 
-	ErrorMessage() {
-	}
+    ErrorMessage() {
+    }
 
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder().append(errorMessage).toHashCode();
-	}
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(errorMessage).toHashCode();
+    }
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		ErrorMessage other = (ErrorMessage) obj;
-		return new EqualsBuilder().append(errorMessage, other.errorMessage).isEquals();
-	}
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ErrorMessage other = (ErrorMessage) obj;
+        return new EqualsBuilder().append(errorMessage, other.errorMessage).isEquals();
+    }
 
-	@Override
-	public String toString() {
-		return format("%s: %s", errorCode, errorMessage);
-	}
+    @Override
+    public String toString() {
+        return format("%s: %s", errorCode, errorMessage);
+    }
 
-	public String getErrorMessage() {
-		return errorMessage;
-	}
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 
-	public String getErrorCode() {
-		return errorCode;
-	}
+    public String getErrorCode() {
+        return errorCode;
+    }
 
-	public ErrorType getErrorType() {
-		return errorType;
-	}
+    public ErrorType getErrorType() {
+        return errorType;
+    }
 
-	@XmlElement(name = "link")
-	public List<Link> getLink() {
-		return links;
-	}
+    @XmlElement(name = "link")
+    public List<Link> getLink() {
+        return links;
+    }
 
-	public void setLink(final List<Link> links) {
-		this.links = links;
-	}
+    public void setLink(final List<Link> links) {
+        this.links = links;
+    }
 }

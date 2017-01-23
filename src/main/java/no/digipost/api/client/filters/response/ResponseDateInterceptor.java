@@ -36,68 +36,68 @@ import static org.joda.time.DateTime.now;
 
 public class ResponseDateInterceptor implements HttpResponseInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ResponseDateInterceptor.class);
-	private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
+    private static final Logger LOG = LoggerFactory.getLogger(ResponseDateInterceptor.class);
+    private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
 
-	private boolean shouldThrow = true;
+    private boolean shouldThrow = true;
 
-	public void setThrowOnError(final boolean shouldThrow) {
-		this.shouldThrow = shouldThrow;
-	}
+    public void setThrowOnError(final boolean shouldThrow) {
+        this.shouldThrow = shouldThrow;
+    }
 
-	@Override
-	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-		String dateHeader = null;
-		Header firstHeader = response.getFirstHeader(DATE);
-		if(firstHeader != null){
-			dateHeader = firstHeader.getValue();
-		}
-			
-		try {
-			if (isNotBlank(dateHeader)) {
-				sjekkDato(dateHeader);
-			} else {
-				throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-						"Mangler Date-header - server-signatur kunne ikke sjekkes");
-			}
-		} catch (Exception e) {
-			LoggingUtil.logResponse(response);
-			if (shouldThrow) {
-				if (e instanceof DigipostClientException) {
-					throw (DigipostClientException) e;
-				} else {
-					throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-							"Det skjedde en feil under signatursjekk: " + e.getMessage());
-				}
-			} else {
-				LOG.warn("Feil under validering av server-signatur: '" + e.getMessage() + "'. " +
-						(LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));
-				LOG.debug(e.getMessage(), e);
-			}
-		}
-	}
+    @Override
+    public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+        String dateHeader = null;
+        Header firstHeader = response.getFirstHeader(DATE);
+        if(firstHeader != null){
+            dateHeader = firstHeader.getValue();
+        }
 
-	private void sjekkDato(final String dateOnRFC1123Format) {
-		try {
-			DateTime date = DateUtils.parseDate(dateOnRFC1123Format);
-			sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date);
-			sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date);
-		} catch (IllegalArgumentException e) {
-			throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-					"Date-header kunne ikke parses - server-signatur kunne ikke sjekkes");
+        try {
+            if (isNotBlank(dateHeader)) {
+                sjekkDato(dateHeader);
+            } else {
+                throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+                        "Mangler Date-header - server-signatur kunne ikke sjekkes");
+            }
+        } catch (Exception e) {
+            LoggingUtil.logResponse(response);
+            if (shouldThrow) {
+                if (e instanceof DigipostClientException) {
+                    throw (DigipostClientException) e;
+                } else {
+                    throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+                            "Det skjedde en feil under signatursjekk: " + e.getMessage());
+                }
+            } else {
+                LOG.warn("Feil under validering av server-signatur: '" + e.getMessage() + "'. " +
+                        (LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));
+                LOG.debug(e.getMessage(), e);
+            }
+        }
+    }
 
-		}
-	}
+    private void sjekkDato(final String dateOnRFC1123Format) {
+        try {
+            DateTime date = DateUtils.parseDate(dateOnRFC1123Format);
+            sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date);
+            sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date);
+        } catch (IllegalArgumentException e) {
+            throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+                    "Date-header kunne ikke parses - server-signatur kunne ikke sjekkes");
 
-	private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final DateTime parsedDate) {
-		if (parsedDate.isBefore(now().minusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
-			throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for gammel: " + headerDate);
-		}
-	}
+        }
+    }
 
-	private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final DateTime parsedDate) {
-		if (parsedDate.isAfter(now().plusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
-			throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for ny: " + headerDate);
-		}
-	}
+    private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final DateTime parsedDate) {
+        if (parsedDate.isBefore(now().minusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
+            throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for gammel: " + headerDate);
+        }
+    }
+
+    private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final DateTime parsedDate) {
+        if (parsedDate.isAfter(now().plusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
+            throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for ny: " + headerDate);
+        }
+    }
 }

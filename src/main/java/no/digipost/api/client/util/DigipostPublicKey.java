@@ -28,24 +28,24 @@ import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
 public class DigipostPublicKey {
-	public final PublicKey publicKey;
-	public final String publicKeyHash;
+    public final PublicKey publicKey;
+    public final String publicKeyHash;
 
-	public DigipostPublicKey(EncryptionKey encryptionKey) {
+    public DigipostPublicKey(EncryptionKey encryptionKey) {
 
-		try (Reader sourceReader = new StringReader(encryptionKey.getValue());
-			 PEMParser pemParser = new PEMParser(sourceReader)) {
+        try (Reader sourceReader = new StringReader(encryptionKey.getValue());
+             PEMParser pemParser = new PEMParser(sourceReader)) {
 
-			SubjectPublicKeyInfo subjectPublicKeyInfo = (SubjectPublicKeyInfo) pemParser.readObject();
-			X509EncodedKeySpec spec = new X509EncodedKeySpec(subjectPublicKeyInfo.getEncoded());
-			PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
+            SubjectPublicKeyInfo subjectPublicKeyInfo = (SubjectPublicKeyInfo) pemParser.readObject();
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(subjectPublicKeyInfo.getEncoded());
+            PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
 
-			this.publicKey = publicKey;
-			this.publicKeyHash = encryptionKey.getKeyId();
+            this.publicKey = publicKey;
+            this.publicKeyHash = encryptionKey.getKeyId();
 
-		} catch (Exception e) {
-			throw new DigipostClientException(ErrorCode.FAILED_TO_PARSE_ENCRYPTION_KEY, "Feil ved parsing av krypteringsnøkkel fra Digipost.", e);
-		}
+        } catch (Exception e) {
+            throw new DigipostClientException(ErrorCode.FAILED_TO_PARSE_ENCRYPTION_KEY, "Feil ved parsing av krypteringsnøkkel fra Digipost.", e);
+        }
 
-	}
+    }
 }

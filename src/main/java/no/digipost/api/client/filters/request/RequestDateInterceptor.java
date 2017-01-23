@@ -30,26 +30,26 @@ import static org.apache.http.HttpHeaders.DATE;
 
 public class RequestDateInterceptor implements HttpRequestInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RequestDateInterceptor.class);
-	private final EventLogger eventLogger;
+    private static final Logger LOG = LoggerFactory.getLogger(RequestDateInterceptor.class);
+    private final EventLogger eventLogger;
 
-	public RequestDateInterceptor(final EventLogger eventListener) {
-		this.eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
-	}
+    public RequestDateInterceptor(final EventLogger eventListener) {
+        this.eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
+    }
 
-	@Override
-	public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
-		modifyRequest(httpRequest);
-	}
+    @Override
+    public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+        modifyRequest(httpRequest);
+    }
 
-	private void log(final String stringToSignMsg) {
-		LOG.debug(stringToSignMsg);
-		eventLogger.log(stringToSignMsg);
-	}
+    private void log(final String stringToSignMsg) {
+        LOG.debug(stringToSignMsg);
+        eventLogger.log(stringToSignMsg);
+    }
 
-	private void modifyRequest(final HttpRequest httpRequest) {
-		String dateOnRFC1123Format = DateUtils.formatDate(DateTime.now());
-		httpRequest.setHeader(DATE, dateOnRFC1123Format);
-		log(getClass().getSimpleName() + " satt headeren " + DATE + "=" + dateOnRFC1123Format);
-	}
+    private void modifyRequest(final HttpRequest httpRequest) {
+        String dateOnRFC1123Format = DateUtils.formatDate(DateTime.now());
+        httpRequest.setHeader(DATE, dateOnRFC1123Format);
+        log(getClass().getSimpleName() + " satt headeren " + DATE + "=" + dateOnRFC1123Format);
+    }
 }

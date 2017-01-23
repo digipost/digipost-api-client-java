@@ -23,21 +23,21 @@ import java.util.Locale;
 
 public class DateUtils {
 
-	public static final String RFC_1123_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
-	private static final DateTimeFormatter fmt = DateTimeFormat.forPattern(RFC_1123_DATE_FORMAT).withZone(FixedDateTimeZone.forID("GMT")).withLocale(Locale.ENGLISH);
+    public static final String RFC_1123_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
+    private static final DateTimeFormatter fmt = DateTimeFormat.forPattern(RFC_1123_DATE_FORMAT).withZone(FixedDateTimeZone.forID("GMT")).withLocale(Locale.ENGLISH);
 
-	/**
-	 * Returns an RFC 1123 date format used in HTTP
-	 */
-	public static String formatDate(DateTime dateTime) {
-		return fmt.print(dateTime);
-	}
+    /**
+     * Returns an RFC 1123 date format used in HTTP
+     */
+    public static String formatDate(DateTime dateTime) {
+        return fmt.print(dateTime);
+    }
 
-	/**
-	 * Return an DateTime parsed from an RFC 1123 compliant string
-	 */
-	public static DateTime parseDate(String dateTime) {
-		return fmt.parseDateTime(dateTime);
-	}
+    /**
+     * Return an DateTime parsed from an RFC 1123 compliant string
+     */
+    public static DateTime parseDate(String dateTime) {
+        return fmt.parseDateTime(dateTime);
+    }
 
 }

@@ -66,93 +66,93 @@ import static org.mockito.Mockito.withSettings;
 
 public class DocumentsPreparerTest {
 
-	private static final byte[] pdf20Pages;
-	static {
-		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
-		try {
-	        pdf20Pages = toByteArray(pdf20Pages());
+    private static final byte[] pdf20Pages;
+    static {
+        CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
+        try {
+            pdf20Pages = toByteArray(pdf20Pages());
         } catch (IOException e) {
-	        throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
-	}
+    }
 
 
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
-	private final DocumentsPreparer preparer = new DocumentsPreparer(new PdfValidator());
+    private final DocumentsPreparer preparer = new DocumentsPreparer(new PdfValidator());
 
-	private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(FakeEncryptionKey.createFakeEncryptionKey()));
+    private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(FakeEncryptionKey.createFakeEncryptionKey()));
 
-	private final Document primaryDocument = new Document(UUID.randomUUID().toString(), "primary", PDF);
-	private final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{ put(primaryDocument, printablePdf1Page()); }};
-	private final MessageBuilder messageBuilder = MessageBuilder.newMessage("m_id", primaryDocument).printDetails(
-			new PrintDetails(new PrintRecipient("Joe Schmoe", new NorwegianAddress("7845", "Far away")), new PrintRecipient("Dolly Parton", new NorwegianAddress("8942", "Farther away")), PostType.A));
+    private final Document primaryDocument = new Document(UUID.randomUUID().toString(), "primary", PDF);
+    private final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{ put(primaryDocument, printablePdf1Page()); }};
+    private final MessageBuilder messageBuilder = MessageBuilder.newMessage("m_id", primaryDocument).printDetails(
+            new PrintDetails(new PrintRecipient("Joe Schmoe", new NorwegianAddress("7845", "Far away")), new PrintRecipient("Dolly Parton", new NorwegianAddress("8942", "Farther away")), PostType.A));
 
-	@Test
-	public void failsIfMessageHasAnyDocumentsRequiringPreEncryptionAndNoEncryptionKeyIsSupplied() throws IOException {
-		primaryDocument.encrypt();
+    @Test
+    public void failsIfMessageHasAnyDocumentsRequiringPreEncryptionAndNoEncryptionKeyIsSupplied() throws IOException {
+        primaryDocument.encrypt();
 
-		expectedException.expect(DigipostClientException.class);
-		expectedException.expectMessage("no encryption key");
-		preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.CHECK_ALL));
-	}
+        expectedException.expect(DigipostClientException.class);
+        expectedException.expectMessage("no encryption key");
+        preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.CHECK_ALL));
+    }
 
-	@Test
-	public void cannotSendNonPdfFilesToPrint() throws IOException {
-		addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter", UTF_8)).encrypt();
+    @Test
+    public void cannotSendNonPdfFilesToPrint() throws IOException {
+        addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter", UTF_8)).encrypt();
 
-		expectedException.expect(DigipostClientException.class);
-		expectedException.expectMessage("filetype gif");
-		preparer.prepare(documents, messageBuilder.build(), encrypter, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
-	}
+        expectedException.expect(DigipostClientException.class);
+        expectedException.expectMessage("filetype gif");
+        preparer.prepare(documents, messageBuilder.build(), encrypter, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
+    }
 
-	@Test
-	public void deniesNonValidatingPdfForBothPrintAndWeb() {
-		for (Channel deliveryMethod : Channel.values()) {
-			try {
-				preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[]{65, 65, 65, 65}, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
-			} catch (DigipostClientException e) {
-				assertThat(e.getMessage(), containsString("Could not parse"));
-				continue;
-			}
-			fail("Should fail validation for bogus PDF using " + Channel.class.getSimpleName() + "." + deliveryMethod);
-		}
-	}
+    @Test
+    public void deniesNonValidatingPdfForBothPrintAndWeb() {
+        for (Channel deliveryMethod : Channel.values()) {
+            try {
+                preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[]{65, 65, 65, 65}, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
+            } catch (DigipostClientException e) {
+                assertThat(e.getMessage(), containsString("Could not parse"));
+                continue;
+            }
+            fail("Should fail validation for bogus PDF using " + Channel.class.getSimpleName() + "." + deliveryMethod);
+        }
+    }
 
-	@Test
-	public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
-		preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.CHECK_ALL));
+    @Test
+    public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
+        preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.CHECK_ALL));
 
-		expectedException.expect(DigipostClientException.class);
-		expectedException.expectMessage("too many pages");
-		preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.CHECK_ALL));
-	}
+        expectedException.expect(DigipostClientException.class);
+        expectedException.expectMessage("too many pages");
+        preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.CHECK_ALL));
+    }
 
 
-	@Test
-	public void doesNothingForNonPreEncryptedDocuments() throws IOException {
-		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.CHECK_ALL));
+    @Test
+    public void doesNothingForNonPreEncryptedDocuments() throws IOException {
+        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.CHECK_ALL));
 
-		assertThat(documents.keySet(), contains(primaryDocument));
-		assertThat(documents.get(primaryDocument), sameInstance(preparedDocuments.get(primaryDocument)));
-	}
+        assertThat(documents.keySet(), contains(primaryDocument));
+        assertThat(documents.get(primaryDocument), sameInstance(preparedDocuments.get(primaryDocument)));
+    }
 
-	@Test
-	public void dontInsertDocumentsPreparerTestBlankPageAfterPrimaryDocumentForPreEncryptedDocuments() throws IOException {
-		primaryDocument.encrypt();
-		addAttachment("attachment", PDF, printablePdf2Pages()).encrypt();
-		Message message = messageBuilder.build();
-		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.CHECK_ALL));
+    @Test
+    public void dontInsertDocumentsPreparerTestBlankPageAfterPrimaryDocumentForPreEncryptedDocuments() throws IOException {
+        primaryDocument.encrypt();
+        addAttachment("attachment", PDF, printablePdf2Pages()).encrypt();
+        Message message = messageBuilder.build();
+        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.CHECK_ALL));
 
-		assertThat(preparedDocuments.size(), is(2));
-	}
+        assertThat(preparedDocuments.size(), is(2));
+    }
 
-	private Document addAttachment(String subject, FileType fileType, InputStream content) {
-		Document document = new Document(UUID.randomUUID().toString(), subject, fileType);
-		documents.put(document, content);
-		messageBuilder.attachments(asList(document));
-		return document;
-	}
+    private Document addAttachment(String subject, FileType fileType, InputStream content) {
+        Document document = new Document(UUID.randomUUID().toString(), subject, fileType);
+        documents.put(document, content);
+        messageBuilder.attachments(asList(document));
+        return document;
+    }
 
 }

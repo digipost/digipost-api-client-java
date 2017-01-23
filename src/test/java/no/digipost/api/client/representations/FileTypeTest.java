@@ -30,19 +30,19 @@ import static org.junit.Assert.assertThat;
 @RunWith(Theories.class)
 public class FileTypeTest {
 
-	@Test
-	public void correctEqualsAndHashcode() {
-		EqualsVerifier.forClass(FileType.class).verify();
-	}
+    @Test
+    public void correctEqualsAndHashcode() {
+        EqualsVerifier.forClass(FileType.class).verify();
+    }
 
-	@Test
-	public void normalizesFiletypeStrings() {
-		assertThat(new FileType("   PdF  "), is(PDF));
-	}
+    @Test
+    public void normalizesFiletypeStrings() {
+        assertThat(new FileType("   PdF  "), is(PDF));
+    }
 
-	@Theory
-	public void createFileTypeUsingTheExtensionOfAFileName(@ForAll String basenames) {
-		assertThat(FileType.fromFilename(basenames + ". Jpeg"), is(JPEG));
-	}
+    @Theory
+    public void createFileTypeUsingTheExtensionOfAFileName(@ForAll String basenames) {
+        assertThat(FileType.fromFilename(basenames + ". Jpeg"), is(JPEG));
+    }
 
 }

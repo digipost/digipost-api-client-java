@@ -29,36 +29,36 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Recipients extends Representation {
 
-	@XmlElement(name = "recipient")
-	private final List<Recipient> recipients;
+    @XmlElement(name = "recipient")
+    private final List<Recipient> recipients;
 
-	public Recipients(final Link... links) {
-		super(links);
-		recipients = new LinkedList<Recipient>();
-	}
+    public Recipients(final Link... links) {
+        super(links);
+        recipients = new LinkedList<Recipient>();
+    }
 
-	public Recipients() {
-		recipients = new LinkedList<Recipient>();
-	}
+    public Recipients() {
+        recipients = new LinkedList<Recipient>();
+    }
 
-	public List<Recipient> getRecipients() {
-		return recipients;
-	}
+    public List<Recipient> getRecipients() {
+        return recipients;
+    }
 
-	public Link getSelfUri() {
-		return getLinkByRelationName(SELF);
-	}
+    public Link getSelfUri() {
+        return getLinkByRelationName(SELF);
+    }
 
-	public void add(final Recipient recipient) {
-		recipients.add(recipient);
-	}
+    public void add(final Recipient recipient) {
+        recipients.add(recipient);
+    }
 
-	@XmlElement(name = "link")
-	protected List<Link> getLink() {
-		return links;
-	}
+    @XmlElement(name = "link")
+    protected List<Link> getLink() {
+        return links;
+    }
 
-	protected void setLink(final List<Link> links) {
-		this.links = links;
-	}
+    protected void setLink(final List<Link> links) {
+        this.links = links;
+    }
 }

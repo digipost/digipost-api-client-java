@@ -21,8 +21,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "authentication-level")
 @XmlEnum
 public enum AuthenticationLevel {
-	PASSWORD,
-	TWO_FACTOR,
-	IDPORTEN_3,
-	IDPORTEN_4;
+    PASSWORD,
+    TWO_FACTOR,
+    IDPORTEN_3,
+    IDPORTEN_4;
 }

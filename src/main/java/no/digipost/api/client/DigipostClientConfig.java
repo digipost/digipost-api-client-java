@@ -16,26 +16,26 @@
 package no.digipost.api.client;
 
 public class DigipostClientConfig {
-	public final boolean cachePrintKey;
+    public final boolean cachePrintKey;
 
-	private DigipostClientConfig(boolean cachePrintKey){
-		this.cachePrintKey = cachePrintKey;
-	}
+    private DigipostClientConfig(boolean cachePrintKey){
+        this.cachePrintKey = cachePrintKey;
+    }
 
-	public static class DigipostClientConfigBuilder {
-		private boolean cachePrintKey = true;
+    public static class DigipostClientConfigBuilder {
+        private boolean cachePrintKey = true;
 
-		public static DigipostClientConfigBuilder newBuilder(){
-			return new DigipostClientConfigBuilder();
-		}
+        public static DigipostClientConfigBuilder newBuilder(){
+            return new DigipostClientConfigBuilder();
+        }
 
-		public DigipostClientConfigBuilder cachePrintKey(boolean cachePrintKey){
-			this.cachePrintKey = cachePrintKey;
-			return this;
-		}
+        public DigipostClientConfigBuilder cachePrintKey(boolean cachePrintKey){
+            this.cachePrintKey = cachePrintKey;
+            return this;
+        }
 
-		public DigipostClientConfig build(){
-			return new DigipostClientConfig(cachePrintKey);
-		}
-	}
+        public DigipostClientConfig build(){
+            return new DigipostClientConfig(cachePrintKey);
+        }
+    }
 }

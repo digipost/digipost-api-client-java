@@ -33,75 +33,75 @@ public final class ListedTime implements ReadableInstant {
     @XmlSchemaType(name = "dateTime")
     public final DateTime time;
 
-	public ListedTime(){
-		this(null);
-	}
+    public ListedTime(){
+        this(null);
+    }
 
-	public ListedTime(DateTime atTime) {
-		this.time = atTime;
-	}
+    public ListedTime(DateTime atTime) {
+        this.time = atTime;
+    }
 
     @Override
     public final boolean equals(Object obj) {
-    	if (obj instanceof ListedTime) {
-    		return Objects.equals(this.time, ((ListedTime) obj).time);
-    	}
-    	return false;
+        if (obj instanceof ListedTime) {
+            return Objects.equals(this.time, ((ListedTime) obj).time);
+        }
+        return false;
     }
 
     @Override
     public final int hashCode() {
-    	return Objects.hashCode(time);
+        return Objects.hashCode(time);
     }
 
-	@Override
+    @Override
     public int compareTo(ReadableInstant o) {
-		return time.compareTo(o);
+        return time.compareTo(o);
     }
 
-	@Override
+    @Override
     public long getMillis() {
-		return time.getMillis();
+        return time.getMillis();
     }
 
-	@Override
+    @Override
     public Chronology getChronology() {
-		return time.getChronology();
+        return time.getChronology();
     }
 
-	@Override
+    @Override
     public DateTimeZone getZone() {
-		return time.getZone();
+        return time.getZone();
     }
 
-	@Override
+    @Override
     public int get(DateTimeFieldType type) {
-		return time.get(type);
+        return time.get(type);
     }
 
-	@Override
+    @Override
     public boolean isSupported(DateTimeFieldType field) {
-		return time.isSupported(field);
+        return time.isSupported(field);
     }
 
-	@Override
+    @Override
     public Instant toInstant() {
-		return time.toInstant();
+        return time.toInstant();
     }
 
-	@Override
+    @Override
     public boolean isEqual(ReadableInstant instant) {
-		return time.isEqual(instant);
+        return time.isEqual(instant);
     }
 
-	@Override
+    @Override
     public boolean isAfter(ReadableInstant instant) {
-		return time.isAfter(instant);
+        return time.isAfter(instant);
     }
 
-	@Override
+    @Override
     public boolean isBefore(ReadableInstant instant) {
-		return time.isBefore(instant);
+        return time.isBefore(instant);
     }
 
 }

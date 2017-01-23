@@ -24,16 +24,16 @@ import org.joda.time.DateTime;
 @XmlTransient
 public class DateTimeXmlAdapter extends XmlAdapter<String, DateTime> {
 
-	@Override
-	public String marshal(final DateTime v) throws Exception {
-		if (v == null) return null;
-		return v.toString();
-	}
+    @Override
+    public String marshal(final DateTime v) throws Exception {
+        if (v == null) return null;
+        return v.toString();
+    }
 
-	@Override
-	public DateTime unmarshal(final String s) throws Exception {
-		if (s == null) return null;
-		return new DateTime(DatatypeConverter.parseDate(s).getTime());
-	}
+    @Override
+    public DateTime unmarshal(final String s) throws Exception {
+        if (s == null) return null;
+        return new DateTime(DatatypeConverter.parseDate(s).getTime());
+    }
 
 }

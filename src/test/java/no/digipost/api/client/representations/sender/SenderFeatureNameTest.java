@@ -32,37 +32,37 @@ import static org.junit.Assert.assertThat;
 
 public class SenderFeatureNameTest {
 
-	@Test
-	public void correctEqualsAndHashcode() {
-		EqualsVerifier.forClass(SenderFeatureName.class).verify();
-	}
+    @Test
+    public void correctEqualsAndHashcode() {
+        EqualsVerifier.forClass(SenderFeatureName.class).verify();
+    }
 
-	@Test
-	public void customFeatures() {
-		assertThat(SenderFeatureName.from("my.feature"), is(SenderFeatureName.from("my.feature")));
-	}
+    @Test
+    public void customFeatures() {
+        assertThat(SenderFeatureName.from("my.feature"), is(SenderFeatureName.from("my.feature")));
+    }
 
-	@Test
-	public void knownFeaturesAreSingletons() {
-		assertThat(SenderFeatureName.from(DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK.identificator),
-				sameInstance(DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK));
-	}
+    @Test
+    public void knownFeaturesAreSingletons() {
+        assertThat(SenderFeatureName.from(DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK.identificator),
+                sameInstance(DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK));
+    }
 
-	@Test
-	public void allSenderFeatureConstantsAreIncludedAsKnownFeatures() throws Exception {
-		Elements<Field> declaredConstants = on(SenderFeatureName.class.getFields())
-			.filter(new Predicate<Field>() { @Override public boolean $(Field f) {
-					return f.getType() == SenderFeatureName.class
-							&& isStatic(f.getModifiers())
-							&& isFinal(f.getModifiers())
-							&& isPublic(f.getModifiers());
-					}});
+    @Test
+    public void allSenderFeatureConstantsAreIncludedAsKnownFeatures() throws Exception {
+        Elements<Field> declaredConstants = on(SenderFeatureName.class.getFields())
+            .filter(new Predicate<Field>() { @Override public boolean $(Field f) {
+                    return f.getType() == SenderFeatureName.class
+                            && isStatic(f.getModifiers())
+                            && isFinal(f.getModifiers())
+                            && isPublic(f.getModifiers());
+                    }});
 
-		assertFalse(declaredConstants.isEmpty());
-		for (Field constantField : declaredConstants) {
-			SenderFeatureName constant = (SenderFeatureName) constantField.get(SenderFeatureName.class);
-			assertThat(SenderFeatureName.from(constant.identificator), sameInstance(constant));
-		}
-	}
+        assertFalse(declaredConstants.isEmpty());
+        for (Field constantField : declaredConstants) {
+            SenderFeatureName constant = (SenderFeatureName) constantField.get(SenderFeatureName.class);
+            assertThat(SenderFeatureName.from(constant.identificator), sameInstance(constant));
+        }
+    }
 
 }

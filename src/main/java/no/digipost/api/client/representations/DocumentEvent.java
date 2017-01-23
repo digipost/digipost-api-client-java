@@ -24,44 +24,44 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "event")
 public class DocumentEvent {
-	@XmlAttribute(name = "uuid", required = true)
-	private String uuid;
-	@XmlAttribute(name = "type", required = true)
-	private DocumentEventType type;
-	@XmlAttribute(name = "created", required = true)
-	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
-	@XmlSchemaType(name = "dateTime")
-	private DateTime created;
-	@XmlElement(name = "metadata")
-	private EventMetadata metadata;
+    @XmlAttribute(name = "uuid", required = true)
+    private String uuid;
+    @XmlAttribute(name = "type", required = true)
+    private DocumentEventType type;
+    @XmlAttribute(name = "created", required = true)
+    @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+    @XmlSchemaType(name = "dateTime")
+    private DateTime created;
+    @XmlElement(name = "metadata")
+    private EventMetadata metadata;
 
-	public DocumentEvent() {
-	}
+    public DocumentEvent() {
+    }
 
-	public DocumentEvent(String uuid, DocumentEventType type, DateTime created) {
-		this(uuid, type, created, null);
-	}
+    public DocumentEvent(String uuid, DocumentEventType type, DateTime created) {
+        this(uuid, type, created, null);
+    }
 
-	public DocumentEvent(String uuid, DocumentEventType type, DateTime created, EventMetadata metadata) {
-		this.uuid = uuid;
-		this.type = type;
-		this.created = created;
-		this.metadata = metadata;
-	}
+    public DocumentEvent(String uuid, DocumentEventType type, DateTime created, EventMetadata metadata) {
+        this.uuid = uuid;
+        this.type = type;
+        this.created = created;
+        this.metadata = metadata;
+    }
 
-	public String getUuid() {
-		return uuid;
-	}
+    public String getUuid() {
+        return uuid;
+    }
 
-	public DocumentEventType getType() {
-		return type;
-	}
+    public DocumentEventType getType() {
+        return type;
+    }
 
-	public DateTime getCreated() {
-		return created;
-	}
+    public DateTime getCreated() {
+        return created;
+    }
 
-	public EventMetadata getMetadata() {
-		return metadata;
-	}
+    public EventMetadata getMetadata() {
+        return metadata;
+    }
 }

@@ -23,35 +23,35 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class DigipostUri {
-	private final URI uri;
+    private final URI uri;
 
-	public DigipostUri(final URI uri) {
-		this.uri = uri;
-	}
+    public DigipostUri(final URI uri) {
+        this.uri = uri;
+    }
 
-	public DigipostUri(final String uri) {
-		try {
-			this.uri = new URI(uri);
-		} catch (URISyntaxException e) {
-			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, e.getMessage());
-		}
-	}
+    public DigipostUri(final String uri) {
+        try {
+            this.uri = new URI(uri);
+        } catch (URISyntaxException e) {
+            throw new DigipostClientException(ErrorCode.CLIENT_ERROR, e.getMessage());
+        }
+    }
 
-	public URI getUri() {
-		return uri;
-	}
+    public URI getUri() {
+        return uri;
+    }
 
-	@Override
-	public String toString() {
-		return uri.toString();
-	}
+    @Override
+    public String toString() {
+        return uri.toString();
+    }
 
-	public String getBaseUri() {
-		String port = "";
-		if (uri.getPort() != 80 && uri.getPort() != -1) {
-			port = ":" + String.valueOf(uri.getPort());
-		}
+    public String getBaseUri() {
+        String port = "";
+        if (uri.getPort() != 80 && uri.getPort() != -1) {
+            port = ":" + String.valueOf(uri.getPort());
+        }
 
-		return uri.getScheme() + "://" + uri.getHost() + port;
-	}
+        return uri.getScheme() + "://" + uri.getHost() + port;
+    }
 }

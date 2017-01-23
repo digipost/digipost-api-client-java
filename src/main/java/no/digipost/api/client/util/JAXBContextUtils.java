@@ -35,40 +35,40 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class JAXBContextUtils {
-	public static final JAXBContext entryPointContext = initContext(EntryPoint.class);
-	public static final JAXBContext errorMessageContext = initContext(ErrorMessage.class);
-	public static final JAXBContext identificationContext = initContext(Identification.class);
-	public static final JAXBContext messageContext = initContext(Message.class);
-	public static final JAXBContext recipientsContext = initContext(Recipients.class);
-	public static final JAXBContext autocompleteContext = initContext(Autocomplete.class);
-	public static final JAXBContext documentEventsContext = initContext(DocumentEvents.class);
-	public static final JAXBContext documentStatusContext = initContext(DocumentStatus.class);
-	public static final JAXBContext messageDeliveryContext = initContext(MessageDelivery.class);
-	public static final JAXBContext encryptionKeyContext = initContext(EncryptionKey.class);
-	public static final JAXBContext identificationResultWithEncryptionKeyContext = initContext(IdentificationResultWithEncryptionKey.class);
-	public static final JAXBContext senderInformationContext = initContext(SenderInformation.class);
+    public static final JAXBContext entryPointContext = initContext(EntryPoint.class);
+    public static final JAXBContext errorMessageContext = initContext(ErrorMessage.class);
+    public static final JAXBContext identificationContext = initContext(Identification.class);
+    public static final JAXBContext messageContext = initContext(Message.class);
+    public static final JAXBContext recipientsContext = initContext(Recipients.class);
+    public static final JAXBContext autocompleteContext = initContext(Autocomplete.class);
+    public static final JAXBContext documentEventsContext = initContext(DocumentEvents.class);
+    public static final JAXBContext documentStatusContext = initContext(DocumentStatus.class);
+    public static final JAXBContext messageDeliveryContext = initContext(MessageDelivery.class);
+    public static final JAXBContext encryptionKeyContext = initContext(EncryptionKey.class);
+    public static final JAXBContext identificationResultWithEncryptionKeyContext = initContext(IdentificationResultWithEncryptionKey.class);
+    public static final JAXBContext senderInformationContext = initContext(SenderInformation.class);
 
-	private static JAXBContext initContext(Class<?> clazz) {
-		try {
-			return JAXBContext.newInstance(clazz);
-		} catch (JAXBException e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
-	}
+    private static JAXBContext initContext(Class<?> clazz) {
+        try {
+            return JAXBContext.newInstance(clazz);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 
-	public static void marshal(JAXBContext context, Object objectToMarshall, OutputStream outputStream){
-		try {
-			context.createMarshaller().marshal(objectToMarshall, outputStream);
-		} catch (JAXBException e) {
-			throw new RuntimeException("Failed when trying to marshal object to outputstream", e);
-		}
-	}
+    public static void marshal(JAXBContext context, Object objectToMarshall, OutputStream outputStream){
+        try {
+            context.createMarshaller().marshal(objectToMarshall, outputStream);
+        } catch (JAXBException e) {
+            throw new RuntimeException("Failed when trying to marshal object to outputstream", e);
+        }
+    }
 
-	public static <T> T unmarshal(JAXBContext context, InputStream inputStream, Class<T> type){
-		try {
-			return type.cast(context.createUnmarshaller().unmarshal(inputStream));
-		} catch (JAXBException e) {
-			throw new RuntimeException("Failed when trying to unmarshal inputstream to object", e);
-		}
-	}
+    public static <T> T unmarshal(JAXBContext context, InputStream inputStream, Class<T> type){
+        try {
+            return type.cast(context.createUnmarshaller().unmarshal(inputStream));
+        } catch (JAXBException e) {
+            throw new RuntimeException("Failed when trying to unmarshal inputstream to object", e);
+        }
+    }
 }

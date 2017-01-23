@@ -25,17 +25,17 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "email-notification-failed-metadata")
 public class EmailNotificationFailedMetadata extends EventMetadata {
 
-	@XmlAttribute(name = "email-address")
-	public final String emailAddress;
-	@XmlAttribute(name = "error-code")
-	public final String errorCode;
+    @XmlAttribute(name = "email-address")
+    public final String emailAddress;
+    @XmlAttribute(name = "error-code")
+    public final String errorCode;
 
-	public EmailNotificationFailedMetadata() {
-		this(null, null);
-	}
+    public EmailNotificationFailedMetadata() {
+        this(null, null);
+    }
 
-	public EmailNotificationFailedMetadata(String emailAddress, String errorCode) {
-		this.emailAddress = emailAddress;
-		this.errorCode = errorCode;
-	}
+    public EmailNotificationFailedMetadata(String emailAddress, String errorCode) {
+        this.emailAddress = emailAddress;
+        this.errorCode = errorCode;
+    }
 }

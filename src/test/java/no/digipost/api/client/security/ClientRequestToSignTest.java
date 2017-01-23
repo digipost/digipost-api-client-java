@@ -23,22 +23,22 @@ import static org.junit.Assert.assertThat;
 
 public class ClientRequestToSignTest {
 
-	@Test
-	public void testStandardQuery(){
-		String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?query=1&query=2");
-		assertThat(s, is("query=1&query=2"));
-	}
+    @Test
+    public void testStandardQuery(){
+        String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?query=1&query=2");
+        assertThat(s, is("query=1&query=2"));
+    }
 
-	@Test
-	public void testStandardNonQuery(){
-		String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com");
-		assertThat(s, is(""));
-	}
+    @Test
+    public void testStandardNonQuery(){
+        String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com");
+        assertThat(s, is(""));
+    }
 
-	@Test
-	public void testNonStandardNonQuery(){
-		String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?");
-		assertThat(s, is(""));
-	}
+    @Test
+    public void testNonStandardNonQuery(){
+        String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?");
+        assertThat(s, is(""));
+    }
 
 }

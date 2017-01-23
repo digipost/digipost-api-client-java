@@ -23,14 +23,14 @@ import static org.junit.Assert.assertNotNull;
 
 public class CryptoUtilTest {
 
-	@Test
-	public void shouldLoadPrivateKeyFromPKCS12File() {
-		final PrivateKey privateKey = CryptoUtil.loadKeyFromP12(getClass().getResourceAsStream("certificate.p12"), "Qwer12345");
-		assertNotNull(privateKey);
-	}
+    @Test
+    public void shouldLoadPrivateKeyFromPKCS12File() {
+        final PrivateKey privateKey = CryptoUtil.loadKeyFromP12(getClass().getResourceAsStream("certificate.p12"), "Qwer12345");
+        assertNotNull(privateKey);
+    }
 
-	@Test(expected = RuntimeException.class)
-	public void shouldThrowRuntimeExceptionWhenBadPassword() {
-		CryptoUtil.loadKeyFromP12(getClass().getResourceAsStream("certificate.p12"), "");
-	}
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowRuntimeExceptionWhenBadPassword() {
+        CryptoUtil.loadKeyFromP12(getClass().getResourceAsStream("certificate.p12"), "");
+    }
 }

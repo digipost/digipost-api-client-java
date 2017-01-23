@@ -42,38 +42,38 @@ public class ResponseSignatureFilterTest {
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
-	private ResponseSignatureInterceptor responseSignatureInterceptor;
+    private ResponseSignatureInterceptor responseSignatureInterceptor;
 
-	@Mock
-	private ApiService apiServiceMock;
+    @Mock
+    private ApiService apiServiceMock;
 
-	@Mock
-	private HttpResponse httpResponseMock;
+    @Mock
+    private HttpResponse httpResponseMock;
 
-	@Mock
-	private HttpContext httpContextMock;
+    @Mock
+    private HttpContext httpContextMock;
 
-	@Before
-	public void setUp() throws URISyntaxException {
-		responseSignatureInterceptor = new ResponseSignatureInterceptor(apiServiceMock);
-		responseSignatureInterceptor.setThrowOnError(true);
-		when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
-	}
+    @Before
+    public void setUp() throws URISyntaxException {
+        responseSignatureInterceptor = new ResponseSignatureInterceptor(apiServiceMock);
+        responseSignatureInterceptor.setThrowOnError(true);
+        when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
+    }
 
-	@Test
-	public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
-		responseSignatureInterceptor.setThrowOnError(false);
-		responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
-	}
+    @Test
+    public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
+        responseSignatureInterceptor.setThrowOnError(false);
+        responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
+    }
 
-	@Test
-	public void skal_kaste_feil_om_server_signatur_mangler() throws IOException, HttpException {
-		try {
-			responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle kastet feil grunnet manglende signatur header");
-		} catch (DigipostClientException e) {
-			assertThat(e.getMessage(), containsString("Mangler X-Digipost-Signature-header"));
-		}
-	}
+    @Test
+    public void skal_kaste_feil_om_server_signatur_mangler() throws IOException, HttpException {
+        try {
+            responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
+            fail("Skulle kastet feil grunnet manglende signatur header");
+        } catch (DigipostClientException e) {
+            assertThat(e.getMessage(), containsString("Mangler X-Digipost-Signature-header"));
+        }
+    }
 
 }

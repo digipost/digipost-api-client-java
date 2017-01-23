@@ -28,25 +28,25 @@ import static org.junit.Assert.*;
 
 public class DigipostClientExceptionTest {
 
-	@Test
+    @Test
     public void resolvesToGeneralErrorWhenGivenUnknownErrorCode() {
-		DigipostClientException exception = new DigipostClientException(new ErrorMessage(CONFIGURATION, "not-an-error-code", "fail message"));
-		assertThat(exception.getErrorCode(), is(GENERAL_ERROR));
+        DigipostClientException exception = new DigipostClientException(new ErrorMessage(CONFIGURATION, "not-an-error-code", "fail message"));
+        assertThat(exception.getErrorCode(), is(GENERAL_ERROR));
     }
 
-	@Test
+    @Test
     public void checkIfContainedErrorCodeIsOneOfMany() {
-		DigipostClientException exception = new DigipostClientException(BAD_CONTENT, "bad content");
-		assertTrue(exception.isOneOf(GENERAL_ERROR, CONTENT_OF_PRINT_MESSAGE_MUST_BE_PDF, BAD_CONTENT));
-		assertFalse(exception.isOneOf(GENERAL_ERROR, CONTENT_OF_PRINT_MESSAGE_MUST_BE_PDF, ILLEGAL_ACCESS));
+        DigipostClientException exception = new DigipostClientException(BAD_CONTENT, "bad content");
+        assertTrue(exception.isOneOf(GENERAL_ERROR, CONTENT_OF_PRINT_MESSAGE_MUST_BE_PDF, BAD_CONTENT));
+        assertFalse(exception.isOneOf(GENERAL_ERROR, CONTENT_OF_PRINT_MESSAGE_MUST_BE_PDF, ILLEGAL_ACCESS));
     }
 
-	@Test
+    @Test
     public void getsMessageFromRootCause() {
-		DigipostClientException tooLarge = new DigipostClientException(FILE_TOO_LARGE, new RuntimeException(new IOException("Too large!")));
-		assertThat(tooLarge.getErrorMessage(), containsString("Too large!"));
-		assertThat(tooLarge.getMessage(), containsString("Too large!"));
-		assertThat(tooLarge.getErrorMessage(), containsString(IOException.class.getSimpleName()));
-		assertThat(tooLarge.getMessage(), containsString(IOException.class.getSimpleName()));
+        DigipostClientException tooLarge = new DigipostClientException(FILE_TOO_LARGE, new RuntimeException(new IOException("Too large!")));
+        assertThat(tooLarge.getErrorMessage(), containsString("Too large!"));
+        assertThat(tooLarge.getMessage(), containsString("Too large!"));
+        assertThat(tooLarge.getErrorMessage(), containsString(IOException.class.getSimpleName()));
+        assertThat(tooLarge.getMessage(), containsString(IOException.class.getSimpleName()));
     }
 }

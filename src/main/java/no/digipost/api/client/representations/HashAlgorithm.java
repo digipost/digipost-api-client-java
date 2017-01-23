@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "hash-algorithm")
 @XmlEnum
 public enum HashAlgorithm {
-	NONE,
-	MD5,
-	SHA256;
+    NONE,
+    MD5,
+    SHA256;
 }

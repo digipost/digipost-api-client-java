@@ -39,57 +39,57 @@ import static no.motif.Singular.optional;
 
 public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RequestSignatureInterceptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RequestSignatureInterceptor.class);
 
-	private final Signer signer;
-	private final RequestContentHashFilter hashFilter;
-	private final EventLogger eventLogger;
+    private final Signer signer;
+    private final RequestContentHashFilter hashFilter;
+    private final EventLogger eventLogger;
 
-	public RequestSignatureInterceptor(final Signer signer, final RequestContentHashFilter hashFilter) {
-		this(signer, NOOP_EVENT_LOGGER, hashFilter);
-	}
+    public RequestSignatureInterceptor(final Signer signer, final RequestContentHashFilter hashFilter) {
+        this(signer, NOOP_EVENT_LOGGER, hashFilter);
+    }
 
-	public RequestSignatureInterceptor(final Signer signer, final EventLogger eventListener, final RequestContentHashFilter hashFilter){
-		eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
-		this.signer = signer;
-		this.hashFilter = hashFilter;
-	}
+    public RequestSignatureInterceptor(final Signer signer, final EventLogger eventListener, final RequestContentHashFilter hashFilter){
+        eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
+        this.signer = signer;
+        this.hashFilter = hashFilter;
+    }
 
-	private void setSignatureHeader(final HttpRequest httpRequest) {
-		String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ClientRequestToSign(httpRequest));
-		log(getClass().getSimpleName() + " beregnet streng som skal signeres:\n===START SIGNATURSTRENG===\n" + stringToSign
-				+ "===SLUTT SIGNATURSTRENG===");
+    private void setSignatureHeader(final HttpRequest httpRequest) {
+        String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ClientRequestToSign(httpRequest));
+        log(getClass().getSimpleName() + " beregnet streng som skal signeres:\n===START SIGNATURSTRENG===\n" + stringToSign
+                + "===SLUTT SIGNATURSTRENG===");
 
-		byte[] signatureBytes = signer.sign(stringToSign);
-		String signature = new String(Base64.encode(signatureBytes));
-		httpRequest.setHeader(Headers.X_Digipost_Signature, signature);
-		log(getClass().getSimpleName() + " satt headeren " + Headers.X_Digipost_Signature + "=" + signature);
-	}
+        byte[] signatureBytes = signer.sign(stringToSign);
+        String signature = new String(Base64.encode(signatureBytes));
+        httpRequest.setHeader(Headers.X_Digipost_Signature, signature);
+        log(getClass().getSimpleName() + " satt headeren " + Headers.X_Digipost_Signature + "=" + signature);
+    }
 
-	private void log(final String stringToSignMsg) {
-		LOG.debug(stringToSignMsg);
-		eventLogger.log(stringToSignMsg);
-	}
+    private void log(final String stringToSignMsg) {
+        LOG.debug(stringToSignMsg);
+        eventLogger.log(stringToSignMsg);
+    }
 
-	@Override
-	public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+    @Override
+    public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
 
-		if(httpRequest instanceof HttpEntityEnclosingRequest) {
-			HttpEntityEnclosingRequest request = (HttpEntityEnclosingRequest) httpRequest;
-			HttpEntity rqEntity = request.getEntity();
+        if(httpRequest instanceof HttpEntityEnclosingRequest) {
+            HttpEntityEnclosingRequest request = (HttpEntityEnclosingRequest) httpRequest;
+            HttpEntity rqEntity = request.getEntity();
 
-			if (rqEntity == null) {
-				setSignatureHeader(httpRequest);
-			} else {
-				byte[] entityBytes = optional(EntityUtils.toByteArray(rqEntity)).orElse(new byte[0]);
-				hashFilter.settContentHashHeader(entityBytes, request);
-				setSignatureHeader(httpRequest);
-			}
-		} else {
-			setSignatureHeader(httpRequest);
-		}
-		httpContext.setAttribute("request-path", URI.create(httpRequest.getRequestLine().getUri()).getPath());
+            if (rqEntity == null) {
+                setSignatureHeader(httpRequest);
+            } else {
+                byte[] entityBytes = optional(EntityUtils.toByteArray(rqEntity)).orElse(new byte[0]);
+                hashFilter.settContentHashHeader(entityBytes, request);
+                setSignatureHeader(httpRequest);
+            }
+        } else {
+            setSignatureHeader(httpRequest);
+        }
+        httpContext.setAttribute("request-path", URI.create(httpRequest.getRequestLine().getUri()).getPath());
 
 
-	}
+    }
 }

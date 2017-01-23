@@ -24,29 +24,29 @@ import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "email-notification", propOrder = {
-		"emailAddress",
-		"subject",
-		"text",
-		"ats"
+        "emailAddress",
+        "subject",
+        "text",
+        "ats"
 })
 public class EmailNotification {
-	@XmlElement(name = "email-address")
-	public final String emailAddress;
-	@XmlElement(name = "subject")
-	public final String subject;
-	@XmlElement(name = "text")
-	public final String text;
-	@XmlElement(name = "at", nillable = false)
-	public final List<ListedTime> ats;
+    @XmlElement(name = "email-address")
+    public final String emailAddress;
+    @XmlElement(name = "subject")
+    public final String subject;
+    @XmlElement(name = "text")
+    public final String text;
+    @XmlElement(name = "at", nillable = false)
+    public final List<ListedTime> ats;
 
-	EmailNotification() {
-		this(null, null, null, null);
-	}
+    EmailNotification() {
+        this(null, null, null, null);
+    }
 
-	public EmailNotification(String emailAddress, String subject, String text, List<ListedTime> ats) {
-		this.emailAddress = emailAddress;
-		this.subject = subject;
-		this.text = text;
-		this.ats = ats;
-	}
+    public EmailNotification(String emailAddress, String subject, String text, List<ListedTime> ats) {
+        this.emailAddress = emailAddress;
+        this.subject = subject;
+        this.text = text;
+        this.ats = ats;
+    }
 }

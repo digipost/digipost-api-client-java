@@ -21,6 +21,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "sensitivity-level")
 @XmlEnum
 public enum SensitivityLevel {
-	NORMAL,
-	SENSITIVE;
+    NORMAL,
+    SENSITIVE;
 }

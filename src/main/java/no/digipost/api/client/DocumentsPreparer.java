@@ -45,78 +45,78 @@ import static org.apache.commons.io.IOUtils.toByteArray;
 
 class DocumentsPreparer {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DocumentsPreparer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DocumentsPreparer.class);
 
-	private final PdfValidator pdfValidator;
+    private final PdfValidator pdfValidator;
 
-	DocumentsPreparer(PdfValidator pdfValidator) {
-	    this.pdfValidator = pdfValidator;
+    DocumentsPreparer(PdfValidator pdfValidator) {
+        this.pdfValidator = pdfValidator;
     }
 
 
 
-	Map<Document, InputStream> prepare(
-			Map<Document, InputStream> documentsAndContent, Message message,
-			Encrypter encrypter, Fn0<PdfValidationSettings> pdfValidationSettings) throws IOException {
+    Map<Document, InputStream> prepare(
+            Map<Document, InputStream> documentsAndContent, Message message,
+            Encrypter encrypter, Fn0<PdfValidationSettings> pdfValidationSettings) throws IOException {
 
-		final Map<Document, InputStream> prepared = new LinkedHashMap<>();
+        final Map<Document, InputStream> prepared = new LinkedHashMap<>();
 
-		if(message.recipient.hasPrintDetails() && message.recipient.hasDigipostIdentification()){
-			throw new IllegalStateException("Forventet message med enkelt kanal");
-		}
+        if(message.recipient.hasPrintDetails() && message.recipient.hasDigipostIdentification()){
+            throw new IllegalStateException("Forventet message med enkelt kanal");
+        }
 
-		for (Elem<Document> i : on(on(documentsAndContent.keySet()).sorted(message.documentOrder())).indexed()) {
-			Document document = i.value;
-			if (document.willBeEncrypted()) {
-				byte[] byteContent = toByteArray(documentsAndContent.get(document));
-				LOG.debug("Validerer dokument med uuid '{}' før kryptering", document.uuid);
-				validateAndSetNrOfPages(message.getChannel(), document, byteContent, pdfValidationSettings);
-				LOG.debug("Krypterer innhold for dokument med uuid '{}'", document.uuid);
-				prepared.put(document, encrypter.encrypt(byteContent));
+        for (Elem<Document> i : on(on(documentsAndContent.keySet()).sorted(message.documentOrder())).indexed()) {
+            Document document = i.value;
+            if (document.willBeEncrypted()) {
+                byte[] byteContent = toByteArray(documentsAndContent.get(document));
+                LOG.debug("Validerer dokument med uuid '{}' før kryptering", document.uuid);
+                validateAndSetNrOfPages(message.getChannel(), document, byteContent, pdfValidationSettings);
+                LOG.debug("Krypterer innhold for dokument med uuid '{}'", document.uuid);
+                prepared.put(document, encrypter.encrypt(byteContent));
 
-			} else {
-				prepared.put(document, documentsAndContent.get(document));
-			}
-		}
-		return prepared;
-	}
-
-
-
-	Optional<PdfInfo> validateAndSetNrOfPages(Channel channel, Document document, byte[] content, Fn0<PdfValidationSettings> pdfValidationSettings) {
-		if (channel == PRINT && !document.is(PDF)) {
-	    	throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT,
-	    			"PDF is required for direct-to-print messages. Document with uuid " + document.uuid + " had filetype " + document.getDigipostFileType());
-	    }
-
-		PdfValidationResult pdfValidation;
-		Optional<PdfInfo> pdfInfo;
-		if (document.is(PDF)) {
-			LOG.debug("Validerer PDF-dokument med uuid '{}'", document.uuid);
-			pdfValidation = pdfValidator.validate(content, pdfValidationSettings.$());
-			if (document.willBeEncrypted()) {
-				document.setNumberOfEncryptedPages(pdfValidation.pages);
-			}
-			pdfInfo = optional(new PdfInfo(pdfValidation.pages));
-		} else {
-			pdfValidation = EVERYTHING_OK;
-			pdfInfo = none();
-		}
-
-	    if ((channel == PRINT && !pdfValidation.okForPrint) || !pdfValidation.okForWeb) {
-	    	throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT, pdfValidation.toString());
-	    }
-	    return pdfInfo;
+            } else {
+                prepared.put(document, documentsAndContent.get(document));
+            }
+        }
+        return prepared;
     }
 
-	static class PdfInfo {
-		final int pages;
-		final boolean hasOddNumberOfPages;
 
-		public PdfInfo(int numberOfPages) {
-			this.pages = numberOfPages;
-			this.hasOddNumberOfPages = pages % 2 == 1;
-		}
-	}
+
+    Optional<PdfInfo> validateAndSetNrOfPages(Channel channel, Document document, byte[] content, Fn0<PdfValidationSettings> pdfValidationSettings) {
+        if (channel == PRINT && !document.is(PDF)) {
+            throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT,
+                    "PDF is required for direct-to-print messages. Document with uuid " + document.uuid + " had filetype " + document.getDigipostFileType());
+        }
+
+        PdfValidationResult pdfValidation;
+        Optional<PdfInfo> pdfInfo;
+        if (document.is(PDF)) {
+            LOG.debug("Validerer PDF-dokument med uuid '{}'", document.uuid);
+            pdfValidation = pdfValidator.validate(content, pdfValidationSettings.$());
+            if (document.willBeEncrypted()) {
+                document.setNumberOfEncryptedPages(pdfValidation.pages);
+            }
+            pdfInfo = optional(new PdfInfo(pdfValidation.pages));
+        } else {
+            pdfValidation = EVERYTHING_OK;
+            pdfInfo = none();
+        }
+
+        if ((channel == PRINT && !pdfValidation.okForPrint) || !pdfValidation.okForWeb) {
+            throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT, pdfValidation.toString());
+        }
+        return pdfInfo;
+    }
+
+    static class PdfInfo {
+        final int pages;
+        final boolean hasOddNumberOfPages;
+
+        public PdfInfo(int numberOfPages) {
+            this.pages = numberOfPages;
+            this.hasOddNumberOfPages = pages % 2 == 1;
+        }
+    }
 
 }

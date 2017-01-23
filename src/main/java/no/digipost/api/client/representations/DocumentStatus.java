@@ -27,65 +27,65 @@ import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "document-status", propOrder = {
-		"attachments",
-		"links"})
+        "attachments",
+        "links"})
 @XmlRootElement(name = "document-status")
 public class DocumentStatus {
 
-	@XmlAttribute(name = "uuid")
-	public String uuid;
-	@XmlAttribute(name = "status")
-	public DeliveryStatus status;
+    @XmlAttribute(name = "uuid")
+    public String uuid;
+    @XmlAttribute(name = "status")
+    public DeliveryStatus status;
 
-	@XmlAttribute(name = "created")
-	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
-	@XmlSchemaType(name = "dateTime")
-	public DateTime created;
+    @XmlAttribute(name = "created")
+    @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+    @XmlSchemaType(name = "dateTime")
+    public DateTime created;
 
-	@XmlAttribute(name = "delivered", required = false)
-	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
-	@XmlSchemaType(name = "dateTime")
-	public DateTime delivered;
+    @XmlAttribute(name = "delivered", required = false)
+    @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+    @XmlSchemaType(name = "dateTime")
+    public DateTime delivered;
 
-	@XmlAttribute(name = "read")
-	public Read read;
+    @XmlAttribute(name = "read")
+    public Read read;
 
-	@XmlAttribute(name = "channel")
-	public Channel channel;
-	@XmlAttribute(name = "is-primary-document")
-	public boolean isPrimaryDocument; //
-	@XmlAttribute(name = "content-hash")
-	public String contentHash;
-	@XmlAttribute(name = "content-hash-algorithm")
-	public HashAlgorithm contentHashAlgorithm;
+    @XmlAttribute(name = "channel")
+    public Channel channel;
+    @XmlAttribute(name = "is-primary-document")
+    public boolean isPrimaryDocument; //
+    @XmlAttribute(name = "content-hash")
+    public String contentHash;
+    @XmlAttribute(name = "content-hash-algorithm")
+    public HashAlgorithm contentHashAlgorithm;
 
-	@XmlElement(name = "attachments")
-	private List<DocumentStatus> attachments = new ArrayList<>();
+    @XmlElement(name = "attachments")
+    private List<DocumentStatus> attachments = new ArrayList<>();
 
-	@XmlElement(name = "link")
-	public List<Link> links = new ArrayList<>();
+    @XmlElement(name = "link")
+    public List<Link> links = new ArrayList<>();
 
-	public DocumentStatus() {
-		this(null, null, null, null, null, null, true, null, null, null, null);
-	}
+    public DocumentStatus() {
+        this(null, null, null, null, null, null, true, null, null, null, null);
+    }
 
-	public DocumentStatus(String uuid, DeliveryStatus status, DateTime created, DateTime delivered, Read read, Channel channel,
-						  boolean isPrimaryDocument, String contentHash, HashAlgorithm contentHashAlgorithm,
-						  List<DocumentStatus> attachments, List<Link> links) {
-		this.uuid = uuid;
-		this.status = status;
-		this.created = created;
-		this.delivered = delivered;
-		this.read = read;
-		this.channel = channel;
-		this.isPrimaryDocument = isPrimaryDocument;
-		this.contentHash = contentHash;
-		this.contentHashAlgorithm = contentHashAlgorithm;
-		this.attachments = attachments;
-		this.links = links;
-	}
+    public DocumentStatus(String uuid, DeliveryStatus status, DateTime created, DateTime delivered, Read read, Channel channel,
+                          boolean isPrimaryDocument, String contentHash, HashAlgorithm contentHashAlgorithm,
+                          List<DocumentStatus> attachments, List<Link> links) {
+        this.uuid = uuid;
+        this.status = status;
+        this.created = created;
+        this.delivered = delivered;
+        this.read = read;
+        this.channel = channel;
+        this.isPrimaryDocument = isPrimaryDocument;
+        this.contentHash = contentHash;
+        this.contentHashAlgorithm = contentHashAlgorithm;
+        this.attachments = attachments;
+        this.links = links;
+    }
 
-	public List<DocumentStatus> getAttachments() {
-		return Collections.unmodifiableList(attachments == null ? new ArrayList<DocumentStatus>() : attachments);
-	}
+    public List<DocumentStatus> getAttachments() {
+        return Collections.unmodifiableList(attachments == null ? new ArrayList<DocumentStatus>() : attachments);
+    }
 }

@@ -26,8 +26,8 @@ import static no.digipost.api.client.util.UserAgent.DIGIPOST_USER_AGENT;
 import static org.apache.http.HttpHeaders.USER_AGENT;
 
 public class RequestUserAgentInterceptor implements HttpRequestInterceptor {
-	@Override
-	public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
-		httpRequest.setHeader(USER_AGENT, DIGIPOST_USER_AGENT);
-	}
+    @Override
+    public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+        httpRequest.setHeader(USER_AGENT, DIGIPOST_USER_AGENT);
+    }
 }

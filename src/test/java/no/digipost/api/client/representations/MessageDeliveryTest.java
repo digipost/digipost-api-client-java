@@ -29,45 +29,45 @@ import static org.junit.Assert.fail;
 
 public class MessageDeliveryTest {
 
-	@Test
+    @Test
     public void deliveryWithNoDocumentsYieldsEmptyListWithDocuments() {
-	    MessageDelivery delivery = new MessageDelivery(null, DIGIPOST, NOT_COMPLETE, null);
-	    assertThat(delivery.getAllDocuments(), empty());
-	    assertThat(delivery.getAttachments(), empty());
+        MessageDelivery delivery = new MessageDelivery(null, DIGIPOST, NOT_COMPLETE, null);
+        assertThat(delivery.getAllDocuments(), empty());
+        assertThat(delivery.getAttachments(), empty());
     }
 
-	@Test
+    @Test
     public void gettingAllDocumentsYieldsListWithPrimaryDocumentFirstFollowedByAttachments() {
-		Document primary = new Document(UUID.randomUUID().toString(), "primary", PDF);
-		Document att1 = new Document(UUID.randomUUID().toString(), "att1", PDF);
-		Document att2 = new Document(UUID.randomUUID().toString(), "att2", PDF);
+        Document primary = new Document(UUID.randomUUID().toString(), "primary", PDF);
+        Document att1 = new Document(UUID.randomUUID().toString(), "att1", PDF);
+        Document att2 = new Document(UUID.randomUUID().toString(), "att2", PDF);
 
-		MessageDelivery delivery = new MessageDelivery(null, DIGIPOST, NOT_COMPLETE, null);
-		delivery.primaryDocument = primary;
-		delivery.attachments = asList(att1, att2);
+        MessageDelivery delivery = new MessageDelivery(null, DIGIPOST, NOT_COMPLETE, null);
+        delivery.primaryDocument = primary;
+        delivery.attachments = asList(att1, att2);
 
-		assertThat(delivery.getAllDocuments(), contains(primary, att1, att2));
-		assertThat(delivery.getAttachments(), contains(att1, att2));
+        assertThat(delivery.getAllDocuments(), contains(primary, att1, att2));
+        assertThat(delivery.getAttachments(), contains(att1, att2));
     }
 
-	@Test
+    @Test
     public void findingDocumentsByUuid() {
-		Document primary = new Document(UUID.randomUUID().toString(), "primary", PDF);
-		Document att1 = new Document(UUID.randomUUID().toString(), "att1", PDF);
+        Document primary = new Document(UUID.randomUUID().toString(), "primary", PDF);
+        Document att1 = new Document(UUID.randomUUID().toString(), "att1", PDF);
 
-		MessageDelivery delivery = new MessageDelivery(null, DIGIPOST, NOT_COMPLETE, null);
-		delivery.primaryDocument = primary;
-		delivery.attachments = asList(att1);
+        MessageDelivery delivery = new MessageDelivery(null, DIGIPOST, NOT_COMPLETE, null);
+        delivery.primaryDocument = primary;
+        delivery.attachments = asList(att1);
 
-		assertThat(delivery.getDocumentByUuid(primary.uuid), is(primary));
-		assertThat(delivery.getDocumentByUuid(att1.uuid), is(att1));
+        assertThat(delivery.getDocumentByUuid(primary.uuid), is(primary));
+        assertThat(delivery.getDocumentByUuid(att1.uuid), is(att1));
 
-		try {
-			delivery.getDocumentByUuid(UUID.randomUUID().toString());
-		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), containsString("not found"));
-			return;
-		}
-		fail("should throw exception");
+        try {
+            delivery.getDocumentByUuid(UUID.randomUUID().toString());
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("not found"));
+            return;
+        }
+        fail("should throw exception");
     }
 }

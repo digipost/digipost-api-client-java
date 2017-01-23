@@ -56,260 +56,260 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  */
 public class DigipostClient {
 
-	static {
-		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
-	}
+    static {
+        CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
+    }
 
-	public static final EventLogger NOOP_EVENT_LOGGER = new EventLogger() {
-		@Override
-		public void log(final String eventText) {
-			// NOOP
-		}
-	};
+    public static final EventLogger NOOP_EVENT_LOGGER = new EventLogger() {
+        @Override
+        public void log(final String eventText) {
+            // NOOP
+        }
+    };
 
-	private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
 
-	private final EventLogger eventLogger;
-	private final ApiService apiService;
-	private final MessageSender messageSender;
-	private final MessageDeliverer deliverer;
-	private final DocumentCommunicator documentCommunicator;
+    private final EventLogger eventLogger;
+    private final ApiService apiService;
+    private final MessageSender messageSender;
+    private final MessageDeliverer deliverer;
+    private final DocumentCommunicator documentCommunicator;
 
-	private final ResponseSignatureInterceptor responseSignatureInterceptor;
-	private final ResponseContentSHA256Interceptor responseHashInterceptor = new ResponseContentSHA256Interceptor();
-	private final ResponseDateInterceptor responseDateInterceptor = new ResponseDateInterceptor();
-
-
-	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
-						  final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
-		this(config, deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
-	}
-
-	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
-						  final long senderAccountId, final Signer signer, final ApiService apiService) {
-		this(config, deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, null, apiService, null);
-	}
-
-	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
-						  final long senderAccountId, final Signer signer, final HttpClientBuilder clientBuilder) {
-		this(config, deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, clientBuilder, null, null);
-	}
-
-	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
-						  final long senderAccountId, final Signer signer, final EventLogger eventLogger,
-						  final HttpClientBuilder clientBuilder) {
-		this(config, deliveryType, digipostUrl, senderAccountId, signer, eventLogger, clientBuilder, null, null);
-	}
-
-	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
-						  final long senderAccountId, final InputStream certificateP12File, final String certificatePassword,
-						  final EventLogger eventLogger, final HttpClientBuilder clientBuilder, final HttpHost proxy) {
-		this(config, deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), eventLogger, clientBuilder, null, proxy);
-	}
-
-	public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
-						  final long senderAccountId, final Signer signer, final EventLogger eventLogger,
-						  final HttpClientBuilder clientBuilder, final ApiService overriddenApiService, final HttpHost proxy) {
-		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
-		HttpClientBuilder httpClientBuilder = clientBuilder == null ? DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT) : clientBuilder;
-		this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
-
-		this.apiService = overriddenApiService == null ?
-				new ApiServiceImpl(httpClientBuilder, senderAccountId, this.eventLogger, digipostUrl, proxy) : overriddenApiService;
-
-		this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
-		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
-		this.documentCommunicator = new DocumentCommunicator(apiService, this.eventLogger);
-		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
-
-		apiService.addFilter(new RequestDateInterceptor(this.eventLogger));
-		apiService.addFilter(new RequestUserAgentInterceptor());
-		apiService.addFilter(new RequestSignatureInterceptor(signer, this.eventLogger, new RequestContentSHA256Filter(this.eventLogger)));
-		apiService.addFilter(responseDateInterceptor);
-		apiService.addFilter(responseHashInterceptor);
-		apiService.addFilter(responseSignatureInterceptor);
-
-		apiService.buildApacheHttpClientBuilder();
-
-		log("Initialiserte apache-klient mot " + digipostUrl);
-	}
-
-	/**
-	 * Bestemmer klienten skal kaste exception ved feil under validering av serversignatur, eller
-	 * om den heller skal logge med log level warn.
-	 *
-	 * @param throwOnError true hvis den skal kaste exception, false for warn logging
-	 */
-	public DigipostClient setThrowOnResponseValidationError(final boolean throwOnError) {
-		responseDateInterceptor.setThrowOnError(throwOnError);
-		responseHashInterceptor.setThrowOnError(throwOnError);
-		responseSignatureInterceptor.setThrowOnError(throwOnError);
-		return this;
-	}
+    private final ResponseSignatureInterceptor responseSignatureInterceptor;
+    private final ResponseContentSHA256Interceptor responseHashInterceptor = new ResponseContentSHA256Interceptor();
+    private final ResponseDateInterceptor responseDateInterceptor = new ResponseDateInterceptor();
 
 
-	/**
-	 * Oppretter en forsendelse for sending gjennom Digipost. Dersom mottaker ikke er
-	 * digipostbruker og det ligger printdetaljer på forsendelsen bestiller vi
-	 * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
-	 * til print.)
-	 */
-	public OngoingDelivery.WithPrintFallback createMessage(final Message message) {
-		return deliverer.createMessage(message);
-	}
+    public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+                          final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
+        this(config, deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
+    }
 
-	/**
-	 * Opprette forsendelse som skal gå direkte til print og videre til utsending
-	 * gjennom vanlig postgang. Krever at avsender har tilgang til å sende direkte
-	 * til print.
-	 */
-	public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
-		return deliverer.createPrintOnlyMessage(printMessage);
-	}
+    public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+                          final long senderAccountId, final Signer signer, final ApiService apiService) {
+        this(config, deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, null, apiService, null);
+    }
 
-	public IdentificationResult identifyRecipient(final Identification identification) {
-		try(CloseableHttpResponse response = apiService.identifyRecipient(identification))
-		{
-			Communicator.checkResponse(response, eventLogger);
-			return JAXBContextUtils.unmarshal(JAXBContextUtils.identificationContext, response.getEntity().getContent(), IdentificationResult.class);
-		} catch (IOException e) {
-			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
-		}
-	}
+    public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+                          final long senderAccountId, final Signer signer, final HttpClientBuilder clientBuilder) {
+        this(config, deliveryType, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, clientBuilder, null, null);
+    }
 
-	public Recipients search(final String searchString) {
-		return apiService.search(searchString);
-	}
+    public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+                          final long senderAccountId, final Signer signer, final EventLogger eventLogger,
+                          final HttpClientBuilder clientBuilder) {
+        this(config, deliveryType, digipostUrl, senderAccountId, signer, eventLogger, clientBuilder, null, null);
+    }
 
-	public Autocomplete getAutocompleteSuggestions(final String searchString) {
-		return apiService.searchSuggest(searchString);
-	}
+    public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+                          final long senderAccountId, final InputStream certificateP12File, final String certificatePassword,
+                          final EventLogger eventLogger, final HttpClientBuilder clientBuilder, final HttpHost proxy) {
+        this(config, deliveryType, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), eventLogger, clientBuilder, null, proxy);
+    }
 
-	public DocumentEvents getDocumentEvents(final DateTime from, final DateTime to,
-	                                        final int offset, final int maxResults) {
-		return getDocumentEvents(null, null, from, to, offset, maxResults);
-	}
+    public DigipostClient(final DigipostClientConfig config, final ApiFlavor deliveryType, final String digipostUrl,
+                          final long senderAccountId, final Signer signer, final EventLogger eventLogger,
+                          final HttpClientBuilder clientBuilder, final ApiService overriddenApiService, final HttpHost proxy) {
+        CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
+        HttpClientBuilder httpClientBuilder = clientBuilder == null ? DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT) : clientBuilder;
+        this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 
-	public DocumentEvents getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to,
-	                                        final int offset, final int maxResults) {
-		return documentCommunicator.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
-	}
+        this.apiService = overriddenApiService == null ?
+                new ApiServiceImpl(httpClientBuilder, senderAccountId, this.eventLogger, digipostUrl, proxy) : overriddenApiService;
 
-	/**
-	 * Hent informasjon om en gitt avsender. Kan enten be om informasjon om
-	 * "deg selv", eller en avsender du har fullmakt til å sende post for.
-	 *
-	 * @param senderId avsender-IDen til avsenderen du vil ha informasjon om.
-	 *
-	 * @return informasjon om avsenderen, dersom den finnes, og du har tilgang
-	 *         til å informasjon om avsenderen. Det er ikke mulig å skille på
-	 *         om avsenderen ikke finnes, eller man ikke har tilgang til
-	 *         informasjonen.
-	 *
-	 * @see SenderInformation
-	 */
-	public SenderInformation getSenderInformation(long senderId) {
-		return apiService.getSenderInformation(senderId);
-	}
+        this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
+        this.deliverer = new MessageDeliverer(deliveryType, messageSender);
+        this.documentCommunicator = new DocumentCommunicator(apiService, this.eventLogger);
+        this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
 
-	/**
-	 * Hent informasjon om en gitt avsender. Kan enten be om informasjon om
-	 * "deg selv", eller en avsender du har fullmakt til å sende post for.
-	 *
-	 * @param orgnr organisasjonsnummeret til avsenderen (påkrevet).
-	 * @param avsenderenhet underenhet for gitt <code>orgnr</code>, dersom
-	 *                      aktuelt, eller <code>null</code>.
-	 *
-	 *
-	 * @return informasjon om avsenderen, dersom den finnes, og du har tilgang
-	 *         til å informasjon om avsenderen. Det er ikke mulig å skille på
-	 *         om avsenderen ikke finnes, eller man ikke har tilgang til
-	 *         informasjonen.
-	 *
-	 * @see SenderInformation
-	 */
-	public SenderInformation getSenderInformation(String orgnr, String avsenderenhet) {
-		return apiService.getSenderInformation(orgnr, avsenderenhet);
-	}
+        apiService.addFilter(new RequestDateInterceptor(this.eventLogger));
+        apiService.addFilter(new RequestUserAgentInterceptor());
+        apiService.addFilter(new RequestSignatureInterceptor(signer, this.eventLogger, new RequestContentSHA256Filter(this.eventLogger)));
+        apiService.addFilter(responseDateInterceptor);
+        apiService.addFilter(responseHashInterceptor);
+        apiService.addFilter(responseSignatureInterceptor);
 
-	public DocumentStatus getDocumentStatus(final Link linkToDocumentStatus) {
-		return documentCommunicator.getDocumentStatus(linkToDocumentStatus);
-	}
+        apiService.buildApacheHttpClientBuilder();
 
-	public DocumentStatus getDocumentStatus(long senderId, String uuid) {
-		return documentCommunicator.getDocumentStatus(senderId, uuid);
-	}
+        log("Initialiserte apache-klient mot " + digipostUrl);
+    }
 
-	private void log(final String stringToSignMsg) {
-		LOG.debug(stringToSignMsg);
-		eventLogger.log(stringToSignMsg);
-	}
+    /**
+     * Bestemmer klienten skal kaste exception ved feil under validering av serversignatur, eller
+     * om den heller skal logge med log level warn.
+     *
+     * @param throwOnError true hvis den skal kaste exception, false for warn logging
+     */
+    public DigipostClient setThrowOnResponseValidationError(final boolean throwOnError) {
+        responseDateInterceptor.setThrowOnError(throwOnError);
+        responseHashInterceptor.setThrowOnError(throwOnError);
+        responseSignatureInterceptor.setThrowOnError(throwOnError);
+        return this;
+    }
 
-	public InputStream getContent(final String path) {
-		return documentCommunicator.getContent(path);
-	}
 
-	public static class DigipostClientBuilder{
-		private ApiFlavor deliveryType = ApiFlavor.ATOMIC_REST;
-		private final String digipostURL;
-		private final long senderAccountId;
-		private final InputStream certificateP12File;
-		private final String certificatePassword;
-		private final Signer signer;
-		private final DigipostClientConfig config;
-		private HttpClientBuilder clientBuilder = null;
-		private EventLogger eventLogger = NOOP_EVENT_LOGGER;
-		private ApiService apiService = null;
-		private HttpHost proxy = null;
+    /**
+     * Oppretter en forsendelse for sending gjennom Digipost. Dersom mottaker ikke er
+     * digipostbruker og det ligger printdetaljer på forsendelsen bestiller vi
+     * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
+     * til print.)
+     */
+    public OngoingDelivery.WithPrintFallback createMessage(final Message message) {
+        return deliverer.createMessage(message);
+    }
 
-		public DigipostClientBuilder(String digipostURL, long senderAccountId, InputStream certificateP12File,
-									 String certificatePassword, DigipostClientConfig config){
-			this.digipostURL = digipostURL;
-			this.senderAccountId = senderAccountId;
-			this.certificateP12File = certificateP12File;
-			this.certificatePassword = certificatePassword;
-			this.signer = null;
-			this.config = config;
-		}
+    /**
+     * Opprette forsendelse som skal gå direkte til print og videre til utsending
+     * gjennom vanlig postgang. Krever at avsender har tilgang til å sende direkte
+     * til print.
+     */
+    public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
+        return deliverer.createPrintOnlyMessage(printMessage);
+    }
 
-		public DigipostClientBuilder(String digipostURL, long senderAccountId, Signer signer, DigipostClientConfig config){
-			this.digipostURL = digipostURL;
-			this.senderAccountId = senderAccountId;
-			this.certificateP12File = null;
-			this.certificatePassword = null;
-			this.signer = signer;
-			this.config = config;
-		}
+    public IdentificationResult identifyRecipient(final Identification identification) {
+        try(CloseableHttpResponse response = apiService.identifyRecipient(identification))
+        {
+            Communicator.checkResponse(response, eventLogger);
+            return JAXBContextUtils.unmarshal(JAXBContextUtils.identificationContext, response.getEntity().getContent(), IdentificationResult.class);
+        } catch (IOException e) {
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
+        }
+    }
 
-		public DigipostClientBuilder deliveryType(ApiFlavor deliveryType){
-			this.deliveryType = deliveryType;
-			return this;
-		}
+    public Recipients search(final String searchString) {
+        return apiService.search(searchString);
+    }
 
-		public DigipostClientBuilder proxy(HttpHost proxy){
-			this.proxy = proxy;
-			return this;
-		}
+    public Autocomplete getAutocompleteSuggestions(final String searchString) {
+        return apiService.searchSuggest(searchString);
+    }
 
-		public DigipostClientBuilder clientBuilder(HttpClientBuilder clientBuilder){
-			this.clientBuilder = clientBuilder;
-			return this;
-		}
+    public DocumentEvents getDocumentEvents(final DateTime from, final DateTime to,
+                                            final int offset, final int maxResults) {
+        return getDocumentEvents(null, null, from, to, offset, maxResults);
+    }
 
-		public DigipostClientBuilder eventLogger(EventLogger eventLogger){
-			this.eventLogger = eventLogger;
-			return this;
-		}
+    public DocumentEvents getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to,
+                                            final int offset, final int maxResults) {
+        return documentCommunicator.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
+    }
 
-		public DigipostClientBuilder apiService(ApiService apiService){
-			this.apiService = apiService;
-			return this;
-		}
+    /**
+     * Hent informasjon om en gitt avsender. Kan enten be om informasjon om
+     * "deg selv", eller en avsender du har fullmakt til å sende post for.
+     *
+     * @param senderId avsender-IDen til avsenderen du vil ha informasjon om.
+     *
+     * @return informasjon om avsenderen, dersom den finnes, og du har tilgang
+     *         til å informasjon om avsenderen. Det er ikke mulig å skille på
+     *         om avsenderen ikke finnes, eller man ikke har tilgang til
+     *         informasjonen.
+     *
+     * @see SenderInformation
+     */
+    public SenderInformation getSenderInformation(long senderId) {
+        return apiService.getSenderInformation(senderId);
+    }
 
-		public DigipostClient build(){
-			return signer == null ? new DigipostClient(config, deliveryType, digipostURL, senderAccountId, certificateP12File, certificatePassword, eventLogger, clientBuilder, proxy)
-					: new DigipostClient(config, deliveryType, digipostURL, senderAccountId, signer, eventLogger, clientBuilder, apiService, proxy);
-		}
+    /**
+     * Hent informasjon om en gitt avsender. Kan enten be om informasjon om
+     * "deg selv", eller en avsender du har fullmakt til å sende post for.
+     *
+     * @param orgnr organisasjonsnummeret til avsenderen (påkrevet).
+     * @param avsenderenhet underenhet for gitt <code>orgnr</code>, dersom
+     *                      aktuelt, eller <code>null</code>.
+     *
+     *
+     * @return informasjon om avsenderen, dersom den finnes, og du har tilgang
+     *         til å informasjon om avsenderen. Det er ikke mulig å skille på
+     *         om avsenderen ikke finnes, eller man ikke har tilgang til
+     *         informasjonen.
+     *
+     * @see SenderInformation
+     */
+    public SenderInformation getSenderInformation(String orgnr, String avsenderenhet) {
+        return apiService.getSenderInformation(orgnr, avsenderenhet);
+    }
 
-	}
+    public DocumentStatus getDocumentStatus(final Link linkToDocumentStatus) {
+        return documentCommunicator.getDocumentStatus(linkToDocumentStatus);
+    }
+
+    public DocumentStatus getDocumentStatus(long senderId, String uuid) {
+        return documentCommunicator.getDocumentStatus(senderId, uuid);
+    }
+
+    private void log(final String stringToSignMsg) {
+        LOG.debug(stringToSignMsg);
+        eventLogger.log(stringToSignMsg);
+    }
+
+    public InputStream getContent(final String path) {
+        return documentCommunicator.getContent(path);
+    }
+
+    public static class DigipostClientBuilder{
+        private ApiFlavor deliveryType = ApiFlavor.ATOMIC_REST;
+        private final String digipostURL;
+        private final long senderAccountId;
+        private final InputStream certificateP12File;
+        private final String certificatePassword;
+        private final Signer signer;
+        private final DigipostClientConfig config;
+        private HttpClientBuilder clientBuilder = null;
+        private EventLogger eventLogger = NOOP_EVENT_LOGGER;
+        private ApiService apiService = null;
+        private HttpHost proxy = null;
+
+        public DigipostClientBuilder(String digipostURL, long senderAccountId, InputStream certificateP12File,
+                                     String certificatePassword, DigipostClientConfig config){
+            this.digipostURL = digipostURL;
+            this.senderAccountId = senderAccountId;
+            this.certificateP12File = certificateP12File;
+            this.certificatePassword = certificatePassword;
+            this.signer = null;
+            this.config = config;
+        }
+
+        public DigipostClientBuilder(String digipostURL, long senderAccountId, Signer signer, DigipostClientConfig config){
+            this.digipostURL = digipostURL;
+            this.senderAccountId = senderAccountId;
+            this.certificateP12File = null;
+            this.certificatePassword = null;
+            this.signer = signer;
+            this.config = config;
+        }
+
+        public DigipostClientBuilder deliveryType(ApiFlavor deliveryType){
+            this.deliveryType = deliveryType;
+            return this;
+        }
+
+        public DigipostClientBuilder proxy(HttpHost proxy){
+            this.proxy = proxy;
+            return this;
+        }
+
+        public DigipostClientBuilder clientBuilder(HttpClientBuilder clientBuilder){
+            this.clientBuilder = clientBuilder;
+            return this;
+        }
+
+        public DigipostClientBuilder eventLogger(EventLogger eventLogger){
+            this.eventLogger = eventLogger;
+            return this;
+        }
+
+        public DigipostClientBuilder apiService(ApiService apiService){
+            this.apiService = apiService;
+            return this;
+        }
+
+        public DigipostClient build(){
+            return signer == null ? new DigipostClient(config, deliveryType, digipostURL, senderAccountId, certificateP12File, certificatePassword, eventLogger, clientBuilder, proxy)
+                    : new DigipostClient(config, deliveryType, digipostURL, senderAccountId, signer, eventLogger, clientBuilder, apiService, proxy);
+        }
+
+    }
 }

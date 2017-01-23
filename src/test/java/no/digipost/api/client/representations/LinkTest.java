@@ -24,32 +24,32 @@ import org.junit.Test;
 
 public class LinkTest {
 
-	private static final String RELATIONS_URI = "https://api.digipost.no/relations";
-	private static final String ADD_CONTENTS_REL_URI = RELATIONS_URI + "/" + ADD_CONTENT.name().toLowerCase();
+    private static final String RELATIONS_URI = "https://api.digipost.no/relations";
+    private static final String ADD_CONTENTS_REL_URI = RELATIONS_URI + "/" + ADD_CONTENT.name().toLowerCase();
 
-	@Test
-	public void shouldParseRelationFromUri() {
-		Link link = new Link();
-		link.setRel(RELATIONS_URI + "/" + SELF.name());
-		assertThat(link.getRelationName(), is(SELF));
-	}
+    @Test
+    public void shouldParseRelationFromUri() {
+        Link link = new Link();
+        link.setRel(RELATIONS_URI + "/" + SELF.name());
+        assertThat(link.getRelationName(), is(SELF));
+    }
 
-	@Test
-	public void shouldBuildRelationUri() {
-		Link link = new Link(ADD_CONTENT, new DigipostUri(RELATIONS_URI + "/" + ADD_CONTENT));
-		assertThat(link.getRel(), is(ADD_CONTENTS_REL_URI));
-	}
+    @Test
+    public void shouldBuildRelationUri() {
+        Link link = new Link(ADD_CONTENT, new DigipostUri(RELATIONS_URI + "/" + ADD_CONTENT));
+        assertThat(link.getRel(), is(ADD_CONTENTS_REL_URI));
+    }
 
-	@Test
-	public void shouldIndicateLinkRelationEquality() {
-		Link link = new Link(ADD_CONTENT, new DigipostUri(RELATIONS_URI + "/" + ADD_CONTENT));
-		assertThat(link.equalsRelation(ADD_CONTENT), is(true));
-	}
+    @Test
+    public void shouldIndicateLinkRelationEquality() {
+        Link link = new Link(ADD_CONTENT, new DigipostUri(RELATIONS_URI + "/" + ADD_CONTENT));
+        assertThat(link.equalsRelation(ADD_CONTENT), is(true));
+    }
 
-	@Test
-	public void shouldIndicateLinkRelationEquality2() {
-		Link link = new Link();
-		link.setRel(RELATIONS_URI + "/" + SELF.name());
-		assertThat(link.equalsRelation(SELF), is(true));
-	}
+    @Test
+    public void shouldIndicateLinkRelationEquality2() {
+        Link link = new Link();
+        link.setRel(RELATIONS_URI + "/" + SELF.name());
+        assertThat(link.equalsRelation(SELF), is(true));
+    }
 }

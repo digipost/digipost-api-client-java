@@ -25,17 +25,17 @@ import java.io.InputStream;
 
 final class StepwisePrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
 
-	private final MessageSender sender;
+    private final MessageSender sender;
     private MessageDelivery delivery;
 
 
     StepwisePrintOnlyMessage(Message printMessage, MessageSender sender) {
-    	if (!printMessage.isDirectPrint()) {
-    		throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
-    				+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
-    	}
-    	this.sender = sender;
-    	this.delivery = sender.createOrFetchMessage(printMessage);
+        if (!printMessage.isDirectPrint()) {
+            throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
+                    + "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
+        }
+        this.sender = sender;
+        this.delivery = sender.createOrFetchMessage(printMessage);
     }
 
 
@@ -46,19 +46,19 @@ final class StepwisePrintOnlyMessage implements OngoingDelivery.SendableForPrint
      */
     @Override
     public OngoingDelivery.SendableForPrintOnly addContent(Document document, InputStream printContent) {
-    	this.delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.uuid), null, printContent);
-    	return this;
+        this.delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.uuid), null, printContent);
+        return this;
     }
 
 
     @Override
     public MessageDelivery send() {
-    	if (delivery.getChannel() != Channel.PRINT) {
-    		throw new IllegalStateException(
-    				"Response from Digipost does not indicate that the message with id " + delivery.getMessageId() +
-    				", status '" + delivery.getStatus() + "' will be delivered to print, " +
-					"although this has been requested by the client. Cannot continue.");
-    	}
-    	return sender.sendMessage(delivery);
+        if (delivery.getChannel() != Channel.PRINT) {
+            throw new IllegalStateException(
+                    "Response from Digipost does not indicate that the message with id " + delivery.getMessageId() +
+                    ", status '" + delivery.getStatus() + "' will be delivered to print, " +
+                    "although this has been requested by the client. Cannot continue.");
+        }
+        return sender.sendMessage(delivery);
     }
 }

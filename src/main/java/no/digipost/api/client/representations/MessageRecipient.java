@@ -25,124 +25,124 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message-recipient", propOrder = {
-		"nameAndAddress",
-		"digipostAddress",
-		"personalIdentificationNumber",
-		"organisationNumber",
-		"printDetails"
+        "nameAndAddress",
+        "digipostAddress",
+        "personalIdentificationNumber",
+        "organisationNumber",
+        "printDetails"
 })
 public class MessageRecipient {
 
-	@XmlElement(name = "name-and-address", nillable = false)
-	protected NameAndAddress nameAndAddress;
-	@XmlElement(name = "digipost-address", nillable = false)
-	protected String digipostAddress;
-	@XmlElement(name = "personal-identification-number", nillable = false)
-	protected String personalIdentificationNumber;
-	@XmlElement(name = "organisation-number", nillable = false)
-	protected String organisationNumber;
-	@XmlElement(name = "print-details", nillable = false)
-	protected PrintDetails printDetails;
+    @XmlElement(name = "name-and-address", nillable = false)
+    protected NameAndAddress nameAndAddress;
+    @XmlElement(name = "digipost-address", nillable = false)
+    protected String digipostAddress;
+    @XmlElement(name = "personal-identification-number", nillable = false)
+    protected String personalIdentificationNumber;
+    @XmlElement(name = "organisation-number", nillable = false)
+    protected String organisationNumber;
+    @XmlElement(name = "print-details", nillable = false)
+    protected PrintDetails printDetails;
 
-	public MessageRecipient() {
-	}
+    public MessageRecipient() {
+    }
 
-	MessageRecipient(NameAndAddress nameAndAddress, String digipostAddress, String personalIdentificationNumber,
-							String organisationNumber, PrintDetails printDetails){
-		this.nameAndAddress = nameAndAddress;
-		this.digipostAddress = digipostAddress;
-		this.personalIdentificationNumber = personalIdentificationNumber;
-		this.organisationNumber = organisationNumber;
-		this.printDetails = printDetails;
-	}
+    MessageRecipient(NameAndAddress nameAndAddress, String digipostAddress, String personalIdentificationNumber,
+                            String organisationNumber, PrintDetails printDetails){
+        this.nameAndAddress = nameAndAddress;
+        this.digipostAddress = digipostAddress;
+        this.personalIdentificationNumber = personalIdentificationNumber;
+        this.organisationNumber = organisationNumber;
+        this.printDetails = printDetails;
+    }
 
-	public MessageRecipient(final PersonalIdentificationNumber id) {
-		this.personalIdentificationNumber = id.asString();
-	}
+    public MessageRecipient(final PersonalIdentificationNumber id) {
+        this.personalIdentificationNumber = id.asString();
+    }
 
-	public MessageRecipient(final DigipostAddress digipostAddress) {
-		this.digipostAddress = digipostAddress.asString();
-	}
+    public MessageRecipient(final DigipostAddress digipostAddress) {
+        this.digipostAddress = digipostAddress.asString();
+    }
 
-	public MessageRecipient(final OrganisationNumber organisationNumber) {
-		this.organisationNumber = organisationNumber.asString();
-	}
+    public MessageRecipient(final OrganisationNumber organisationNumber) {
+        this.organisationNumber = organisationNumber.asString();
+    }
 
-	public MessageRecipient(final NameAndAddress nameAndAddress) {
-		this.nameAndAddress = nameAndAddress;
-	}
+    public MessageRecipient(final NameAndAddress nameAndAddress) {
+        this.nameAndAddress = nameAndAddress;
+    }
 
-	public MessageRecipient(final PersonalIdentificationNumber id, final PrintDetails printDetails) {
-		this(id);
-		this.printDetails = printDetails;
-	}
+    public MessageRecipient(final PersonalIdentificationNumber id, final PrintDetails printDetails) {
+        this(id);
+        this.printDetails = printDetails;
+    }
 
-	public MessageRecipient(final DigipostAddress digipostAddress, final PrintDetails printDetails) {
-		this(digipostAddress);
-		this.printDetails = printDetails;
-	}
+    public MessageRecipient(final DigipostAddress digipostAddress, final PrintDetails printDetails) {
+        this(digipostAddress);
+        this.printDetails = printDetails;
+    }
 
-	public MessageRecipient(final NameAndAddress nameAndAddress, final PrintDetails printDetails) {
-		this(nameAndAddress);
-		this.printDetails = printDetails;
-	}
+    public MessageRecipient(final NameAndAddress nameAndAddress, final PrintDetails printDetails) {
+        this(nameAndAddress);
+        this.printDetails = printDetails;
+    }
 
-	public MessageRecipient(final OrganisationNumber organisationNumber, final PrintDetails printDetails) {
-		this(organisationNumber);
-		this.printDetails = printDetails;
-	}
+    public MessageRecipient(final OrganisationNumber organisationNumber, final PrintDetails printDetails) {
+        this(organisationNumber);
+        this.printDetails = printDetails;
+    }
 
-	public MessageRecipient(final PrintDetails printDetails) {
-		this.printDetails = printDetails;
-	}
+    public MessageRecipient(final PrintDetails printDetails) {
+        this.printDetails = printDetails;
+    }
 
-	public NameAndAddress getNameAndAddress() {
-		return nameAndAddress;
-	}
+    public NameAndAddress getNameAndAddress() {
+        return nameAndAddress;
+    }
 
-	public String getDigipostAddress() {
-		return digipostAddress;
-	}
+    public String getDigipostAddress() {
+        return digipostAddress;
+    }
 
-	public String getPersonalIdentificationNumber() {
-		return personalIdentificationNumber;
-	}
+    public String getPersonalIdentificationNumber() {
+        return personalIdentificationNumber;
+    }
 
-	public String getOrganisationNumber() {
-		return organisationNumber;
-	}
+    public String getOrganisationNumber() {
+        return organisationNumber;
+    }
 
-	public PrintDetails getPrintDetails() {
-		return printDetails;
-	}
+    public PrintDetails getPrintDetails() {
+        return printDetails;
+    }
 
-	public boolean isDirectPrint() {
-		return hasPrintDetails() && !hasDigipostIdentification();
-	}
+    public boolean isDirectPrint() {
+        return hasPrintDetails() && !hasDigipostIdentification();
+    }
 
-	public boolean hasPrintDetails() {
-		return printDetails != null;
-	}
+    public boolean hasPrintDetails() {
+        return printDetails != null;
+    }
 
-	public boolean hasDigipostIdentification() {
-		return digipostAddress != null || personalIdentificationNumber != null || nameAndAddress != null || organisationNumber != null;
-	}
+    public boolean hasDigipostIdentification() {
+        return digipostAddress != null || personalIdentificationNumber != null || nameAndAddress != null || organisationNumber != null;
+    }
 
-	public Identification toIdentification() {
-		if (isDirectPrint()) {
-			throw new IllegalStateException("MessageRecipient mangler identifikasjonsdetaljer.");
-		}
+    public Identification toIdentification() {
+        if (isDirectPrint()) {
+            throw new IllegalStateException("MessageRecipient mangler identifikasjonsdetaljer.");
+        }
 
-		if (digipostAddress != null) {
-			return new Identification(new DigipostAddress(digipostAddress));
-		} else if (nameAndAddress != null) {
-			return new Identification(nameAndAddress);
-		} else if (organisationNumber != null) {
-			return new Identification(new OrganisationNumber(organisationNumber));
-		} else if (personalIdentificationNumber != null) {
-			return new Identification(new PersonalIdentificationNumber(personalIdentificationNumber));
-		} else {
-			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, "Ukjent identifikationstype.");
-		}
-	}
+        if (digipostAddress != null) {
+            return new Identification(new DigipostAddress(digipostAddress));
+        } else if (nameAndAddress != null) {
+            return new Identification(nameAndAddress);
+        } else if (organisationNumber != null) {
+            return new Identification(new OrganisationNumber(organisationNumber));
+        } else if (personalIdentificationNumber != null) {
+            return new Identification(new PersonalIdentificationNumber(personalIdentificationNumber));
+        } else {
+            throw new DigipostClientException(ErrorCode.CLIENT_ERROR, "Ukjent identifikationstype.");
+        }
+    }
 }

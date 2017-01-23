@@ -24,11 +24,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "event-metadata")
 @XmlSeeAlso({
-		MoveFilesFromPublicSectorMetadata.class,
-		EmailNotificationFailedMetadata.class,
-		SmsNotificationFailedMetadata.class,
-		FailedPrintMetadata.class,
-		PostmarkedMetadata.class
+        MoveFilesFromPublicSectorMetadata.class,
+        EmailNotificationFailedMetadata.class,
+        SmsNotificationFailedMetadata.class,
+        FailedPrintMetadata.class,
+        PostmarkedMetadata.class
 })
 public abstract class EventMetadata {
 }

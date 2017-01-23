@@ -45,81 +45,81 @@ public class ResponseDateInterceptorTest {
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
-	private ResponseDateInterceptor responseDateInterceptor;
+    private ResponseDateInterceptor responseDateInterceptor;
 
-	@Mock
-	private HttpContext httpContextMock;
+    @Mock
+    private HttpContext httpContextMock;
 
-	@Mock
-	private HttpResponse httpResponseMock;
+    @Mock
+    private HttpResponse httpResponseMock;
 
-	@Before
-	public void setUp() {
-		responseDateInterceptor = new ResponseDateInterceptor();
-		responseDateInterceptor.setThrowOnError(true);
-		when(httpResponseMock.getStatusLine()).thenReturn(new StatusLineMock(200));
-	}
+    @Before
+    public void setUp() {
+        responseDateInterceptor = new ResponseDateInterceptor();
+        responseDateInterceptor.setThrowOnError(true);
+        when(httpResponseMock.getStatusLine()).thenReturn(new StatusLineMock(200));
+    }
 
-	@Test
-	public void skal_kaste_exception_når_Date_header_mangler() throws IOException, HttpException {
-		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
-		try {
-			responseDateInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle ha kastet feil grunnet manglende Date-header");
-		} catch (DigipostClientException e) {
-			assertThat(e.getMessage(), containsString("Mangler Date-header"));
-		}
-	}
+    @Test
+    public void skal_kaste_exception_når_Date_header_mangler() throws IOException, HttpException {
+        when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
+        try {
+            responseDateInterceptor.process(httpResponseMock, httpContextMock);
+            fail("Skulle ha kastet feil grunnet manglende Date-header");
+        } catch (DigipostClientException e) {
+            assertThat(e.getMessage(), containsString("Mangler Date-header"));
+        }
+    }
 
-	@Test
-	public void skal_kaste_feil_når_Date_header_er_på_feil_format() throws IOException, HttpException {
-		List<BasicHeader> headers = new ArrayList<>();
-		headers.add(new BasicHeader("Date", "16. januar 2012 - 16:14:23"));
-		when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
-		when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
-		try {
-			responseDateInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle kastet feil grunnet feilaktig Date header format");
-		} catch (DigipostClientException e) {
-			assertThat(e.getMessage(), containsString("Date-header kunne ikke parses"));
-		}
-	}
+    @Test
+    public void skal_kaste_feil_når_Date_header_er_på_feil_format() throws IOException, HttpException {
+        List<BasicHeader> headers = new ArrayList<>();
+        headers.add(new BasicHeader("Date", "16. januar 2012 - 16:14:23"));
+        when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
+        when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
+        try {
+            responseDateInterceptor.process(httpResponseMock, httpContextMock);
+            fail("Skulle kastet feil grunnet feilaktig Date header format");
+        } catch (DigipostClientException e) {
+            assertThat(e.getMessage(), containsString("Date-header kunne ikke parses"));
+        }
+    }
 
-	@Test
-	public void skal_kaste_feil_når_Date_header_er_for_ny() throws IOException, HttpException {
-		DateTimeUtils.setCurrentMillisFixed(new DateTime(2014, 11, 4, 21, 00, 58, UTC).getMillis());
-		List<BasicHeader> headers = new ArrayList<>();
-		headers.add(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
-		when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
-		when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
-		try {
-			responseDateInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle kastet feil grunnet for ny Date header");
-		} catch (DigipostClientException e) {
-			assertThat(e.getMessage(), containsString("Date-header fra server er for ny"));
-		}
-	}
+    @Test
+    public void skal_kaste_feil_når_Date_header_er_for_ny() throws IOException, HttpException {
+        DateTimeUtils.setCurrentMillisFixed(new DateTime(2014, 11, 4, 21, 00, 58, UTC).getMillis());
+        List<BasicHeader> headers = new ArrayList<>();
+        headers.add(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
+        when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
+        when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
+        try {
+            responseDateInterceptor.process(httpResponseMock, httpContextMock);
+            fail("Skulle kastet feil grunnet for ny Date header");
+        } catch (DigipostClientException e) {
+            assertThat(e.getMessage(), containsString("Date-header fra server er for ny"));
+        }
+    }
 
-	@Test
-	public void skal_kaste_feil_når_Date_header_er_for_gammel() throws IOException, HttpException {
-		DateTimeUtils.setCurrentMillisFixed(new DateTime(2014, 11, 4, 21, 20, 58, UTC).getMillis());
-		List<BasicHeader> headers = new ArrayList<>();
-		headers.add(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
-		when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
-		when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
-		try {
-			responseDateInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle kastet feil grunnet for gammel Date header");
-		} catch (DigipostClientException e) {
-			assertThat(e.getMessage(), containsString("Date-header fra server er for gammel"));
-		}
-	}
+    @Test
+    public void skal_kaste_feil_når_Date_header_er_for_gammel() throws IOException, HttpException {
+        DateTimeUtils.setCurrentMillisFixed(new DateTime(2014, 11, 4, 21, 20, 58, UTC).getMillis());
+        List<BasicHeader> headers = new ArrayList<>();
+        headers.add(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
+        when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
+        when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
+        try {
+            responseDateInterceptor.process(httpResponseMock, httpContextMock);
+            fail("Skulle kastet feil grunnet for gammel Date header");
+        } catch (DigipostClientException e) {
+            assertThat(e.getMessage(), containsString("Date-header fra server er for gammel"));
+        }
+    }
 
-	@Test
-	public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
-		responseDateInterceptor.setThrowOnError(false);
-		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
-		responseDateInterceptor.process(httpResponseMock, httpContextMock);
-	}
+    @Test
+    public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
+        responseDateInterceptor.setThrowOnError(false);
+        when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
+        responseDateInterceptor.process(httpResponseMock, httpContextMock);
+    }
 
 }

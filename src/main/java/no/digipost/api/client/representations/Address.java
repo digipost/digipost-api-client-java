@@ -22,51 +22,51 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Address {
 
-	private String street;
-	@XmlElement(name = "house-number")
-	private String houseNumber;
-	@XmlElement(name = "house-letter")
-	private String houseLetter;
-	@XmlElement(name = "additional-addressline")
-	private String additionalAddressline;
-	@XmlElement(name = "zip-code")
-	private String zipCode;
-	private String city;
+    private String street;
+    @XmlElement(name = "house-number")
+    private String houseNumber;
+    @XmlElement(name = "house-letter")
+    private String houseLetter;
+    @XmlElement(name = "additional-addressline")
+    private String additionalAddressline;
+    @XmlElement(name = "zip-code")
+    private String zipCode;
+    private String city;
 
-	public Address(final String street, final String houseNumber, final String houseLetter, final String additionalAddressLine,
-			final String zipCode, final String city) {
-		this.street = street;
-		this.houseNumber = houseNumber;
-		this.houseLetter = houseLetter;
-		additionalAddressline = additionalAddressLine;
-		this.zipCode = zipCode;
-		this.city = city;
-	}
+    public Address(final String street, final String houseNumber, final String houseLetter, final String additionalAddressLine,
+            final String zipCode, final String city) {
+        this.street = street;
+        this.houseNumber = houseNumber;
+        this.houseLetter = houseLetter;
+        additionalAddressline = additionalAddressLine;
+        this.zipCode = zipCode;
+        this.city = city;
+    }
 
-	Address() {
-	}
+    Address() {
+    }
 
-	public String getStreet() {
-		return street;
-	}
+    public String getStreet() {
+        return street;
+    }
 
-	public String getHouseNumber() {
-		return houseNumber;
-	}
+    public String getHouseNumber() {
+        return houseNumber;
+    }
 
-	public String getHouseLetter() {
-		return houseLetter;
-	}
+    public String getHouseLetter() {
+        return houseLetter;
+    }
 
-	public String getAdditionalAddressline() {
-		return additionalAddressline;
-	}
+    public String getAdditionalAddressline() {
+        return additionalAddressline;
+    }
 
-	public String getZipCode() {
-		return zipCode;
-	}
+    public String getZipCode() {
+        return zipCode;
+    }
 
-	public String getCity() {
-		return city;
-	}
+    public String getCity() {
+        return city;
+    }
 }

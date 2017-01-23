@@ -21,8 +21,8 @@ import org.junit.Test;
 
 public class SenderOrganizationTest {
 
-	@Test
-	public void correctEqualsAndHashCode() {
-		EqualsVerifier.forClass(SenderOrganization.class).verify();
-	}
+    @Test
+    public void correctEqualsAndHashCode() {
+        EqualsVerifier.forClass(SenderOrganization.class).verify();
+    }
 }

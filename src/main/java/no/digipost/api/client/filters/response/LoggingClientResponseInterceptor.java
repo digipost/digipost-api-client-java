@@ -31,12 +31,12 @@ import static no.motif.Singular.optional;
 
 public class LoggingClientResponseInterceptor implements HttpResponseInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(LoggingClientResponseInterceptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingClientResponseInterceptor.class);
 
-	@Override
-	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-		byte[] entityBytes = optional(EntityUtils.toByteArray(response.getEntity())).orElse(new byte[0]);
-		LOG.info(new String(entityBytes, UTF_8));
-		response.setEntity(new ByteArrayEntity(entityBytes));
-	}
+    @Override
+    public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+        byte[] entityBytes = optional(EntityUtils.toByteArray(response.getEntity())).orElse(new byte[0]);
+        LOG.info(new String(entityBytes, UTF_8));
+        response.setEntity(new ByteArrayEntity(entityBytes));
+    }
 }

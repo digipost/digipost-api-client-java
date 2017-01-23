@@ -28,8 +28,8 @@ final class StepwiseWithPrintFallback implements OngoingDelivery.SendableWithPri
 
 
     StepwiseWithPrintFallback(Message message, MessageSender sender) {
-		this.sender = sender;
-	    this.delivery = sender.createOrFetchMessage(message);
+        this.sender = sender;
+        this.delivery = sender.createOrFetchMessage(message);
     }
 
 
@@ -40,14 +40,14 @@ final class StepwiseWithPrintFallback implements OngoingDelivery.SendableWithPri
      */
     @Override
     public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
-    	return addContent(document, content, content);
+        return addContent(document, content, content);
     }
 
 
     @Override
     public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
-    	this.delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.uuid), content, printContent);
-    	return this;
+        this.delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.uuid), content, printContent);
+        return this;
     }
 
 
@@ -58,6 +58,6 @@ final class StepwiseWithPrintFallback implements OngoingDelivery.SendableWithPri
      */
     @Override
     public MessageDelivery send() {
-    	return sender.sendMessage(delivery);
+        return sender.sendMessage(delivery);
     }
 }

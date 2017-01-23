@@ -20,43 +20,43 @@ import javax.xml.bind.annotation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "identification-result-with-encryption-key", propOrder = {
-		"result",
-		"encryptionKey"
+        "result",
+        "encryptionKey"
 })
 @XmlRootElement(name = "identification-result-with-encryption-key")
 public class IdentificationResultWithEncryptionKey {
 
-	@XmlElement(name="identification-result", required = true)
-	protected IdentificationResult result;
-	@XmlElement(name = "encryption-key")
-	protected EncryptionKey encryptionKey;
+    @XmlElement(name="identification-result", required = true)
+    protected IdentificationResult result;
+    @XmlElement(name = "encryption-key")
+    protected EncryptionKey encryptionKey;
 
-	public IdentificationResultWithEncryptionKey() {
-		this(null, null);
-	}
+    public IdentificationResultWithEncryptionKey() {
+        this(null, null);
+    }
 
-	public IdentificationResultWithEncryptionKey(IdentificationResult result, EncryptionKey encryptionKey) {
-		this.result = result;
-		this.encryptionKey = encryptionKey;
-	}
+    public IdentificationResultWithEncryptionKey(IdentificationResult result, EncryptionKey encryptionKey) {
+        this.result = result;
+        this.encryptionKey = encryptionKey;
+    }
 
-	public IdentificationResult getResult() {
-		return result;
-	}
+    public IdentificationResult getResult() {
+        return result;
+    }
 
-	public IdentificationResultCode getResultCode(){
-		return result.getResult();
-	}
+    public IdentificationResultCode getResultCode(){
+        return result.getResult();
+    }
 
-	public EncryptionKey getEncryptionKey() {
-		return encryptionKey;
-	}
+    public EncryptionKey getEncryptionKey() {
+        return encryptionKey;
+    }
 
-	@Override
-	public String toString() {
-		return "IdentificationResultWithEncryptionKey{" +
-				"result=" + result.toString() +
-				", encryption-key=" + encryptionKey.toString() +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "IdentificationResultWithEncryptionKey{" +
+                "result=" + result.toString() +
+                ", encryption-key=" + encryptionKey.toString() +
+                '}';
+    }
 }

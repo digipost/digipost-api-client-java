@@ -22,13 +22,13 @@ import org.joda.time.LocalDate;
 
 public class DateXmlAdapter extends XmlAdapter<String, LocalDate> {
 
-	@Override
-	public LocalDate unmarshal(final String value) {
-		return new LocalDate(DatatypeConverter.parseDate(value));
-	}
+    @Override
+    public LocalDate unmarshal(final String value) {
+        return new LocalDate(DatatypeConverter.parseDate(value));
+    }
 
-	@Override
-	public String marshal(final LocalDate date) {
-		return date.toString();
-	}
+    @Override
+    public String marshal(final LocalDate date) {
+        return date.toString();
+    }
 }
