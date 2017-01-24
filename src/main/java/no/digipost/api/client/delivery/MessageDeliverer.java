@@ -28,12 +28,12 @@ public class MessageDeliverer {
 
 
 	public OngoingDelivery.WithPrintFallback createMessage(Message message) {
-		return new AtomicWithPrintFallback(message, sender);
+		return new WithPrintFallback(message, sender);
 
 	}
 
 	public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
-		return new AtomicPrintOnlyMessage(printMessage, sender);
+		return new PrintOnlyMessage(printMessage, sender);
 	}
 
 }
