@@ -17,7 +17,6 @@ package no.digipost.api.client.swing;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.EventLogger;
-import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.*;
@@ -603,7 +602,7 @@ public class DigipostSwingClient {
 				layout.show(contentPane, BREV);
 
 				try {
-					client = new DigipostClient(newBuilder().build(),ApiFlavor.STEPWISE_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
+					client = new DigipostClient(newBuilder().build(), endpointField.getText(), Long.parseLong(senderField.getText()),
 							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger, null, null);
 				} catch (NumberFormatException e1) {
 					eventLogger.log("FEIL: Avsenders ID må være et tall > 0");

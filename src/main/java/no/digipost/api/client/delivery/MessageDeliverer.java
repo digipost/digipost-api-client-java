@@ -20,29 +20,20 @@ import no.digipost.api.client.representations.Message;
 
 public class MessageDeliverer {
 
-	private final ApiFlavor type;
 	private final MessageSender sender;
 
-	public MessageDeliverer(ApiFlavor type, MessageSender sender) {
-		this.type = type;
+	public MessageDeliverer(MessageSender sender) {
 		this.sender = sender;
 	}
 
 
 	public OngoingDelivery.WithPrintFallback createMessage(Message message) {
-		switch (type) {
-			case STEPWISE_REST: return new StepwiseWithPrintFallback(message, sender);
-			case ATOMIC_REST: return new AtomicWithPrintFallback(message, sender);
-			default: throw new UnsupportedOperationException(ApiFlavor.class.getSimpleName() + " " + type + " is not supported");
-		}
+		return new AtomicWithPrintFallback(message, sender);
+
 	}
 
 	public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
-		switch (type) {
-    		case STEPWISE_REST: return new StepwisePrintOnlyMessage(printMessage, sender);
-    		case ATOMIC_REST: return new AtomicPrintOnlyMessage(printMessage, sender);
-    		default: throw new UnsupportedOperationException(ApiFlavor.class.getSimpleName() + " " + type + " is not supported");
-    	}
+		return new AtomicPrintOnlyMessage(printMessage, sender);
 	}
 
 }

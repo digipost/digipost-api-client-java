@@ -16,23 +16,7 @@
 package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.delivery.ApiFlavor;
-import no.digipost.api.client.representations.AuthenticationLevel;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.FileType;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.IdentificationResult;
-import no.digipost.api.client.representations.Invoice;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.MessageRecipient;
-import no.digipost.api.client.representations.NameAndAddress;
-import no.digipost.api.client.representations.NorwegianAddress;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.PrintDetails;
-import no.digipost.api.client.representations.PrintRecipient;
-import no.digipost.api.client.representations.SensitivityLevel;
-import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.representations.*;
 import org.joda.time.LocalDate;
 
 import java.io.FileInputStream;
@@ -57,7 +41,7 @@ public class GithubPagesEksempler {
 
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
@@ -76,7 +60,7 @@ public class GithubPagesEksempler {
 
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1", "Oppgang B", "0001", "Oslo");
 
@@ -96,7 +80,7 @@ public class GithubPagesEksempler {
 
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
@@ -123,7 +107,7 @@ public class GithubPagesEksempler {
 
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
@@ -144,7 +128,7 @@ public class GithubPagesEksempler {
 
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
@@ -165,7 +149,7 @@ public class GithubPagesEksempler {
 
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
@@ -190,7 +174,7 @@ public class GithubPagesEksempler {
 
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
@@ -212,7 +196,7 @@ public class GithubPagesEksempler {
 
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
@@ -227,7 +211,7 @@ public class GithubPagesEksempler {
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
         // API URL is different when request is sent from NHN
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.nhn.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.nhn.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
