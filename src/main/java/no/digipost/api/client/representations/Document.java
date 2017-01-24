@@ -16,7 +16,6 @@
 
 package no.digipost.api.client.representations;
 
-import no.motif.f.Fn;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -34,8 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static no.motif.Singular.optional;
-import static no.motif.Strings.inBetween;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
@@ -209,16 +207,9 @@ public class Document extends Representation {
         return getLinkByRelationName(Relation.ADD_CONTENT);
     }
 
-    public Link getEncryptionKeyLink() { return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY); }
-
-
-    public static final Fn<Document, String> getUuid = new Fn<Document, String>() { @Override public String $(Document doc) {
-        return doc.uuid;
-    }};
-
-    public static final Fn<Document, FileType> getFileType = new Fn<Document, FileType>() { @Override public FileType $(Document doc) {
-        return new FileType(doc.digipostFileType);
-    }};
+    public Link getEncryptionKeyLink() {
+        return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY);
+    }
 
     public String[] getTechnicalType() {
         return technicalType != null ? technicalType.split(",") : null;
@@ -231,8 +222,8 @@ public class Document extends Representation {
     @Override
     public String toString() {
         return getClass().getSimpleName() + " with uuid '" + uuid + "'" +
-                optional(technicalType).map(inBetween(", technicalType '", "'")).orElse("") +
-                (willBeEncrypted() ? optional(subject).map(inBetween(", subject '", "'")).orElse(", no subject") : ", encrypted");
+                ofNullable(technicalType).map(t -> ", technicalType '" + t + "'").orElse("") +
+                (willBeEncrypted() ? ofNullable(subject).map(s -> ", subject '" + s + "'").orElse(", no subject") : ", encrypted");
     }
 
     public void setNumberOfEncryptedPages(int pages) {

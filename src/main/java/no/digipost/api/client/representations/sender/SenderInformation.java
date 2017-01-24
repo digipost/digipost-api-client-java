@@ -17,12 +17,23 @@ package no.digipost.api.client.representations.sender;
 
 import no.digipost.print.validate.PdfValidationSettings;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
+
 import java.util.List;
 
-import static no.digipost.api.client.representations.sender.SenderFeatureName.*;
+import static java.util.stream.Collectors.joining;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_BLEED;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_FONTS;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_MARGINS_LEFT;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PAGEAMOUNT;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PDFVERSION;
 import static no.digipost.print.validate.PdfValidationSettings.DEFAULT_BLEED_MM;
-import static no.motif.Iterate.on;
 
 /**
  * Informasjon om en avsender. Bruk
@@ -94,7 +105,8 @@ public class SenderInformation
         StringBuilder s = new StringBuilder(status.toString());
         if (status != SenderStatus.NO_INFO_AVAILABLE) {
             s.append(" - id: ").append(senderId)
-             .append(", supported features: ").append(on(supportedFeatures).join(", "));
+             .append(", supported features: ")
+             .append(supportedFeatures.stream().map(Object::toString).collect(joining(", ")));
         }
         return s.toString();
     }

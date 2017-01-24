@@ -18,17 +18,24 @@ package no.digipost.api.client.representations;
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 import org.joda.time.DateTime;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Stream.concat;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.Channel.PRINT;
-import static no.motif.Singular.the;
 import static org.apache.commons.lang3.ArrayUtils.INDEX_NOT_FOUND;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -217,14 +224,12 @@ public class Message implements MayHaveSender {
 
 
     /**
-     * @return a list containing every {@link Document} in this delivery.
+     * @return an ordered Stream containing every {@link Document} in this message.
      *         The primary document will be the first element of the list,
-     *         with the attachments following. The list is immutable and
-     *         can not be used to change which documents are in this
-     *         MessageDelivery.
+     *         with the attachments following.
      */
-    public List<Document> getAllDocuments() {
-        return the(primaryDocument).append(attachments).collect();
+    public Stream<Document> getAllDocuments() {
+        return concat(ofNullable(primaryDocument).map(Stream::of).orElseGet(Stream::empty), attachments.stream());
     }
 
     public boolean isDirectPrint() {
@@ -236,12 +241,7 @@ public class Message implements MayHaveSender {
     }
 
     public boolean hasAnyDocumentRequiringEncryption() {
-        for (Document document: getAllDocuments()) {
-            if (document.willBeEncrypted()) {
-                return true;
-            }
-        }
-        return false;
+        return getAllDocuments().anyMatch(Document::willBeEncrypted);
     }
 
     public Channel getChannel() {
@@ -255,7 +255,7 @@ public class Message implements MayHaveSender {
      */
     public Comparator<? super Document> documentOrder() {
         return new Comparator<Document>() {
-            final String[] uuids = the(primaryDocument).append(attachments).map(Document.getUuid).collect().toArray(new String[attachments.size() + 1]);
+            final String[] uuids = getAllDocuments().map(d -> d.uuid).toArray(size -> new String[size]);
             @Override
             public int compare(Document d1, Document d2) {
                 int d1Index = indexOf(uuids, d1.uuid);

@@ -25,16 +25,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.Document.technicalAttachment;
-import static no.digipost.api.client.representations.FileType.*;
+import static no.digipost.api.client.representations.FileType.GIF;
+import static no.digipost.api.client.representations.FileType.HTML;
+import static no.digipost.api.client.representations.FileType.PDF;
+import static no.digipost.api.client.representations.FileType.ZIP;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-import static no.motif.Iterate.on;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 
 public class MessageTest {
@@ -111,9 +122,7 @@ public class MessageTest {
 
         assertThat("When copying to only print, the file type should be set to pdf",
                 copyOfMessageWithPrintDetailsOnly.primaryDocument.digipostFileType, is(PDF.toString()));
-        for(Document doc : copyOfMessageWithPrintDetailsOnly.getAllDocuments()){
-            assertThat("When copying to only print, the file type should be set to pdf", doc.digipostFileType, is(PDF.toString()));
-        }
+        assertThat("When copying to only print, the file type should be set to pdf", copyOfMessageWithPrintDetailsOnly.getAllDocuments().map(d -> d.digipostFileType).collect(toList()), everyItem(is(PDF.toString())));
 
         assertThat(copyOfMessageWithPrintDetailsOnly.recipient.printDetails.recipient.name, is(message.recipient.printDetails.recipient.name));
         assertThat(copyOfMessageWithPrintDetailsOnly.recipient.printDetails.recipient.norwegianAddress.addressline1, is(message.recipient.printDetails.recipient.norwegianAddress.addressline1));
@@ -130,9 +139,7 @@ public class MessageTest {
         assertNull(copyOfMessageWithDigipostDetailsOnly.recipient.printDetails);
 
         assertThat(copyOfMessageWithDigipostDetailsOnly.primaryDocument.digipostFileType, is(HTML.toString()));
-        for(Document doc : copyOfMessageWithDigipostDetailsOnly.getAllDocuments()){
-            assertThat(doc.digipostFileType, is(HTML.toString()));
-        }
+        assertThat(copyOfMessageWithDigipostDetailsOnly.getAllDocuments().map(doc -> doc.digipostFileType).collect(toList()), everyItem(is(HTML.toString())));
     }
 
     @Test
@@ -186,7 +193,7 @@ public class MessageTest {
         Document a3 = new Document(UUID.randomUUID().toString(), "a3", HTML);
         Message message = newMessage("id", hoved).attachments(asList(a1, a2, a3)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
 
-        assertThat(on(a2, hoved, a3, a1).sorted(message.documentOrder()), contains(hoved, a1, a2, a3));
+        assertThat(Stream.of(a2, hoved, a3, a1).sorted(message.documentOrder()).collect(toList()), contains(hoved, a1, a2, a3));
     }
 
     @Test

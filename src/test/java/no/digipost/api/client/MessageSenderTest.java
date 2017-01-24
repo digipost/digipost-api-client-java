@@ -78,8 +78,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Stream.concat;
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.delivery.ApiFlavor.ATOMIC_REST;
 import static no.digipost.api.client.delivery.ApiFlavor.STEPWISE_REST;
@@ -106,7 +108,6 @@ import static no.digipost.api.client.util.JAXBContextUtils.encryptionKeyContext;
 import static no.digipost.api.client.util.JAXBContextUtils.identificationResultWithEncryptionKeyContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.messageDeliveryContext;
-import static no.motif.Singular.the;
 import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.Matchers.is;
@@ -342,10 +343,10 @@ public class MessageSenderTest {
         Message digipostCopyMessage = Message.copyMessageWithOnlyDigipostDetails(message);
         MessageSender.setDigipostContentToUUID(documentAndContent, documentAndInputStreams, digipostCopyMessage.getAllDocuments());
 
-        for(Document doc : digipostCopyMessage.getAllDocuments()){
+        digipostCopyMessage.getAllDocuments().forEach(doc -> {
             InputStream inputStream = documentAndInputStreams.get(doc);
             assertThat(inputStream, is(documentAndContent.get(doc.uuid).getDigipostContent()));
-        }
+        });
 
         assertThat(digipostCopyMessage.recipient.hasPrintDetails(), is(false));
         assertThat(digipostCopyMessage.recipient.hasDigipostIdentification(),is(true));
@@ -371,10 +372,10 @@ public class MessageSenderTest {
         Message printCopyMessage = Message.copyMessageWithOnlyPrintDetails(message);
         MessageSender.setPrintContentToUUID(documentAndContent, documentAndInputStreams, printCopyMessage.getAllDocuments());
 
-        for(Document doc : printCopyMessage.getAllDocuments()){
+        printCopyMessage.getAllDocuments().forEach(doc -> {
             InputStream inputStream = documentAndInputStreams.get(doc);
             assertThat(inputStream, is(documentAndContent.get(doc.uuid).getPrintContent()));
-        }
+        });
 
         assertThat(printCopyMessage.recipient.hasPrintDetails(), is(true));
         assertThat(printCopyMessage.recipient.hasDigipostIdentification(),is(false));
@@ -397,12 +398,7 @@ public class MessageSenderTest {
         MessageDelivery incompleteDelivery = MessageDeliverySetter.setMessageDeliveryStatus(new MessageDelivery(messageId, PRINT, NOT_COMPLETE, now()), printDocument,
                 printAttachments, new Link(SEND, new DigipostUri("/send")));
 
-        final List<Document> allDocuments = the(printDocument).append(printAttachments).collect();
-
-        for (Document document : allDocuments) {
-            document.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt")));
-        }
-
+        concat(Stream.of(printDocument), printAttachments.stream()).forEach(document -> document.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt"))));
 
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         marshal(messageDeliveryContext, incompleteDelivery, bao);

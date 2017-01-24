@@ -20,10 +20,14 @@ import org.junit.Test;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.MessageStatus.NOT_COMPLETE;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -32,7 +36,7 @@ public class MessageDeliveryTest {
     @Test
     public void deliveryWithNoDocumentsYieldsEmptyListWithDocuments() {
         MessageDelivery delivery = new MessageDelivery(null, DIGIPOST, NOT_COMPLETE, null);
-        assertThat(delivery.getAllDocuments(), empty());
+        assertThat(delivery.getAllDocuments().collect(toList()), empty());
         assertThat(delivery.getAttachments(), empty());
     }
 
@@ -46,7 +50,7 @@ public class MessageDeliveryTest {
         delivery.primaryDocument = primary;
         delivery.attachments = asList(att1, att2);
 
-        assertThat(delivery.getAllDocuments(), contains(primary, att1, att2));
+        assertThat(delivery.getAllDocuments().collect(toList()), contains(primary, att1, att2));
         assertThat(delivery.getAttachments(), contains(att1, att2));
     }
 

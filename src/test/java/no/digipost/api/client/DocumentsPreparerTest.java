@@ -51,7 +51,6 @@ import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.FileType.GIF;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.util.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
-import static no.motif.Base.always;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.hamcrest.Matchers.contains;
@@ -95,7 +94,7 @@ public class DocumentsPreparerTest {
 
         expectedException.expect(DigipostClientException.class);
         expectedException.expectMessage("no encryption key");
-        preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.CHECK_ALL));
+        preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, () -> PdfValidationSettings.CHECK_ALL);
     }
 
     @Test
@@ -104,14 +103,14 @@ public class DocumentsPreparerTest {
 
         expectedException.expect(DigipostClientException.class);
         expectedException.expectMessage("filetype gif");
-        preparer.prepare(documents, messageBuilder.build(), encrypter, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
+        preparer.prepare(documents, messageBuilder.build(), encrypter, () -> mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS)));
     }
 
     @Test
     public void deniesNonValidatingPdfForBothPrintAndWeb() {
         for (Channel deliveryMethod : Channel.values()) {
             try {
-                preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[]{65, 65, 65, 65}, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
+                preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[]{65, 65, 65, 65}, () -> mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS)));
             } catch (DigipostClientException e) {
                 assertThat(e.getMessage(), containsString("Could not parse"));
                 continue;
@@ -122,17 +121,17 @@ public class DocumentsPreparerTest {
 
     @Test
     public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
-        preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.CHECK_ALL));
+        preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL);
 
         expectedException.expect(DigipostClientException.class);
         expectedException.expectMessage("too many pages");
-        preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.CHECK_ALL));
+        preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL);
     }
 
 
     @Test
     public void doesNothingForNonPreEncryptedDocuments() throws IOException {
-        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.CHECK_ALL));
+        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, () -> PdfValidationSettings.CHECK_ALL);
 
         assertThat(documents.keySet(), contains(primaryDocument));
         assertThat(documents.get(primaryDocument), sameInstance(preparedDocuments.get(primaryDocument)));
@@ -143,7 +142,7 @@ public class DocumentsPreparerTest {
         primaryDocument.encrypt();
         addAttachment("attachment", PDF, printablePdf2Pages()).encrypt();
         Message message = messageBuilder.build();
-        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.CHECK_ALL));
+        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, () -> PdfValidationSettings.CHECK_ALL);
 
         assertThat(preparedDocuments.size(), is(2));
     }

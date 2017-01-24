@@ -23,12 +23,16 @@
 
 package no.digipost.api.client.representations.sender;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
+
 import java.util.Objects;
 
 import static java.util.Objects.hash;
-import static no.motif.Singular.optional;
-import static no.motif.Strings.prepend;
+import static java.util.Optional.ofNullable;
 
 
 /**
@@ -99,7 +103,8 @@ public final class SenderFeature {
         return hash(value, param);
     }
 
+    @Override
     public String toString() {
-        return value + optional(param).map(prepend(": ")).orElse("");
+        return value + ofNullable(param).map(p -> ": " + p).orElse("");
     }
 }

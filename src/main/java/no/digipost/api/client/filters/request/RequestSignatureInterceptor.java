@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
-import static no.motif.Singular.optional;
 
 public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 
@@ -81,7 +81,7 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
             if (rqEntity == null) {
                 setSignatureHeader(httpRequest);
             } else {
-                byte[] entityBytes = optional(EntityUtils.toByteArray(rqEntity)).orElse(new byte[0]);
+                byte[] entityBytes = Optional.ofNullable(EntityUtils.toByteArray(rqEntity)).orElseGet(() -> new byte[0]);
                 hashFilter.settContentHashHeader(entityBytes, request);
                 setSignatureHeader(httpRequest);
             }

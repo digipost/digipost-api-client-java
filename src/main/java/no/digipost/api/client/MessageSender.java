@@ -25,18 +25,13 @@ import no.digipost.api.client.representations.Identification;
 import no.digipost.api.client.representations.IdentificationResultCode;
 import no.digipost.api.client.representations.IdentificationResultWithEncryptionKey;
 import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.MessageStatus;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
-import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
-import no.motif.f.Apply;
-import no.motif.f.Fn;
-import no.motif.single.Optional;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -54,31 +49,24 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.stream.Stream;
 
+import static java.util.Optional.empty;
 import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7;
 import static no.digipost.api.client.util.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
-import static no.digipost.api.client.util.Encrypter.keyToEncrypter;
 import static no.digipost.api.client.util.JAXBContextUtils.encryptionKeyContext;
 import static no.digipost.api.client.util.JAXBContextUtils.identificationResultWithEncryptionKeyContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
 import static no.digipost.api.client.util.JAXBContextUtils.messageDeliveryContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
-import static no.motif.Singular.none;
-import static no.motif.Singular.optional;
-import static no.motif.Singular.the;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class MessageSender extends Communicator {
-
-    private final Fn<MayHaveSender, PdfValidationSettings> resolvePdfValidationSettings = new Fn<MayHaveSender, PdfValidationSettings>() {
-        @Override public PdfValidationSettings $(MayHaveSender message) {
-            return apiService.getSenderInformation(message).getPdfValidationSettings();
-        }};
 
     private final DocumentsPreparer documentsPreparer;
     private final DigipostClientConfig digipostClientConfig;
@@ -102,13 +90,13 @@ public class MessageSender extends Communicator {
      */
     public MessageDelivery sendMultipartMessage(Message message, Map<String, DocumentContent> documentsAndContent) {
         EncryptionKeyAndDocsWithInputstream encryptionAndInputStream = fetchEncryptionKeyForRecipientIfNecessaryAndMapContentToInputstream(message, documentsAndContent);
-        Encrypter encrypter = encryptionAndInputStream.digipostPublicKeys.map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT);
+        Encrypter encrypter = encryptionAndInputStream.digipostPublicKeys.map(Encrypter::using).orElse(FAIL_IF_TRYING_TO_ENCRYPT);
         Map<Document, InputStream> documentInputStream = encryptionAndInputStream.documentsAndInputstream;
         Message singleChannelMessage = encryptionAndInputStream.getSingleChannelMessage();
 
         try {
             Map<Document, InputStream> preparedDocuments = documentsPreparer.prepare(
-                    documentInputStream, singleChannelMessage, encrypter, Apply.partially(resolvePdfValidationSettings).of(singleChannelMessage));
+                    documentInputStream, singleChannelMessage, encrypter, () -> apiService.getSenderInformation(message).getPdfValidationSettings());
 
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
             marshal(messageContext, singleChannelMessage, bao);
@@ -219,7 +207,7 @@ public class MessageSender extends Communicator {
             } catch (IOException e) {
                 throw new DigipostClientException(GENERAL_ERROR, "Unable to read content of document with uuid " + document.uuid, e);
             }
-            documentsPreparer.validateAndSetNrOfPages(message.getChannel(), document, byteContent, Apply.partially(resolvePdfValidationSettings).of(message));
+            documentsPreparer.validateAndSetNrOfPages(message.getChannel(), document, byteContent, () -> apiService.getSenderInformation(message).getPdfValidationSettings());
             InputStream encryptetContent = fetchKeyAndEncrypt(document, new ByteArrayInputStream(byteContent));
             delivery = uploadContent(document, encryptetContent);
         } else {
@@ -254,7 +242,7 @@ public class MessageSender extends Communicator {
             checkResponse(encryptionKeyResponse);
 
             EncryptionKey key = unmarshal(encryptionKeyContext, encryptionKeyResponse.getEntity().getContent(), EncryptionKey.class);
-            return the(new DigipostPublicKey(key)).map(keyToEncrypter).orElse(FAIL_IF_TRYING_TO_ENCRYPT).encrypt(content);
+            return Encrypter.using(new DigipostPublicKey(key)).encrypt(content);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -378,7 +366,7 @@ public class MessageSender extends Communicator {
     private EncryptionKeyAndDocsWithInputstream fetchEncryptionKeyForRecipientIfNecessaryAndMapContentToInputstream(Message message,
                                                                                         Map<String, DocumentContent> documentsAndContent) {
         final Map<Document, InputStream> documentsAndInputstream = new LinkedHashMap<>();
-        Optional<DigipostPublicKey> publicKeys = none();
+        Optional<DigipostPublicKey> publicKeys = empty();
         Message singleChannelMessage;
 
             if (message.isDirectPrint()) {
@@ -386,7 +374,7 @@ public class MessageSender extends Communicator {
 
                 if (singleChannelMessage.hasAnyDocumentRequiringEncryption()) {
                     eventLogger.log("Direkte print. Bruker krypteringsnøkkel for print.");
-                    publicKeys = optional(getEncryptionKeyForPrint());
+                    publicKeys = Optional.ofNullable(getEncryptionKeyForPrint());
                 }
 
             } else if (!message.recipient.hasPrintDetails() && !message.hasAnyDocumentRequiringEncryption()) {
@@ -399,14 +387,14 @@ public class MessageSender extends Communicator {
 
                     if (singleChannelMessage.hasAnyDocumentRequiringEncryption()) {
                         eventLogger.log("Mottaker er Digipost-bruker. Bruker brukers krypteringsnøkkel.");
-                        publicKeys = optional(new DigipostPublicKey(result.getEncryptionKey()));
+                        publicKeys = Optional.of(new DigipostPublicKey(result.getEncryptionKey()));
                     }
                 } else if (message.recipient.hasPrintDetails()) {
                     singleChannelMessage = setMapAndMessageToPrint(message, documentsAndContent, documentsAndInputstream);
 
                     if (singleChannelMessage.hasAnyDocumentRequiringEncryption()) {
                         eventLogger.log("Mottaker er ikke Digipost-bruker. Bruker krypteringsnøkkel for print.");
-                        publicKeys = optional(getEncryptionKeyForPrint());
+                        publicKeys = Optional.of(getEncryptionKeyForPrint());
                     }
                 } else {
                     throw new DigipostClientException(ErrorCode.UNKNOWN_RECIPIENT, "Mottaker er ikke Digipost-bruker og forsendelse mangler print-fallback.");
@@ -431,16 +419,12 @@ public class MessageSender extends Communicator {
         return singleChannelMessage;
     }
 
-    static void setDigipostContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, List<Document> allDocuments) {
-        for(Document doc : allDocuments) {
-            documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getDigipostContent());
-        }
+    static void setDigipostContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, Stream<Document> allDocuments) {
+        allDocuments.forEach(doc -> documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getDigipostContent()));
     }
 
-    static void setPrintContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, List<Document> allDocuments) {
-        for(Document doc : allDocuments) {
-            documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getPrintContent());
-        }
+    static void setPrintContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, Stream<Document> allDocuments) {
+        allDocuments.forEach(doc -> documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getPrintContent()));
     }
 
     private static URI responseToURI(CloseableHttpResponse response){

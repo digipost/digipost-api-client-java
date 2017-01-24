@@ -16,18 +16,21 @@
 package no.digipost.api.client.representations.sender;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import no.motif.f.Predicate;
-import no.motif.types.Elements;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.util.List;
+import java.util.stream.Stream;
 
-import static java.lang.reflect.Modifier.*;
+import static java.lang.reflect.Modifier.isFinal;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.util.stream.Collectors.toList;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK;
-import static no.motif.Iterate.on;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
 public class SenderFeatureNameTest {
@@ -50,19 +53,18 @@ public class SenderFeatureNameTest {
 
     @Test
     public void allSenderFeatureConstantsAreIncludedAsKnownFeatures() throws Exception {
-        Elements<Field> declaredConstants = on(SenderFeatureName.class.getFields())
-            .filter(new Predicate<Field>() { @Override public boolean $(Field f) {
-                    return f.getType() == SenderFeatureName.class
-                            && isStatic(f.getModifiers())
-                            && isFinal(f.getModifiers())
-                            && isPublic(f.getModifiers());
-                    }});
+        List<Field> declaredConstants = Stream.of(SenderFeatureName.class.getFields())
+            .filter(f -> f.getType() == SenderFeatureName.class &&
+                         isStatic(f.getModifiers()) &&
+                         isFinal(f.getModifiers()) &&
+                         isPublic(f.getModifiers()))
+            .collect(toList());
 
-        assertFalse(declaredConstants.isEmpty());
         for (Field constantField : declaredConstants) {
             SenderFeatureName constant = (SenderFeatureName) constantField.get(SenderFeatureName.class);
             assertThat(SenderFeatureName.from(constant.identificator), sameInstance(constant));
         }
+        assertThat(declaredConstants, not(empty()));
     }
 
 }

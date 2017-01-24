@@ -15,14 +15,14 @@
  */
 package no.digipost.api.client.representations.sender;
 
-import no.motif.f.Fn;
-import no.motif.types.Elements;
-
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
-import static no.motif.Base.is;
-import static no.motif.Base.where;
-import static no.motif.Iterate.on;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toMap;
 
 
 /**
@@ -86,9 +86,10 @@ public final class SenderFeatureName {
      */
     public static final SenderFeatureName PRINTVALIDATION_BLEED = new SenderFeatureName("no.digipost.feature.validation.print.bleed", false);
 
-    private static final Elements<SenderFeatureName> KNOWN_FEATURES = on(
+    private static final Map<String, SenderFeatureName> KNOWN_FEATURES = Stream.of(
             DIGIPOST_DELIVERY, DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK, DELIVERY_DIRECT_TO_PRINT,
-            PRINTVALIDATION_FONTS, PRINTVALIDATION_MARGINS_LEFT, PRINTVALIDATION_PAGEAMOUNT, PRINTVALIDATION_PDFVERSION, PRINTVALIDATION_BLEED);
+            PRINTVALIDATION_FONTS, PRINTVALIDATION_MARGINS_LEFT, PRINTVALIDATION_PAGEAMOUNT, PRINTVALIDATION_PDFVERSION, PRINTVALIDATION_BLEED)
+                .collect(collectingAndThen(toMap((SenderFeatureName name) -> name.identificator, identity()), Collections::unmodifiableMap));
 
     public final String identificator;
     private final boolean custom;
@@ -100,10 +101,8 @@ public final class SenderFeatureName {
 
 
     public static SenderFeatureName from(String identificator) {
-        for(SenderFeatureName known : KNOWN_FEATURES.filter(where(getIdentificator, is(identificator))).head()) {
-            return known;
-        }
-        return new SenderFeatureName(identificator, true);
+        SenderFeatureName known = KNOWN_FEATURES.get(identificator);
+        return known != null ? known : new SenderFeatureName(identificator, true);
     }
 
     public SenderFeature withParam(String param) {
@@ -113,13 +112,6 @@ public final class SenderFeatureName {
     public SenderFeature withNoParam() {
         return withParam(null);
     }
-
-    public static final Fn<String, SenderFeatureName> toSenderFeature = new Fn<String, SenderFeatureName>() {
-        @Override public SenderFeatureName $(String identificator) { return from(identificator); }};
-
-
-    public static final Fn<SenderFeatureName, String> getIdentificator = new Fn<SenderFeatureName, String>() {
-        @Override public String $(SenderFeatureName feature) { return feature.identificator; }};
 
     @Override
     public String toString() {

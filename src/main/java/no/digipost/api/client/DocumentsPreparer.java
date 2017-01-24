@@ -24,9 +24,6 @@ import no.digipost.api.client.util.Encrypter;
 import no.digipost.print.validate.PdfValidationResult;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
-import no.motif.f.Fn0;
-import no.motif.single.Elem;
-import no.motif.single.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +31,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
+import static java.util.Optional.empty;
 import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.print.validate.PdfValidationResult.EVERYTHING_OK;
-import static no.motif.Iterate.on;
-import static no.motif.Singular.none;
-import static no.motif.Singular.optional;
 import static org.apache.commons.io.IOUtils.toByteArray;
 
 class DocumentsPreparer {
@@ -57,7 +54,7 @@ class DocumentsPreparer {
 
     Map<Document, InputStream> prepare(
             Map<Document, InputStream> documentsAndContent, Message message,
-            Encrypter encrypter, Fn0<PdfValidationSettings> pdfValidationSettings) throws IOException {
+            Encrypter encrypter, Supplier<PdfValidationSettings> pdfValidationSettings) throws IOException {
 
         final Map<Document, InputStream> prepared = new LinkedHashMap<>();
 
@@ -65,8 +62,7 @@ class DocumentsPreparer {
             throw new IllegalStateException("Forventet message med enkelt kanal");
         }
 
-        for (Elem<Document> i : on(on(documentsAndContent.keySet()).sorted(message.documentOrder())).indexed()) {
-            Document document = i.value;
+        for (Document document : (Iterable<Document>) documentsAndContent.keySet().stream().sorted(message.documentOrder())::iterator) {
             if (document.willBeEncrypted()) {
                 byte[] byteContent = toByteArray(documentsAndContent.get(document));
                 LOG.debug("Validerer dokument med uuid '{}' før kryptering", document.uuid);
@@ -83,7 +79,7 @@ class DocumentsPreparer {
 
 
 
-    Optional<PdfInfo> validateAndSetNrOfPages(Channel channel, Document document, byte[] content, Fn0<PdfValidationSettings> pdfValidationSettings) {
+    Optional<PdfInfo> validateAndSetNrOfPages(Channel channel, Document document, byte[] content, Supplier<PdfValidationSettings> pdfValidationSettings) {
         if (channel == PRINT && !document.is(PDF)) {
             throw new DigipostClientException(ErrorCode.INVALID_PDF_CONTENT,
                     "PDF is required for direct-to-print messages. Document with uuid " + document.uuid + " had filetype " + document.getDigipostFileType());
@@ -93,14 +89,14 @@ class DocumentsPreparer {
         Optional<PdfInfo> pdfInfo;
         if (document.is(PDF)) {
             LOG.debug("Validerer PDF-dokument med uuid '{}'", document.uuid);
-            pdfValidation = pdfValidator.validate(content, pdfValidationSettings.$());
+            pdfValidation = pdfValidator.validate(content, pdfValidationSettings.get());
             if (document.willBeEncrypted()) {
                 document.setNumberOfEncryptedPages(pdfValidation.pages);
             }
-            pdfInfo = optional(new PdfInfo(pdfValidation.pages));
+            pdfInfo = Optional.of(new PdfInfo(pdfValidation.pages));
         } else {
             pdfValidation = EVERYTHING_OK;
-            pdfInfo = none();
+            pdfInfo = empty();
         }
 
         if ((channel == PRINT && !pdfValidation.okForPrint) || !pdfValidation.okForWeb) {

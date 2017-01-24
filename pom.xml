@@ -16,13 +16,13 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>7.4-SNAPSHOT</version>
+    <version>8.0-SNAPSHOT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 
     <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
         <bouncycastle.version>1.54</bouncycastle.version>
         <slf4j.version>1.7.22</slf4j.version>
@@ -41,11 +41,6 @@
             <groupId>no.digipost</groupId>
             <artifactId>cache</artifactId>
             <version>1.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.runeflobakk</groupId>
-            <artifactId>motif</artifactId>
-            <version>0.8</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -235,18 +230,6 @@
                     <version>2.3</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>animal-sniffer-maven-plugin</artifactId>
-                    <version>1.15</version>
-                    <configuration>
-                        <signature>
-                            <groupId>org.codehaus.mojo.signature</groupId>
-                            <artifactId>java17</artifactId>
-                            <version>1.0</version>
-                        </signature>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
                     <version>0.9.3</version>
@@ -293,19 +276,6 @@
                             <goal>check</goal>
                         </goals>
                         <phase>test</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>ensure-java7-compatible</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>

@@ -18,17 +18,21 @@ package no.digipost.api.client.representations;
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 import org.joda.time.DateTime;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableList;
-import static no.motif.Base.is;
-import static no.motif.Base.where;
-import static no.motif.Iterate.on;
-import static no.motif.Singular.the;
+import static java.util.Optional.ofNullable;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message-delivery", propOrder = {
@@ -129,21 +133,17 @@ public class MessageDelivery extends Representation implements MayHaveSender {
     }
 
     /**
-     * @return a list containing every {@link Document} in this delivery.
-     *         The primary document will be the first element of the list,
-     *         with the attachments following. The list is immutable and
-     *         can not be used to change which documents are in this
-     *         MessageDelivery.
+     * @return an ordered Stream containing every {@link Document} in this delivery.
+     *         The primary document will be the first element of the stream,
+     *         with the attachments following.
      */
-    public List<Document> getAllDocuments() {
-        return the(primaryDocument).append(getAttachments()).collect();
+    public Stream<Document> getAllDocuments() {
+        return Stream.concat(ofNullable(primaryDocument).map(Stream::of).orElseGet(Stream::empty), getAttachments().stream());
     }
 
     public Document getDocumentByUuid(String uuid) {
-        for (Document document : on(getAllDocuments()).filter(where(Document.getUuid, is(uuid)))) {
-            return document;
-        }
-        throw new IllegalArgumentException("Document with UUID '" + uuid + "' was not found in this " + getClass().getSimpleName() + ".");
+        return getAllDocuments().filter(doc -> Objects.equals(uuid, doc.uuid)).findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Document with UUID '" + uuid + "' was not found in this " + getClass().getSimpleName() + "."));
     }
 
     /**

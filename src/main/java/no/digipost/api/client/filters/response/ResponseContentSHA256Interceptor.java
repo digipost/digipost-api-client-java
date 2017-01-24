@@ -30,10 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static no.digipost.api.client.Headers.X_Content_SHA256;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
-import static no.motif.Singular.optional;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor {
@@ -71,7 +71,7 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
                 throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
                         "Mangler X-Content-SHA256-header - server-signatur kunne ikke valideres");
             }
-            byte[] entityBytes = optional(EntityUtils.toByteArray(response.getEntity())).orElse(new byte[0]);
+            byte[] entityBytes = Optional.ofNullable(EntityUtils.toByteArray(response.getEntity())).orElseGet(() -> new byte[0]);
             response.setEntity(new ByteArrayEntity(entityBytes));
             validerBytesMotHashHeader(hashHeader, entityBytes);
         } catch (IOException e) {

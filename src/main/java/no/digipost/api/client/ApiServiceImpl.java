@@ -17,7 +17,16 @@ package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.EntryPoint;
+import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.MayHaveSender;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -26,7 +35,12 @@ import no.digipost.cache.inmemory.Cache;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -40,6 +54,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.joda.time.DateTime;
 
 import javax.xml.bind.JAXB;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -49,14 +64,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
+import static java.util.Optional.ofNullable;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
-import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.autocompleteContext;
+import static no.digipost.api.client.util.JAXBContextUtils.entryPointContext;
+import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
+import static no.digipost.api.client.util.JAXBContextUtils.identificationContext;
+import static no.digipost.api.client.util.JAXBContextUtils.marshal;
+import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
+import static no.digipost.api.client.util.JAXBContextUtils.recipientsContext;
+import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
-import static no.motif.Singular.optional;
-import static no.motif.Strings.prepend;
 import static org.joda.time.Duration.standardMinutes;
 
 public class ApiServiceImpl implements ApiService {
@@ -362,7 +383,7 @@ public class ApiServiceImpl implements ApiService {
             queryParams.put("part_id", avsenderenhet);
         }
 
-        return senderInformation.get(orgnr + optional(avsenderenhet).map(prepend("-")).orElse(""),
+        return senderInformation.get(orgnr + ofNullable(avsenderenhet).map(enhet -> "-" + enhet).orElse(""),
                 getResource(getEntryPoint().getSenderInformationUri().getPath(), queryParams, SenderInformation.class));
     }
 

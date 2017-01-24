@@ -5,6 +5,5 @@ cache:
 
 language: java
 jdk:
-  - oraclejdk7
   - oraclejdk8
 

@@ -16,10 +16,12 @@
 package no.digipost.api.client.util;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.motif.Exceptions;
-import no.motif.f.Fn;
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.cms.*;
+import org.bouncycastle.cms.CMSAlgorithm;
+import org.bouncycastle.cms.CMSEnvelopedData;
+import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -40,14 +42,6 @@ public final class Encrypter {
      * to encrypt anything with it.
      */
     public static final Encrypter FAIL_IF_TRYING_TO_ENCRYPT = new Encrypter(null);
-
-    public static final Fn<DigipostPublicKey, Encrypter> keyToEncrypter = new Fn<DigipostPublicKey, Encrypter>() {
-        @Override
-        public Encrypter $(DigipostPublicKey key) {
-            return Encrypter.using(key);
-        }
-    };
-
 
     public static Encrypter using(DigipostPublicKey digipostPublicKey) {
         return new Encrypter(digipostPublicKey);
@@ -71,7 +65,7 @@ public final class Encrypter {
         try {
             bytes = IOUtils.toByteArray(content);
         } catch (IOException e) {
-            throw Exceptions.asRuntimeException(e);
+            throw new RuntimeException(e.getClass().getSimpleName() + ": '" + e.getMessage() + "'", e);
         }
         return encrypt(bytes);
     }
