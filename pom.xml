@@ -256,6 +256,22 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>de.andrena.tools.macker</groupId>
+                <artifactId>macker-maven-plugin</artifactId>
+                <version>1.0.2</version>
+                <configuration>
+                    <rule>macker-rules.xml</rule>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>macker</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>3.0</version>
