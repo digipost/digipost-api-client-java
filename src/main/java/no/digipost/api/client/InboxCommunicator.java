@@ -17,6 +17,8 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.representations.inbox.Inbox;
+import no.digipost.api.client.representations.inbox.Letter;
+import no.digipost.api.client.representations.inbox.LetterContent;
 
 public class InboxCommunicator extends Communicator{
 
@@ -28,4 +30,11 @@ public class InboxCommunicator extends Communicator{
         return apiService.getInbox(organisation);
     }
 
+    public LetterContent getLetterContent(Letter letter) {
+        return apiService.getLetterContent(letter);
+    }
+
+    public void deleteLetter(Letter letter) {
+        apiService.deleteLetter(letter);
+    }
 }

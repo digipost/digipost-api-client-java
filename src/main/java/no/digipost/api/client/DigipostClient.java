@@ -29,6 +29,8 @@ import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.inbox.Inbox;
+import no.digipost.api.client.representations.inbox.Letter;
+import no.digipost.api.client.representations.inbox.LetterContent;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.FileKeystoreSigner;
@@ -245,6 +247,18 @@ public class DigipostClient {
 
 	public Inbox getInbox(long senderAccountId) {
 		return inboxCommunicator.getInbox(senderAccountId);
+	}
+
+	public LetterContent getLetterContent(Letter letter) {
+		return inboxCommunicator.getLetterContent(letter);
+	}
+
+	public InputStream getLetterContentStream(LetterContent letterContent) {
+		return apiService.getLetterContentStream(letterContent);
+	}
+
+	public void deleteLetter(Letter letter) {
+		inboxCommunicator.deleteLetter(letter);
 	}
 
 	private void log(final String stringToSignMsg) {

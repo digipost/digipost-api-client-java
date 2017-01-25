@@ -16,12 +16,16 @@
 package no.digipost.api.client.representations.inbox;
 
 import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.Relation;
+import no.digipost.api.client.representations.Representation;
 import org.joda.time.DateTime;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -33,22 +37,28 @@ import java.util.List;
         "attachments",
         "links"
 })
-public class Letter {
+public class Letter extends Representation {
 
     @XmlElement(name = "subject")
-    public final String subject;
+    public String subject;
     @XmlElement(name = "sender")
-    public final String sender;
+    public String sender;
     @XmlElement(name = "date")
-    public final DateTime date;
+    public DateTime date;
     @XmlElement(name = "read")
-    public final Boolean read;
+    public Boolean read;
 
-    @XmlElement(name = "attachments")
-    public final List<Letter> attachments;
+    @XmlElement(name = "attachment")
+    public List<Letter> attachments = new ArrayList<>();
 
-    @XmlElement(name = "links")
-    public final List<Link> links;
+    @XmlElement(name = "link")
+    protected List<Link> getLinks() {
+        return links;
+    }
+
+    protected void setLinks(final List<Link> links) {
+        this.links = links;
+    }
 
     public Letter(String subject, String sender, DateTime date, Boolean read, List<Letter> attachments, List<Link> links) {
         this.subject = subject;
@@ -60,12 +70,13 @@ public class Letter {
     }
 
     public Letter() {
-        this(null,null,null,null,null, null);
     }
 
-    protected List<Link> getLinks() {
-        return links;
+    public URI getContentLink() {
+        return getLinkByRelationName(Relation.GET_INBOX_LETTER_CONTENT).getUri();
     }
+
+    public URI getDeleteLink() { return getLinkByRelationName(Relation.DELETE_INBOX_LETTER).getUri(); }
 
 
 

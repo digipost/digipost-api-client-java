@@ -1079,7 +1079,7 @@
             <xsd:element name="date" type="xsd:dateTime" minOccurs="1" maxOccurs="1" />
             <xsd:element name="read" type="xsd:boolean" minOccurs="1" maxOccurs="1" />
             <xsd:sequence>
-                <xsd:element name="attachments" type="letter" minOccurs="0" maxOccurs="unbounded" />
+                <xsd:element name="attachment" type="letter" minOccurs="0" maxOccurs="unbounded" />
             </xsd:sequence>
             <xsd:sequence>
                 <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
