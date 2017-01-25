@@ -17,10 +17,16 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.DateTime;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +39,7 @@ public class MoveFilesFromPublicSectorMetadata extends EventMetadata {
     @XmlAttribute(name = "delivery-time", required = true)
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    public final DateTime deliveryTime;
+    public final ZonedDateTime deliveryTime;
     @XmlAttribute(name = "subject")
     public final String subject;
     @XmlAttribute(name = "sensitivity-level")
@@ -54,7 +60,7 @@ public class MoveFilesFromPublicSectorMetadata extends EventMetadata {
         this(null, null, null, null, null, null, null, null, new ArrayList<DocumentMetadata>());
     }
 
-    public MoveFilesFromPublicSectorMetadata(Boolean opened, DateTime deliveryTime, String subject, SensitivityLevel sensitivityLevel,
+    public MoveFilesFromPublicSectorMetadata(Boolean opened, ZonedDateTime deliveryTime, String subject, SensitivityLevel sensitivityLevel,
                                              AuthenticationLevel authenticationLevel, String x509Certificate, String destinationMailbox,
                                              String destinationMailboxAddress, List<DocumentMetadata> documents) {
         this.opened = opened;

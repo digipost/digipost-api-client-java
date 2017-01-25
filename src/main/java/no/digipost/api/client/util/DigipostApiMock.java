@@ -45,7 +45,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Base64;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +56,7 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,6 +68,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.lang.Integer.parseInt;
+import static java.time.ZonedDateTime.now;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 import static no.digipost.api.client.util.JAXBContextUtils.encryptionKeyContext;
 import static no.digipost.api.client.util.JAXBContextUtils.entryPointContext;
@@ -78,7 +79,6 @@ import static no.digipost.api.client.util.JAXBContextUtils.messageDeliveryContex
 import static no.digipost.api.client.util.JAXBContextUtils.senderInformationContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 import static org.apache.http.HttpStatus.SC_OK;
-import static org.joda.time.DateTime.now;
 
 public class DigipostApiMock implements HttpHandler {
 
@@ -128,10 +128,21 @@ public class DigipostApiMock implements HttpHandler {
             "6vYEpI930hzj81irYEPyRvoDAaEv2Zc=\n" +
             "-----END CERTIFICATE-----";
 
+    private final Clock clock;
+    public final CloseableHttpResponse defaultResponse;
     private int port;
     private Undertow server;
     private Map<Method, RequestsAndResponses> requestsAndResponsesMap;
     private KeyPair keyPair;
+
+    public DigipostApiMock() {
+        this(Clock.systemDefaultZone());
+    }
+
+    public DigipostApiMock(Clock clock) {
+        this.clock = clock;
+        this.defaultResponse = getDefaultResponse(clock);
+    }
 
     @Override
     public void handleRequest(HttpServerExchange httpContext) throws Exception {
@@ -175,7 +186,7 @@ public class DigipostApiMock implements HttpHandler {
         byte[] bytes = bao.toByteArray();
         HeaderMap responseHeaders = httpContext.getResponseHeaders();
 
-        String dateOnRFC1123Format = DateUtils.formatDate(now());
+        String dateOnRFC1123Format = DateUtils.formatDate(now(clock));
         String xContentSHA256 = generateXContentSHA256(bytes);
         String signature =  httpResponse + "\n" + httpContext.getRequestPath().toLowerCase() + "\n" +
                 "date: " + dateOnRFC1123Format + "\n" + "x-content-sha256: " + xContentSHA256 + "\n";
@@ -404,35 +415,32 @@ public class DigipostApiMock implements HttpHandler {
         }
     }
 
-    public static class MultipartRequestMatcher implements RequestMatcher {
 
-        public static CloseableHttpResponse DEFAULT_RESPONSE = getDefaultResponse();
-        public static RuntimeException CONNECTION_REFUSED = new RuntimeException(new ConnectException("Connection refused"));
 
-        public static final Map<String, CloseableHttpResponse> responses = new HashMap<>();
-        public static final Map<String, RuntimeException> errors = new HashMap<>();
+    public static CloseableHttpResponse getDefaultResponse(Clock clock) {
+        MessageDelivery messageDelivery = new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, COMPLETE, now(clock));
 
-        public static CloseableHttpResponse getDefaultResponse(){
-            MessageDelivery messageDelivery = new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, COMPLETE, DateTime.now());
+        org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
+        marshal(messageDeliveryContext, messageDelivery, bao);
 
-            org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
-            marshal(messageDeliveryContext, messageDelivery, bao);
+        return MockfriendlyResponse.MockedResponseBuilder.create()
+                .status(SC_OK)
+                .entity(new ByteArrayEntity(bao.toByteArray()))
+                .build();
+    }
+    public class MultipartRequestMatcher implements RequestMatcher {
 
-            return MockfriendlyResponse.MockedResponseBuilder.create()
-                    .status(SC_OK)
-                    .entity(new ByteArrayEntity(bao.toByteArray()))
-                    .build();
+        public final Map<String, CloseableHttpResponse> responses = new HashMap<>();
+        public final Map<String, RuntimeException> errors = new HashMap<>();
+
+        public MultipartRequestMatcher() {
+            responses.put("200:OK", defaultResponse);
+            errors.put("CONNECTION_REFUSED", new RuntimeException(new ConnectException("Connection refused")));
         }
 
-
-        static {
-            responses.put("200:OK", DEFAULT_RESPONSE);
-            errors.put("CONNECTION_REFUSED", CONNECTION_REFUSED);
-        }
 
         @Override
         public CloseableHttpResponse findResponse(String requestString) {
-
             if (responses.containsKey(requestString)) {
                 return responses.get(requestString);
             } else if (errors.containsKey(requestString)) {
@@ -454,7 +462,7 @@ public class DigipostApiMock implements HttpHandler {
                     throw new IllegalArgumentException("ErrorCode " + split[1] + " is unknown");
                 }
             } else {
-                return DEFAULT_RESPONSE;
+                return defaultResponse;
             }
 
         }

@@ -17,10 +17,15 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.DateTime;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import java.time.ZonedDateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "postmarked-metadata")
@@ -29,13 +34,13 @@ public class PostmarkedMetadata extends EventMetadata {
     @XmlAttribute(name = "postmarked-date", required = true)
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    public final DateTime postmarkedTime;
+    public final ZonedDateTime postmarkedTime;
 
     public PostmarkedMetadata() {
         this(null);
     }
 
-    public PostmarkedMetadata(DateTime postmarkedTime) {
+    public PostmarkedMetadata(ZonedDateTime postmarkedTime) {
         this.postmarkedTime = postmarkedTime;
     }
 }

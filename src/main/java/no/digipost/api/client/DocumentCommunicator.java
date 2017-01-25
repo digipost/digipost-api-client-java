@@ -19,12 +19,14 @@ import no.digipost.api.client.representations.DocumentEvents;
 import no.digipost.api.client.representations.DocumentStatus;
 import no.digipost.api.client.representations.Link;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 
-import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.documentEventsContext;
+import static no.digipost.api.client.util.JAXBContextUtils.documentStatusContext;
+import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
 public class DocumentCommunicator extends Communicator {
 
@@ -32,7 +34,7 @@ public class DocumentCommunicator extends Communicator {
         super(apiService, eventLogger);
     }
 
-    public DocumentEvents getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
+    public DocumentEvents getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
         try(CloseableHttpResponse response = apiService.getDocumentEvents(organisation, partId, from, to, offset, maxResults)){;
             checkResponse(response, eventLogger);
             return unmarshal(documentEventsContext, response.getEntity().getContent(), DocumentEvents.class);

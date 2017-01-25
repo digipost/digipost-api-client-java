@@ -31,8 +31,6 @@ import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.util.MultipartNoLengthCheckHttpEntity;
-import no.digipost.cache.inmemory.Cache;
-import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
@@ -51,7 +49,6 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.joda.time.DateTime;
 
 import javax.xml.bind.JAXB;
 
@@ -59,10 +56,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
 
 import static java.util.Optional.ofNullable;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
@@ -76,9 +74,6 @@ import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
 import static no.digipost.api.client.util.JAXBContextUtils.recipientsContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
-import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
-import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
-import static org.joda.time.Duration.standardMinutes;
 
 public class ApiServiceImpl implements ApiService {
 
@@ -89,30 +84,7 @@ public class ApiServiceImpl implements ApiService {
     private final RequestConfig config;
     private final HttpClientBuilder httpClientBuilder;
 
-
-    private final Callable<EntryPoint> entryPoint = new Callable<EntryPoint>() {
-        @Override
-        public EntryPoint call() throws Exception {
-
-            HttpGet httpGet = new HttpGet(digipostUrl + ENTRY_POINT);
-            httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
-
-            try(CloseableHttpResponse execute = send(httpGet)) {
-
-                if (execute.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    EntryPoint entryPoint = unmarshal(entryPointContext, execute.getEntity().getContent(), EntryPoint.class);
-                    return entryPoint;
-                } else {
-                    ErrorMessage errorMessage = unmarshal(errorMessageContext, execute.getEntity().getContent(), ErrorMessage.class);
-                    throw new DigipostClientException(errorMessage);
-                }
-            }
-
-        }
-    };
-
-    private final SingleCached<EntryPoint> cachedEntryPoint = new SingleCached<>("digipost-entrypoint", entryPoint, expireAfterAccess(standardMinutes(5)), useSoftValues);
-    private final Cache<String, SenderInformation> senderInformation = new Cache<>("sender-information", expireAfterAccess(standardMinutes(5)), useSoftValues);
+    private final Cached cached;
     private final EventLogger eventLogger;
 
     public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long senderAccountId, EventLogger eventLogger, String digipostUrl,
@@ -129,11 +101,12 @@ public class ApiServiceImpl implements ApiService {
         }
 
         this.httpClientBuilder = httpClientBuilder;
+        this.cached = new Cached(this::fetchEntryPoint);
     }
 
     @Override
     public EntryPoint getEntryPoint() {
-        return cachedEntryPoint.get();
+        return cached.entryPoint.get();
     }
 
 
@@ -254,11 +227,11 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public CloseableHttpResponse getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to, final int offset, final int maxResults) {
-
+    public CloseableHttpResponse getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
+        DateTimeFormatter urlParamPattern = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
         URIBuilder builder = new URIBuilder().setPath(digipostUrl + getEntryPoint().getDocumentEventsUri().getPath())
-                .setParameter("from", from.toString("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"))
-                .setParameter("to", to.toString("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"))
+                .setParameter("from", urlParamPattern.format(from))
+                .setParameter("to", urlParamPattern.format(to))
                 .setParameter("offset", String.valueOf(offset))
                 .setParameter("maxResults", String.valueOf(maxResults));
 
@@ -356,6 +329,22 @@ public class ApiServiceImpl implements ApiService {
         return send(httpPost);
     }
 
+    private EntryPoint fetchEntryPoint() throws IOException {
+        HttpGet httpGet = new HttpGet(digipostUrl + ENTRY_POINT);
+        httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
+
+        try(CloseableHttpResponse execute = send(httpGet)) {
+
+            if (execute.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                EntryPoint entryPoint = unmarshal(entryPointContext, execute.getEntity().getContent(), EntryPoint.class);
+                return entryPoint;
+            } else {
+                ErrorMessage errorMessage = unmarshal(errorMessageContext, execute.getEntity().getContent(), ErrorMessage.class);
+                throw new DigipostClientException(errorMessage);
+            }
+        }
+    }
+
     private CloseableHttpResponse send(HttpRequestBase request){
         try {
             if(config != null){
@@ -371,8 +360,8 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public SenderInformation getSenderInformation(long senderId) {
-        return senderInformation.get(String.valueOf(senderId),
-                getResource(getEntryPoint().getSenderInformationUri().getPath() + "/" + senderId, SenderInformation.class));
+        return cached.senderInformation.get(String.valueOf(senderId),
+                () -> getResource(getEntryPoint().getSenderInformationUri().getPath() + "/" + senderId, SenderInformation.class));
     }
 
     @Override
@@ -383,8 +372,8 @@ public class ApiServiceImpl implements ApiService {
             queryParams.put("part_id", avsenderenhet);
         }
 
-        return senderInformation.get(orgnr + ofNullable(avsenderenhet).map(enhet -> "-" + enhet).orElse(""),
-                getResource(getEntryPoint().getSenderInformationUri().getPath(), queryParams, SenderInformation.class));
+        return cached.senderInformation.get(orgnr + ofNullable(avsenderenhet).map(enhet -> "-" + enhet).orElse(""),
+                () -> getResource(getEntryPoint().getSenderInformationUri().getPath(), queryParams, SenderInformation.class));
     }
 
     @Override
@@ -398,38 +387,32 @@ public class ApiServiceImpl implements ApiService {
     }
 
 
-    private <R> Callable<R> getResource(final String path, final Class<R> entityType) {
+    private <R> R getResource(final String path, final Class<R> entityType) {
         return getResource(path, new HashMap<String, Object>(), entityType);
     }
 
-    private <R, P> Callable<R> getResource(final String path, final Map<String, P> queryParams, final Class<R> entityType) {
-        return new Callable<R>() {
-            @Override
-            public R call() {
+    private <R, P> R getResource(final String path, final Map<String, P> queryParams, final Class<R> entityType) {
+        try {
+            HttpGet httpGet = new HttpGet(digipostUrl + path);
+            URIBuilder uriBuilder = new URIBuilder(httpGet.getURI());
 
-                try {
-                    HttpGet httpGet = new HttpGet(digipostUrl + path);
-                    URIBuilder uriBuilder = new URIBuilder(httpGet.getURI());
+            for (Entry<String, P> param : queryParams.entrySet()) {
+                uriBuilder.setParameter(param.getKey(), param.getValue().toString());
+            }
 
-                    for (Entry<String, P> param : queryParams.entrySet()) {
-                        uriBuilder.setParameter(param.getKey(), param.getValue().toString());
-                    }
+            httpGet.setURI(uriBuilder.build());
+            httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
-                    httpGet.setURI(uriBuilder.build());
-                    httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
+            try (CloseableHttpResponse execute = send(httpGet)){
+                Communicator.checkResponse(execute, eventLogger);
+                R unmarshal = JAXB.unmarshal(execute.getEntity().getContent(), entityType);
+                return unmarshal;
 
-                    try (CloseableHttpResponse execute = send(httpGet)){
-                        Communicator.checkResponse(execute, eventLogger);
-                        R unmarshal = JAXB.unmarshal(execute.getEntity().getContent(), entityType);
-                        return unmarshal;
-
-                    } catch (IOException e) {
-                        throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
-                    }
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e.getMessage(), e);
-                }
-              }
-        };
+            } catch (IOException e) {
+                throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 }

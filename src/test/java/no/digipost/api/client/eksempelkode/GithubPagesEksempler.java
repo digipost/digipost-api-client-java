@@ -33,12 +33,12 @@ import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.SensitivityLevel;
 import no.digipost.api.client.representations.SmsNotification;
-import org.joda.time.LocalDate;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -128,7 +128,7 @@ public class GithubPagesEksempler {
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
         // An invoice requires four extra fields (KID, amount, account and due date). The use of the Invoice class will trigger payment functionality i Digipost.
-        Invoice invoice = new Invoice(UUID1, "Invoice subject", FileType.PDF, null, null, null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, "704279604", new BigDecimal("1.20"), "82760100435", new LocalDate(2015, 5, 5));
+        Invoice invoice = new Invoice(UUID1, "Invoice subject", FileType.PDF, null, null, null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, "704279604", new BigDecimal("1.20"), "82760100435", LocalDate.of(2015, 5, 5));
 
         Message message = Message.MessageBuilder.newMessage(UUID2, invoice)
                 .personalIdentificationNumber(pin)

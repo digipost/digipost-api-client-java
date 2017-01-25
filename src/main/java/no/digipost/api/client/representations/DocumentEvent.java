@@ -16,10 +16,16 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.DateTime;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import java.time.ZonedDateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "event")
@@ -31,18 +37,18 @@ public class DocumentEvent {
     @XmlAttribute(name = "created", required = true)
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    private DateTime created;
+    private ZonedDateTime created;
     @XmlElement(name = "metadata")
     private EventMetadata metadata;
 
     public DocumentEvent() {
     }
 
-    public DocumentEvent(String uuid, DocumentEventType type, DateTime created) {
+    public DocumentEvent(String uuid, DocumentEventType type, ZonedDateTime created) {
         this(uuid, type, created, null);
     }
 
-    public DocumentEvent(String uuid, DocumentEventType type, DateTime created, EventMetadata metadata) {
+    public DocumentEvent(String uuid, DocumentEventType type, ZonedDateTime created, EventMetadata metadata) {
         this.uuid = uuid;
         this.type = type;
         this.created = created;
@@ -57,7 +63,7 @@ public class DocumentEvent {
         return type;
     }
 
-    public DateTime getCreated() {
+    public ZonedDateTime getCreated() {
         return created;
     }
 

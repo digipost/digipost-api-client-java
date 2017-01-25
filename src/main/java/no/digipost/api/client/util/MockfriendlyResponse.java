@@ -28,13 +28,13 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.params.HttpParams;
-import org.joda.time.DateTime;
 
 import javax.xml.bind.JAXB;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -52,7 +52,7 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
     public static CloseableHttpResponse DEFAULT_RESPONSE = getDefaultResponse();
 
     public static CloseableHttpResponse getDefaultResponse(){
-        MessageDelivery messageDelivery = new MessageDelivery(UUID.randomUUID().toString(), DIGIPOST, COMPLETE, DateTime.now());
+        MessageDelivery messageDelivery = new MessageDelivery(UUID.randomUUID().toString(), DIGIPOST, COMPLETE, ZonedDateTime.now());
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         JAXB.marshal(messageDelivery, bao);
 

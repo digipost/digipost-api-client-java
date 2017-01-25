@@ -16,7 +16,6 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.DateTime;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -26,6 +25,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -59,7 +59,7 @@ public class MessageDelivery extends Representation implements MayHaveSender {
     @XmlElement(name = "delivery-time", type = String.class, nillable = false)
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    protected DateTime deliveryTime;
+    protected ZonedDateTime deliveryTime;
     @XmlElement(name = "primary-document", required = true)
     protected Document primaryDocument;
     @XmlElement(name = "attachment")
@@ -68,7 +68,7 @@ public class MessageDelivery extends Representation implements MayHaveSender {
     public MessageDelivery() {
     }
 
-    public MessageDelivery(String messageId, Channel channel, MessageStatus status, DateTime deliveryTime) {
+    public MessageDelivery(String messageId, Channel channel, MessageStatus status, ZonedDateTime deliveryTime) {
         this.messageId = messageId;
         this.deliveryMethod = channel;
         this.status = status;
@@ -124,7 +124,7 @@ public class MessageDelivery extends Representation implements MayHaveSender {
         return deliveryMethod;
     }
 
-    public DateTime getDeliveryTime() {
+    public ZonedDateTime getDeliveryTime() {
         return deliveryTime;
     }
 

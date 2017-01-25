@@ -20,21 +20,55 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.DigipostAddress;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.FileType;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageRecipient;
+import no.digipost.api.client.representations.NameAndAddress;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.OrganisationNumber;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintDetails.PostType;
-import org.joda.time.LocalDate;
+import no.digipost.api.client.representations.PrintRecipient;
+import no.digipost.api.client.representations.SmsNotification;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.UUID;
 
+import static java.lang.Integer.parseInt;
 import static java.nio.file.Files.newInputStream;
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
@@ -437,8 +471,7 @@ public class DigipostSwingClient {
                         String birthDateAsString = recipientBirthDateField.getText();
                         LocalDate birthDate = null;
                         if (!birthDateAsString.equals("")) {
-                            birthDate = new LocalDate(Integer.parseInt(birthDateAsString.substring(6)), Integer.parseInt(birthDateAsString
-                                    .substring(3, 5)), Integer.parseInt(birthDateAsString.substring(0, 2)));
+                            birthDate = LocalDate.of(parseInt(birthDateAsString.substring(6)), parseInt(birthDateAsString.substring(3, 5)), parseInt(birthDateAsString.substring(0, 2)));
                         }
                         String phoneNumber = recipientPhoneNumberField.getText().equals("") ? null : recipientPhoneNumberField.getText();
                         String emailAddress = recipientEmailAddressField.getText().equals("") ? null : recipientEmailAddressField.getText();

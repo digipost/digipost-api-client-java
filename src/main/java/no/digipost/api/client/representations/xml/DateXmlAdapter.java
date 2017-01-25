@@ -15,20 +15,36 @@
  */
 package no.digipost.api.client.representations.xml;
 
-import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
+import static javax.xml.bind.DatatypeConverter.parseDate;
+import static javax.xml.bind.DatatypeConverter.printDate;
 
 public class DateXmlAdapter extends XmlAdapter<String, LocalDate> {
 
     @Override
-    public LocalDate unmarshal(final String value) {
-        return new LocalDate(DatatypeConverter.parseDate(value));
+    public String marshal(final LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        GregorianCalendar convertedDate = GregorianCalendar.from(ZonedDateTime.of(date, LocalTime.MIDNIGHT, ZoneId.systemDefault()));
+        return printDate(convertedDate);
     }
 
     @Override
-    public String marshal(final LocalDate date) {
-        return date.toString();
+    public LocalDate unmarshal(final String value) {
+        if (value == null) {
+            return null;
+        }
+        Calendar parsed = parseDate(value);
+        return ZonedDateTime.ofInstant(parsed.toInstant(), parsed.getTimeZone().toZoneId()).toLocalDate();
     }
+
 }

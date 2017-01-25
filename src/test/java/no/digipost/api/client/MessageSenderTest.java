@@ -48,6 +48,7 @@ import no.digipost.api.client.util.FakeEncryptionKey;
 import no.digipost.api.client.util.MockfriendlyResponse;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
+import no.digipost.time.ControllableClock;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.ProtocolVersion;
@@ -55,10 +56,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHeader;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
-import org.joda.time.Duration;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -73,6 +70,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -80,6 +78,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static java.time.Duration.ofMillis;
+import static java.time.Duration.ofMinutes;
+import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.stream.Stream.concat;
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
@@ -111,7 +112,6 @@ import static no.digipost.api.client.util.JAXBContextUtils.messageDeliveryContex
 import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.Matchers.is;
-import static org.joda.time.DateTime.now;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -144,9 +144,11 @@ public class MessageSenderTest {
     private ApiService api;
 
     @Mock
-    IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey;
+    private IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey;
 
     private MockfriendlyResponse encryptionKeyResponse;
+
+    private final ControllableClock clock = ControllableClock.freezedAt(Instant.now());
 
     @Spy
     private PdfValidator pdfValidator;
@@ -166,9 +168,9 @@ public class MessageSenderTest {
                 .entity(new ByteArrayEntity(bao.toByteArray()))
                 .build();
 
-        sender = new MessageSender(newBuilder().cachePrintKey(true).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
+        sender = new MessageSender(newBuilder().cachePrintKey(true).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator, clock);
 
-        cachelessSender = new MessageSender(newBuilder().cachePrintKey(false).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
+        cachelessSender = new MessageSender(newBuilder().cachePrintKey(false).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator, clock);
     }
 
 
@@ -255,10 +257,11 @@ public class MessageSenderTest {
         sender.getEncryptionKeyForPrint();
         then(api).should(times(1)).getEncryptionKeyForPrint();
 
+        clock.timePasses(ofMinutes(5));
         sender.getEncryptionKeyForPrint();
         then(api).should(times(1)).getEncryptionKeyForPrint();
 
-        DateTimeUtils.setCurrentMillisOffset(Duration.standardMinutes(10).getMillis());
+        clock.timePasses(ofMillis(1));
         sender.getEncryptionKeyForPrint();
         then(api).should(times(2)).getEncryptionKeyForPrint();
     }
@@ -273,7 +276,7 @@ public class MessageSenderTest {
         cachelessSender.getEncryptionKeyForPrint();
         then(api).should(times(2)).getEncryptionKeyForPrint();
 
-        DateTimeUtils.setCurrentMillisOffset(Duration.standardMinutes(10).getMillis());
+        clock.timePasses(ofMinutes(10));
         cachelessSender.getEncryptionKeyForPrint();
         then(api).should(times(3)).getEncryptionKeyForPrint();
     }
@@ -296,7 +299,7 @@ public class MessageSenderTest {
         CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
         ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
         marshal(messageDeliveryContext,
-                new MessageDelivery(UUID.randomUUID().toString(), Channel.PRINT, MessageStatus.COMPLETE, DateTime.now()), bao2);
+                new MessageDelivery(UUID.randomUUID().toString(), Channel.PRINT, MessageStatus.COMPLETE, now()), bao2);
 
         when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray()));
         when(response.getStatusLine()).thenReturn(new StatusLineMock(200));
@@ -452,11 +455,6 @@ public class MessageSenderTest {
 
 
 
-
-    @After
-    public void resetToSystemClock() {
-        DateTimeUtils.setCurrentMillisSystem();
-    }
 
     public static class StatusLineMock implements StatusLine {
 

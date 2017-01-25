@@ -16,7 +16,6 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.DateTime;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -26,6 +25,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,7 +65,7 @@ public class Message implements MayHaveSender {
     @XmlElement(name = "delivery-time", type = String.class, nillable = false)
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    public final DateTime deliveryTime;
+    public final ZonedDateTime deliveryTime;
     @XmlElement(name = "invoice-reference")
     public final String invoiceReference;
     @XmlElement(name = "primary-document", required = true)
@@ -82,7 +82,7 @@ public class Message implements MayHaveSender {
         private Long senderId;
         private SenderOrganization senderOrganization;
         private MessageRecipient recipient;
-        private DateTime deliveryTime;
+        private ZonedDateTime deliveryTime;
         private Document primaryDocument;
         private List<Document> attachments = new ArrayList<>();
         private String invoiceReference;
@@ -141,7 +141,7 @@ public class Message implements MayHaveSender {
             return recipient(new MessageRecipient(printDetails));
         }
 
-        public MessageBuilder deliveryTime(DateTime deliveryTime) {
+        public MessageBuilder deliveryTime(ZonedDateTime deliveryTime) {
             this.deliveryTime = deliveryTime;
             return this;
         }
@@ -165,14 +165,13 @@ public class Message implements MayHaveSender {
             if (senderId != null && senderOrganization != null) {
                 throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
             }
-            return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments,
-                    deliveryTime, invoiceReference);
+            return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryTime, invoiceReference);
         }
 
     }
 
     private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
-                    Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryTime,
+                    Document primaryDocument, Iterable<? extends Document> attachments, ZonedDateTime deliveryTime,
                     String invoiceReference) {
         this.messageId = messageId;
         this.senderId = senderId;
@@ -208,7 +207,7 @@ public class Message implements MayHaveSender {
 
     private Message(final String messageId, final Long senderId, final SenderOrganization senderOrganization,
                     final NameAndAddress nameAndAddress, final String digipostAddress, String personalIdentificationNumber,
-                    final String organisationNumber, final DateTime deliveryTime, final String invoiceReference,
+                    final String organisationNumber, final ZonedDateTime deliveryTime, final String invoiceReference,
                     final Document primaryDocument, final List<Document> attachments, final PrintDetails printDetails){
         this.messageId = messageId;
         this.senderId = senderId;

@@ -15,12 +15,12 @@
  */
 package no.digipost.api.client.representations;
 
-import org.joda.time.DateTime;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -100,7 +100,7 @@ public class MessageTest {
     public void copyOfMessageIsTheSameAsTheOriginalExceptPrintDetails() {
         Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", HTML))
                 .digipostAddress(new DigipostAddress("Test2"))
-                .senderId(1L).deliveryTime(DateTime.now()).invoiceReference("Invoice")
+                .senderId(1L).deliveryTime(ZonedDateTime.now()).invoiceReference("Invoice")
                 .recipient(new MessageRecipient(new DigipostAddress("TestAdress"), new PrintDetails(
                         new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop"))
                         , new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop")),

@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.representations.xml.DateXmlAdapter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -22,8 +24,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import no.digipost.api.client.representations.xml.DateXmlAdapter;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "name-and-address", propOrder = {
@@ -59,7 +60,7 @@ public class NameAndAddress {
     NameAndAddress() {
     }
 
-    public NameAndAddress(final String fullname, final String addressline1, final String addressline2, final String postalcode, final String city) {
+    public NameAndAddress(String fullname, String addressline1, String addressline2, String postalcode, String city) {
         this.fullname = fullname;
         this.addressline1 = addressline1;
         this.addressline2 = addressline2;
@@ -67,8 +68,8 @@ public class NameAndAddress {
         this.city = city;
     }
 
-    public NameAndAddress(final String fullname, final String addressline1, final String addressline2, final String postalcode, final String city,
-                          final LocalDate birthDate, final String phoneNumber, final String emailAddress) {
+    public NameAndAddress(String fullname, String addressline1, String addressline2, String postalcode, String city,
+                          LocalDate birthDate, String phoneNumber, String emailAddress) {
         this.fullname = fullname;
         this.addressline1 = addressline1;
         this.addressline2 = addressline2;

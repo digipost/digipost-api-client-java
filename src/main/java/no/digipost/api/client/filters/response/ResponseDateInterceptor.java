@@ -23,16 +23,18 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.protocol.HttpContext;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 
+import static java.time.ZonedDateTime.now;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.http.HttpHeaders.DATE;
-import static org.joda.time.DateTime.now;
 
 public class ResponseDateInterceptor implements HttpResponseInterceptor {
 
@@ -40,8 +42,17 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
     private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
 
     private boolean shouldThrow = true;
+    private final Clock clock;
 
-    public void setThrowOnError(final boolean shouldThrow) {
+    public ResponseDateInterceptor() {
+        this(Clock.systemDefaultZone());
+    }
+
+    public ResponseDateInterceptor(Clock clock) {
+        this.clock = clock;
+    }
+
+    public void setThrowOnError(boolean shouldThrow) {
         this.shouldThrow = shouldThrow;
     }
 
@@ -77,26 +88,24 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
         }
     }
 
-    private void sjekkDato(final String dateOnRFC1123Format) {
+    private void sjekkDato(String dateOnRFC1123Format) {
         try {
-            DateTime date = DateUtils.parseDate(dateOnRFC1123Format);
+            ZonedDateTime date = DateUtils.parseDate(dateOnRFC1123Format);
             sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date);
             sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date);
-        } catch (IllegalArgumentException e) {
-            throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-                    "Date-header kunne ikke parses - server-signatur kunne ikke sjekkes");
-
+        } catch (DateTimeParseException e) {
+            throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header '" + dateOnRFC1123Format + "' kunne ikke parses (er den 'RFC 1123 compliant'?) - server-signatur kunne ikke sjekkes");
         }
     }
 
-    private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final DateTime parsedDate) {
-        if (parsedDate.isBefore(now().minusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
+    private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final ZonedDateTime parsedDate) {
+        if (parsedDate.isBefore(now(clock).minusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
             throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for gammel: " + headerDate);
         }
     }
 
-    private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final DateTime parsedDate) {
-        if (parsedDate.isAfter(now().plusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
+    private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final ZonedDateTime parsedDate) {
+        if (parsedDate.isAfter(now(clock).plusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
             throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for ny: " + headerDate);
         }
     }

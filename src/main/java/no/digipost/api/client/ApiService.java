@@ -15,16 +15,24 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.EntryPoint;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.MayHaveSender;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.joda.time.DateTime;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.time.ZonedDateTime;
 
 /**
  * Klasser som implementerer dette interfacet tar seg av de enkelte HTTP-forespørslene
@@ -126,7 +134,7 @@ public interface ApiService {
      * @param partId Frivillig organisasjons-enhet, kan være {@code null}
      *
      */
-    CloseableHttpResponse getDocumentEvents(String organisation, String partId, DateTime from, DateTime to, int offset, int maxResults);
+    CloseableHttpResponse getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults);
 
     /**
      * Henter status på dokumeter som tidligere blitt sendt i Digipost, både via digital og print-kanal.

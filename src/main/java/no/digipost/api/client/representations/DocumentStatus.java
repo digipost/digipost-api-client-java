@@ -16,10 +16,17 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.DateTime;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,12 +47,12 @@ public class DocumentStatus {
     @XmlAttribute(name = "created")
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    public DateTime created;
+    public ZonedDateTime created;
 
     @XmlAttribute(name = "delivered", required = false)
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    public DateTime delivered;
+    public ZonedDateTime delivered;
 
     @XmlAttribute(name = "read")
     public Read read;
@@ -69,7 +76,7 @@ public class DocumentStatus {
         this(null, null, null, null, null, null, true, null, null, null, null);
     }
 
-    public DocumentStatus(String uuid, DeliveryStatus status, DateTime created, DateTime delivered, Read read, Channel channel,
+    public DocumentStatus(String uuid, DeliveryStatus status, ZonedDateTime created, ZonedDateTime delivered, Read read, Channel channel,
                           boolean isPrimaryDocument, String contentHash, HashAlgorithm contentHashAlgorithm,
                           List<DocumentStatus> attachments, List<Link> links) {
         this.uuid = uuid;

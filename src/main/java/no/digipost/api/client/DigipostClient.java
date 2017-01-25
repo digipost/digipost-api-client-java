@@ -27,7 +27,14 @@ import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.DocumentEvents;
+import no.digipost.api.client.representations.DocumentStatus;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.FileKeystoreSigner;
@@ -39,12 +46,12 @@ import no.digipost.print.validate.PdfValidator;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -185,13 +192,11 @@ public class DigipostClient {
         return apiService.searchSuggest(searchString);
     }
 
-    public DocumentEvents getDocumentEvents(final DateTime from, final DateTime to,
-                                            final int offset, final int maxResults) {
+    public DocumentEvents getDocumentEvents(ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
         return getDocumentEvents(null, null, from, to, offset, maxResults);
     }
 
-    public DocumentEvents getDocumentEvents(final String organisation, final String partId, final DateTime from, final DateTime to,
-                                            final int offset, final int maxResults) {
+    public DocumentEvents getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
         return documentCommunicator.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
     }
 

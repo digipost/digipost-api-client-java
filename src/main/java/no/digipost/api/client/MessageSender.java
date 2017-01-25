@@ -40,20 +40,22 @@ import org.apache.http.entity.mime.FormBodyPartBuilder;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Clock;
+import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.time.Duration.between;
+import static java.time.Duration.ofMinutes;
 import static java.util.Optional.empty;
 import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7;
@@ -68,17 +70,23 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class MessageSender extends Communicator {
 
+    private final Clock clock;
     private final DocumentsPreparer documentsPreparer;
     private final DigipostClientConfig digipostClientConfig;
 
-    private DateTime printKeyCachedTime = null;
+    private ZonedDateTime printKeyCachedTime = null;
     private DigipostPublicKey cachedPrintKey;
 
 
     public MessageSender(DigipostClientConfig digipostClientConfig, ApiService apiService, EventLogger eventLogger, PdfValidator pdfValidator) {
+        this(digipostClientConfig, apiService, eventLogger, pdfValidator, Clock.systemDefaultZone());
+    }
+
+    public MessageSender(DigipostClientConfig digipostClientConfig, ApiService apiService, EventLogger eventLogger, PdfValidator pdfValidator, Clock clock) {
         super(apiService, eventLogger);
         this.documentsPreparer = new DocumentsPreparer(pdfValidator);
         this.digipostClientConfig = digipostClientConfig;
+        this.clock = clock;
     }
 
 
@@ -269,9 +277,9 @@ public class MessageSender extends Communicator {
     }
 
     public DigipostPublicKey getEncryptionKeyForPrint() {
-        DateTime now = DateTime.now();
+        ZonedDateTime now = ZonedDateTime.now(clock);
 
-        if (!digipostClientConfig.cachePrintKey || (printKeyCachedTime == null || new Duration(printKeyCachedTime, now).isLongerThan(Duration.standardMinutes(5)))) {
+        if (!digipostClientConfig.cachePrintKey || (printKeyCachedTime == null || between(printKeyCachedTime, now).toMillis() > ofMinutes(5).toMillis())) {
             log("*** STARTER INTERAKSJON MED API: HENT KRYPTERINGSNØKKEL FOR PRINT ***");
             try(CloseableHttpResponse response = apiService.getEncryptionKeyForPrint()){
                 checkResponse(response);
