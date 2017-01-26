@@ -29,6 +29,7 @@ This software includes third party software subject to the following licenses:
   Digipost HTTP Client Builder under The Apache Software License, Version 2.0
   Digipost Printability Validator under The Apache Software License, Version 2.0
   EqualsVerifier under The Apache Software License, Version 2.0
+  generics-resolver under The MIT License
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
   Hamcrest Core under New BSD License
   Hamcrest library under New BSD License
@@ -40,7 +41,6 @@ This software includes third party software subject to the following licenses:
   JUnit under Eclipse Public License 1.0
   junit-quickcheck-core under The MIT License
   junit-quickcheck-generators under The MIT License
-  junit-theories under Eclipse Public License v 1.0
   Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   mockito-core under The MIT License
