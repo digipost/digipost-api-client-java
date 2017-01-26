@@ -67,12 +67,7 @@ public class DigipostClient {
         CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
     }
 
-    public static final EventLogger NOOP_EVENT_LOGGER = new EventLogger() {
-        @Override
-        public void log(final String eventText) {
-            // NOOP
-        }
-    };
+    public static final EventLogger NOOP_EVENT_LOGGER = eventText -> {};
 
     private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
 

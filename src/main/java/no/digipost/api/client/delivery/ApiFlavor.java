@@ -17,6 +17,12 @@ package no.digipost.api.client.delivery;
 
 import no.digipost.api.client.delivery.OngoingDelivery.SendableDelivery;
 
+/**
+ * @deprecated ApiFlavor is due to be removed in the final 8.0 release. Marking it
+ *             as deprecated already now, even thought the proper API which does not
+ *             use ApiFlavor is not in place yet.
+ */
+@Deprecated
 public enum ApiFlavor {
     /**
      * This will deliver messages using a stepwise
