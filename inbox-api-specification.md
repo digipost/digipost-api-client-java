@@ -1,10 +1,14 @@
 # Inbox API specification
 
-This API enables an organisation (sender) to manage (list, get, delete) messages received in Digipost.
+This API enables an organisation (sender) to manage (list, read, delete) documents received in Digipost.
 
 ## Table of contents
 
-...
+* [Organisation account](#organisation-account)
+* [API technical](#api-technical)
+* [Get Inbox](#get-inbox)
+* [Get Document content](#get-document-content)
+* [Delete document](#delete-document)
 
 ## Organisation account
 
