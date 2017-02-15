@@ -84,7 +84,7 @@ HTTP/1.1 200 Ok
 #### Java
 
 ```java
-InputStream content = client.getDocumentContent(inboxDocument);
+InputStream content = client.getDocumentContent(senderId, inboxDocument);
 ```
 
 #### Request
@@ -107,7 +107,7 @@ Location: https://www.digipostdata.no/documents/109695014?token=f677fd84c3f3df8f
 #### Java
 
 ```java
-client.deleteDocument(inboxDocument);
+client.deleteDocument(senderId, inboxDocument);
 ```
 
 #### Request
