@@ -36,11 +36,11 @@ Inbox inbox = client.getInbox(senderId);
 
 |Parameter|Type  |Description|
 |---------|------|-----------|
-|startIndex|int|Paging start at index (default: 0)|
-|maxResult|int|Maximum number of returned messages (default: 100)|
+|deliveryTimeBefore|ISO8601 DateTime|Only get inbox-messages delivered before this timestamp|
+|maxResults|int|Maximum number of returned messages (default: 100)|
 
 ```http
-GET /<senderId>/inbox?startIndex=0&maxResult=100
+GET /<sender-id>/inbox?deliveryTimeBefore=2017-02-14T08:25:00+01:00&maxResults=100
 Accept: application/vnd.digipost-v7+xml
 ```
 
@@ -50,17 +50,27 @@ Accept: application/vnd.digipost-v7+xml
 HTTP/1.1 200 Ok
 
 <inbox>
-    <inbox-message> <!--zero or more-->
+    <inbox-document> <!--zero or more-->
+        <id>1234</id>
         <sender>Posten Norge As</sender>
-        <deliveryTime>2017-05-23T09:30:10+02:00</deliveryTime>
-        <inbox-document> <!--one or more -->
-            <subject>PUM</subject>
+        <delivery-time>2017-05-23T09:30:10+02:00</delivery-time>
+        <subject>PUM</subject>
+        <authentication-level>TWO FACTOR</authentication-level>
+        <first-accessed>2017-02-14T08:25:00+01:00</first-accessed> <!-- or null -->
+        <content-type>application/pdf</content-type>
+        <content-uri>/1000/inbox/1234/content</content-uri>
+        <delete-uri>/1000/inbox/1234</delete-uri>
+        <attachment> <!--one or more -->
+            <id>2345</id>
+            <sender>Posten Norge As</sender>
+            <delivery-time>2017-05-23T09:30:10+02:00</delivery-time>
+            <subject>Fødselsnummer</subject>
             <authentication-level>TWO FACTOR</authentication-level>
-            <firstAccessed>2017-02-14T08:25:00+01:00</firstAccessed> <!-- or null -->
-            <document-content-uri>/1000/inbox/1234</document-content-uri>
-            <document-content-type>application/pdf</document-content-type>
-        </inbox-document>
-    </inbox-message>
+            <first-accessed>2017-02-14T08:25:00+01:00</first-accessed> <!-- or null -->
+            <content-type>application/xml</content-type>
+            <content-uri>/1000/inbox/2345/content</content-uri>
+        </attachment>
+    </inbox-document>
 </inbox>
 ```
 
@@ -75,16 +85,16 @@ InputStream content = client.getDocumentContent(inboxDocument);
 #### Request
 
 ```http
-GET /<senderId>/inbox/<documentId>
-Accept: */*
+GET /<sender-id>/inbox/<document-id>/content
 ```
 
 #### Response
 
-```
-HTTP/1.1 200 Ok
+The document content-uri will return a 307 redirect to a one time, time-limited uri to the actual content. 
 
-pdf...content...data...
+```
+HTTP/1.1 307 Temporary Redirect
+Location: https://www.digipostdata.no/documents/109695014?token=f677fd84c3f3df8fa147cd2cf28bc4a76f521a67b61a28172a0b81e2363d4fe5642e5c0512cb5f75004217427d34cc8599707e61b4eedca3482572d1d2b29b69&download=false
 ```
 
 ## Delete document
@@ -98,7 +108,7 @@ client.deleteDocument(inboxDocument);
 #### Request
 
 ```http
-DELETE /<senderId>/inbox/<documentId>
+DELETE /<sender-id>/inbox/<document-id>
 ```
 
 #### Response
