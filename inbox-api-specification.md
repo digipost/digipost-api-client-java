@@ -78,7 +78,7 @@ HTTP/1.1 200 Ok
 </inbox>
 ```
 
-## Get Document content
+## Get document content
 
 #### Java
 
