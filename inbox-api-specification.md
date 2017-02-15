@@ -55,7 +55,7 @@ Accept: application/vnd.digipost-v7+xml
 HTTP/1.1 200 Ok
 
 <inbox>
-    <inbox-document> <!--zero or more-->
+    <document> <!--zero or more, type: inbox-document -->
         <id>1234</id>
         <sender>Posten Norge As</sender>
         <delivery-time>2017-05-23T09:30:10+02:00</delivery-time>
@@ -65,7 +65,7 @@ HTTP/1.1 200 Ok
         <content-type>application/pdf</content-type>
         <content-uri>/1000/inbox/1234/content</content-uri>
         <delete-uri>/1000/inbox/1234</delete-uri>
-        <attachment> <!--zero or more -->
+        <attachment> <!--zero or more, type: inbox-document -->
             <id>2345</id>
             <sender>Posten Norge As</sender>
             <delivery-time>2017-05-23T09:30:10+02:00</delivery-time>
@@ -75,7 +75,7 @@ HTTP/1.1 200 Ok
             <content-type>application/xml</content-type>
             <content-uri>/1000/inbox/2345/content</content-uri>
         </attachment>
-    </inbox-document>
+    </document>
 </inbox>
 ```
 
@@ -84,7 +84,7 @@ HTTP/1.1 200 Ok
 #### Java
 
 ```java
-InputStream content = client.getDocumentContent(senderId, inboxDocument);
+InputStream content = client.getDocumentContent(senderId, document);
 ```
 
 #### Request
@@ -107,7 +107,7 @@ Location: https://www.digipostdata.no/documents/109695014?token=f677fd84c3f3df8f
 #### Java
 
 ```java
-client.deleteDocument(senderId, inboxDocument);
+client.deleteDocument(senderId, document);
 ```
 
 #### Request
