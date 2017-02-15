@@ -57,21 +57,21 @@ HTTP/1.1 200 Ok
 <inbox>
     <document> <!--zero or more, type: inbox-document -->
         <id>1234</id>
+        <subject>PUM</subject>
         <sender>Posten Norge As</sender>
         <delivery-time>2017-05-23T09:30:10+02:00</delivery-time>
-        <subject>PUM</subject>
-        <authentication-level>TWO FACTOR</authentication-level>
         <first-accessed>2017-02-14T08:25:00+01:00</first-accessed> <!-- or null -->
+        <authentication-level>TWO FACTOR</authentication-level>
         <content-type>application/pdf</content-type>
         <content-uri>/1000/inbox/1234/content</content-uri>
         <delete-uri>/1000/inbox/1234</delete-uri>
         <attachment> <!--zero or more, type: inbox-document -->
             <id>2345</id>
+            <subject>Fødselsnummer</subject>
             <sender>Posten Norge As</sender>
             <delivery-time>2017-05-23T09:30:10+02:00</delivery-time>
-            <subject>Fødselsnummer</subject>
-            <authentication-level>TWO FACTOR</authentication-level>
             <first-accessed>2017-02-14T08:25:00+01:00</first-accessed> <!-- or null -->
+            <authentication-level>TWO FACTOR</authentication-level>
             <content-type>application/xml</content-type>
             <content-uri>/1000/inbox/2345/content</content-uri>
         </attachment>
