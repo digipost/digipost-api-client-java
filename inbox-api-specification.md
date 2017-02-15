@@ -65,7 +65,7 @@ HTTP/1.1 200 Ok
         <content-type>application/pdf</content-type>
         <content-uri>/1000/inbox/1234/content</content-uri>
         <delete-uri>/1000/inbox/1234</delete-uri>
-        <attachment> <!--one or more -->
+        <attachment> <!--zero or more -->
             <id>2345</id>
             <sender>Posten Norge As</sender>
             <delivery-time>2017-05-23T09:30:10+02:00</delivery-time>
