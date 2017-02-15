@@ -40,8 +40,8 @@ Inbox inbox = client.getInbox(senderId);
 
 |Parameter|Type  |Description|
 |---------|------|-----------|
-|deliveryTimeBefore|ISO8601 DateTime|Only get inbox-messages delivered before this timestamp|
-|maxResults|int|Maximum number of returned messages (default: 100)|
+|deliveryTimeBefore|ISO8601 DateTime|Only get documents delivered before this timestamp|
+|maxResults|int|Maximum number of returned documents (default: 100)|
 
 ```http
 GET /<sender-id>/inbox?deliveryTimeBefore=2017-02-14T08:25:00+01:00&maxResults=100
@@ -96,7 +96,7 @@ GET /<sender-id>/inbox/<document-id>/content
 
 The document content-uri will return a 307 redirect to a one time, time-limited uri to the actual content. 
 
-```
+```http
 HTTP/1.1 307 Temporary Redirect
 Location: https://www.digipostdata.no/documents/109695014?token=f677fd84c3f3df8fa147cd2cf28bc4a76f521a67b61a28172a0b81e2363d4fe5642e5c0512cb5f75004217427d34cc8599707e61b4eedca3482572d1d2b29b69&download=false
 ```
@@ -117,6 +117,6 @@ DELETE /<sender-id>/inbox/<document-id>
 
 #### Response
 
-```
+```http
 HTTP/1.1 200 Ok
 ```
