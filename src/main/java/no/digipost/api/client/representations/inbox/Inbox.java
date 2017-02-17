@@ -23,19 +23,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "inbox", propOrder = {
-        "letter"
-})
+@XmlType(name = "inbox")
 public class Inbox {
 
     @XmlElement(name = "letter")
-    public final List<Letter> letter;
+    public final List<InboxDocument> inboxDocument;
 
     public Inbox() {
-        this(new ArrayList<Letter>());
+        this(new ArrayList<InboxDocument>());
     }
 
-    public Inbox(List<Letter> letters) {
-        this.letter = letters;
+    public Inbox(List<InboxDocument> inboxDocuments) {
+        this.inboxDocument = inboxDocuments;
     }
 }

@@ -17,8 +17,8 @@ package no.digipost.api.client;
 
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.inbox.Inbox;
-import no.digipost.api.client.representations.inbox.Letter;
-import no.digipost.api.client.representations.inbox.LetterContent;
+import no.digipost.api.client.representations.inbox.InboxDocument;
+import no.digipost.api.client.representations.inbox.InboxDocumentContent;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequestInterceptor;
@@ -171,12 +171,12 @@ public interface ApiService {
 	 */
 	SenderInformation getSenderInformation(String orgnr, String avsenderenhet);
 
-	Inbox getInbox(long organisation);
+	Inbox getInbox(SenderId senderId);
 
-	LetterContent getLetterContent(Letter letter);
+	InboxDocumentContent getLetterContent(InboxDocument inboxDocument);
 
-	InputStream getLetterContentStream(LetterContent letterContent);
+	InputStream getLetterContentStream(InboxDocumentContent inboxDocumentContent);
 
-	void deleteLetter(Letter letter);
+	void deleteLetter(InboxDocument inboxDocument);
 }
 

@@ -29,8 +29,8 @@ import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.inbox.Inbox;
-import no.digipost.api.client.representations.inbox.Letter;
-import no.digipost.api.client.representations.inbox.LetterContent;
+import no.digipost.api.client.representations.inbox.InboxDocument;
+import no.digipost.api.client.representations.inbox.InboxDocumentContent;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.FileKeystoreSigner;
@@ -245,20 +245,20 @@ public class DigipostClient {
 		return documentCommunicator.getDocumentStatus(senderId, uuid);
 	}
 
-	public Inbox getInbox(long senderAccountId) {
-		return inboxCommunicator.getInbox(senderAccountId);
+	public Inbox getInbox(SenderId senderId) {
+		return inboxCommunicator.getInbox(senderId);
 	}
 
-	public LetterContent getLetterContent(Letter letter) {
-		return inboxCommunicator.getLetterContent(letter);
+	public InboxDocumentContent getLetterContent(InboxDocument inboxDocument) {
+		return inboxCommunicator.getLetterContent(inboxDocument);
 	}
 
-	public InputStream getLetterContentStream(LetterContent letterContent) {
-		return apiService.getLetterContentStream(letterContent);
+	public InputStream getLetterContentStream(InboxDocumentContent inboxDocumentContent) {
+		return apiService.getLetterContentStream(inboxDocumentContent);
 	}
 
-	public void deleteLetter(Letter letter) {
-		inboxCommunicator.deleteLetter(letter);
+	public void deleteLetter(InboxDocument inboxDocument) {
+		inboxCommunicator.deleteLetter(inboxDocument);
 	}
 
 	private void log(final String stringToSignMsg) {

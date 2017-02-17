@@ -1068,7 +1068,7 @@
 
     <xsd:complexType name="inbox">
         <xsd:sequence>
-            <xsd:element name="letter" type="letter" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="inboxDocument" type="letter" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
 

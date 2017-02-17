@@ -25,13 +25,13 @@ import javax.xml.bind.annotation.XmlType;
         "uri",
         "fileType"
 })
-public class LetterContent {
+public class InboxDocumentContent {
 
-    public LetterContent() {
+    public InboxDocumentContent() {
         this(null, null);
     }
 
-    public LetterContent(String uri, String fileType) {
+    public InboxDocumentContent(String uri, String fileType) {
         this.uri = uri;
         this.fileType = fileType;
     }

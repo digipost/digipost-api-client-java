@@ -19,8 +19,8 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.inbox.Inbox;
-import no.digipost.api.client.representations.inbox.Letter;
-import no.digipost.api.client.representations.inbox.LetterContent;
+import no.digipost.api.client.representations.inbox.InboxDocument;
+import no.digipost.api.client.representations.inbox.InboxDocumentContent;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -410,27 +410,27 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
-	public Inbox getInbox(long organisation) {
+	public Inbox getInbox(SenderId senderId) {
 		try {
-			return getResource(getEntryPoint().getInboxLink().getPath(), Inbox.class).call();
+			return getResource(String.format("/%s/inbox", senderId.getId()), Inbox.class).call();
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
 	@Override
-	public LetterContent getLetterContent(Letter letter) {
+	public InboxDocumentContent getLetterContent(InboxDocument inboxDocument) {
 		try {
-			return getResource(letter.getContentLink().getPath(), LetterContent.class).call();
+			return getResource(inboxDocument.getContentUri().getPath(), InboxDocumentContent.class).call();
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
 	@Override
-	public InputStream getLetterContentStream(LetterContent letterContent) {
+	public InputStream getLetterContentStream(InboxDocumentContent inboxDocumentContent) {
 
-		HttpGet httpGet = new HttpGet(letterContent.uri);
+		HttpGet httpGet = new HttpGet(inboxDocumentContent.uri);
 		httpGet.setHeader(HttpHeaders.ACCEPT, "WILDCARD");
 
 		try (CloseableHttpResponse execute = send(httpGet)){
@@ -443,8 +443,8 @@ public class ApiServiceImpl implements ApiService {
 	}
 
     @Override
-    public void deleteLetter(Letter letter) {
-		HttpDelete httpDelete = new HttpDelete(digipostUrl + letter.getDeleteLink().getPath());
+    public void deleteLetter(InboxDocument inboxDocument) {
+		HttpDelete httpDelete = new HttpDelete(digipostUrl + inboxDocument.getDeleteUri().getPath());
 		send(httpDelete);
     }
 }
