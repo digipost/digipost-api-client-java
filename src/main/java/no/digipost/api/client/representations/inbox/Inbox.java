@@ -26,14 +26,14 @@ import java.util.List;
 @XmlType(name = "inbox")
 public class Inbox {
 
-    @XmlElement(name = "letter")
-    public final List<InboxDocument> inboxDocument;
+    @XmlElement(name = "document")
+    public final List<InboxDocument> documents;
 
     public Inbox() {
         this(new ArrayList<InboxDocument>());
     }
 
-    public Inbox(List<InboxDocument> inboxDocuments) {
-        this.inboxDocument = inboxDocuments;
+    public Inbox(List<InboxDocument> documents) {
+        this.documents = documents;
     }
 }
