@@ -20,7 +20,6 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
-import no.digipost.api.client.representations.inbox.InboxDocumentContent;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -29,9 +28,18 @@ import no.digipost.cache.inmemory.Cache;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
@@ -419,31 +427,20 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
-	public InboxDocumentContent getLetterContent(InboxDocument inboxDocument) {
-		try {
-			return getResource(inboxDocument.getContentUri().getPath(), InboxDocumentContent.class).call();
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
-	}
-
-	@Override
-	public InputStream getLetterContentStream(InboxDocumentContent inboxDocumentContent) {
-
-		HttpGet httpGet = new HttpGet(inboxDocumentContent.uri);
+	public InputStream getInboxDocumentContentStream(InboxDocument inboxDocument) {
+		HttpGet httpGet = new HttpGet(digipostUrl + inboxDocument.getContentUri());
 		httpGet.setHeader(HttpHeaders.ACCEPT, "WILDCARD");
 
 		try (CloseableHttpResponse execute = send(httpGet)){
 			Communicator.checkResponse(execute, eventLogger);
 			return execute.getEntity().getContent();
-
 		} catch (IOException e) {
 			throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
 		}
 	}
 
     @Override
-    public void deleteLetter(InboxDocument inboxDocument) {
+    public void deleteInboxDocument(InboxDocument inboxDocument) {
 		HttpDelete httpDelete = new HttpDelete(digipostUrl + inboxDocument.getDeleteUri().getPath());
 		send(httpDelete);
     }

@@ -15,10 +15,17 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.EntryPoint;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.MayHaveSender;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
-import no.digipost.api.client.representations.inbox.InboxDocumentContent;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequestInterceptor;
@@ -173,10 +180,8 @@ public interface ApiService {
 
 	Inbox getInbox(SenderId senderId);
 
-	InboxDocumentContent getLetterContent(InboxDocument inboxDocument);
+	InputStream getInboxDocumentContentStream(InboxDocument inboxDocument);
 
-	InputStream getLetterContentStream(InboxDocumentContent inboxDocumentContent);
-
-	void deleteLetter(InboxDocument inboxDocument);
+	void deleteInboxDocument(InboxDocument inboxDocument);
 }
 

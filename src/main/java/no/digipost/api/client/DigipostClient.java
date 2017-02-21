@@ -27,10 +27,16 @@ import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.DocumentEvents;
+import no.digipost.api.client.representations.DocumentStatus;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
-import no.digipost.api.client.representations.inbox.InboxDocumentContent;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.FileKeystoreSigner;
@@ -249,16 +255,12 @@ public class DigipostClient {
 		return inboxCommunicator.getInbox(senderId);
 	}
 
-	public InboxDocumentContent getLetterContent(InboxDocument inboxDocument) {
-		return inboxCommunicator.getLetterContent(inboxDocument);
+	public InputStream getInboxDocumentContent(InboxDocument inboxDocument) {
+		return inboxCommunicator.getInboxDocumentContentStream(inboxDocument);
 	}
 
-	public InputStream getLetterContentStream(InboxDocumentContent inboxDocumentContent) {
-		return apiService.getLetterContentStream(inboxDocumentContent);
-	}
-
-	public void deleteLetter(InboxDocument inboxDocument) {
-		inboxCommunicator.deleteLetter(inboxDocument);
+	public void deleteInboxDocument(InboxDocument inboxDocument) {
+		inboxCommunicator.deleteInboxDocument(inboxDocument);
 	}
 
 	private void log(final String stringToSignMsg) {

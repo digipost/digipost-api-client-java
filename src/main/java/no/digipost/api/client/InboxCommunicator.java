@@ -18,7 +18,8 @@ package no.digipost.api.client;
 
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
-import no.digipost.api.client.representations.inbox.InboxDocumentContent;
+
+import java.io.InputStream;
 
 public class InboxCommunicator extends Communicator{
 
@@ -30,11 +31,11 @@ public class InboxCommunicator extends Communicator{
         return apiService.getInbox(senderId);
     }
 
-    public InboxDocumentContent getLetterContent(InboxDocument inboxDocument) {
-        return apiService.getLetterContent(inboxDocument);
+    public InputStream getInboxDocuInboxmentContentStream(InboxDocument inboxDocument) {
+        return apiService.getInboxDocumentContentStream(inboxDocument);
     }
 
-    public void deleteLetter(InboxDocument inboxDocument) {
-        apiService.deleteLetter(inboxDocument);
+    public void deleteInboxDocument(InboxDocument inboxDocument) {
+        apiService.deleteInboxDocument(inboxDocument);
     }
 }
