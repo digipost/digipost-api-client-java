@@ -25,17 +25,17 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "sms-notification-failed-metadata")
 public class SmsNotificationFailedMetadata extends EventMetadata {
 
-	@XmlAttribute(name = "mobile-number")
-	public final String mobileNumber;
-	@XmlAttribute(name = "error-code")
-	public final String errorCode;
+    @XmlAttribute(name = "mobile-number")
+    public final String mobileNumber;
+    @XmlAttribute(name = "error-code")
+    public final String errorCode;
 
-	public SmsNotificationFailedMetadata() {
-		this(null, null);
-	}
+    public SmsNotificationFailedMetadata() {
+        this(null, null);
+    }
 
-	public SmsNotificationFailedMetadata(String mobileNumber, String errorCode) {
-		this.mobileNumber = mobileNumber;
-		this.errorCode = errorCode;
-	}
+    public SmsNotificationFailedMetadata(String mobileNumber, String errorCode) {
+        this.mobileNumber = mobileNumber;
+        this.errorCode = errorCode;
+    }
 }

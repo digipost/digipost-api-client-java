@@ -25,14 +25,14 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "failed-print-metadata")
 public class FailedPrintMetadata extends EventMetadata {
 
-	@XmlAttribute(name = "error-code")
-	public final String errorCode;
+    @XmlAttribute(name = "error-code")
+    public final String errorCode;
 
-	public FailedPrintMetadata() {
-		this(null);
-	}
+    public FailedPrintMetadata() {
+        this(null);
+    }
 
-	public FailedPrintMetadata(String errorCode) {
-		this.errorCode = errorCode;
-	}
+    public FailedPrintMetadata(String errorCode) {
+        this.errorCode = errorCode;
+    }
 }

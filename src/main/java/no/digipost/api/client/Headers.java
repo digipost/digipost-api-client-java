@@ -16,12 +16,12 @@
 package no.digipost.api.client;
 
 public final class Headers {
-	public static final String X_Digipost_Prefix = "X-Digipost-";
+    public static final String X_Digipost_Prefix = "X-Digipost-";
 
-	public static final String X_Digipost_Signature = X_Digipost_Prefix + "Signature";
-	public static final String X_Digipost_UserId = X_Digipost_Prefix + "UserId";
+    public static final String X_Digipost_Signature = X_Digipost_Prefix + "Signature";
+    public static final String X_Digipost_UserId = X_Digipost_Prefix + "UserId";
 
-	public static final String Content_MD5 = "Content-MD5";
-	public static final String X_Content_SHA256 = "X-Content-SHA256";
+    public static final String Content_MD5 = "Content-MD5";
+    public static final String X_Content_SHA256 = "X-Content-SHA256";
 
 }

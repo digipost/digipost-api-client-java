@@ -33,77 +33,74 @@ import java.util.Objects;
  */
 public final class AuthorialSender {
 
-	public enum Type {
-		ACCOUNT_ID, ORGANIZATION;
-	}
+    public enum Type {
+        ACCOUNT_ID, ORGANIZATION;
+    }
 
-	public static AuthorialSender resolve(long brokerId, MayHaveSender mayHaveAuthorialSender) {
-		if (mayHaveAuthorialSender.getSenderId() != null) {
-			return new AuthorialSender(mayHaveAuthorialSender.getSenderId(), null);
-		} else if (mayHaveAuthorialSender.getSenderOrganization() != null) {
-			return new AuthorialSender(null, mayHaveAuthorialSender.getSenderOrganization());
-		} else {
-			return new AuthorialSender(brokerId, null);
-		}
-	}
-
-
-
-	private final Long id;
-	private final SenderOrganization organization;
-
-	private AuthorialSender(Long id, SenderOrganization organization) {
-		this.id = id;
-		this.organization = organization;
-	}
-
-	public boolean is(Type type) {
-		switch (type) {
-    		case ACCOUNT_ID: return id != null;
-    		case ORGANIZATION: return organization != null;
-    		default: return false;
-		}
-	}
-
-	public long getAccountId() {
-		if (!is(Type.ACCOUNT_ID)) throw new IllegalStateException("account id of " + AuthorialSender.class.getSimpleName() + " is null. Actual: " + this);
-		return id;
-	}
-
-	public SenderOrganization getOrganization() {
-		if (!is(Type.ORGANIZATION)) throw new IllegalStateException("organization of " + AuthorialSender.class.getSimpleName() + " is null. Actual: " + this);
-		return organization;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof AuthorialSender) {
-			AuthorialSender other = (AuthorialSender) obj;
-			if (this.is(Type.ACCOUNT_ID)) return Objects.equals(this.id, other.id);
-			if (this.is(Type.ORGANIZATION)) return Objects.equals(this.organization, other.organization);
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		if (this.is(Type.ACCOUNT_ID)) return Objects.hashCode(id);
-		if (this.is(Type.ORGANIZATION)) return Objects.hashCode(organization);
-		else return super.hashCode();
-	}
+    public static AuthorialSender resolve(long brokerId, MayHaveSender mayHaveAuthorialSender) {
+        if (mayHaveAuthorialSender.getSenderId() != null) {
+            return new AuthorialSender(mayHaveAuthorialSender.getSenderId(), null);
+        } else if (mayHaveAuthorialSender.getSenderOrganization() != null) {
+            return new AuthorialSender(null, mayHaveAuthorialSender.getSenderOrganization());
+        } else {
+            return new AuthorialSender(brokerId, null);
+        }
+    }
 
 
-	@Override
-	public String toString() {
-		StringBuilder s = new StringBuilder("authorial sender ");
-		if (is(Type.ACCOUNT_ID)) {
-			s.append(" ID: ").append(id);
-		} else if (is(Type.ORGANIZATION)) {
-			s.append(" organization: ").append(organization);
-		} else {
-			s.append(" <undefined>");
-		}
-		return s.toString();
-	}
+
+    private final Long id;
+    private final SenderOrganization organization;
+
+    private AuthorialSender(Long id, SenderOrganization organization) {
+        this.id = id;
+        this.organization = organization;
+    }
+
+    public boolean is(Type type) {
+        switch (type) {
+            case ACCOUNT_ID: return id != null;
+            case ORGANIZATION: return organization != null;
+            default: return false;
+        }
+    }
+
+    public long getAccountId() {
+        if (!is(Type.ACCOUNT_ID)) throw new IllegalStateException("account id of " + AuthorialSender.class.getSimpleName() + " is null. Actual: " + this);
+        return id;
+    }
+
+    public SenderOrganization getOrganization() {
+        if (!is(Type.ORGANIZATION)) throw new IllegalStateException("organization of " + AuthorialSender.class.getSimpleName() + " is null. Actual: " + this);
+        return organization;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AuthorialSender) {
+            AuthorialSender that = (AuthorialSender) obj;
+            return Objects.equals(this.id, that.id) && Objects.equals(this.organization, that.organization);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, organization);
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder("authorial sender ");
+        if (is(Type.ACCOUNT_ID)) {
+            s.append(" ID: ").append(id);
+        } else if (is(Type.ORGANIZATION)) {
+            s.append(" organization: ").append(organization);
+        } else {
+            s.append(" <undefined>");
+        }
+        return s.toString();
+    }
 
 }

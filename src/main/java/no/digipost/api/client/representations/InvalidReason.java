@@ -22,16 +22,16 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum InvalidReason {
 
-	INVALID_PERSONAL_IDENTIFICATION_NUMBER,
-	UNKNOWN;
+    INVALID_PERSONAL_IDENTIFICATION_NUMBER,
+    UNKNOWN;
 
-	public String value() {
-		return name();
-	}
+    public String value() {
+        return name();
+    }
 
-	public static InvalidReason fromValue(String v) {
-		return valueOf(v);
-	}
+    public static InvalidReason fromValue(String v) {
+        return valueOf(v);
+    }
 
 }
 

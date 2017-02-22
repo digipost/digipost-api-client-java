@@ -20,95 +20,96 @@ import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Relation;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static no.digipost.api.client.errorhandling.ErrorType.*;
+import static no.digipost.api.client.errorhandling.ErrorType.NONE;
+import static no.digipost.api.client.errorhandling.ErrorType.UNKNOWN;
+import static no.digipost.api.client.errorhandling.ErrorType.resolve;
 
 public class DigipostClientException extends RuntimeException {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final ErrorCode errorCode;
-	private final List<Link> links;
-	private final ErrorType errorType;
-	private final String errorMessage;
+    private final ErrorCode errorCode;
+    private final List<Link> links;
+    private final ErrorType errorType;
+    private final String errorMessage;
 
-	public static DigipostClientException from(Throwable e) {
-		return e instanceof DigipostClientException ? (DigipostClientException) e : new DigipostClientException(ErrorCode.resolve(e), e);
-	}
+    public static DigipostClientException from(Throwable e) {
+        return e instanceof DigipostClientException ? (DigipostClientException) e : new DigipostClientException(ErrorCode.resolve(e), e);
+    }
 
-	public DigipostClientException(ErrorMessage error) {
-		this(ErrorCode.resolve(error.getErrorCode()), resolve(error.getErrorType()), getMessage(error), error.getLink(), null);
-	}
+    public DigipostClientException(ErrorMessage error) {
+        this(ErrorCode.resolve(error.getErrorCode()), resolve(error.getErrorType()), getMessage(error), error.getLink(), null);
+    }
 
-	public DigipostClientException(ErrorCode code, Throwable cause) {
-		this(code, NONE, getMessage(cause), cause);
-	}
+    public DigipostClientException(ErrorCode code, Throwable cause) {
+        this(code, NONE, getMessage(cause), cause);
+    }
 
-	public DigipostClientException(ErrorCode code, String message) {
-		this(code, NONE, message, null);
-	}
+    public DigipostClientException(ErrorCode code, String message) {
+        this(code, NONE, message, null);
+    }
 
-	public DigipostClientException(ErrorCode code, String message, Throwable cause) {
-		this(code, NONE, message, cause);
-	}
+    public DigipostClientException(ErrorCode code, String message, Throwable cause) {
+        this(code, NONE, message, cause);
+    }
 
-	private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, Throwable cause) { this(code, errorTypeFromServer, message, null, cause); }
+    private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, Throwable cause) { this(code, errorTypeFromServer, message, null, cause); }
 
-	private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, List<Link> links, Throwable cause) {
-		super(code + ": " + message, cause);
-		this.errorCode = code;
-		this.links = links;
-		this.errorType = code.getOverriddenErrorType() == UNKNOWN ? errorTypeFromServer : code.getOverriddenErrorType();
-		this.errorMessage = message;
-	}
+    private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, List<Link> links, Throwable cause) {
+        super(code + ": " + message, cause);
+        this.errorCode = code;
+        this.links = links;
+        this.errorType = code.getOverriddenErrorType() == UNKNOWN ? errorTypeFromServer : code.getOverriddenErrorType();
+        this.errorMessage = message;
+    }
 
-	public boolean isOneOf(ErrorCode ... codes) {
-		return isOneOf(asList(codes));
-	}
+    public boolean isOneOf(ErrorCode ... codes) {
+        return isOneOf(asList(codes));
+    }
 
-	public boolean isOneOf(Iterable<ErrorCode> codes) {
-		for (ErrorCode code : codes) {
-			if (code == errorCode) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public boolean isOneOf(Iterable<ErrorCode> codes) {
+        for (ErrorCode code : codes) {
+            if (code == errorCode) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public ErrorCode getErrorCode() {
-		return errorCode;
-	}
+    public ErrorCode getErrorCode() {
+        return errorCode;
+    }
 
-	public String getErrorMessage() {
-		return errorMessage;
-	}
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 
-	public ErrorType getErrorType() {
-		return errorType;
-	}
+    public ErrorType getErrorType() {
+        return errorType;
+    }
 
-	public Link getLink(Relation relation) {
-		for (Link link : links) {
-			if (link.equalsRelation(relation)) {
-				return link;
-			}
-		}
-		return null;
-	}
+    public Link getLink(Relation relation) {
+        for (Link link : links) {
+            if (link.equalsRelation(relation)) {
+                return link;
+            }
+        }
+        return null;
+    }
 
-	private static String getMessage(Throwable t) {
-		Throwable rootCause = ExceptionUtils.getRootCause(t);
-		return rootCause != null ? rootCause.getClass().getName() + ": " + rootCause.getMessage() : null;
-	}
+    private static String getMessage(Throwable t) {
+        Throwable rootCause = ExceptionUtils.getRootCause(t);
+        return rootCause != null ? rootCause.getClass().getName() + ": " + rootCause.getMessage() : null;
+    }
 
-	private static String getMessage(ErrorMessage error) {
-		String prefix = "";
-		if (!ErrorCode.isKnown(error.getErrorCode())) {
-			prefix = String.format("(Server errorcode %s:%s) ", error.getErrorType(), error.getErrorCode());
-		}
-		return prefix + error.getErrorMessage();
-	}
+    private static String getMessage(ErrorMessage error) {
+        String prefix = "";
+        if (!ErrorCode.isKnown(error.getErrorCode())) {
+            prefix = String.format("(Server errorcode %s:%s) ", error.getErrorType(), error.getErrorCode());
+        }
+        return prefix + error.getErrorMessage();
+    }
 
 }

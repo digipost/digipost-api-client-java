@@ -21,6 +21,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "channel")
 @XmlEnum
 public enum Channel {
-	PRINT,
-	DIGIPOST;
+    PRINT,
+    DIGIPOST;
 }

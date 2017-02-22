@@ -31,7 +31,7 @@ public class InboxCommunicator extends Communicator{
         return apiService.getInbox(senderId);
     }
 
-    public InputStream getInboxDocuInboxmentContentStream(InboxDocument inboxDocument) {
+    public InputStream getInboxDocumentContentStream(InboxDocument inboxDocument) {
         return apiService.getInboxDocumentContentStream(inboxDocument);
     }
 

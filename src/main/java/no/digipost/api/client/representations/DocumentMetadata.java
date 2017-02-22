@@ -25,27 +25,27 @@ import static no.digipost.api.client.representations.Relation.GET_DOCUMENT_CONTE
 @XmlType(name = "document-metadata")
 public class DocumentMetadata extends Representation {
 
-	@XmlAttribute(name = "uuid", required = true)
-	public final String uuid;
-	@XmlAttribute(name = "technical-type")
-	public final String technicalType;
+    @XmlAttribute(name = "uuid", required = true)
+    public final String uuid;
+    @XmlAttribute(name = "technical-type")
+    public final String technicalType;
 
-	@XmlElement(name = "link")
-	protected List<Link> getLinks() {
-		return links;
-	}
+    @XmlElement(name = "link")
+    protected List<Link> getLinks() {
+        return links;
+    }
 
-	public DocumentMetadata() {
-		this(null, null);
-	}
+    public DocumentMetadata() {
+        this(null, null);
+    }
 
-	public DocumentMetadata(String uuid, String technicalType, Link... links) {
-		super(links);
-		this.uuid = uuid;
-		this.technicalType = technicalType;
-	}
+    public DocumentMetadata(String uuid, String technicalType, Link... links) {
+        super(links);
+        this.uuid = uuid;
+        this.technicalType = technicalType;
+    }
 
-	public Link getDocumentContentLink() {
-		return getLinkByRelationName(GET_DOCUMENT_CONTENT);
-	}
+    public Link getDocumentContentLink() {
+        return getLinkByRelationName(GET_DOCUMENT_CONTENT);
+    }
 }

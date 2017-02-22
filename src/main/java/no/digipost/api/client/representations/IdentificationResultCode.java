@@ -22,17 +22,17 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum IdentificationResultCode {
 
-	DIGIPOST,
-	IDENTIFIED,
-	UNIDENTIFIED,
-	INVALID;
+    DIGIPOST,
+    IDENTIFIED,
+    UNIDENTIFIED,
+    INVALID;
 
-	public String value() {
-		return name();
-	}
+    public String value() {
+        return name();
+    }
 
-	public static IdentificationResultCode fromValue(String v) {
-		return valueOf(v);
-	}
+    public static IdentificationResultCode fromValue(String v) {
+        return valueOf(v);
+    }
 
 }

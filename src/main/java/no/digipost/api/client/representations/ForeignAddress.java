@@ -29,96 +29,96 @@ import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 @XmlType(name = "foreign-address", propOrder = { "addressline1", "addressline2", "addressline3", "addressline4", "country", "countryCode" })
 public class ForeignAddress {
 
-	@XmlElement(required = true)
-	protected String addressline1;
-	protected String addressline2;
-	protected String addressline3;
-	protected String addressline4;
-	@XmlElement(required = true)
-	protected String country;
-	@XmlElement(name = "country-code", required = true)
-	protected String countryCode;
+    @XmlElement(required = true)
+    protected String addressline1;
+    protected String addressline2;
+    protected String addressline3;
+    protected String addressline4;
+    @XmlElement(required = true)
+    protected String country;
+    @XmlElement(name = "country-code", required = true)
+    protected String countryCode;
 
-	public ForeignAddress() {
-	}
+    public ForeignAddress() {
+    }
 
-	public ForeignAddress(String addressline1, String country, String counryCode) {
-		this(addressline1, null, null, null, country, counryCode);
-	}
+    public ForeignAddress(String addressline1, String country, String counryCode) {
+        this(addressline1, null, null, null, country, counryCode);
+    }
 
-	public ForeignAddress(String addressline1, String addressline2, String addressline3, String addressline4, String country, String countryCode) {
-		this.addressline1 = addressline1;
-		this.addressline2 = addressline2;
-		this.addressline3 = addressline3;
-		this.addressline4 = addressline4;
-		this.country = country;
-		this.countryCode = countryCode;
-	}
+    public ForeignAddress(String addressline1, String addressline2, String addressline3, String addressline4, String country, String countryCode) {
+        this.addressline1 = addressline1;
+        this.addressline2 = addressline2;
+        this.addressline3 = addressline3;
+        this.addressline4 = addressline4;
+        this.country = country;
+        this.countryCode = countryCode;
+    }
 
-	public String getAddressline1() {
-		return addressline1;
-	}
+    public String getAddressline1() {
+        return addressline1;
+    }
 
-	public void setAddressline1(String value) {
-		addressline1 = value;
-	}
+    public void setAddressline1(String value) {
+        addressline1 = value;
+    }
 
-	public String getAddressline2() {
-		return addressline2;
-	}
+    public String getAddressline2() {
+        return addressline2;
+    }
 
-	public void setAddressline2(String value) {
-		addressline2 = value;
-	}
+    public void setAddressline2(String value) {
+        addressline2 = value;
+    }
 
-	public String getAddressline3() {
-		return addressline3;
-	}
+    public String getAddressline3() {
+        return addressline3;
+    }
 
-	public void setAddressline3(String value) {
-		addressline3 = value;
-	}
+    public void setAddressline3(String value) {
+        addressline3 = value;
+    }
 
-	public String getAddressline4() {
-		return addressline4;
-	}
+    public String getAddressline4() {
+        return addressline4;
+    }
 
-	public void setAddressline4(String value) {
-		addressline4 = value;
-	}
+    public void setAddressline4(String value) {
+        addressline4 = value;
+    }
 
-	public List<String> getAddresslines() {
-		List<String> lines = new ArrayList<>(3);
-		if (addressline1 != null) lines.add(addressline1);
-		if (addressline2 != null) lines.add(addressline2);
-		if (addressline3 != null) lines.add(addressline3);
-		if (addressline4 != null) lines.add(addressline4);
-		return lines;
-	}
+    public List<String> getAddresslines() {
+        List<String> lines = new ArrayList<>(3);
+        if (addressline1 != null) lines.add(addressline1);
+        if (addressline2 != null) lines.add(addressline2);
+        if (addressline3 != null) lines.add(addressline3);
+        if (addressline4 != null) lines.add(addressline4);
+        return lines;
+    }
 
-	public String getCountry() {
-		return country;
-	}
+    public String getCountry() {
+        return country;
+    }
 
-	public void setCountry(String value) {
-		country = value;
-	}
+    public void setCountry(String value) {
+        country = value;
+    }
 
-	public String getCountryCode() {
-		return countryCode;
-	}
+    public String getCountryCode() {
+        return countryCode;
+    }
 
-	public void setCountryCode(String countryCode) {
-		this.countryCode = countryCode;
-	}
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
 
-	public boolean isSameAddressAs(ForeignAddress other) {
-		return other != null && trimEquals(addressline1, other.addressline1) && trimEquals(country, other.country)
-				&& trimEquals(countryCode, other.countryCode);
-	}
+    public boolean isSameAddressAs(ForeignAddress other) {
+        return other != null && trimEquals(addressline1, other.addressline1) && trimEquals(country, other.country)
+                && trimEquals(countryCode, other.countryCode);
+    }
 
-	private boolean trimEquals(final String first, final String second) {
-		return trimToEmpty(first).equals(trimToEmpty(second));
-	}
+    private boolean trimEquals(final String first, final String second) {
+        return trimToEmpty(first).equals(trimToEmpty(second));
+    }
 
 }

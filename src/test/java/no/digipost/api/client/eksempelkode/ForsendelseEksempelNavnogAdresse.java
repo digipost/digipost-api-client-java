@@ -39,51 +39,51 @@ import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
  *
  */
 public class ForsendelseEksempelNavnogAdresse {
-	// Din virksomhets Digipost-kontoid
-	private static final long AVSENDERS_KONTOID = 10987;
+    // Din virksomhets Digipost-kontoid
+    private static final long AVSENDERS_KONTOID = 10987;
 
-	// Passordet sertifikatfilen er beskyttet med
-	private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
+    // Passordet sertifikatfilen er beskyttet med
+    private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
 
-	public static void main(final String[] args) {
+    public static void main(final String[] args) {
 
-		// 1. Vi leser inn sertifikatet du har knyttet til din Digipost-konto
-		// (i .p12-formatet)
-		InputStream sertifikatInputStream = lesInnSertifikat();
+        // 1. Vi leser inn sertifikatet du har knyttet til din Digipost-konto
+        // (i .p12-formatet)
+        InputStream sertifikatInputStream = lesInnSertifikat();
 
-		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        // 2. Vi oppretter en DigipostClient
+        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
-		// 3. Vi oppretter et nameandaddress-objekt
-		NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1", "Oppgang B", "0001", "Oslo");
+        // 3. Vi oppretter et nameandaddress-objekt
+        NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1", "Oppgang B", "0001", "Oslo");
 
-		// 4. Vi oppretter hoveddokumentet
-		Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
+        // 4. Vi oppretter hoveddokumentet
+        Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
-		// 5. Vi opprettet en forsendelse
-		Message message = newMessage(UUID.randomUUID().toString(), primaryDocument)
-				.nameAndAddress(nameAndAddress)
-				.build();
+        // 5. Vi opprettet en forsendelse
+        Message message = newMessage(UUID.randomUUID().toString(), primaryDocument)
+                .nameAndAddress(nameAndAddress)
+                .build();
 
-		// 6. Klientbiblioteket håndterer opprettelse av forsendelse,
-		// legge til innhold, og til slutt sending av forsendelsen.
-		client.createMessage(message)
-		      .addContent(primaryDocument, getMessageContent())
-		      .send();
-	}
+        // 6. Klientbiblioteket håndterer opprettelse av forsendelse,
+        // legge til innhold, og til slutt sending av forsendelsen.
+        client.createMessage(message)
+              .addContent(primaryDocument, getMessageContent())
+              .send();
+    }
 
-	private static InputStream getMessageContent() {
-		// Her må du returnere brevinnholdet du ønsker å sende istedenfor null
-		return null;
-	}
+    private static InputStream getMessageContent() {
+        // Her må du returnere brevinnholdet du ønsker å sende istedenfor null
+        return null;
+    }
 
-	private static InputStream lesInnSertifikat() {
-		try {
-			// Leser inn sertifikatet
-			return new FileInputStream(new File("/path/til/sertifikatfil.p12"));
-		} catch (FileNotFoundException e) {
-			// Håndter at sertifikatet ikke kunne leses!
-			throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);
-		}
-	}
+    private static InputStream lesInnSertifikat() {
+        try {
+            // Leser inn sertifikatet
+            return new FileInputStream(new File("/path/til/sertifikatfil.p12"));
+        } catch (FileNotFoundException e) {
+            // Håndter at sertifikatet ikke kunne leses!
+            throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);
+        }
+    }
 }

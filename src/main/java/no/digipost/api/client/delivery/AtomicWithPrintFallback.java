@@ -32,13 +32,13 @@ import java.util.Map;
  */
 final class AtomicWithPrintFallback implements OngoingDelivery.SendableWithPrintFallback {
 
-	private final MessageSender sender;
-	private final Message message;
-	private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
+    private final MessageSender sender;
+    private final Message message;
+    private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
     AtomicWithPrintFallback(Message message, MessageSender sender) {
-    	this.message = message;
-    	this.sender = sender;
+        this.message = message;
+        this.sender = sender;
     }
 
 
@@ -47,20 +47,20 @@ final class AtomicWithPrintFallback implements OngoingDelivery.SendableWithPrint
      *
      * @return videre operasjoner for å fullføre leveransen.
      */
-	@Override
-	public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
-		documents.put(document.uuid, DocumentContent.CreateBothStreamContent(content));
-		return this;
-	}
+    @Override
+    public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
+        documents.put(document.uuid, DocumentContent.CreateBothStreamContent(content));
+        return this;
+    }
 
-	@Override
-	public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
-		documents.put(document.uuid, DocumentContent.CreateMultiStreamContent(content, printContent));
-		return this;
-	}
+    @Override
+    public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
+        documents.put(document.uuid, DocumentContent.CreateMultiStreamContent(content, printContent));
+        return this;
+    }
 
-	@Override
+    @Override
     public MessageDelivery send() {
-		return sender.sendMultipartMessage(message, documents);
+        return sender.sendMultipartMessage(message, documents);
     }
 }

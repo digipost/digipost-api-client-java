@@ -7,6 +7,8 @@
     ***********************************
             XML API for avsendere
     ***********************************
+
+    17.10.16 - Utvidet antal tillatt vedlegg fra 99 til 201
     -->
 
     <xsd:simpleType name="authentication-level">
@@ -551,7 +553,7 @@
             <xsd:element name="status" type="message-status" minOccurs="1" maxOccurs="1" />
             <xsd:element name="delivery-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="200" nillable="false"/>
+            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="201" nillable="false"/>
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
@@ -655,7 +657,7 @@
                 </xsd:simpleType>
             </xsd:element>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
-            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="99" nillable="false"/>
+            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="201" nillable="false"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -828,7 +830,6 @@
         </xsd:restriction>
     </xsd:simpleType>
 
-    <xsd:element name="sender-information" type="sender-information" />
 
     <xsd:complexType name="sender-information">
         <xsd:sequence>
@@ -837,6 +838,8 @@
             <xsd:element name="supported-features" type="features" minOccurs="0" />
         </xsd:sequence>
     </xsd:complexType>
+
+    <xsd:element name="sender-information" type="sender-information" />
 
     <xsd:simpleType name="sender-status">
         <xsd:restriction base="xsd:string">
@@ -872,16 +875,23 @@
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
-            <xsd:element name="feature" maxOccurs="unbounded">
-                <xsd:simpleType>
-                    <xsd:restriction base="xsd:string">
-                        <xsd:pattern value="no\.digipost\.feature\.[a-zA-Z0-9_\.\-]+" />
-                    </xsd:restriction>
-                </xsd:simpleType>
-            </xsd:element>
+            <xsd:element name="feature" maxOccurs="unbounded" type="feature" />
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:complexType name="feature">
+        <xsd:simpleContent>
+            <xsd:extension base="feature-name">
+                <xsd:attribute name="param" type="xsd:string" />
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="feature-name">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="no\.digipost\.feature\.[a-zA-Z0-9_\.\-]+" />
+        </xsd:restriction>
+    </xsd:simpleType>
 
     <xsd:element name="document-status" type="document-status" />
 
@@ -1063,37 +1073,5 @@
             <xsd:pattern value="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/>
         </xsd:restriction>
     </xsd:simpleType>
-
-    <xsd:element name="inbox" type="inbox" />
-
-    <xsd:complexType name="inbox">
-        <xsd:sequence>
-            <xsd:element name="documents" type="letter" minOccurs="0" maxOccurs="unbounded" />
-        </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:complexType name="letter">
-        <xsd:sequence>
-            <xsd:element name="subject" type="xsd:string" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="sender" type="xsd:string" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="date" type="xsd:dateTime" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="read" type="xsd:boolean" minOccurs="1" maxOccurs="1" />
-            <xsd:sequence>
-                <xsd:element name="attachment" type="letter" minOccurs="0" maxOccurs="unbounded" />
-            </xsd:sequence>
-            <xsd:sequence>
-                <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
-            </xsd:sequence>
-        </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:element name="letter-content" type="letter-content" />
-
-    <xsd:complexType name="letter-content">
-        <xsd:sequence>
-            <xsd:element name="uri" type="xsd:string" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="file-type" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false" />
-        </xsd:sequence>
-    </xsd:complexType>
 
 </xsd:schema>

@@ -18,7 +18,6 @@ package no.digipost.api.client.representations.inbox;
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 import no.digipost.api.client.representations.xml.URIXmlAdapter;
-import org.joda.time.DateTime;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -27,6 +26,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.net.URI;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -42,11 +42,11 @@ public class InboxDocument {
     @XmlElement(name = "delivery-time", required = true, type = String.class)
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    protected DateTime deliveryTime;
+    protected ZonedDateTime deliveryTime;
     @XmlElement(name = "first-accessed", type = String.class)
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    protected DateTime firstAccessed;
+    protected ZonedDateTime firstAccessed;
     @XmlElement(name = "authentication-level", required = true)
     @XmlSchemaType(name = "string")
     protected AuthenticationLevel authenticationLevel;
@@ -76,11 +76,11 @@ public class InboxDocument {
         return sender;
     }
 
-    public DateTime getDeliveryTime() {
+    public ZonedDateTime getDeliveryTime() {
         return deliveryTime;
     }
 
-    public DateTime getFirstAccessed() {
+    public ZonedDateTime getFirstAccessed() {
         return firstAccessed;
     }
 

@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.representations.xml.DateXmlAdapter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -22,8 +24,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import no.digipost.api.client.representations.xml.DateXmlAdapter;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "name-and-address", propOrder = {
@@ -32,9 +33,9 @@ import org.joda.time.LocalDate;
     "addressline2",
     "postalcode",
     "city",
-	"birthDate",
-	"phoneNumber",
-	"emailAddress"
+    "birthDate",
+    "phoneNumber",
+    "emailAddress"
 })
 public class NameAndAddress {
     @XmlElement(required = true)
@@ -47,49 +48,49 @@ public class NameAndAddress {
     protected String postalcode;
     @XmlElement(required = true)
     protected String city;
-	@XmlElement(name = "birth-date", type = String.class, nillable = false)
-	@XmlJavaTypeAdapter(DateXmlAdapter.class)
-	@XmlSchemaType(name = "date")
-	protected LocalDate birthDate;
-	@XmlElement(name = "phone-number", nillable = false)
-	protected String phoneNumber;
-	@XmlElement(name = "email-address", nillable = false)
-	protected String emailAddress;
+    @XmlElement(name = "birth-date", type = String.class, nillable = false)
+    @XmlJavaTypeAdapter(DateXmlAdapter.class)
+    @XmlSchemaType(name = "date")
+    protected LocalDate birthDate;
+    @XmlElement(name = "phone-number", nillable = false)
+    protected String phoneNumber;
+    @XmlElement(name = "email-address", nillable = false)
+    protected String emailAddress;
 
-	NameAndAddress() {
-	}
+    NameAndAddress() {
+    }
 
-	public NameAndAddress(final String fullname, final String addressline1, final String addressline2, final String postalcode, final String city) {
-		this.fullname = fullname;
-		this.addressline1 = addressline1;
-		this.addressline2 = addressline2;
-		this.postalcode = postalcode;
-		this.city = city;
-	}
+    public NameAndAddress(String fullname, String addressline1, String addressline2, String postalcode, String city) {
+        this.fullname = fullname;
+        this.addressline1 = addressline1;
+        this.addressline2 = addressline2;
+        this.postalcode = postalcode;
+        this.city = city;
+    }
 
-	public NameAndAddress(final String fullname, final String addressline1, final String addressline2, final String postalcode, final String city,
-						  final LocalDate birthDate, final String phoneNumber, final String emailAddress) {
-		this.fullname = fullname;
-		this.addressline1 = addressline1;
-		this.addressline2 = addressline2;
-		this.postalcode = postalcode;
-		this.city = city;
-		this.birthDate = birthDate;
-		this.phoneNumber = phoneNumber;
-		this.emailAddress = emailAddress;
-	}
+    public NameAndAddress(String fullname, String addressline1, String addressline2, String postalcode, String city,
+                          LocalDate birthDate, String phoneNumber, String emailAddress) {
+        this.fullname = fullname;
+        this.addressline1 = addressline1;
+        this.addressline2 = addressline2;
+        this.postalcode = postalcode;
+        this.city = city;
+        this.birthDate = birthDate;
+        this.phoneNumber = phoneNumber;
+        this.emailAddress = emailAddress;
+    }
 
-	@Override
-	public String toString() {
-		return "NameAndAddress{" +
-				"fullname='" + fullname + '\'' +
-				", addressline1='" + addressline1 + '\'' +
-				", addressline2='" + addressline2 + '\'' +
-				", postalcode='" + postalcode + '\'' +
-				", city='" + city + '\'' +
-				", birthDate=" + birthDate +
-				", phoneNumber='" + phoneNumber + '\'' +
-				", emailAddress='" + emailAddress + '\'' +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "NameAndAddress{" +
+                "fullname='" + fullname + '\'' +
+                ", addressline1='" + addressline1 + '\'' +
+                ", addressline2='" + addressline2 + '\'' +
+                ", postalcode='" + postalcode + '\'' +
+                ", city='" + city + '\'' +
+                ", birthDate=" + birthDate +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", emailAddress='" + emailAddress + '\'' +
+                '}';
+    }
 }

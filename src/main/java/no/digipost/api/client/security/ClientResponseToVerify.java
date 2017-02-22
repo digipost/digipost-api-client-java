@@ -24,31 +24,31 @@ import java.util.TreeMap;
 
 public class ClientResponseToVerify implements ResponseToVerify{
 
-	private final HttpContext context;
-	private final HttpResponse response;
+    private final HttpContext context;
+    private final HttpResponse response;
 
-	public ClientResponseToVerify(final HttpContext context, final HttpResponse response) {
-		this.context = context;
-		this.response = response;
-	}
+    public ClientResponseToVerify(final HttpContext context, final HttpResponse response) {
+        this.context = context;
+        this.response = response;
+    }
 
-	@Override
-	public int getStatus() {
-		return response.getStatusLine().getStatusCode();
-	}
+    @Override
+    public int getStatus() {
+        return response.getStatusLine().getStatusCode();
+    }
 
-	@Override
-	public SortedMap<String, String> getHeaders() {
-		TreeMap<String, String> sortedHeaders = new TreeMap<>();
-		for(Header header : response.getAllHeaders()){
-			sortedHeaders.put(header.getName(), header.getValue());
-		}
+    @Override
+    public SortedMap<String, String> getHeaders() {
+        TreeMap<String, String> sortedHeaders = new TreeMap<>();
+        for(Header header : response.getAllHeaders()){
+            sortedHeaders.put(header.getName(), header.getValue());
+        }
 
-		return sortedHeaders;
-	}
+        return sortedHeaders;
+    }
 
-	@Override
-	public String getPath() {
-		return (String) context.getAttribute("request-path");
-	}
+    @Override
+    public String getPath() {
+        return (String) context.getAttribute("request-path");
+    }
 }

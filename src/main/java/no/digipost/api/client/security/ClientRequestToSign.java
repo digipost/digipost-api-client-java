@@ -25,46 +25,46 @@ import java.util.TreeMap;
 
 public class ClientRequestToSign implements RequestToSign {
 
-	private final HttpRequest clientRequest;
+    private final HttpRequest clientRequest;
 
-	public ClientRequestToSign(final HttpRequest httpRequest) {
-		this.clientRequest = httpRequest;
-	}
+    public ClientRequestToSign(final HttpRequest httpRequest) {
+        this.clientRequest = httpRequest;
+    }
 
-	@Override
-	public String getMethod() {
-		return clientRequest.getRequestLine().getMethod();
-	}
+    @Override
+    public String getMethod() {
+        return clientRequest.getRequestLine().getMethod();
+    }
 
-	@Override
-	public SortedMap<String, String> getHeaders() {
-		TreeMap<String, String> sortedHeaders = new TreeMap<String, String>();
-		Header[] headers = clientRequest.getAllHeaders();
-		for (Header header : headers) {
-			sortedHeaders.put(header.getName(), header.getValue());
-		}
-		return sortedHeaders;
-	}
+    @Override
+    public SortedMap<String, String> getHeaders() {
+        TreeMap<String, String> sortedHeaders = new TreeMap<String, String>();
+        Header[] headers = clientRequest.getAllHeaders();
+        for (Header header : headers) {
+            sortedHeaders.put(header.getName(), header.getValue());
+        }
+        return sortedHeaders;
+    }
 
-	@Override
-	public String getPath() {
-		try {
-			String path = new URI(clientRequest.getRequestLine().getUri()).getPath();
-			return path != null ? path : "";
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
-	}
+    @Override
+    public String getPath() {
+        try {
+            String path = new URI(clientRequest.getRequestLine().getUri()).getPath();
+            return path != null ? path : "";
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 
-	@Override
-	public String getParameters() {
-		return queryParametersFromURI(clientRequest.getRequestLine().getUri());
-	}
+    @Override
+    public String getParameters() {
+        return queryParametersFromURI(clientRequest.getRequestLine().getUri());
+    }
 
-	static String queryParametersFromURI(String uri){
-		int index = uri.indexOf('?');
+    static String queryParametersFromURI(String uri){
+        int index = uri.indexOf('?');
 
-		return index == -1 ? "" : uri.substring(index + 1);
-	}
+        return index == -1 ? "" : uri.substring(index + 1);
+    }
 
 }

@@ -16,92 +16,79 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.*;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalField;
+import java.time.temporal.TemporalUnit;
 import java.util.Objects;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "listedTime")
-public final class ListedTime implements ReadableInstant {
+public final class ListedTime implements Temporal {
 
     @XmlAttribute(name = "time")
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    public final DateTime time;
+    public final ZonedDateTime time;
 
-	public ListedTime(){
-		this(null);
-	}
+    public ListedTime(){
+        this(null);
+    }
 
-	public ListedTime(DateTime atTime) {
-		this.time = atTime;
-	}
+    public ListedTime(ZonedDateTime atTime) {
+        this.time = atTime;
+    }
 
     @Override
     public final boolean equals(Object obj) {
-    	if (obj instanceof ListedTime) {
-    		return Objects.equals(this.time, ((ListedTime) obj).time);
-    	}
-    	return false;
+        if (obj instanceof ListedTime) {
+            return Objects.equals(this.time, ((ListedTime) obj).time);
+        }
+        return false;
     }
 
     @Override
     public final int hashCode() {
-    	return Objects.hashCode(time);
+        return Objects.hashCode(time);
     }
 
-	@Override
-    public int compareTo(ReadableInstant o) {
-		return time.compareTo(o);
+    @Override
+    public boolean isSupported(TemporalField field) {
+        return time.isSupported(field);
     }
 
-	@Override
-    public long getMillis() {
-		return time.getMillis();
+    @Override
+    public long getLong(TemporalField field) {
+        return time.getLong(field);
     }
 
-	@Override
-    public Chronology getChronology() {
-		return time.getChronology();
+    @Override
+    public boolean isSupported(TemporalUnit unit) {
+        return time.isSupported(unit);
     }
 
-	@Override
-    public DateTimeZone getZone() {
-		return time.getZone();
+    @Override
+    public ListedTime with(TemporalField field, long newValue) {
+        return new ListedTime(time.with(field, newValue));
     }
 
-	@Override
-    public int get(DateTimeFieldType type) {
-		return time.get(type);
+    @Override
+    public ListedTime plus(long amountToAdd, TemporalUnit unit) {
+        return new ListedTime(time.plus(amountToAdd, unit));
     }
 
-	@Override
-    public boolean isSupported(DateTimeFieldType field) {
-		return time.isSupported(field);
-    }
-
-	@Override
-    public Instant toInstant() {
-		return time.toInstant();
-    }
-
-	@Override
-    public boolean isEqual(ReadableInstant instant) {
-		return time.isEqual(instant);
-    }
-
-	@Override
-    public boolean isAfter(ReadableInstant instant) {
-		return time.isAfter(instant);
-    }
-
-	@Override
-    public boolean isBefore(ReadableInstant instant) {
-		return time.isBefore(instant);
+    @Override
+    public long until(Temporal endExclusive, TemporalUnit unit) {
+        return time.until(endExclusive, unit);
     }
 
 }

@@ -23,17 +23,17 @@ import java.io.InputStream;
 
 public class BlankPdf {
 
-	private static final byte[] BLANK_ONE_PAGE_PDF;
+    private static final byte[] BLANK_ONE_PAGE_PDF;
 
-	static {
-		try {
-	        BLANK_ONE_PAGE_PDF = IOUtils.toByteArray(BlankPdf.class.getResourceAsStream("blank.pdf"));
+    static {
+        try {
+            BLANK_ONE_PAGE_PDF = IOUtils.toByteArray(BlankPdf.class.getResourceAsStream("blank.pdf"));
         } catch (IOException e) {
-	        throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
-	}
+    }
 
-	public static InputStream onePage() {
-		return new ByteArrayInputStream(BLANK_ONE_PAGE_PDF);
-	}
+    public static InputStream onePage() {
+        return new ByteArrayInputStream(BLANK_ONE_PAGE_PDF);
+    }
 }

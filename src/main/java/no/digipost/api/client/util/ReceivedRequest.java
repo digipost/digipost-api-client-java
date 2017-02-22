@@ -22,30 +22,30 @@ import java.util.Map;
 import static java.util.Collections.unmodifiableMap;
 
 public class ReceivedRequest {
-	public final String path;
-	public final String queryParams;
-	public final String method;
-	public final Map<String, String> headers;
-	private final String body;
+    public final String path;
+    public final String queryParams;
+    public final String method;
+    public final Map<String, String> headers;
+    private final String body;
 
-	public ReceivedRequest(String method, String path, String queryParams, Map<String, String> headers, String postData) {
-		this.method = method;
-		this.path = path;
-		this.queryParams = queryParams;
-		this.headers = unmodifiableMap(headers);
-		this.body = postData;
-	}
+    public ReceivedRequest(String method, String path, String queryParams, Map<String, String> headers, String postData) {
+        this.method = method;
+        this.path = path;
+        this.queryParams = queryParams;
+        this.headers = unmodifiableMap(headers);
+        this.body = postData;
+    }
 
-	@Override
-	public String toString() {
-		return method + " " + path + queryParams;
-	}
+    @Override
+    public String toString() {
+        return method + " " + path + queryParams;
+    }
 
-	public InputStream getBody() {
-		return new ByteArrayInputStream(body.getBytes());
-	}
+    public InputStream getBody() {
+        return new ByteArrayInputStream(body.getBytes());
+    }
 
-	public String getBodyAsString() {
-		return body;
-	}
+    public String getBodyAsString() {
+        return body;
+    }
 }

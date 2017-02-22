@@ -31,10 +31,10 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.joda.time.DateTime;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.time.ZonedDateTime;
 
 /**
  * Klasser som implementerer dette interfacet tar seg av de enkelte HTTP-forespørslene
@@ -67,121 +67,120 @@ import java.net.URI;
  * {@code MessageSender}, som i tillegg gjør en del feilhåndtering.
  */
 public interface ApiService {
-	EntryPoint getEntryPoint();
+    EntryPoint getEntryPoint();
 
 
-	/**
-	 * Oppretter og sender en multipartforsendelse
-	 */
-	CloseableHttpResponse multipartMessage(HttpEntity multipart);
+    /**
+     * Oppretter og sender en multipartforsendelse
+     */
+    CloseableHttpResponse multipartMessage(HttpEntity multipart);
 
-	/**
-	 * Oppretter en ny forsendelsesressurs på serveren ved å sende en
-	 * POST-forespørsel.
-	 */
-	CloseableHttpResponse createMessage(Message message);
+    /**
+     * Oppretter en ny forsendelsesressurs på serveren ved å sende en
+     * POST-forespørsel.
+     */
+    CloseableHttpResponse createMessage(Message message);
 
-	/**
-	 * Henter en allerede eksisterende forsendelsesressurs fra serveren.
-	 */
-	CloseableHttpResponse fetchExistingMessage(URI location);
+    /**
+     * Henter en allerede eksisterende forsendelsesressurs fra serveren.
+     */
+    CloseableHttpResponse fetchExistingMessage(URI location);
 
-	CloseableHttpResponse getEncryptionKey(URI location);
+    CloseableHttpResponse getEncryptionKey(URI location);
 
-	/**
-	 * Angir innholdet i en allerede opprettet forsendelse
-	 *
-	 * Før man kaller denne metoden, må man allerede ha opprettet en
-	 * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
-	 *
-	 */
-	CloseableHttpResponse addContent(Document document, InputStream letterContent);
+    /**
+     * Angir innholdet i en allerede opprettet forsendelse
+     *
+     * Før man kaller denne metoden, må man allerede ha opprettet en
+     * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
+     *
+     */
+    CloseableHttpResponse addContent(Document document, InputStream letterContent);
 
-	/**
-	 * Sender innholdet i forsendelsen som en POST-forespørsel til serveren
-	 *
-	 * OBS! Denne metoden fører til at brevet blir sendt på ordentlig.
-	 *
-	 * Før man kaller denne metoden, må man ha lagt innhold til forsendelsen ved
-	 * metoden {@code addContent}
-	 *
-	 */
-	CloseableHttpResponse send(MessageDelivery createdMessage);
+    /**
+     * Sender innholdet i forsendelsen som en POST-forespørsel til serveren
+     *
+     * OBS! Denne metoden fører til at brevet blir sendt på ordentlig.
+     *
+     * Før man kaller denne metoden, må man ha lagt innhold til forsendelsen ved
+     * metoden {@code addContent}
+     *
+     */
+    CloseableHttpResponse send(MessageDelivery createdMessage);
 
-	Recipients search(String searchString);
+    Recipients search(String searchString);
 
-	Autocomplete searchSuggest(String searchString);
+    Autocomplete searchSuggest(String searchString);
 
-	void addFilter(HttpResponseInterceptor interceptor);
+    void addFilter(HttpResponseInterceptor interceptor);
 
-	void addFilter(HttpRequestInterceptor interceptor);
+    void addFilter(HttpRequestInterceptor interceptor);
 
-	void buildApacheHttpClientBuilder();
+    void buildApacheHttpClientBuilder();
 
-	CloseableHttpResponse identifyRecipient(Identification identification);
+    CloseableHttpResponse identifyRecipient(Identification identification);
 
-	/**
-	 * Sjekker hvis spesifisert mottaker er Digipost-bruker.
-	 * Returnerer då også publik del av krypteringsnøkkel for Digipost-bruker.
-	 * Nøkkelen brukes for å kryptere dokument-innhold for dokumenter som
-	 * skal prekrypteres.
-	 * @param identification
-	 */
-	CloseableHttpResponse identifyAndGetEncryptionKey(Identification identification);
+    /**
+     * Sjekker hvis spesifisert mottaker er Digipost-bruker.
+     * Returnerer då også publik del av krypteringsnøkkel for Digipost-bruker.
+     * Nøkkelen brukes for å kryptere dokument-innhold for dokumenter som
+     * skal prekrypteres.
+     * @param identification
+     */
+    CloseableHttpResponse identifyAndGetEncryptionKey(Identification identification);
 
-	/**
-	 * Henter hendelser knyttet til tidligere sendte brev.
-	 *
-	 * @param organisation Organisasjonsnummer
-	 * @param partId Frivillig organisasjons-enhet, kan være {@code null}
-	 *
-	 */
-	CloseableHttpResponse getDocumentEvents(String organisation, String partId, DateTime from, DateTime to, int offset, int maxResults);
+    /**
+     * Henter hendelser knyttet til tidligere sendte brev.
+     *
+     * @param organisation Organisasjonsnummer
+     * @param partId Frivillig organisasjons-enhet, kan være {@code null}
+     *
+     */
+    CloseableHttpResponse getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults);
 
-	/**
-	 * Henter status på dokumeter som tidligere blitt sendt i Digipost, både via digital og print-kanal.
-	 * @param linkToDocumentStatus
-	 */
-	CloseableHttpResponse getDocumentStatus(Link linkToDocumentStatus);
-	CloseableHttpResponse getDocumentStatus(long senderId, String uuid);
+    /**
+     * Henter status på dokumeter som tidligere blitt sendt i Digipost, både via digital og print-kanal.
+     * @param linkToDocumentStatus
+     */
+    CloseableHttpResponse getDocumentStatus(Link linkToDocumentStatus);
+    CloseableHttpResponse getDocumentStatus(long senderId, String uuid);
 
-	CloseableHttpResponse getContent(String path);
+    CloseableHttpResponse getContent(String path);
 
-	/**
-	 * Henter publik krypteringsnøkkel for forsendelser som skal sendes til print.
-	 */
-	CloseableHttpResponse getEncryptionKeyForPrint();
-
-
-	/**
-	 * Henter informasjon om en faktisk avsender av en melding, altså
-	 * det mottaker ser som avsender.
-	 *
-	 * @param message melding som skal sendes.
-	 */
-	SenderInformation getSenderInformation(MayHaveSender message);
+    /**
+     * Henter publik krypteringsnøkkel for forsendelser som skal sendes til print.
+     */
+    CloseableHttpResponse getEncryptionKeyForPrint();
 
 
-	/**
-	 * Henter informasjon om en avsender.
-	 *
-	 * @param senderId id-en til avsenderen.
-	 */
-	SenderInformation getSenderInformation(long senderId);
+    /**
+     * Henter informasjon om en faktisk avsender av en melding, altså
+     * det mottaker ser som avsender.
+     *
+     * @param message melding som skal sendes.
+     */
+    SenderInformation getSenderInformation(MayHaveSender message);
 
-	/**
-	 * Henter informasjon om en avsender. Avsender må ha godtatt å identifiseres med
-	 * organisasjonsnummer og ev. underenhet.
-	 *
-	 * @param orgnr organisasjonsnummeret til avsenderen.
-	 * @param avsenderenhet underenhet for et organisasjonsnummer.
-	 */
-	SenderInformation getSenderInformation(String orgnr, String avsenderenhet);
 
-	Inbox getInbox(SenderId senderId);
+    /**
+     * Henter informasjon om en avsender.
+     *
+     * @param senderId id-en til avsenderen.
+     */
+    SenderInformation getSenderInformation(long senderId);
 
-	InputStream getInboxDocumentContentStream(InboxDocument inboxDocument);
+    /**
+     * Henter informasjon om en avsender. Avsender må ha godtatt å identifiseres med
+     * organisasjonsnummer og ev. underenhet.
+     *
+     * @param orgnr organisasjonsnummeret til avsenderen.
+     * @param avsenderenhet underenhet for et organisasjonsnummer.
+     */
+    SenderInformation getSenderInformation(String orgnr, String avsenderenhet);
 
-	void deleteInboxDocument(InboxDocument inboxDocument);
+    Inbox getInbox(SenderId senderId);
+
+    InputStream getInboxDocumentContentStream(InboxDocument inboxDocument);
+
+    void deleteInboxDocument(InboxDocument inboxDocument);
 }
-

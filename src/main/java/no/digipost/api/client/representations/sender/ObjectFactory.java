@@ -20,8 +20,8 @@ import javax.xml.bind.annotation.XmlRegistry;
 @XmlRegistry
 public class ObjectFactory {
 
-	public SenderInformation createSenderInformation() {
-		return new SenderInformation();
-	}
+    public SenderInformation createSenderInformation() {
+        return new SenderInformation();
+    }
 
 }

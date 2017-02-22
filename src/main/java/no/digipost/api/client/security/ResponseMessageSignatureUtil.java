@@ -25,39 +25,39 @@ import static org.apache.http.HttpHeaders.DATE;
 
 public class ResponseMessageSignatureUtil {
 
-	private static final List<String> HEADERS_FOR_SIGNATURE = Arrays.asList(Content_MD5.toLowerCase(), DATE.toLowerCase(),
-			X_Digipost_UserId.toLowerCase(), X_Content_SHA256.toLowerCase());
+    private static final List<String> HEADERS_FOR_SIGNATURE = Arrays.asList(Content_MD5.toLowerCase(), DATE.toLowerCase(),
+            X_Digipost_UserId.toLowerCase(), X_Content_SHA256.toLowerCase());
 
-	public static String getCanonicalResponseRepresentation(final ClientResponseToVerify clientResponseToVerify) {
-		StringBuilder s = new StringBuilder();
-		s.append(getCanonicalResponseCodeRepresentation(clientResponseToVerify));
-		s.append(getCanonicalUrlRepresentation(clientResponseToVerify));
-		s.append(getCanonicalHeaderRepresentation(clientResponseToVerify));
-		return s.toString();
-	}
+    public static String getCanonicalResponseRepresentation(final ClientResponseToVerify clientResponseToVerify) {
+        StringBuilder s = new StringBuilder();
+        s.append(getCanonicalResponseCodeRepresentation(clientResponseToVerify));
+        s.append(getCanonicalUrlRepresentation(clientResponseToVerify));
+        s.append(getCanonicalHeaderRepresentation(clientResponseToVerify));
+        return s.toString();
+    }
 
-	private static String getCanonicalResponseCodeRepresentation(final ClientResponseToVerify clientResponseToVerify) {
-		return clientResponseToVerify.getStatus() + "\n";
-	}
+    private static String getCanonicalResponseCodeRepresentation(final ClientResponseToVerify clientResponseToVerify) {
+        return clientResponseToVerify.getStatus() + "\n";
+    }
 
-	private static String getCanonicalUrlRepresentation(final ClientResponseToVerify clientResponseToVerify) {
-		return clientResponseToVerify.getPath().toLowerCase() + "\n";
-	}
+    private static String getCanonicalUrlRepresentation(final ClientResponseToVerify clientResponseToVerify) {
+        return clientResponseToVerify.getPath().toLowerCase() + "\n";
+    }
 
-	private static String getCanonicalHeaderRepresentation(final ClientResponseToVerify clientResponseToVerify) {
-		SortedMap<String, String> headers = clientResponseToVerify.getHeaders();
-		StringBuilder headersString = new StringBuilder();
-		for (Entry<String, String> entry : headers.entrySet()) {
-			String key = entry.getKey();
-			if (isHeaderForSignature(key)) {
-				headersString.append(key.toLowerCase() + ": " + entry.getValue() + "\n");
-			}
-		}
-		return headersString.toString();
-	}
+    private static String getCanonicalHeaderRepresentation(final ClientResponseToVerify clientResponseToVerify) {
+        SortedMap<String, String> headers = clientResponseToVerify.getHeaders();
+        StringBuilder headersString = new StringBuilder();
+        for (Entry<String, String> entry : headers.entrySet()) {
+            String key = entry.getKey();
+            if (isHeaderForSignature(key)) {
+                headersString.append(key.toLowerCase() + ": " + entry.getValue() + "\n");
+            }
+        }
+        return headersString.toString();
+    }
 
-	private static boolean isHeaderForSignature(final String key) {
-		return HEADERS_FOR_SIGNATURE.contains(key.toLowerCase());
-	}
+    private static boolean isHeaderForSignature(final String key) {
+        return HEADERS_FOR_SIGNATURE.contains(key.toLowerCase());
+    }
 
 }

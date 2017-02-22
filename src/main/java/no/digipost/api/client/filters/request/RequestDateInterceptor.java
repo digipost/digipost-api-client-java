@@ -17,39 +17,48 @@ package no.digipost.api.client.filters.request;
 
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.util.DateUtils;
-import org.apache.http.*;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.protocol.HttpContext;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.ZonedDateTime;
 
 import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 import static org.apache.http.HttpHeaders.DATE;
 
 public class RequestDateInterceptor implements HttpRequestInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RequestDateInterceptor.class);
-	private final EventLogger eventLogger;
+    private static final Logger LOG = LoggerFactory.getLogger(RequestDateInterceptor.class);
+    private final EventLogger eventLogger;
+    private final Clock clock;
 
-	public RequestDateInterceptor(final EventLogger eventListener) {
-		this.eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
-	}
+    public RequestDateInterceptor(EventLogger eventListener) {
+        this(eventListener, Clock.systemDefaultZone());
+    }
 
-	@Override
-	public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
-		modifyRequest(httpRequest);
-	}
+    public RequestDateInterceptor(EventLogger eventListener, Clock clock) {
+        this.eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
+        this.clock = clock;
+    }
 
-	private void log(final String stringToSignMsg) {
-		LOG.debug(stringToSignMsg);
-		eventLogger.log(stringToSignMsg);
-	}
+    @Override
+    public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+        modifyRequest(httpRequest);
+    }
 
-	private void modifyRequest(final HttpRequest httpRequest) {
-		String dateOnRFC1123Format = DateUtils.formatDate(DateTime.now());
-		httpRequest.setHeader(DATE, dateOnRFC1123Format);
-		log(getClass().getSimpleName() + " satt headeren " + DATE + "=" + dateOnRFC1123Format);
-	}
+    private void log(final String stringToSignMsg) {
+        LOG.debug(stringToSignMsg);
+        eventLogger.log(stringToSignMsg);
+    }
+
+    private void modifyRequest(final HttpRequest httpRequest) {
+        String dateOnRFC1123Format = DateUtils.formatDate(ZonedDateTime.now(clock));
+        httpRequest.setHeader(DATE, dateOnRFC1123Format);
+        log(getClass().getSimpleName() + " satt headeren " + DATE + "=" + dateOnRFC1123Format);
+    }
 }

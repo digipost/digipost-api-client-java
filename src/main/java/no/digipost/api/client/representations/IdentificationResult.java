@@ -24,64 +24,64 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "identification-result", propOrder = {
-		"result",
-		"invalidReason",
-		"unidentifiedReason",
-		"personAlias",
-		"digipostAddress"
+        "result",
+        "invalidReason",
+        "unidentifiedReason",
+        "personAlias",
+        "digipostAddress"
 })
 @XmlRootElement(name = "identification-result")
 public class IdentificationResult {
 
-	@XmlElement(required = true)
-	protected IdentificationResultCode result;
-	@XmlElement(name = "invalid-reason")
-	protected InvalidReason invalidReason;
-	@XmlElement(name = "unidentified-reason")
-	protected UnidentifiedReason unidentifiedReason;
-	@XmlElement(name = "person-alias")
-	protected String personAlias;
-	@XmlElement(name = "digipost-address")
-	protected String digipostAddress;
+    @XmlElement(required = true)
+    protected IdentificationResultCode result;
+    @XmlElement(name = "invalid-reason")
+    protected InvalidReason invalidReason;
+    @XmlElement(name = "unidentified-reason")
+    protected UnidentifiedReason unidentifiedReason;
+    @XmlElement(name = "person-alias")
+    protected String personAlias;
+    @XmlElement(name = "digipost-address")
+    protected String digipostAddress;
 
-	public IdentificationResult() {
-	}
+    public IdentificationResult() {
+    }
 
-	public IdentificationResultCode getResult() {
-		return result;
-	}
+    public IdentificationResultCode getResult() {
+        return result;
+    }
 
-	public InvalidReason getInvalidReason() {
-		return invalidReason;
-	}
+    public InvalidReason getInvalidReason() {
+        return invalidReason;
+    }
 
-	public UnidentifiedReason getUnidentifiedReason() {
-		return unidentifiedReason;
-	}
+    public UnidentifiedReason getUnidentifiedReason() {
+        return unidentifiedReason;
+    }
 
-	public String getPersonAlias() {
-		return personAlias;
-	}
+    public String getPersonAlias() {
+        return personAlias;
+    }
 
-	public String getDigipostAddress() {
-		return digipostAddress;
-	}
+    public String getDigipostAddress() {
+        return digipostAddress;
+    }
 
-	public static IdentificationResult digipost(String digipostAddress) {
-		IdentificationResult result = new IdentificationResult();
-		result.result = IdentificationResultCode.DIGIPOST;
-		result.digipostAddress = digipostAddress;
-		return result;
-	}
+    public static IdentificationResult digipost(String digipostAddress) {
+        IdentificationResult result = new IdentificationResult();
+        result.result = IdentificationResultCode.DIGIPOST;
+        result.digipostAddress = digipostAddress;
+        return result;
+    }
 
-	@Override
-	public String toString() {
-		return "IdentificationResult{" +
-				"result=" + result +
-				", invalidReason=" + invalidReason +
-				", unidentifiedReason=" + unidentifiedReason +
-				", personAlias='" + personAlias + '\'' +
-				", digipostAddress='" + digipostAddress + '\'' +
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "IdentificationResult{" +
+                "result=" + result +
+                ", invalidReason=" + invalidReason +
+                ", unidentifiedReason=" + unidentifiedReason +
+                ", personAlias='" + personAlias + '\'' +
+                ", digipostAddress='" + digipostAddress + '\'' +
+                '}';
+    }
 }

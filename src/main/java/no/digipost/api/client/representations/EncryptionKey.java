@@ -27,25 +27,25 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlRootElement(name = "encryption-key")
 public class EncryptionKey extends Representation {
 
-	@XmlValue
-	protected String value;
-	@XmlAttribute(name = "key-id")
-	protected String keyId;
+    @XmlValue
+    protected String value;
+    @XmlAttribute(name = "key-id")
+    protected String keyId;
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public void setValue(final String value) {
-		this.value = value;
-	}
+    public void setValue(final String value) {
+        this.value = value;
+    }
 
-	public String getKeyId() {
-		return keyId;
-	}
+    public String getKeyId() {
+        return keyId;
+    }
 
-	public void setKeyId(final String value) {
-		keyId = value;
-	}
+    public void setKeyId(final String value) {
+        keyId = value;
+    }
 
 }

@@ -19,21 +19,28 @@ import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.joda.time.DateTime;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 @XmlTransient
-public class DateTimeXmlAdapter extends XmlAdapter<String, DateTime> {
+public class DateTimeXmlAdapter extends XmlAdapter<String, ZonedDateTime> {
 
-	@Override
-	public String marshal(final DateTime v) throws Exception {
-		if (v == null) return null;
-		return v.toString();
-	}
+    @Override
+    public String marshal(ZonedDateTime v) {
+        if (v == null) {
+            return null;
+        }
+        return DatatypeConverter.printDateTime(GregorianCalendar.from(v));
+    }
 
-	@Override
-	public DateTime unmarshal(final String s) throws Exception {
-		if (s == null) return null;
-		return new DateTime(DatatypeConverter.parseDate(s).getTime());
-	}
+    @Override
+    public ZonedDateTime unmarshal(final String s) {
+        if (s == null) {
+            return null;
+        }
+        Calendar parsed = DatatypeConverter.parseDate(s);
+        return ZonedDateTime.ofInstant(parsed.toInstant(), parsed.getTimeZone().toZoneId());
+    }
 
 }

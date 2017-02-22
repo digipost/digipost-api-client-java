@@ -16,5 +16,5 @@
 package no.digipost.api.client;
 
 public interface EventLogger {
-	void log(String logMessage);
+    void log(String logMessage);
 }

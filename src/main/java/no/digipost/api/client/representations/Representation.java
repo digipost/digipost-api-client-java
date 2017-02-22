@@ -24,27 +24,27 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlTransient
 public abstract class Representation {
 
-	@XmlTransient
-	protected List<Link> links;
+    @XmlTransient
+    protected List<Link> links;
 
-	public Representation(final Link... linker) {
-		links = new ArrayList<Link>(Arrays.asList(linker));
-	}
+    public Representation(final Link... linker) {
+        links = new ArrayList<Link>(Arrays.asList(linker));
+    }
 
-	Representation() {
-		links = new ArrayList<Link>();
-	}
+    Representation() {
+        links = new ArrayList<Link>();
+    }
 
-	public void addLink(final Link link) {
-		links.add(link);
-	}
+    public void addLink(final Link link) {
+        links.add(link);
+    }
 
-	protected Link getLinkByRelationName(final Relation relation) {
-		for (Link l : links) {
-			if (l.equalsRelation(relation)) {
-				return l;
-			}
-		}
-		return null;
-	}
+    protected Link getLinkByRelationName(final Relation relation) {
+        for (Link l : links) {
+            if (l.equalsRelation(relation)) {
+                return l;
+            }
+        }
+        return null;
+    }
 }

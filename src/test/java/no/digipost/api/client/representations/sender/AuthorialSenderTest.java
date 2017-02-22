@@ -27,31 +27,31 @@ import static org.junit.Assert.assertThat;
 
 public class AuthorialSenderTest {
 
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
-	@Test
-	public void correctEqualsAndHashCode() {
-		EqualsVerifier.forClass(AuthorialSender.class).verify();
-	}
+    @Test
+    public void correctEqualsAndHashCode() {
+        EqualsVerifier.forClass(AuthorialSender.class).verify();
+    }
 
-	@Test
-	public void failsIfOrganizationIsQueriedFromAnIdBasedSender() {
-		AuthorialSender sender = AuthorialSender.resolve(42, MayHaveSender.NO_SENDER);
-		assertThat(sender.getAccountId(), is(42L));
-		expectedException.expect(IllegalStateException.class);
-		sender.getOrganization();
-	}
+    @Test
+    public void failsIfOrganizationIsQueriedFromAnIdBasedSender() {
+        AuthorialSender sender = AuthorialSender.resolve(42, MayHaveSender.NO_SENDER);
+        assertThat(sender.getAccountId(), is(42L));
+        expectedException.expect(IllegalStateException.class);
+        sender.getOrganization();
+    }
 
-	@Test
-	public void failsIfIdIsQueriedFromAnOrganizationBasedSender() {
-		final SenderOrganization org = new SenderOrganization("10", null);
-		AuthorialSender sender = AuthorialSender.resolve(42, new MayHaveSender() {
-			@Override public SenderOrganization getSenderOrganization() { return org; }
-			@Override public Long getSenderId() { return null; }
-		});
-		assertThat(sender.getOrganization(), is(org));
-		expectedException.expect(IllegalStateException.class);
-		sender.getAccountId();
-	}
+    @Test
+    public void failsIfIdIsQueriedFromAnOrganizationBasedSender() {
+        final SenderOrganization org = new SenderOrganization("10", null);
+        AuthorialSender sender = AuthorialSender.resolve(42, new MayHaveSender() {
+            @Override public SenderOrganization getSenderOrganization() { return org; }
+            @Override public Long getSenderId() { return null; }
+        });
+        assertThat(sender.getOrganization(), is(org));
+        expectedException.expect(IllegalStateException.class);
+        sender.getAccountId();
+    }
 }

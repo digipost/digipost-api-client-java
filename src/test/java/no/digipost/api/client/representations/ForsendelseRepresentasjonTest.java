@@ -28,27 +28,27 @@ import static org.junit.Assert.assertTrue;
 
 public class ForsendelseRepresentasjonTest {
 
-	@Test
-	public void skalHanteraDuplikatForsendelse() {
-		DigipostAddress digipostAddress = new DigipostAddress("peter.pan#0000");
-		String id1 = UUID.randomUUID().toString();
-		String id2 = UUID.randomUUID().toString();
-		Message adresseForsendelse1 = newMessage(id1, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-				.digipostAddress(digipostAddress)
-				.build();
+    @Test
+    public void skalHanteraDuplikatForsendelse() {
+        DigipostAddress digipostAddress = new DigipostAddress("peter.pan#0000");
+        String id1 = UUID.randomUUID().toString();
+        String id2 = UUID.randomUUID().toString();
+        Message adresseForsendelse1 = newMessage(id1, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+                .digipostAddress(digipostAddress)
+                .build();
 
-		Message adresseForsendelse2 = newMessage(id1, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-				.digipostAddress(digipostAddress)
-				.build();
+        Message adresseForsendelse2 = newMessage(id1, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+                .digipostAddress(digipostAddress)
+                .build();
 
-		Message adresseForsendelse3 = newMessage(id2, new Document(UUID.randomUUID().toString(), "annetemne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-				.digipostAddress(digipostAddress)
-				.build();
+        Message adresseForsendelse3 = newMessage(id2, new Document(UUID.randomUUID().toString(), "annetemne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+                .digipostAddress(digipostAddress)
+                .build();
 
-		assertTrue(adresseForsendelse1.isSameMessageAs(adresseForsendelse2));
-		assertTrue(adresseForsendelse2.isSameMessageAs(adresseForsendelse1));
+        assertTrue(adresseForsendelse1.isSameMessageAs(adresseForsendelse2));
+        assertTrue(adresseForsendelse2.isSameMessageAs(adresseForsendelse1));
 
-		assertFalse(adresseForsendelse1.isSameMessageAs(adresseForsendelse3));
-	}
+        assertFalse(adresseForsendelse1.isSameMessageAs(adresseForsendelse3));
+    }
 
 }

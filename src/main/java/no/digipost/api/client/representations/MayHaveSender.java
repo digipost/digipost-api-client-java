@@ -24,19 +24,19 @@ package no.digipost.api.client.representations;
  */
 public interface MayHaveSender {
 
-	public static final MayHaveSender NO_SENDER = new MayHaveSender() {
-		@Override public SenderOrganization getSenderOrganization() { return null; }
-		@Override public Long getSenderId() { return null; }
-	};
+    public static final MayHaveSender NO_SENDER = new MayHaveSender() {
+        @Override public SenderOrganization getSenderOrganization() { return null; }
+        @Override public Long getSenderId() { return null; }
+    };
 
-	/**
-	 * @return the sender ID. May be {@code null}.
-	 */
-	Long getSenderId();
+    /**
+     * @return the sender ID. May be {@code null}.
+     */
+    Long getSenderId();
 
-	/**
-	 * @return the sender organization. May be {@code null}.
-	 */
-	SenderOrganization getSenderOrganization();
+    /**
+     * @return the sender organization. May be {@code null}.
+     */
+    SenderOrganization getSenderOrganization();
 
 }

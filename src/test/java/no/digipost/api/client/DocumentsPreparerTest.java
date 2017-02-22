@@ -16,18 +16,21 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Channel;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.FileType;
+import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.Message.MessageBuilder;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintDetails.PostType;
+import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
 import no.digipost.api.client.util.FakeEncryptionKey;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
-import org.hamcrest.CustomTypeSafeMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -38,16 +41,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static no.digipost.api.client.pdf.EksempelPdf.*;
+import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
+import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
+import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.Channel.PRINT;
-import static no.digipost.api.client.representations.FileType.*;
+import static no.digipost.api.client.representations.FileType.GIF;
+import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.util.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
-import static no.motif.Base.always;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.io.IOUtils.toInputStream;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Answers.RETURNS_SMART_NULLS;
@@ -56,112 +65,93 @@ import static org.mockito.Mockito.withSettings;
 
 public class DocumentsPreparerTest {
 
-	private static final byte[] pdf20Pages;
-	static {
-		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
-		try {
-	        pdf20Pages = toByteArray(pdf20Pages());
+    private static final byte[] pdf20Pages;
+    static {
+        CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
+        try {
+            pdf20Pages = toByteArray(pdf20Pages());
         } catch (IOException e) {
-	        throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
-	}
+    }
 
 
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
-	private final DocumentsPreparer preparer = new DocumentsPreparer(new PdfValidator());
+    private final DocumentsPreparer preparer = new DocumentsPreparer(new PdfValidator());
 
-	private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(FakeEncryptionKey.createFakeEncryptionKey()));
+    private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(FakeEncryptionKey.createFakeEncryptionKey()));
 
-	private final Document primaryDocument = new Document(UUID.randomUUID().toString(), "primary", PDF);
-	private final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{ put(primaryDocument, printablePdf1Page()); }};
-	private final MessageBuilder messageBuilder = MessageBuilder.newMessage("m_id", primaryDocument).printDetails(
-			new PrintDetails(new PrintRecipient("Joe Schmoe", new NorwegianAddress("7845", "Far away")), new PrintRecipient("Dolly Parton", new NorwegianAddress("8942", "Farther away")), PostType.A));
+    private final Document primaryDocument = new Document(UUID.randomUUID().toString(), "primary", PDF);
+    private final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{ put(primaryDocument, printablePdf1Page()); }};
+    private final MessageBuilder messageBuilder = MessageBuilder.newMessage("m_id", primaryDocument).printDetails(
+            new PrintDetails(new PrintRecipient("Joe Schmoe", new NorwegianAddress("7845", "Far away")), new PrintRecipient("Dolly Parton", new NorwegianAddress("8942", "Farther away")), PostType.A));
 
-	@Test
-	public void failsIfMessageHasAnyDocumentsRequiringPreEncryptionAndNoEncryptionKeyIsSupplied() throws IOException {
-		primaryDocument.setPreEncrypt();
+    @Test
+    public void failsIfMessageHasAnyDocumentsRequiringPreEncryptionAndNoEncryptionKeyIsSupplied() throws IOException {
+        primaryDocument.encrypt();
 
-		expectedException.expect(DigipostClientException.class);
-		expectedException.expectMessage("no encryption key");
-		preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.SJEKK_ALLE));
-	}
+        expectedException.expect(DigipostClientException.class);
+        expectedException.expectMessage("no encryption key");
+        preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, () -> PdfValidationSettings.CHECK_ALL);
+    }
 
-	@Test
-	public void cannotSendNonPdfFilesToPrint() throws IOException {
-		addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter")).setPreEncrypt();
+    @Test
+    public void cannotSendNonPdfFilesToPrint() throws IOException {
+        addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter", UTF_8)).encrypt();
 
-		expectedException.expect(DigipostClientException.class);
-		expectedException.expectMessage("filetype gif");
-		preparer.prepare(documents, messageBuilder.build(), encrypter, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
-	}
+        expectedException.expect(DigipostClientException.class);
+        expectedException.expectMessage("filetype gif");
+        preparer.prepare(documents, messageBuilder.build(), encrypter, () -> mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS)));
+    }
 
-	@Test
-	public void deniesNonValidatingPdfForBothPrintAndWeb() {
-		for (Channel deliveryMethod : Channel.values()) {
-			try {
-				preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[]{65, 65, 65, 65}, always(mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
-			} catch (DigipostClientException e) {
-				assertThat(e.getMessage(), containsString("Kunne ikke parse"));
-				continue;
-			}
-			fail("Should fail validation for bogus PDF using " + Channel.class.getSimpleName() + "." + deliveryMethod);
-		}
-	}
-
-	@Test
-	public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
-		preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
-
-		expectedException.expect(DigipostClientException.class);
-		expectedException.expectMessage("for mange sider");
-		preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, always(PdfValidationSettings.SJEKK_ALLE));
-	}
-
-
-	@Test
-	public void doesNothingForNonPreEncryptedDocuments() throws IOException {
-		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, always(PdfValidationSettings.SJEKK_ALLE));
-
-		assertThat(documents.keySet(), contains(primaryDocument));
-		assertThat(documents.get(primaryDocument), sameInstance(preparedDocuments.get(primaryDocument)));
-	}
-
-	@Test
-	public void dontInsertDocumentsPreparerTestBlankPageAfterPrimaryDocumentForPreEncryptedDocuments() throws IOException {
-		primaryDocument.setPreEncrypt();
-		Document attachment = addAttachment("attachment", PDF, printablePdf2Pages()).setPreEncrypt();
-		Message message = messageBuilder.build();
-		Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, always(PdfValidationSettings.SJEKK_ALLE));
-
-		assertThat(preparedDocuments.size(), is(2));
-	}
-
-	private Document addAttachment(String subject, FileType fileType, InputStream content) {
-		Document document = new Document(UUID.randomUUID().toString(), subject, fileType);
-		documents.put(document, content);
-		messageBuilder.attachments(asList(document));
-		return document;
-	}
-
-
-	private static final Matcher<Document> blankPdf = new CustomTypeSafeMatcher<Document>(Document.class.getSimpleName() + " for padding with a blank page") {
-		@Override
-        protected boolean matchesSafely(Document doc) {
-			return doc.subject == null && doc.isPreEncrypt();
+    @Test
+    public void deniesNonValidatingPdfForBothPrintAndWeb() {
+        for (Channel deliveryMethod : Channel.values()) {
+            try {
+                preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[]{65, 65, 65, 65}, () -> mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS)));
+            } catch (DigipostClientException e) {
+                assertThat(e.getMessage(), containsString("Could not parse"));
+                continue;
+            }
+            fail("Should fail validation for bogus PDF using " + Channel.class.getSimpleName() + "." + deliveryMethod);
         }
+    }
 
-		@Override
-        protected void describeMismatchSafely(Document doc, Description mismatchDescription) {
-			if (doc.subject != null) {
-				mismatchDescription.appendText("has subject '").appendText(doc.subject).appendText("' (should be null) ");
-			}
-			if (!doc.isPreEncrypt()) {
-				mismatchDescription.appendText("not marked as preencrypted");
-			}
-		};
-	};
+    @Test
+    public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
+        preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL);
 
+        expectedException.expect(DigipostClientException.class);
+        expectedException.expectMessage("too many pages");
+        preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL);
+    }
+
+
+    @Test
+    public void doesNothingForNonPreEncryptedDocuments() throws IOException {
+        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, () -> PdfValidationSettings.CHECK_ALL);
+
+        assertThat(documents.keySet(), contains(primaryDocument));
+        assertThat(documents.get(primaryDocument), sameInstance(preparedDocuments.get(primaryDocument)));
+    }
+
+    @Test
+    public void dontInsertDocumentsPreparerTestBlankPageAfterPrimaryDocumentForPreEncryptedDocuments() throws IOException {
+        primaryDocument.encrypt();
+        addAttachment("attachment", PDF, printablePdf2Pages()).encrypt();
+        Message message = messageBuilder.build();
+        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, () -> PdfValidationSettings.CHECK_ALL);
+
+        assertThat(preparedDocuments.size(), is(2));
+    }
+
+    private Document addAttachment(String subject, FileType fileType, InputStream content) {
+        Document document = new Document(UUID.randomUUID().toString(), subject, fileType);
+        documents.put(document, content);
+        messageBuilder.attachments(asList(document));
+        return document;
+    }
 
 }

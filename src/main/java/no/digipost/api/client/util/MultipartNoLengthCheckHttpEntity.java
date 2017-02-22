@@ -22,61 +22,61 @@ import org.apache.http.HttpEntity;
 import java.io.*;
 
 public class MultipartNoLengthCheckHttpEntity implements HttpEntity {
-	private final HttpEntity entity;
+    private final HttpEntity entity;
 
-	public MultipartNoLengthCheckHttpEntity(HttpEntity entity) {
-		this.entity = entity;
-	}
+    public MultipartNoLengthCheckHttpEntity(HttpEntity entity) {
+        this.entity = entity;
+    }
 
-	@Override
-	public boolean isRepeatable() {
-		return entity.isRepeatable();
-	}
+    @Override
+    public boolean isRepeatable() {
+        return entity.isRepeatable();
+    }
 
-	@Override
-	public boolean isChunked() {
-		return entity.isChunked();
-	}
+    @Override
+    public boolean isChunked() {
+        return entity.isChunked();
+    }
 
-	@Override
-	public long getContentLength() {
-		return entity.getContentLength();
-	}
+    @Override
+    public long getContentLength() {
+        return entity.getContentLength();
+    }
 
-	@Override
-	public Header getContentType() {
-		return entity.getContentType();
-	}
+    @Override
+    public Header getContentType() {
+        return entity.getContentType();
+    }
 
-	@Override
-	public Header getContentEncoding() {
-		return entity.getContentEncoding();
-	}
+    @Override
+    public Header getContentEncoding() {
+        return entity.getContentEncoding();
+    }
 
-	@Override
-	public InputStream getContent() throws IOException, IllegalStateException {
-		if (entity.getContentLength() < 0) {
-			throw new ContentTooLongException("Content length is unknown");
-		}
-		final ByteArrayOutputStream outstream = new ByteArrayOutputStream();
-		writeTo(outstream);
-		outstream.flush();
-		return new ByteArrayInputStream(outstream.toByteArray());
-	}
+    @Override
+    public InputStream getContent() throws IOException, IllegalStateException {
+        if (entity.getContentLength() < 0) {
+            throw new ContentTooLongException("Content length is unknown");
+        }
+        final ByteArrayOutputStream outstream = new ByteArrayOutputStream();
+        writeTo(outstream);
+        outstream.flush();
+        return new ByteArrayInputStream(outstream.toByteArray());
+    }
 
-	@Override
-	public void writeTo(OutputStream outputStream) throws IOException {
-		entity.writeTo(outputStream);
-	}
+    @Override
+    public void writeTo(OutputStream outputStream) throws IOException {
+        entity.writeTo(outputStream);
+    }
 
-	@Override
-	public boolean isStreaming() {
-		return entity.isStreaming();
-	}
+    @Override
+    public boolean isStreaming() {
+        return entity.isStreaming();
+    }
 
-	@Override
-	@Deprecated
-	public void consumeContent() throws IOException {
-		entity.consumeContent();
-	}
+    @Override
+    @Deprecated
+    public void consumeContent() throws IOException {
+        entity.consumeContent();
+    }
 }
