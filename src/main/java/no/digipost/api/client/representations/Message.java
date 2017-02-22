@@ -16,20 +16,26 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.DateTime;
 
-import javax.print.Doc;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Stream.concat;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.Channel.PRINT;
-import static no.motif.Singular.the;
 import static org.apache.commons.lang3.ArrayUtils.INDEX_NOT_FOUND;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -37,211 +43,208 @@ import static org.apache.commons.lang3.StringUtils.join;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "message", propOrder = {
-		"messageId",
-		"senderId",
-		"senderOrganization",
-		"recipient",
-		"deliveryTime",
-		"invoiceReference",
-		"primaryDocument",
-		"attachments" })
+        "messageId",
+        "senderId",
+        "senderOrganization",
+        "recipient",
+        "deliveryTime",
+        "invoiceReference",
+        "primaryDocument",
+        "attachments" })
 @XmlRootElement(name = "message")
 public class Message implements MayHaveSender {
 
-	@XmlElement(name = "message-id")
-	public final String messageId;
-	@XmlElement(name = "sender-id")
-	public final Long senderId;
-	@XmlElement(name = "sender-organization")
-	public final SenderOrganization senderOrganization;
-	@XmlElement(name = "recipient")
-	public final MessageRecipient recipient;
-	@XmlElement(name = "delivery-time", type = String.class, nillable = false)
-	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
-	@XmlSchemaType(name = "dateTime")
-	public final DateTime deliveryTime;
-	@XmlElement(name = "invoice-reference")
-	public final String invoiceReference;
-	@XmlElement(name = "primary-document", required = true)
-	public final Document primaryDocument;
-	@XmlElement(name = "attachment")
-	public final List<Document> attachments;
+    @XmlElement(name = "message-id")
+    public final String messageId;
+    @XmlElement(name = "sender-id")
+    public final Long senderId;
+    @XmlElement(name = "sender-organization")
+    public final SenderOrganization senderOrganization;
+    @XmlElement(name = "recipient")
+    public final MessageRecipient recipient;
+    @XmlElement(name = "delivery-time", type = String.class, nillable = false)
+    @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+    @XmlSchemaType(name = "dateTime")
+    public final ZonedDateTime deliveryTime;
+    @XmlElement(name = "invoice-reference")
+    public final String invoiceReference;
+    @XmlElement(name = "primary-document", required = true)
+    public final Document primaryDocument;
+    @XmlElement(name = "attachment")
+    public final List<Document> attachments;
 
-	Message() {
-		this(null, null, null, null, null, null, null, null);
-	}
+    Message() {
+        this(null, null, null, null, null, null, null, null);
+    }
 
-	public static class MessageBuilder {
-		private String messageId;
-		private Long senderId;
-		private SenderOrganization senderOrganization;
-		private MessageRecipient recipient;
-		private DateTime deliveryTime;
-		private Document primaryDocument;
-		private List<Document> attachments = new ArrayList<>();
-		private String invoiceReference;
+    public static class MessageBuilder {
+        private String messageId;
+        private Long senderId;
+        private SenderOrganization senderOrganization;
+        private MessageRecipient recipient;
+        private ZonedDateTime deliveryTime;
+        private Document primaryDocument;
+        private List<Document> attachments = new ArrayList<>();
+        private String invoiceReference;
 
-		private MessageBuilder(String messageId, Document primaryDocument) {
-			this.messageId = messageId;
-			this.primaryDocument = primaryDocument;
-		}
-
-		public static MessageBuilder newMessage(String messageId, Document primaryDocument) {
-			return new MessageBuilder(messageId, primaryDocument);
-		}
-
-		/**
-		 * Only neccessary when sending on behalf of another user. In this case
-		 * senderId must be the party you are sending on behalf of. Your own user id
-		 * should be set in the http header X-Digipost-UserId.
-		 */
-		public MessageBuilder senderId(Long senderId) {
-			this.senderId = senderId;
-			return this;
-		}
-
-		/**
-		 * Only neccessary when sending on behalf of another user. In this case
-		 * senderOrganization must be the party you are sending on behalf of.
-		 * Your own user id should be set in the http header X-Digipost-UserId.
-		 */
-		public MessageBuilder senderOrganization(SenderOrganization senderOrganization) {
-			this.senderOrganization = senderOrganization;
-			return this;
-		}
-
-		public MessageBuilder recipient(MessageRecipient recipient) {
-			this.recipient = recipient;
-			return this;
-		}
-
-		public MessageBuilder digipostAddress(DigipostAddress digipostAddress) {
-			return recipient(new MessageRecipient(digipostAddress));
-		}
-
-		public MessageBuilder personalIdentificationNumber(PersonalIdentificationNumber personalIdentificationNumber) {
-			return recipient(new MessageRecipient(personalIdentificationNumber));
-		}
-
-		public MessageBuilder organisationNumber(OrganisationNumber organisationNumber) {
-			return recipient(new MessageRecipient(organisationNumber));
-		}
-
-		public MessageBuilder nameAndAddress(NameAndAddress nameAndAddress) {
-			return recipient(new MessageRecipient(nameAndAddress));
-		}
-
-		public MessageBuilder printDetails(PrintDetails printDetails) {
-			return recipient(new MessageRecipient(printDetails));
-		}
-
-		public MessageBuilder deliveryTime(DateTime deliveryTime) {
-			this.deliveryTime = deliveryTime;
-			return this;
-		}
-
-		public MessageBuilder invoiceReference(String invoiceReference) {
-			this.invoiceReference = invoiceReference;
-			return this;
-		}
-
-		public MessageBuilder attachments(Iterable<? extends Document> attachments) {
-			for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
-				this.attachments.add(attachment);
-			}
-			return this;
-		}
-
-		public Message build() {
-			if (recipient == null) {
-				throw new IllegalStateException("You must specify a recipient.");
-			}
-			if (senderId != null && senderOrganization != null) {
-				throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
-			}
-			return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments,
-					deliveryTime, invoiceReference);
-		}
-
-	}
-
-	private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
-	                Document primaryDocument, Iterable<? extends Document> attachments, DateTime deliveryTime,
-					String invoiceReference) {
-		this.messageId = messageId;
-		this.senderId = senderId;
-		this.senderOrganization = senderOrganization;
-		this.recipient = recipient;
-		this.primaryDocument = primaryDocument;
-		this.invoiceReference = invoiceReference;
-		this.deliveryTime = deliveryTime;
-		this.attachments = new ArrayList<>();
-		for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
-	        this.attachments.add(attachment);
+        private MessageBuilder(String messageId, Document primaryDocument) {
+            this.messageId = messageId;
+            this.primaryDocument = primaryDocument;
         }
-	}
 
-	public static Message copyMessageWithOnlyPrintDetails(Message messageToCopy){
-		List<Document> tmpAttachments = new ArrayList<>();
-		for(Document attachment : messageToCopy.attachments){
-			tmpAttachments.add(Document.copyDocumentAndSetDigipostFileTypeToPdf(attachment));
-		}
+        public static MessageBuilder newMessage(String messageId, Document primaryDocument) {
+            return new MessageBuilder(messageId, primaryDocument);
+        }
 
-		return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
-				null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference,
-				Document.copyDocumentAndSetDigipostFileTypeToPdf(messageToCopy.primaryDocument), tmpAttachments, messageToCopy.recipient.getPrintDetails());
-	}
+        /**
+         * Only neccessary when sending on behalf of another user. In this case
+         * senderId must be the party you are sending on behalf of. Your own user id
+         * should be set in the http header X-Digipost-UserId.
+         */
+        public MessageBuilder senderId(Long senderId) {
+            this.senderId = senderId;
+            return this;
+        }
 
-	public static Message copyMessageWithOnlyDigipostDetails(Message messageToCopy){
-		return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
-				messageToCopy.recipient.nameAndAddress, messageToCopy.recipient.digipostAddress,
-				messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber,
-				messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
-				messageToCopy.attachments, null);
-	}
+        /**
+         * Only neccessary when sending on behalf of another user. In this case
+         * senderOrganization must be the party you are sending on behalf of.
+         * Your own user id should be set in the http header X-Digipost-UserId.
+         */
+        public MessageBuilder senderOrganization(SenderOrganization senderOrganization) {
+            this.senderOrganization = senderOrganization;
+            return this;
+        }
 
-	private Message(final String messageId, final Long senderId, final SenderOrganization senderOrganization,
-					final NameAndAddress nameAndAddress, final String digipostAddress, String personalIdentificationNumber,
-					final String organisationNumber, final DateTime deliveryTime, final String invoiceReference,
-					final Document primaryDocument, final List<Document> attachments, final PrintDetails printDetails){
-		this.messageId = messageId;
-		this.senderId = senderId;
-		this.senderOrganization = senderOrganization;
-		MessageRecipient recipient = new MessageRecipient(nameAndAddress, digipostAddress,
-				personalIdentificationNumber, organisationNumber, printDetails);
-		this.recipient = recipient;
-		this.deliveryTime = deliveryTime;
-		this.invoiceReference = invoiceReference;
-		this.primaryDocument = primaryDocument;
-		this.attachments = attachments;
-	}
+        public MessageBuilder recipient(MessageRecipient recipient) {
+            this.recipient = recipient;
+            return this;
+        }
+
+        public MessageBuilder digipostAddress(DigipostAddress digipostAddress) {
+            return recipient(new MessageRecipient(digipostAddress));
+        }
+
+        public MessageBuilder personalIdentificationNumber(PersonalIdentificationNumber personalIdentificationNumber) {
+            return recipient(new MessageRecipient(personalIdentificationNumber));
+        }
+
+        public MessageBuilder organisationNumber(OrganisationNumber organisationNumber) {
+            return recipient(new MessageRecipient(organisationNumber));
+        }
+
+        public MessageBuilder nameAndAddress(NameAndAddress nameAndAddress) {
+            return recipient(new MessageRecipient(nameAndAddress));
+        }
+
+        public MessageBuilder printDetails(PrintDetails printDetails) {
+            return recipient(new MessageRecipient(printDetails));
+        }
+
+        public MessageBuilder deliveryTime(ZonedDateTime deliveryTime) {
+            this.deliveryTime = deliveryTime;
+            return this;
+        }
+
+        public MessageBuilder invoiceReference(String invoiceReference) {
+            this.invoiceReference = invoiceReference;
+            return this;
+        }
+
+        public MessageBuilder attachments(Iterable<? extends Document> attachments) {
+            for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
+                this.attachments.add(attachment);
+            }
+            return this;
+        }
+
+        public Message build() {
+            if (recipient == null) {
+                throw new IllegalStateException("You must specify a recipient.");
+            }
+            if (senderId != null && senderOrganization != null) {
+                throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
+            }
+            return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryTime, invoiceReference);
+        }
+
+    }
+
+    private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
+                    Document primaryDocument, Iterable<? extends Document> attachments, ZonedDateTime deliveryTime,
+                    String invoiceReference) {
+        this.messageId = messageId;
+        this.senderId = senderId;
+        this.senderOrganization = senderOrganization;
+        this.recipient = recipient;
+        this.primaryDocument = primaryDocument;
+        this.invoiceReference = invoiceReference;
+        this.deliveryTime = deliveryTime;
+        this.attachments = new ArrayList<>();
+        for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
+            this.attachments.add(attachment);
+        }
+    }
+
+    public static Message copyMessageWithOnlyPrintDetails(Message messageToCopy){
+        List<Document> tmpAttachments = new ArrayList<>();
+        for(Document attachment : messageToCopy.attachments){
+            tmpAttachments.add(attachment.copyDocumentAndSetDigipostFileTypeToPdf());
+        }
+
+        return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
+                null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference,
+                messageToCopy.primaryDocument.copyDocumentAndSetDigipostFileTypeToPdf(), tmpAttachments, messageToCopy.recipient.getPrintDetails());
+    }
+
+    public static Message copyMessageWithOnlyDigipostDetails(Message messageToCopy){
+        return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
+                messageToCopy.recipient.nameAndAddress, messageToCopy.recipient.digipostAddress,
+                messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber,
+                messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
+                messageToCopy.attachments, null);
+    }
+
+    private Message(final String messageId, final Long senderId, final SenderOrganization senderOrganization,
+                    final NameAndAddress nameAndAddress, final String digipostAddress, String personalIdentificationNumber,
+                    final String organisationNumber, final ZonedDateTime deliveryTime, final String invoiceReference,
+                    final Document primaryDocument, final List<Document> attachments, final PrintDetails printDetails){
+        this.messageId = messageId;
+        this.senderId = senderId;
+        this.senderOrganization = senderOrganization;
+        MessageRecipient recipient = new MessageRecipient(nameAndAddress, digipostAddress,
+                personalIdentificationNumber, organisationNumber, printDetails);
+        this.recipient = recipient;
+        this.deliveryTime = deliveryTime;
+        this.invoiceReference = invoiceReference;
+        this.primaryDocument = primaryDocument;
+        this.attachments = attachments;
+    }
 
 
-	/**
-	 * @return a list containing every {@link Document} in this delivery.
-	 *         The primary document will be the first element of the list,
-	 *         with the attachments following. The list is immutable and
-	 *         can not be used to change which documents are in this
-	 *         MessageDelivery.
-	 */
-	public List<Document> getAllDocuments() {
-		return the(primaryDocument).append(attachments).collect();
-	}
+    /**
+     * @return an ordered Stream containing every {@link Document} in this message.
+     *         The primary document will be the first element of the list,
+     *         with the attachments following.
+     */
+    public Stream<Document> getAllDocuments() {
+        return concat(ofNullable(primaryDocument).map(Stream::of).orElseGet(Stream::empty), attachments.stream());
+    }
 
-	public boolean isDirectPrint() {
-		return recipient.isDirectPrint();
-	}
+    public boolean isDirectPrint() {
+        return recipient.isDirectPrint();
+    }
 
-	public boolean isSameMessageAs(final Message message) {
-		return this.messageId != null && this.messageId.equals(message.messageId);
-	}
+    public boolean isSameMessageAs(final Message message) {
+        return this.messageId != null && this.messageId.equals(message.messageId);
+    }
 
-	public boolean hasAnyDocumentRequiringPreEncryption() {
-		return the(primaryDocument).append(attachments).exists(Document.isPreEncrypt);
-	}
+    public boolean hasAnyDocumentRequiringEncryption() {
+        return getAllDocuments().anyMatch(Document::willBeEncrypted);
+    }
 
     public Channel getChannel() {
-		return recipient.isDirectPrint() ? PRINT : DIGIPOST;
+        return recipient.isDirectPrint() ? PRINT : DIGIPOST;
     }
 
 
@@ -249,41 +252,41 @@ public class Message implements MayHaveSender {
      * @return {@link Comparator} which order documents by the same order as they are contained in
      *         this message. If a document
      */
-	public Comparator<? super Document> documentOrder() {
-		return new Comparator<Document>() {
-			final String[] uuids = the(primaryDocument).append(attachments).map(Document.getUuid).collect().toArray(new String[attachments.size() + 1]);
-			@Override
+    public Comparator<? super Document> documentOrder() {
+        return new Comparator<Document>() {
+            final String[] uuids = getAllDocuments().map(d -> d.uuid).toArray(size -> new String[size]);
+            @Override
             public int compare(Document d1, Document d2) {
-				int d1Index = indexOf(uuids, d1.uuid);
-				if (d1Index == INDEX_NOT_FOUND) {
-					throw new CannotSortDocumentsUsingMessageOrder(d1.uuid, uuids);
-				}
+                int d1Index = indexOf(uuids, d1.uuid);
+                if (d1Index == INDEX_NOT_FOUND) {
+                    throw new CannotSortDocumentsUsingMessageOrder(d1.uuid, uuids);
+                }
 
-				int d2Index = indexOf(uuids, d2.uuid);
-				if (d2Index == INDEX_NOT_FOUND) {
-					throw new CannotSortDocumentsUsingMessageOrder(d2.uuid, uuids);
-				}
-				return d1Index - d2Index;
+                int d2Index = indexOf(uuids, d2.uuid);
+                if (d2Index == INDEX_NOT_FOUND) {
+                    throw new CannotSortDocumentsUsingMessageOrder(d2.uuid, uuids);
+                }
+                return d1Index - d2Index;
             }};
     }
 
-	public class CannotSortDocumentsUsingMessageOrder extends IllegalStateException {
-		private CannotSortDocumentsUsingMessageOrder(String uuid, String[] validUuids) {
-			super(
-					"Kan ikke sortere Document med uuid '" + uuid + "' etter rekkefølgen i Message med id '" + messageId +
-					"' da dokumentet ikke eksisterer i meldingen.\nMeldingen har følgende dokumenter:\n  - " +
-					join(validUuids, "\n  - "));
-		}
-	}
+    public class CannotSortDocumentsUsingMessageOrder extends IllegalStateException {
+        private CannotSortDocumentsUsingMessageOrder(String uuid, String[] validUuids) {
+            super(
+                    "Kan ikke sortere Document med uuid '" + uuid + "' etter rekkefølgen i Message med id '" + messageId +
+                    "' da dokumentet ikke eksisterer i meldingen.\nMeldingen har følgende dokumenter:\n  - " +
+                    join(validUuids, "\n  - "));
+        }
+    }
 
-	@Override
-	public Long getSenderId() {
-		return senderId;
-	}
+    @Override
+    public Long getSenderId() {
+        return senderId;
+    }
 
-	@Override
-	public SenderOrganization getSenderOrganization() {
-		return senderOrganization;
-	}
+    @Override
+    public SenderOrganization getSenderOrganization() {
+        return senderOrganization;
+    }
 
 }

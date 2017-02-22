@@ -20,8 +20,8 @@ import org.junit.Test;
 
 public class ListedTimeTest {
 
-	@Test
-	public void correctEqualsAndHashCode() {
-		EqualsVerifier.forClass(ListedTime.class).verify();
-	}
+    @Test
+    public void correctEqualsAndHashCode() {
+        EqualsVerifier.forClass(ListedTime.class).verify();
+    }
 }

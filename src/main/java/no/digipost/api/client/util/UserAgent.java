@@ -20,25 +20,25 @@ import java.util.Properties;
 
 public class UserAgent {
 
-	private static final String DIGIPOST_USER_AGENT_FALLBACK = "Digipost API Client";
+    private static final String DIGIPOST_USER_AGENT_FALLBACK = "Digipost API Client";
 
-	public static final String DIGIPOST_USER_AGENT;
+    public static final String DIGIPOST_USER_AGENT;
 
-	static {
+    static {
 
-		String userAgentTmp;
+        String userAgentTmp;
 
-		try (InputStream in = UserAgent.class.getResourceAsStream("user-agent.properties")) {
-			Properties properties = new Properties();
-			properties.load(in);
-			userAgentTmp = properties.getProperty("user-agent", DIGIPOST_USER_AGENT_FALLBACK);
+        try (InputStream in = UserAgent.class.getResourceAsStream("user-agent.properties")) {
+            Properties properties = new Properties();
+            properties.load(in);
+            userAgentTmp = properties.getProperty("user-agent", DIGIPOST_USER_AGENT_FALLBACK);
 
-		} catch (Exception e) {
-			userAgentTmp = DIGIPOST_USER_AGENT_FALLBACK;
-		}
+        } catch (Exception e) {
+            userAgentTmp = DIGIPOST_USER_AGENT_FALLBACK;
+        }
 
-		DIGIPOST_USER_AGENT = userAgentTmp;
+        DIGIPOST_USER_AGENT = userAgentTmp;
 
-	}
+    }
 
 }

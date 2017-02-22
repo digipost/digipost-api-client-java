@@ -27,29 +27,29 @@ import static org.junit.Assert.assertThat;
 
 public class ErrorCodeTest {
 
-	@Test
+    @Test
     public void resolveErrorTypeFromException() {
-		assertThat(ErrorCode.resolve(new ConnectException()), is(ErrorCode.CONNECTION_ERROR));
+        assertThat(ErrorCode.resolve(new ConnectException()), is(ErrorCode.CONNECTION_ERROR));
     }
 
-	@Test
+    @Test
     public void resolveErrorTypeFromRootCause() {
-		assertThat(ErrorCode.resolve(new DirectoryIteratorException(new ConnectException())), is(ErrorCode.CONNECTION_ERROR));
+        assertThat(ErrorCode.resolve(new DirectoryIteratorException(new ConnectException())), is(ErrorCode.CONNECTION_ERROR));
     }
 
-	@Test
+    @Test
     public void fallbackToGeneralErrorOnUnknownRootCause() {
-		assertThat(ErrorCode.resolve(new CancellationException()), is(ErrorCode.GENERAL_ERROR));
-	    assertThat(ErrorCode.resolve(new ConnectIOException(null, new CancellationException())), is(ErrorCode.GENERAL_ERROR));
+        assertThat(ErrorCode.resolve(new CancellationException()), is(ErrorCode.GENERAL_ERROR));
+        assertThat(ErrorCode.resolve(new ConnectIOException(null, new CancellationException())), is(ErrorCode.GENERAL_ERROR));
     }
 
-	@Test
+    @Test
     public void resolveFromString() {
-	    assertThat(ErrorCode.resolve(ErrorCode.PROBLEM_WITH_REQUEST.name()), is(ErrorCode.PROBLEM_WITH_REQUEST));
+        assertThat(ErrorCode.resolve(ErrorCode.PROBLEM_WITH_REQUEST.name()), is(ErrorCode.PROBLEM_WITH_REQUEST));
     }
 
-	@Test
+    @Test
     public void fallbackToGeneralErrorOnUnknownString() {
-	    assertThat(ErrorCode.resolve("I_AM_ERROR"), is(ErrorCode.GENERAL_ERROR));
+        assertThat(ErrorCode.resolve("I_AM_ERROR"), is(ErrorCode.GENERAL_ERROR));
     }
 }

@@ -22,19 +22,19 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum ErrorType {
 
-	SERVER,
-	CLIENT_DATA,
-	CLIENT_TECHNICAL,
-	CONFIGURATION,
-	NONE;
+    SERVER,
+    CLIENT_DATA,
+    CLIENT_TECHNICAL,
+    CONFIGURATION,
+    NONE;
 
-	public String value() {
-		return name();
-	}
+    public String value() {
+        return name();
+    }
 
-	public static ErrorType fromValue(final String v) {
-		return valueOf(v);
-	}
+    public static ErrorType fromValue(final String v) {
+        return valueOf(v);
+    }
 
 
 }

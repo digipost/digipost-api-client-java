@@ -20,84 +20,84 @@ import javax.xml.bind.annotation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "identification", propOrder = {
-		"nameAndAddress",
-		"digipostAddress",
-		"organisationNumber",
-		"personalIdentificationNumber"
+        "nameAndAddress",
+        "digipostAddress",
+        "organisationNumber",
+        "personalIdentificationNumber"
 })
 @XmlRootElement(name = "identification")
 public class Identification {
 
-	@XmlAttribute(name = "include-personalias-for-digipost-user")
-	protected boolean includePersonaliasForDigipostUser;
+    @XmlAttribute(name = "include-personalias-for-digipost-user")
+    protected boolean includePersonaliasForDigipostUser;
 
-	@XmlElement(name = "name-and-address", nillable = false)
-	protected NameAndAddress nameAndAddress;
-	@XmlElement(name = "digipost-address", nillable = false)
-	protected String digipostAddress;
-	@XmlElement(name = "personal-identification-number", nillable = false)
-	protected String personalIdentificationNumber;
-	@XmlElement(name = "organisation-number", nillable = false)
-	protected String organisationNumber;
+    @XmlElement(name = "name-and-address", nillable = false)
+    protected NameAndAddress nameAndAddress;
+    @XmlElement(name = "digipost-address", nillable = false)
+    protected String digipostAddress;
+    @XmlElement(name = "personal-identification-number", nillable = false)
+    protected String personalIdentificationNumber;
+    @XmlElement(name = "organisation-number", nillable = false)
+    protected String organisationNumber;
 
-	public Identification(final NameAndAddress nameAndAddress) {
-		this(nameAndAddress, false);
-	}
+    public Identification(final NameAndAddress nameAndAddress) {
+        this(nameAndAddress, false);
+    }
 
-	public Identification(final NameAndAddress nameAndAddress, boolean includePersonaliasForDigipostUser) {
-		this.nameAndAddress = nameAndAddress;
-		this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
-	}
+    public Identification(final NameAndAddress nameAndAddress, boolean includePersonaliasForDigipostUser) {
+        this.nameAndAddress = nameAndAddress;
+        this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
+    }
 
-	public Identification(final DigipostAddress digipostAddress) {
-		this(digipostAddress, false);
-	}
-	public Identification(final DigipostAddress digipostAddress, boolean includePersonaliasForDigipostUser) {
-		this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
-		this.digipostAddress = digipostAddress.asString();
-	}
+    public Identification(final DigipostAddress digipostAddress) {
+        this(digipostAddress, false);
+    }
+    public Identification(final DigipostAddress digipostAddress, boolean includePersonaliasForDigipostUser) {
+        this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
+        this.digipostAddress = digipostAddress.asString();
+    }
 
-	public Identification(final PersonalIdentificationNumber personalIdentificationNumber) {
-		this(personalIdentificationNumber, false);
-	}
-	public Identification(final PersonalIdentificationNumber personalIdentificationNumber, boolean includePersonaliasForDigipostUser) {
-		this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
-		this.personalIdentificationNumber = personalIdentificationNumber.asString();
-	}
+    public Identification(final PersonalIdentificationNumber personalIdentificationNumber) {
+        this(personalIdentificationNumber, false);
+    }
+    public Identification(final PersonalIdentificationNumber personalIdentificationNumber, boolean includePersonaliasForDigipostUser) {
+        this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
+        this.personalIdentificationNumber = personalIdentificationNumber.asString();
+    }
 
-	public Identification(final OrganisationNumber organisationNumber) {
-		this.includePersonaliasForDigipostUser = false;
-		this.organisationNumber = organisationNumber.asString();
-	}
+    public Identification(final OrganisationNumber organisationNumber) {
+        this.includePersonaliasForDigipostUser = false;
+        this.organisationNumber = organisationNumber.asString();
+    }
 
-	//JAXB
-	public Identification() {
+    //JAXB
+    public Identification() {
 
-	}
+    }
 
-	public NameAndAddress getNameAndAddress() {
-		return nameAndAddress;
-	}
+    public NameAndAddress getNameAndAddress() {
+        return nameAndAddress;
+    }
 
-	public String getDigipostAddress() {
-		return digipostAddress;
-	}
+    public String getDigipostAddress() {
+        return digipostAddress;
+    }
 
-	public String getPersonalIdentificationNumber() {
-		return personalIdentificationNumber;
-	}
+    public String getPersonalIdentificationNumber() {
+        return personalIdentificationNumber;
+    }
 
-	@Override
-	public String toString() {
-		if (digipostAddress != null) {
-			return digipostAddress;
-		} else if (personalIdentificationNumber != null) {
-			return personalIdentificationNumber;
-		} else if (nameAndAddress != null) {
-			return nameAndAddress.toString();
-		} else {
-			return "empty";
-		}
-	}
+    @Override
+    public String toString() {
+        if (digipostAddress != null) {
+            return digipostAddress;
+        } else if (personalIdentificationNumber != null) {
+            return personalIdentificationNumber;
+        } else if (nameAndAddress != null) {
+            return nameAndAddress.toString();
+        } else {
+            return "empty";
+        }
+    }
 }
 

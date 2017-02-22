@@ -16,225 +16,220 @@
 
 package no.digipost.api.client.representations;
 
-import no.motif.f.Fn;
-import no.motif.f.Predicate;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static no.motif.Singular.optional;
-import static no.motif.Strings.inBetween;
-import static org.apache.commons.lang3.StringUtils.*;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.lowerCase;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "document", propOrder = {
-		"uuid",
-		"subject",
-		"digipostFileType",
-		"opened",
-		"openingReceipt",
-		"smsNotification",
-		"emailNotification",
-		"authenticationLevel",
-		"sensitivityLevel",
-		"preEncrypt",
-		"preEncryptNoPages",
-		"contentHash",
-		"links"
+        "uuid",
+        "subject",
+        "digipostFileType",
+        "opened",
+        "openingReceipt",
+        "smsNotification",
+        "emailNotification",
+        "authenticationLevel",
+        "sensitivityLevel",
+        "encrypted",
+        "contentHash",
+        "links"
 })
 @XmlSeeAlso({ Invoice.class })
 public class Document extends Representation {
 
-	private final static Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+    private final static Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
 
-	@XmlElement(name = "uuid", required = true)
-	public final String uuid;
-	@XmlElement(name = "subject", required = true)
-	public final String subject;
-	@XmlElement(name = "file-type", required = true)
-	protected String digipostFileType;
-	@XmlElement(nillable = false)
-	protected Boolean opened;
-	@XmlElement(name = "opening-receipt")
-	public final String openingReceipt;
-	@XmlElement(name = "sms-notification")
-	public final SmsNotification smsNotification;
-	@XmlElement(name = "email-notification")
-	public final EmailNotification emailNotification;
-	@XmlElement(name = "authentication-level")
-	public final AuthenticationLevel authenticationLevel;
-	@XmlElement(name = "sensitivity-level")
-	public final SensitivityLevel sensitivityLevel;
-	@XmlElement(name = "pre-encrypt")
-	protected Boolean preEncrypt;
-	@XmlElement(name = "pre-encrypt-no-pages")
-	protected Integer preEncryptNoPages;
-	@XmlElement(name = "content-hash", nillable = false)
-	protected ContentHash contentHash;
+    @XmlElement(name = "uuid", required = true)
+    public final String uuid;
+    @XmlElement(name = "subject", required = true)
+    public final String subject;
+    @XmlElement(name = "file-type", required = true)
+    protected String digipostFileType;
+    @XmlElement(nillable = false)
+    protected Boolean opened;
+    @XmlElement(name = "opening-receipt")
+    public final String openingReceipt;
+    @XmlElement(name = "sms-notification")
+    public final SmsNotification smsNotification;
+    @XmlElement(name = "email-notification")
+    public final EmailNotification emailNotification;
+    @XmlElement(name = "authentication-level")
+    public final AuthenticationLevel authenticationLevel;
+    @XmlElement(name = "sensitivity-level")
+    public final SensitivityLevel sensitivityLevel;
+    @XmlElement(name = "encrypted")
+    protected EncryptionInfo encrypted;
+    @XmlElement(name = "content-hash", nillable = false)
+    protected ContentHash contentHash;
 
-	@XmlElement(name = "link")
-	protected List<Link> getLinks() {
-		return links;
-	}
-
-	@XmlAttribute(name = "technical-type")
-	private String technicalType;
-
-	public Document() { this(null, null, null); }
-
-	/**
-	 * Constructor for just the required fields of a document.
-	 */
-	public Document(String uuid, String subject, FileType fileType) {
-		this(uuid, subject, fileType, null, null, null, null, null, null, null);
-	}
-
-	public Document(String uuid, String subject, FileType fileType, String openingReceipt,
-					SmsNotification smsNotification, EmailNotification emailNotification,
-					AuthenticationLevel authenticationLevel,
-					SensitivityLevel sensitivityLevel) {
-		this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel, null, null);
-	}
-
-
-	public Document(String uuid, String subject, FileType fileType, String openingReceipt,
-					SmsNotification smsNotification, EmailNotification emailNotification,
-					AuthenticationLevel authenticationLevel,
-					SensitivityLevel sensitivityLevel, Boolean opened, String... technicalType) {
-		this.uuid = lowerCase(uuid);
-		this.subject = subject;
-		this.digipostFileType = Objects.toString(fileType, null);
-		this.openingReceipt = defaultIfBlank(openingReceipt, null);
-		this.opened = opened == Boolean.TRUE ? true : null;
-		this.smsNotification = smsNotification;
-		this.emailNotification = emailNotification;
-		this.authenticationLevel = authenticationLevel;
-		this.sensitivityLevel = sensitivityLevel;
-		this.technicalType = parseTechnicalTypes(technicalType);
-		validate();
-	}
-
-	static String parseTechnicalTypes(String... technicalTypes){
-		if(technicalTypes == null || technicalTypes.length == 0){
-			return null;
-		}
-
-		Set<String> cleanedStrings = new HashSet<>();
-		for(String st : technicalTypes){
-			if(st != null && !st.isEmpty()){
-				cleanedStrings.add(st.trim());
-			}
-		}
-
-		return cleanedStrings.size() != 0 ? StringUtils.join(cleanedStrings, ",") : null;
-
-	}
-
-	public static Document copyDocumentAndSetDigipostFileTypeToPdf(Document doc){
-		Document newDoc = new Document(doc.uuid, doc.subject, new FileType("pdf"), doc.openingReceipt, doc.smsNotification, doc.emailNotification,
-				doc.authenticationLevel, doc.sensitivityLevel, doc.opened, doc.getTechnicalType());
-
-		if(doc.getPreEncryptNoPages() != null) {
-			newDoc.setNoEncryptedPages(doc.getPreEncryptNoPages());
-		}
-		if(doc.preEncrypt != null && doc.preEncrypt){
-			newDoc.setPreEncrypt();
-		}
-		newDoc.setContentHash(doc.contentHash);
-
-		return newDoc;
-	}
-
-	private void validate() {
-		List<String> errors = new ArrayList<>();
-		if (uuid != null && !UUID_PATTERN.matcher(this.uuid).matches()) {
-			errors.add("Not a UUID: " + uuid);
-		}
-		if (openingReceipt != null && opened != null) {
-			errors.add("Both openingReceipt and opened was set");
-		}
-		if (!errors.isEmpty()) {
-			throw new IllegalStateException(
-					errors.size() + " errors when instantiating " + Document.class.getSimpleName() +
-					"\n - " + join(errors, "\n - "));
-		}
+    @XmlElement(name = "link")
+    protected List<Link> getLinks() {
+        return links;
     }
 
-	public static Document technicalAttachment(FileType fileType, String... type) {
-		Document document = new Document(UUID.randomUUID().toString(), null, fileType);
-		document.technicalType = parseTechnicalTypes(type);
-		return document;
-	}
+    @XmlAttribute(name = "technical-type")
+    private String technicalType;
 
-	public void setContentHash(ContentHash contentHash){
-		this.contentHash = contentHash;
-	}
+    public Document() { this(null, null, null); }
 
-	public void setDigipostFileType(FileType fileType) {
-		this.digipostFileType = fileType.toString();
-	}
+    /**
+     * Constructor for just the required fields of a document.
+     */
+    public Document(String uuid, String subject, FileType fileType) {
+        this(uuid, subject, fileType, null, null, null, null, null, null, (String[]) null);
+    }
 
-	public String getDigipostFileType() {
-		return digipostFileType;
-	}
-
-	public boolean is(FileType fileType) {
-		return fileType.equals(new FileType(digipostFileType));
-	}
-
-	public Document setPreEncrypt() {
-		this.preEncrypt = true;
-		return this;
-	}
-
-	public Document setNoEncryptedPages(int noEncryptedPages){
-		this.preEncryptNoPages = noEncryptedPages;
-		return this;
-	}
-
-	public static final Predicate<Document> isPreEncrypt = new Predicate<Document>() { @Override public boolean $(Document document) {
-		return document.isPreEncrypt();
-    }};
-
-	public boolean isPreEncrypt() {
-		return preEncrypt != null && preEncrypt;
-	}
-
-	public Integer getPreEncryptNoPages() {
-		return preEncryptNoPages;
-	}
-
-	public Link getAddContentLink() {
-		return getLinkByRelationName(Relation.ADD_CONTENT);
-	}
-
-	public Link getEncryptionKeyLink() { return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY); }
+    public Document(String uuid, String subject, FileType fileType, String openingReceipt,
+                    SmsNotification smsNotification, EmailNotification emailNotification,
+                    AuthenticationLevel authenticationLevel,
+                    SensitivityLevel sensitivityLevel) {
+        this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel, null, (String[]) null);
+    }
 
 
-	public static final Fn<Document, String> getUuid = new Fn<Document, String>() { @Override public String $(Document doc) {
-		return doc.uuid;
-    }};
+    public Document(String uuid, String subject, FileType fileType, String openingReceipt,
+                    SmsNotification smsNotification, EmailNotification emailNotification,
+                    AuthenticationLevel authenticationLevel,
+                    SensitivityLevel sensitivityLevel, Boolean opened, String... technicalType) {
+        this.uuid = lowerCase(uuid);
+        this.subject = subject;
+        this.digipostFileType = Objects.toString(fileType, null);
+        this.openingReceipt = defaultIfBlank(openingReceipt, null);
+        this.opened = opened == Boolean.TRUE ? true : null;
+        this.smsNotification = smsNotification;
+        this.emailNotification = emailNotification;
+        this.authenticationLevel = authenticationLevel;
+        this.sensitivityLevel = sensitivityLevel;
+        this.technicalType = parseTechnicalTypes(technicalType);
+        validate();
+    }
 
-    public static final Fn<Document, FileType> getFileType = new Fn<Document, FileType>() { @Override public FileType $(Document doc) {
-    	return new FileType(doc.digipostFileType);
-    }};
+    static String parseTechnicalTypes(String... technicalTypes){
+        if(technicalTypes == null || technicalTypes.length == 0){
+            return null;
+        }
 
-	public String[] getTechnicalType() {
-		return technicalType != null ? technicalType.split(",") : null;
-	}
+        Set<String> cleanedStrings = new HashSet<>();
+        for(String st : technicalTypes){
+            if(st != null && !st.isEmpty()){
+                cleanedStrings.add(st.trim());
+            }
+        }
 
-	public boolean isOpened() {
-		return opened != null && opened;
-	}
+        return cleanedStrings.size() != 0 ? StringUtils.join(cleanedStrings, ",") : null;
 
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + " with uuid '" + uuid + "'" +
-				optional(technicalType).map(inBetween(", technicalType '", "'")).orElse("") +
-				(preEncrypt != Boolean.TRUE ? optional(subject).map(inBetween(", subject '", "'")).orElse(", no subject") : ", encrypted");
-	}
+    }
+
+    public Document copyDocumentAndSetDigipostFileTypeToPdf(){
+        Document newDoc = new Document(this.uuid, this.subject, new FileType("pdf"), this.openingReceipt, this.smsNotification, this.emailNotification,
+                this.authenticationLevel, this.sensitivityLevel, this.opened, this.getTechnicalType());
+
+        newDoc.encrypted  = this.encrypted == null ? null : this.encrypted.copy();
+        newDoc.setContentHash(this.contentHash);
+
+        return newDoc;
+    }
+
+    private void validate() {
+        List<String> errors = new ArrayList<>();
+        if (uuid != null && !UUID_PATTERN.matcher(this.uuid).matches()) {
+            errors.add("Not a UUID: " + uuid);
+        }
+        if (openingReceipt != null && opened != null) {
+            errors.add("Both openingReceipt and opened was set");
+        }
+        if (!errors.isEmpty()) {
+            throw new IllegalStateException(
+                    errors.size() + " errors when instantiating " + Document.class.getSimpleName() +
+                    "\n - " + join(errors, "\n - "));
+        }
+    }
+
+    public static Document technicalAttachment(FileType fileType, String... type) {
+        Document document = new Document(UUID.randomUUID().toString(), null, fileType);
+        document.technicalType = parseTechnicalTypes(type);
+        return document;
+    }
+
+    public void setContentHash(ContentHash contentHash){
+        this.contentHash = contentHash;
+    }
+
+    public void setDigipostFileType(FileType fileType) {
+        this.digipostFileType = fileType.toString();
+    }
+
+    public String getDigipostFileType() {
+        return digipostFileType;
+    }
+
+    public boolean is(FileType fileType) {
+        return fileType.equals(new FileType(digipostFileType));
+    }
+
+    public Document encrypt() {
+        if (this.encrypted != null) {
+            throw new IllegalStateException("Document already set to encrypted, are you calling encrypt() twice?");
+        }
+        this.encrypted = new EncryptionInfo();
+        return this;
+    }
+
+    public boolean willBeEncrypted() {
+        return  encrypted != null;
+    }
+
+    public EncryptionInfo getEncrypted() {
+        return encrypted;
+    }
+
+    public Link getAddContentLink() {
+        return getLinkByRelationName(Relation.ADD_CONTENT);
+    }
+
+    public Link getEncryptionKeyLink() {
+        return getLinkByRelationName(Relation.GET_ENCRYPTION_KEY);
+    }
+
+    public String[] getTechnicalType() {
+        return technicalType != null ? technicalType.split(",") : null;
+    }
+
+    public boolean isOpened() {
+        return opened != null && opened;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " with uuid '" + uuid + "'" +
+                ofNullable(technicalType).map(t -> ", technicalType '" + t + "'").orElse("") +
+                (willBeEncrypted() ? ofNullable(subject).map(s -> ", subject '" + s + "'").orElse(", no subject") : ", encrypted");
+    }
+
+    public void setNumberOfEncryptedPages(int pages) {
+        if (this.encrypted == null) {
+            throw new IllegalStateException("Tried setting number of encrypted pages, but document is not set to be encrypted. Have you called Document.encrypt()?");
+        }
+        this.encrypted.setNumberOfPages(pages);
+    }
 }

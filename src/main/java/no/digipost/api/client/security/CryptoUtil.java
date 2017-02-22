@@ -31,50 +31,50 @@ import java.security.interfaces.RSAPrivateCrtKey;
 import java.util.Enumeration;
 
 public class CryptoUtil {
-	private static final Logger LOG = LoggerFactory.getLogger(CryptoUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CryptoUtil.class);
 
-	public static PrivateKey loadKeyFromP12(final InputStream certificateStream, final String passord) {
-		try {
-			KeyStore keyStore = KeyStore.getInstance("PKCS12");
-			keyStore.load(certificateStream, passord.toCharArray());
-			final Enumeration<String> aliases = keyStore.aliases();
-			while (aliases.hasMoreElements()) {
-				final String alias = aliases.nextElement();
-				LOG.debug("Trying to get private key for alias: " + alias);
-				if (keyStore.isKeyEntry(alias)) {
-					RSAPrivateCrtKey key = (RSAPrivateCrtKey) keyStore.getKey(alias, passord.toCharArray());
-					if (key != null) {
-						LOG.debug("Found private key for alias: " + alias);
-						return key;
-					}
-				}
-			}
-		} catch (Exception e) {
-			throw new RuntimeException("Error loading private key", e);
-		}
-		throw new RuntimeException("No private key found in certificate file");
-	}
+    public static PrivateKey loadKeyFromP12(final InputStream certificateStream, final String passord) {
+        try {
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            keyStore.load(certificateStream, passord.toCharArray());
+            final Enumeration<String> aliases = keyStore.aliases();
+            while (aliases.hasMoreElements()) {
+                final String alias = aliases.nextElement();
+                LOG.debug("Trying to get private key for alias: " + alias);
+                if (keyStore.isKeyEntry(alias)) {
+                    RSAPrivateCrtKey key = (RSAPrivateCrtKey) keyStore.getKey(alias, passord.toCharArray());
+                    if (key != null) {
+                        LOG.debug("Found private key for alias: " + alias);
+                        return key;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error loading private key", e);
+        }
+        throw new RuntimeException("No private key found in certificate file");
+    }
 
-	public static byte[] sign(final PrivateKey privateKey, final String messageToSign) {
-		Signature instance;
-		try {
-			instance = Signature.getInstance("SHA256WithRSAEncryption");
-			instance.initSign(privateKey);
-			instance.update(messageToSign.getBytes());
-			return instance.sign();
-		} catch (Exception e) {
-			throw new RuntimeException("Det skjedde en feil ved signeringen", e);
-		}
-	}
+    public static byte[] sign(final PrivateKey privateKey, final String messageToSign) {
+        Signature instance;
+        try {
+            instance = Signature.getInstance("SHA256WithRSAEncryption");
+            instance.initSign(privateKey);
+            instance.update(messageToSign.getBytes());
+            return instance.sign();
+        } catch (Exception e) {
+            throw new RuntimeException("Det skjedde en feil ved signeringen", e);
+        }
+    }
 
-	public static void addBouncyCastleProviderAndVerify_AES256_CBC_Support() {
-		try {
-			Security.addProvider(new BouncyCastleProvider());
-			LOG.debug("Registered BouncyCastleProvider");
-			new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
-			LOG.debug("Support for AES256_CBC ok");
-		} catch (CMSException e) {
-			throw new RuntimeException("Feil under initialisering av algoritmer. Er Java Cryptographic Excetsions (JCE) installert?", e);
-		}
-	}
+    public static void addBouncyCastleProviderAndVerify_AES256_CBC_Support() {
+        try {
+            Security.addProvider(new BouncyCastleProvider());
+            LOG.debug("Registered BouncyCastleProvider");
+            new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+            LOG.debug("Support for AES256_CBC ok");
+        } catch (CMSException e) {
+            throw new RuntimeException("Feil under initialisering av algoritmer. Er Java Cryptographic Excetsions (JCE) installert?", e);
+        }
+    }
 }

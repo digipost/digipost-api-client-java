@@ -22,22 +22,22 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sms-overrides", propOrder = {
-		"smsMobileNumber",
-		"text"
+        "smsMobileNumber",
+        "text"
 })
 public class SmsOverrides {
 
-	@XmlElement(name = "sms-mobile-number")
-	public final String smsMobileNumber;
-	@XmlElement(name = "text")
-	public final String text;
+    @XmlElement(name = "sms-mobile-number")
+    public final String smsMobileNumber;
+    @XmlElement(name = "text")
+    public final String text;
 
-	SmsOverrides() {
-		this(null, null);
-	}
+    SmsOverrides() {
+        this(null, null);
+    }
 
-	public SmsOverrides(final String smsMobileNumber, final String text) {
-		this.smsMobileNumber = smsMobileNumber;
-		this.text = text;
-	}
+    public SmsOverrides(final String smsMobileNumber, final String text) {
+        this.smsMobileNumber = smsMobileNumber;
+        this.text = text;
+    }
 }

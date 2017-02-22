@@ -21,6 +21,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "read")
 @XmlEnum
 public enum Read {
-	Y,
-	N;
+    Y,
+    N;
 }

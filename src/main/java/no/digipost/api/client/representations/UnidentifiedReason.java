@@ -22,15 +22,15 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum UnidentifiedReason {
 
-	MULTIPLE_MATCHES,
-	NOT_FOUND;
+    MULTIPLE_MATCHES,
+    NOT_FOUND;
 
-	public String value() {
-		return name();
-	}
+    public String value() {
+        return name();
+    }
 
-	public static UnidentifiedReason fromValue(String v) {
-		return valueOf(v);
-	}
+    public static UnidentifiedReason fromValue(String v) {
+        return valueOf(v);
+    }
 
 }

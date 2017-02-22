@@ -1,10 +1,24 @@
 sudo: false
 cache:
   directories:
-    - '$HOME/.m2/repository'
+    - "$HOME/.m2/repository"
 
 language: java
 jdk:
-  - oraclejdk7
   - oraclejdk8
+
+env:
+  global:
+  - secure: DI3MgvvWSEZrpgjjUwGed3wxVf8UDwlvFwk1vEmg1TVSsda0wppDjTwCm5MT3rhe76R3vxaOWvLRosPctN8ej8tPJNi1XmrSR9/wwmbjFU+OCAGYBfkcVTI9hHmd5Xtgp9KNm8/9OD+QoWv9Rfe/ph3HzvWCWykc0i9ITstgckY=
+  - secure: bK8gInLepwyu6dHdKOc1656Oagkbfig3G4v1PtG1zPSslzrJX3KgFj6HHPQICeab9dthSjDejYftGWglF+HoyFWwrHWwgNb7j9YD3jdQhjt6B1f2YKwhohzgCCRpIJJ8nz2DkBAkASnXoYKpskBsSGy9Vt7w3gXOaqPXFbISRDs=
+
+before_install:
+  - echo "<settings><servers><server><id>sonatype-oss-nexus-snapshots</id><username>\${env.SONATYPE_USER}</username><password>\${env.SONATYPE_PASS}</password></server></servers></settings>" > ~/.m2/deploy-settings.xml
+
+install: true
+
+script:
+  - 'echo "TRAVIS_PULL_REQUEST value: $TRAVIS_PULL_REQUEST"'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn clean deploy --update-snapshots --settings ~/.m2/deploy-settings.xml; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then mvn clean install --update-snapshots; fi' #Uses !="false" because $TRAVIS_PULL_REQUEST is the Pull Request # if such is the case.
 

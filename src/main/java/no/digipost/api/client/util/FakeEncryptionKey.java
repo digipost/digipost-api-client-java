@@ -26,25 +26,25 @@ import java.security.KeyPairGenerator;
 
 public class FakeEncryptionKey {
 
-	public static EncryptionKey createFakeEncryptionKey() {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (Writer osWriter = new OutputStreamWriter(baos); JcaPEMWriter writer = new JcaPEMWriter(osWriter)) {
+    public static EncryptionKey createFakeEncryptionKey() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (Writer osWriter = new OutputStreamWriter(baos); JcaPEMWriter writer = new JcaPEMWriter(osWriter)) {
 
-			KeyPairGenerator factory = KeyPairGenerator.getInstance("RSA");
-			factory.initialize(2048);
-			KeyPair keyPair = factory.generateKeyPair();
+            KeyPairGenerator factory = KeyPairGenerator.getInstance("RSA");
+            factory.initialize(2048);
+            KeyPair keyPair = factory.generateKeyPair();
 
-			writer.writeObject(keyPair.getPublic());
+            writer.writeObject(keyPair.getPublic());
 
-		} catch (Exception e) {
-			throw new RuntimeException("Failed creation of fake encryption key.", e);
-		}
+        } catch (Exception e) {
+            throw new RuntimeException("Failed creation of fake encryption key.", e);
+        }
 
-		EncryptionKey fakeKey = new EncryptionKey();
-		fakeKey.setKeyId("fake-hash");
-		fakeKey.setValue(new String(baos.toByteArray()));
+        EncryptionKey fakeKey = new EncryptionKey();
+        fakeKey.setKeyId("fake-hash");
+        fakeKey.setValue(new String(baos.toByteArray()));
 
-		return fakeKey;
-	}
+        return fakeKey;
+    }
 
 }

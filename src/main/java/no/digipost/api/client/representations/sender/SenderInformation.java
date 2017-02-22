@@ -16,25 +16,34 @@
 package no.digipost.api.client.representations.sender;
 
 import no.digipost.print.validate.PdfValidationSettings;
-import no.motif.types.Elements;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 
 import java.util.List;
 
-import static no.digipost.api.client.representations.sender.SenderFeature.*;
-import static no.motif.Base.equalTo;
-import static no.motif.Iterate.on;
+import static java.util.stream.Collectors.joining;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_BLEED;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_FONTS;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_MARGINS_LEFT;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PAGEAMOUNT;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PDFVERSION;
+import static no.digipost.print.validate.PdfValidationSettings.DEFAULT_BLEED_MM;
 
 /**
  * Informasjon om en avsender. Bruk
  * {@link #is(SenderStatus) is(}{@link SenderStatus#VALID_SENDER VALID_SENDER)}
  * for å avgjøre om avsenderen er gyldig, og eksempelvis
- * {@link #hasEnabled(SenderFeature) hasEnabled(}{@link SenderFeature#DIGIPOST_DELIVERY DIGIPOST_DELIVERY)}
+ * {@link #hasEnabled(SenderFeatureName) hasEnabled(}{@link SenderFeatureName#DIGIPOST_DELIVERY DIGIPOST_DELIVERY)}
  * for å sjekke om du kan sende post fra avsenderen med REST-APIet til Digipost.
  *
  * @see SenderStatus
- * @see SenderFeature
+ * @see SenderFeatureName
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sender-information", propOrder = {
@@ -55,14 +64,14 @@ public class SenderInformation
 
     @XmlElementWrapper(name = "supported-features")
     @XmlElement(name = "feature", nillable = false)
-    private List<String> supportedFeatures;
+    private List<SenderFeature> supportedFeatures;
 
     public SenderInformation() { }
 
     public SenderInformation(Long senderId, SenderStatus status, List<SenderFeature> supportedFeatures) {
-    	this.senderId = senderId;
-    	this.status = status;
-    	this.supportedFeatures = supportedFeatures == null || supportedFeatures.isEmpty() ? null : on(supportedFeatures).map(getIdentificator).collect();
+        this.senderId = senderId;
+        this.status = status;
+        this.supportedFeatures = supportedFeatures == null || supportedFeatures.isEmpty() ? null : supportedFeatures;
     }
 
 
@@ -74,29 +83,42 @@ public class SenderInformation
         return this.status == status;
     }
 
-    public Elements<SenderFeature> getSupportedFeatures() {
-    	return on(supportedFeatures).map(SenderFeature.toSenderFeature);
+    public List<SenderFeature> getSupportedFeatures() {
+        return supportedFeatures;
     }
 
-    public boolean hasEnabled(SenderFeature feature) {
-    	return getSupportedFeatures().exists(equalTo(feature));
+    public boolean hasEnabled(SenderFeatureName featureName) {
+        return get(featureName) != null;
+    }
+
+    public SenderFeature get(SenderFeatureName featureName) {
+        for (SenderFeature feature : supportedFeatures ){
+            if (featureName.equals(feature.getName())) {
+                return feature;
+            }
+        }
+        return null;
     }
 
     @Override
     public String toString() {
-    	StringBuilder s = new StringBuilder(status.toString());
-    	if (status != SenderStatus.NO_INFO_AVAILABLE) {
-    		s.append(" - id: ").append(senderId)
-			 .append(", supported features: ").append(on(supportedFeatures).join(", "));
-    	}
-    	return s.toString();
+        StringBuilder s = new StringBuilder(status.toString());
+        if (status != SenderStatus.NO_INFO_AVAILABLE) {
+            s.append(" - id: ").append(senderId)
+             .append(", supported features: ")
+             .append(supportedFeatures.stream().map(Object::toString).collect(joining(", ")));
+        }
+        return s.toString();
     }
 
     public PdfValidationSettings getPdfValidationSettings() {
-    	return new PdfValidationSettings(
-    			hasEnabled(PRINTVALIDATION_MARGINS_LEFT),
-    			hasEnabled(PRINTVALIDATION_FONTS),
-    			hasEnabled(PRINTVALIDATION_PAGEAMOUNT),
-    			hasEnabled(PRINTVALIDATION_PDFVERSION));
+        SenderFeature bleed = get(PRINTVALIDATION_BLEED);
+        return new PdfValidationSettings(
+                hasEnabled(PRINTVALIDATION_MARGINS_LEFT),
+                hasEnabled(PRINTVALIDATION_FONTS),
+                hasEnabled(PRINTVALIDATION_PAGEAMOUNT),
+                hasEnabled(PRINTVALIDATION_PDFVERSION),
+                bleed != null ? bleed.getIntParam() : DEFAULT_BLEED_MM
+        );
     }
 }

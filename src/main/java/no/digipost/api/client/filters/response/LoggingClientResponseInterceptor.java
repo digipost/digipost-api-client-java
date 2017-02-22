@@ -25,18 +25,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static no.motif.Singular.optional;
 
 public class LoggingClientResponseInterceptor implements HttpResponseInterceptor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(LoggingClientResponseInterceptor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingClientResponseInterceptor.class);
 
-	@Override
-	public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-		byte[] entityBytes = optional(EntityUtils.toByteArray(response.getEntity())).orElse(new byte[0]);
-		LOG.info(new String(entityBytes, UTF_8));
-		response.setEntity(new ByteArrayEntity(entityBytes));
-	}
+    @Override
+    public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+        byte[] entityBytes = Optional.ofNullable(EntityUtils.toByteArray(response.getEntity())).orElseGet(() -> new byte[0]);
+        LOG.info(new String(entityBytes, UTF_8));
+        response.setEntity(new ByteArrayEntity(entityBytes));
+    }
 }

@@ -23,9 +23,9 @@ import static org.junit.Assert.assertThat;
 
 public class UserAgentTest {
 
-	@Test
-	public void should_return_correct_user_agent() {
-		assertThat(DIGIPOST_USER_AGENT, containsString("no.digipost - digipost-api-client-java"));
-	}
+    @Test
+    public void should_return_correct_user_agent() {
+        assertThat(DIGIPOST_USER_AGENT, containsString("no.digipost - digipost-api-client-java"));
+    }
 
 }

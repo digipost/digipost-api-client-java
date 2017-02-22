@@ -16,199 +16,218 @@
 package no.digipost.api.client.representations;
 
 
-import org.joda.time.DateTime;
 import org.junit.Test;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
-import static no.digipost.api.client.representations.AuthenticationLevel.*;
-import static no.digipost.api.client.representations.DocumentEventType.*;
+import static java.util.UUID.randomUUID;
+import static no.digipost.api.client.representations.AuthenticationLevel.IDPORTEN_3;
+import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
+import static no.digipost.api.client.representations.AuthenticationLevel.TWO_FACTOR;
+import static no.digipost.api.client.representations.Channel.DIGIPOST;
+import static no.digipost.api.client.representations.DocumentEventType.EMAIL_NOTIFICATION_FAILED;
+import static no.digipost.api.client.representations.DocumentEventType.MOVE_FILES_FROM_PUBLIC_SECTOR;
+import static no.digipost.api.client.representations.DocumentEventType.OPENED;
+import static no.digipost.api.client.representations.DocumentEventType.POSTMARKED;
+import static no.digipost.api.client.representations.DocumentEventType.PRINT_FAILED;
+import static no.digipost.api.client.representations.DocumentEventType.SHREDDED;
+import static no.digipost.api.client.representations.DocumentEventType.SMS_NOTIFICATION_FAILED;
 import static no.digipost.api.client.representations.ErrorType.CLIENT_DATA;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
+import static no.digipost.api.client.representations.MessageStatus.DELIVERED;
 import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static no.digipost.api.client.representations.XmlTestHelper.marshallValidateAndUnmarshall;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 public class XsdValidationTest {
 
 
-	private Link link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V6);
+    private Link link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V7);
 
 
-	@Test
-	public void validateRecipients() {
-		Address address = new Address("Streetn", "houseNumber", "houseLetter", "additionalAddressLine", "zipCode", "city");
-		ArrayList<Address> addresses = new ArrayList<Address>();
-		addresses.add(address);
-		Recipients recipients = new Recipients();
-		Recipient recipient = new Recipient("Even", "Emmil", "Beinlaus", "even.beinlaus#1234", addresses, link);
-		recipients.add(recipient);
-		marshallValidateAndUnmarshall(recipients);
-	}
+    @Test
+    public void validateRecipients() {
+        Address address = new Address("Streetn", "houseNumber", "houseLetter", "additionalAddressLine", "zipCode", "city");
+        ArrayList<Address> addresses = new ArrayList<Address>();
+        addresses.add(address);
+        Recipients recipients = new Recipients();
+        Recipient recipient = new Recipient("Even", "Emmil", "Beinlaus", "even.beinlaus#1234", addresses, link);
+        recipients.add(recipient);
+        marshallValidateAndUnmarshall(recipients);
+    }
 
-	@Test
-	public void validateErrorMessage() {
-		marshallValidateAndUnmarshall(new ErrorMessage(CLIENT_DATA, "Error message", link));
-	}
+    @Test
+    public void validateErrorMessage() {
+        marshallValidateAndUnmarshall(new ErrorMessage(CLIENT_DATA, "Error message", link));
+    }
 
-	@Test
-	public void validateAutocomplete() {
-		List<Suggestion> suggestions = new ArrayList<Suggestion>();
-		suggestions.add(new Suggestion("even", link));
-		marshallValidateAndUnmarshall(new Autocomplete(suggestions, link));
-	}
+    @Test
+    public void validateAutocomplete() {
+        List<Suggestion> suggestions = new ArrayList<Suggestion>();
+        suggestions.add(new Suggestion("even", link));
+        marshallValidateAndUnmarshall(new Autocomplete(suggestions, link));
+    }
 
-	@Test
-	public void validateEntryPoint() {
-		marshallValidateAndUnmarshall(new EntryPoint("dummy certificate-PEM", link, link, link));
-	}
+    @Test
+    public void validateEntryPoint() {
+        marshallValidateAndUnmarshall(new EntryPoint("dummy certificate-PEM", link, link, link));
+    }
 
-	@Test
-	public void validateMessage() {
-		Message messageWithDigipostAddress = newMessage(UUID.randomUUID().toString(),
-						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
-				)
-				.digipostAddress(new DigipostAddress("even.beinlaus#1234"))
-				.senderOrganization(new SenderOrganization("1337", "R&D"))
-				.build();
+    @Test
+    public void validateMessage() {
+        Message messageWithDigipostAddress = newMessage(randomUUID().toString(),
+                        new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
+                )
+                .digipostAddress(new DigipostAddress("even.beinlaus#1234"))
+                .senderOrganization(new SenderOrganization("1337", "R&D"))
+                .build();
 
-		Message messageWithPersonalIdentificationNumber = newMessage(UUID.randomUUID().toString(),
-						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
-				)
-				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
-				.build();
+        Message messageWithPersonalIdentificationNumber = newMessage(randomUUID().toString(),
+                        new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
+                )
+                .personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+                .build();
 
-		Document primaryDocumentToPreEncrypt = new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL);
-		Message messageWithPreEncryptAndSenderId = newMessage(UUID.randomUUID().toString(), primaryDocumentToPreEncrypt)
-				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
-				.senderId(10L)
-				.build();
+        Document primaryDocumentToPreEncrypt = new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL);
+        Message messageWithPreEncryptAndSenderId = newMessage(randomUUID().toString(), primaryDocumentToPreEncrypt)
+                .personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+                .senderId(10L)
+                .build();
 
-		primaryDocumentToPreEncrypt.setPreEncrypt();
+        primaryDocumentToPreEncrypt.encrypt();
 
-		Message messageWithTechnicalAttachment = newMessage(UUID.randomUUID().toString(),
-					new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL))
-				.personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
-				.attachments(Collections.singleton(Document.technicalAttachment(PDF, "tech-type")))
-				.build();
+        Message messageWithTechnicalAttachment = newMessage(randomUUID().toString(),
+                    new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL))
+                .personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+                .attachments(Collections.singleton(Document.technicalAttachment(PDF, "tech-type")))
+                .build();
 
 
-		marshallValidateAndUnmarshall(messageWithDigipostAddress);
-		marshallValidateAndUnmarshall(messageWithPersonalIdentificationNumber);
-		marshallValidateAndUnmarshall(messageWithPreEncryptAndSenderId);
-		marshallValidateAndUnmarshall(messageWithTechnicalAttachment);
-	}
+        marshallValidateAndUnmarshall(messageWithDigipostAddress);
+        marshallValidateAndUnmarshall(messageWithPersonalIdentificationNumber);
+        marshallValidateAndUnmarshall(messageWithPreEncryptAndSenderId);
+        marshallValidateAndUnmarshall(messageWithTechnicalAttachment);
+    }
 
-	@Test
-	public void validateMessage_invoicingAccount() {
-		Document document = new Document(UUID.randomUUID().toString(), "subject", PDF, null, null, null, TWO_FACTOR, NORMAL);
-		Message message = newMessage(UUID.randomUUID().toString(), document)
-				.digipostAddress(new DigipostAddress("even.beinlaus#1234"))
-				.invoiceReference("ACCOUNT01")
-				.deliveryTime(DateTime.now())
-				.build();
-		marshallValidateAndUnmarshall(message);
-	}
+    @Test
+    public void validateMessage_invoicingAccount() {
+        Document document = new Document(randomUUID().toString(), "subject", PDF, null, null, null, TWO_FACTOR, NORMAL);
+        Message message = newMessage(randomUUID().toString(), document)
+                .digipostAddress(new DigipostAddress("even.beinlaus#1234"))
+                .invoiceReference("ACCOUNT01")
+                .deliveryTime(ZonedDateTime.now())
+                .build();
+        marshallValidateAndUnmarshall(message);
+    }
 
-	@Test
-	public void validatePrintMessage() {
-		PrintRecipient address = new PrintRecipient("name", new NorwegianAddress("1234", "Oslo"));
-		Message message = newMessage(UUID.randomUUID().toString(),
-						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
-				)
-				.recipient(new MessageRecipient(new PrintDetails(address, address, B)))
-				.build();
-		marshallValidateAndUnmarshall(message);
-	}
+    @Test
+    public void validatePrintMessage() {
+        PrintRecipient address = new PrintRecipient("name", new NorwegianAddress("1234", "Oslo"));
+        Message message = newMessage(randomUUID().toString(),
+                        new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+                )
+                .recipient(new MessageRecipient(new PrintDetails(address, address, B)))
+                .build();
+        marshallValidateAndUnmarshall(message);
+    }
 
-	@Test
-	public void validatePrintMessageWithForeignRecipiantWihtCountry() {
-		PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", "Sverige", null));
-		Message message = newMessage(UUID.randomUUID().toString(),
-						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
-				)
-				.recipient(new MessageRecipient(new PrintDetails(address, address, B)))
-				.build();
-		marshallValidateAndUnmarshall(message);
-	}
+    @Test
+    public void validatePrintMessageWithForeignRecipiantWihtCountry() {
+        PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", "Sverige", null));
+        Message message = newMessage(randomUUID().toString(),
+                        new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+                )
+                .recipient(new MessageRecipient(new PrintDetails(address, address, B)))
+                .build();
+        marshallValidateAndUnmarshall(message);
+    }
 
-	@Test
-	public void validatePrintMessageWithForeignRecipiantWihtCountryCode() {
-		PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", null, "SE"));
-		Message message = newMessage(UUID.randomUUID().toString(),
-						new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
-				)
-				.recipient(new MessageRecipient(new PrintDetails(address, address, B)))
-				.build();
-		marshallValidateAndUnmarshall(message);
-	}
+    @Test
+    public void validatePrintMessageWithForeignRecipiantWihtCountryCode() {
+        PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", null, "SE"));
+        Message message = newMessage(randomUUID().toString(),
+                        new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+                )
+                .recipient(new MessageRecipient(new PrintDetails(address, address, B)))
+                .build();
+        marshallValidateAndUnmarshall(message);
+    }
 
-	@Test
-	public void validateDocumentEvents() {
-		DocumentEvent openedEvent = new DocumentEvent(UUID.randomUUID().toString(), OPENED, DateTime.now());
+    @Test
+    public void validateDocumentEvents() {
+        DocumentEvent openedEvent = new DocumentEvent(randomUUID().toString(), OPENED, ZonedDateTime.now());
 
-		DocumentEvent failedEmailNotificationEvent = new DocumentEvent(UUID.randomUUID().toString(), EMAIL_NOTIFICATION_FAILED, DateTime.now(),
-				new EmailNotificationFailedMetadata("emailAddress", "ERROR_CODE"));
+        DocumentEvent failedEmailNotificationEvent = new DocumentEvent(randomUUID().toString(), EMAIL_NOTIFICATION_FAILED, ZonedDateTime.now(),
+                new EmailNotificationFailedMetadata("emailAddress", "ERROR_CODE"));
 
-		DocumentEvent failedSmsNotificationEvent = new DocumentEvent(UUID.randomUUID().toString(), SMS_NOTIFICATION_FAILED, DateTime.now(),
-				new SmsNotificationFailedMetadata("12345678", "ERROR_CODE"));
+        DocumentEvent failedSmsNotificationEvent = new DocumentEvent(randomUUID().toString(), SMS_NOTIFICATION_FAILED, ZonedDateTime.now(),
+                new SmsNotificationFailedMetadata("12345678", "ERROR_CODE"));
 
-		DocumentEvent printFailedEvent = new DocumentEvent(UUID.randomUUID().toString(), PRINT_FAILED, DateTime.now(),
-				new FailedPrintMetadata("Feil dimensjoner"));
+        DocumentEvent printFailedEvent = new DocumentEvent(randomUUID().toString(), PRINT_FAILED, ZonedDateTime.now(),
+                new FailedPrintMetadata("Feil dimensjoner"));
 
-		DocumentEvent postmarkedEvent = new DocumentEvent(UUID.randomUUID().toString(), POSTMARKED, DateTime.now(),
-				new PostmarkedMetadata(DateTime.now()));
+        DocumentEvent postmarkedEvent = new DocumentEvent(randomUUID().toString(), POSTMARKED, ZonedDateTime.now(),
+                new PostmarkedMetadata(ZonedDateTime.now()));
 
-		DocumentEvent movedFilesEvent = new DocumentEvent(UUID.randomUUID().toString(), MOVE_FILES_FROM_PUBLIC_SECTOR, DateTime.now(),
-				new MoveFilesFromPublicSectorMetadata(true, DateTime.now().minusDays(3), "Subject", NORMAL, IDPORTEN_3, "fake-cert",
-						"dest-mailbox", "dest-mailbox-address", asList(new DocumentMetadata(UUID.randomUUID().toString(), null)))
-		);
+        DocumentEvent movedFilesEvent = new DocumentEvent(randomUUID().toString(), MOVE_FILES_FROM_PUBLIC_SECTOR, ZonedDateTime.now(),
+                new MoveFilesFromPublicSectorMetadata(true, ZonedDateTime.now().minusDays(3), "Subject", NORMAL, IDPORTEN_3, "fake-cert",
+                        "dest-mailbox", "dest-mailbox-address", asList(new DocumentMetadata(UUID.randomUUID().toString(), null)))
+        );
 
-		DocumentEvent shreddedEvent = new DocumentEvent(UUID.randomUUID().toString(), SHREDDED, DateTime.now());
+        DocumentEvent shreddedEvent = new DocumentEvent(randomUUID().toString(), SHREDDED, ZonedDateTime.now());
 
-		DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent,
-				failedSmsNotificationEvent, printFailedEvent, movedFilesEvent, postmarkedEvent, shreddedEvent));
-		marshallValidateAndUnmarshall(documentEvents);
-	}
+        DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent,
+                failedSmsNotificationEvent, printFailedEvent, movedFilesEvent, postmarkedEvent, shreddedEvent));
+        marshallValidateAndUnmarshall(documentEvents);
+    }
 
-	@Test
-	public void validate_document_status_simple() {
-		DocumentStatus primaryDoc = new DocumentStatus(UUID.randomUUID().toString(), DeliveryStatus.NOT_DELIVERED, DateTime.now(), null, null, Channel.DIGIPOST, true,
-				null, HashAlgorithm.NONE, null, null);
-		marshallValidateAndUnmarshall(primaryDoc);
-	}
+    @Test
+    public void validate_document_status_simple() {
+        DocumentStatus primaryDoc = new DocumentStatus(randomUUID().toString(), DeliveryStatus.NOT_DELIVERED, ZonedDateTime.now(), null, null, Channel.DIGIPOST, true,
+                null, HashAlgorithm.NONE, null, null);
+        marshallValidateAndUnmarshall(primaryDoc);
+    }
 
-	@Test
-	public void validate_document_status_with_attachments() {
-		DocumentStatus attachment1 = createDocumentStatus(false);
-		DocumentStatus attachment2 = createDocumentStatus(false);
-		DocumentStatus primaryDoc = createDocumentStatus(true, attachment1, attachment2);
+    @Test
+    public void validate_document_status_with_attachments() {
+        DocumentStatus attachment1 = createDocumentStatus(false);
+        DocumentStatus attachment2 = createDocumentStatus(false);
+        DocumentStatus primaryDoc = createDocumentStatus(true, attachment1, attachment2);
 
-		marshallValidateAndUnmarshall(primaryDoc);
-	}
+        marshallValidateAndUnmarshall(primaryDoc);
+    }
 
-	private DocumentStatus createDocumentStatus(boolean isPrimaryDocument, DocumentStatus ... attachments) {
-		return new DocumentStatus(UUID.randomUUID().toString(), DeliveryStatus.DELIVERED, DateTime.now(), DateTime.now(), Read.Y, Channel.PRINT, isPrimaryDocument,
-				"asdf", HashAlgorithm.SHA256, Arrays.asList(attachments), null);
-	}
+    private DocumentStatus createDocumentStatus(boolean isPrimaryDocument, DocumentStatus ... attachments) {
+        return new DocumentStatus(randomUUID().toString(), DeliveryStatus.DELIVERED, ZonedDateTime.now(), ZonedDateTime.now(), Read.Y, Channel.PRINT, isPrimaryDocument,
+                "asdf", HashAlgorithm.SHA256, Arrays.asList(attachments), null);
+    }
 
-	@Test
+    @Test
     public void validateMessageDelivery() {
-		DateTime deliveryTime = DateTime.now();
-		MessageDelivery delivery = new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, MessageStatus.DELIVERED, deliveryTime);
-		delivery.primaryDocument = new Document(UUID.randomUUID().toString(), "primary", FileType.PDF);
-		MessageDelivery unmarshalled = marshallValidateAndUnmarshall(delivery);
-		assertThat(unmarshalled, not(sameInstance(delivery)));
-		assertThat(unmarshalled.primaryDocument.uuid, is(delivery.primaryDocument.uuid));
-		assertThat(unmarshalled.primaryDocument.subject, is(delivery.primaryDocument.subject));
-		assertThat(unmarshalled.messageId, is(delivery.messageId));
-		assertThat(unmarshalled.deliveryMethod, is(delivery.deliveryMethod));
-		assertThat(unmarshalled.deliveryTime, is(delivery.deliveryTime));
-		assertThat(unmarshalled.status, is(delivery.status));
+        ZonedDateTime deliveryTime = ZonedDateTime.of(LocalDateTime.of(2017, 1, 30, 12, 45), ZoneId.of("GMT+3"));
+        MessageDelivery delivery = new MessageDelivery(randomUUID().toString(), DIGIPOST, DELIVERED, deliveryTime);
+        delivery.primaryDocument = new Document(randomUUID().toString(), "primary", FileType.PDF);
+        MessageDelivery unmarshalled = marshallValidateAndUnmarshall(delivery);
+        assertThat(unmarshalled, not(sameInstance(delivery)));
+        assertThat(unmarshalled.primaryDocument.uuid, is(delivery.primaryDocument.uuid));
+        assertThat(unmarshalled.primaryDocument.subject, is(delivery.primaryDocument.subject));
+        assertThat(unmarshalled.messageId, is(delivery.messageId));
+        assertThat(unmarshalled.deliveryMethod, is(delivery.deliveryMethod));
+        assertThat(unmarshalled.deliveryTime, is(delivery.deliveryTime));
+        assertThat(unmarshalled.status, is(delivery.status));
     }
 
 }

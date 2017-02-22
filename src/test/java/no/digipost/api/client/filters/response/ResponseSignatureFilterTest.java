@@ -20,13 +20,13 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.cookie.CookieOrigin;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -34,45 +34,46 @@ import java.net.URISyntaxException;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ResponseSignatureFilterTest {
 
-	private ResponseSignatureInterceptor responseSignatureInterceptor;
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
 
-	@Mock
-	private ApiService apiServiceMock;
+    private ResponseSignatureInterceptor responseSignatureInterceptor;
 
-	@Mock
-	private HttpResponse httpResponseMock;
+    @Mock
+    private ApiService apiServiceMock;
 
-	@Mock
-	private HttpContext httpContextMock;
+    @Mock
+    private HttpResponse httpResponseMock;
 
-	@Before
-	public void setUp() throws URISyntaxException {
-		responseSignatureInterceptor = new ResponseSignatureInterceptor(apiServiceMock);
-		responseSignatureInterceptor.setThrowOnError(true);
-		when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
-		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
-	}
+    @Mock
+    private HttpContext httpContextMock;
 
-	@Test
-	public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
-		responseSignatureInterceptor.setThrowOnError(false);
-		responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
-	}
+    @Before
+    public void setUp() throws URISyntaxException {
+        responseSignatureInterceptor = new ResponseSignatureInterceptor(apiServiceMock);
+        responseSignatureInterceptor.setThrowOnError(true);
+        when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
+    }
 
-	@Test
-	public void skal_kaste_feil_om_server_signatur_mangler() throws IOException, HttpException {
-		try {
-			responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle kastet feil grunnet manglende signatur header");
-		} catch (DigipostClientException e) {
-			assertThat(e.getMessage(), containsString("Mangler X-Digipost-Signature-header"));
-		}
-	}
+    @Test
+    public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
+        responseSignatureInterceptor.setThrowOnError(false);
+        responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
+    }
+
+    @Test
+    public void skal_kaste_feil_om_server_signatur_mangler() throws IOException, HttpException {
+        try {
+            responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
+            fail("Skulle kastet feil grunnet manglende signatur header");
+        } catch (DigipostClientException e) {
+            assertThat(e.getMessage(), containsString("Mangler X-Digipost-Signature-header"));
+        }
+    }
 
 }

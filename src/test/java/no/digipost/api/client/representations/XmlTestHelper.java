@@ -34,55 +34,55 @@ import java.io.InputStream;
 
 public class XmlTestHelper {
 
-	private static final Logger LOG = LoggerFactory.getLogger(XmlTestHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XmlTestHelper.class);
 
 
-	public static <T> T marshallValidateAndUnmarshall(T element) {
-		return marshallValidateAndUnmarshall(element, false);
-	}
+    public static <T> T marshallValidateAndUnmarshall(T element) {
+        return marshallValidateAndUnmarshall(element, false);
+    }
 
-	public static <T> T marshallValidateAndUnmarshall(T element, boolean log) {
-		try (ByteArrayOutputStream resultXml = new ByteArrayOutputStream()) {
-			Marshaller marshaller = Singletons.jaxbContext.createMarshaller();
-			marshaller.setSchema(Singletons.schema);
-			marshaller.setProperty("jaxb.formatted.output", true);
-			marshaller.marshal(element, new StreamResult(resultXml));
-			resultXml.flush();
-			byte[] xml = resultXml.toByteArray();
-			if (log) {
-				LOG.info("Marshalled XML:\n{}", new String(xml));
-			}
-			try (InputStream in = new ByteArrayInputStream(xml)) {
-				Unmarshaller unmarshaller = Singletons.jaxbContext.createUnmarshaller();
-				unmarshaller.setSchema(Singletons.schema);
-				@SuppressWarnings("unchecked")
-				T unmarshalled = (T) unmarshaller.unmarshal(in);
-				return unmarshalled;
-			}
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
-	}
-
-
-	/**
-	 * Inner class to achieve lazy initialization of static singletons.
-	 */
-	private static final class Singletons {
-
-		static final Schema schema;
-		static final JAXBContext jaxbContext;
-
-		static {
-			SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-			try {
-	            schema = schemaFactory.newSchema(XmlTestHelper.class.getResource("/xsd/api_v6.xsd"));
-	            jaxbContext = JAXBContext.newInstance("no.digipost.api.client.representations:no.digipost.api.client.representations.sender");
-            } catch (SAXException | JAXBException e) {
-	            throw new RuntimeException(e.getMessage(), e);
+    public static <T> T marshallValidateAndUnmarshall(T element, boolean log) {
+        try (ByteArrayOutputStream resultXml = new ByteArrayOutputStream()) {
+            Marshaller marshaller = Singletons.jaxbContext.createMarshaller();
+            marshaller.setSchema(Singletons.schema);
+            marshaller.setProperty("jaxb.formatted.output", true);
+            marshaller.marshal(element, new StreamResult(resultXml));
+            resultXml.flush();
+            byte[] xml = resultXml.toByteArray();
+            if (log) {
+                LOG.info("Marshalled XML:\n{}", new String(xml));
             }
-		}
-	}
+            try (InputStream in = new ByteArrayInputStream(xml)) {
+                Unmarshaller unmarshaller = Singletons.jaxbContext.createUnmarshaller();
+                unmarshaller.setSchema(Singletons.schema);
+                @SuppressWarnings("unchecked")
+                T unmarshalled = (T) unmarshaller.unmarshal(in);
+                return unmarshalled;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+
+    /**
+     * Inner class to achieve lazy initialization of static singletons.
+     */
+    private static final class Singletons {
+
+        static final Schema schema;
+        static final JAXBContext jaxbContext;
+
+        static {
+            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            try {
+                schema = schemaFactory.newSchema(XmlTestHelper.class.getResource("/xsd/api_v7.xsd"));
+                jaxbContext = JAXBContext.newInstance("no.digipost.api.client.representations:no.digipost.api.client.representations.sender");
+            } catch (SAXException | JAXBException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        }
+    }
 
 
 }

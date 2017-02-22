@@ -23,29 +23,29 @@ import org.slf4j.LoggerFactory;
 
 public class LoggingUtil {
 
-	private static final Logger LOG = LoggerFactory.getLogger(LoggingUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingUtil.class);
 
-	public static void logResponse(HttpResponse response) {
-		LOG.info("HTTP response status code: {}", response.getStatusLine().getStatusCode());
-		LOG.info("HTTP response headers: {}", headersAsString(response.getAllHeaders()));
-	}
+    public static void logResponse(HttpResponse response) {
+        LOG.info("HTTP response status code: {}", response.getStatusLine().getStatusCode());
+        LOG.info("HTTP response headers: {}", headersAsString(response.getAllHeaders()));
+    }
 
-	public static String headersAsString(Header[] httpHeaders) {
+    public static String headersAsString(Header[] httpHeaders) {
 
-		StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder();
 
-		for (Header header : httpHeaders) {
+        for (Header header : httpHeaders) {
 
-			result.append(header.getName()).append(" :");
+            result.append(header.getName()).append(" :");
 
-			for (HeaderElement element : header.getElements()) {
-				result.append(" ").append(element.getValue());
-			}
+            for (HeaderElement element : header.getElements()) {
+                result.append(" ").append(element.getValue());
+            }
 
-			result.append("; ");
+            result.append("; ");
 
-		}
-		return result.toString();
+        }
+        return result.toString();
 
-	}
+    }
 }

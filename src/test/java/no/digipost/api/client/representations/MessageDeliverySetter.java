@@ -19,11 +19,11 @@ import java.util.List;
 
 public class MessageDeliverySetter extends MessageDelivery {
 
-	public static MessageDelivery setMessageDeliveryStatus(MessageDelivery messageDelivery, final Document primaryDocument, List<Document> attachments, final Link link){
-		messageDelivery.primaryDocument = primaryDocument;
-		messageDelivery.attachments = attachments;
-		messageDelivery.addLink(link);
+    public static MessageDelivery setMessageDeliveryStatus(MessageDelivery messageDelivery, final Document primaryDocument, List<Document> attachments, final Link link){
+        messageDelivery.primaryDocument = primaryDocument;
+        messageDelivery.attachments = attachments;
+        messageDelivery.addLink(link);
 
-		return messageDelivery;
-	}
+        return messageDelivery;
+    }
 }
