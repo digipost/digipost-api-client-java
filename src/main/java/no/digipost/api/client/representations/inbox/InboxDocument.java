@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.net.URI;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -62,6 +63,7 @@ public class InboxDocument {
     protected List<InboxDocument> attachments;
 
     public InboxDocument() {
+        attachments = new ArrayList<>();
     }
 
     public long getId() {
