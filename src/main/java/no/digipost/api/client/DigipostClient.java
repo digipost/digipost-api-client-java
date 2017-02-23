@@ -141,20 +141,6 @@ public class DigipostClient {
     }
 
     /**
-     * Bestemmer klienten skal kaste exception ved feil under validering av serversignatur, eller
-     * om den heller skal logge med log level warn.
-     *
-     * @param throwOnError true hvis den skal kaste exception, false for warn logging
-     */
-    public DigipostClient setThrowOnResponseValidationError(final boolean throwOnError) {
-        responseDateInterceptor.setThrowOnError(throwOnError);
-        responseHashInterceptor.setThrowOnError(throwOnError);
-        responseSignatureInterceptor.setThrowOnError(throwOnError);
-        return this;
-    }
-
-
-    /**
      * Oppretter en forsendelse for sending gjennom Digipost. Dersom mottaker ikke er
      * digipostbruker og det ligger printdetaljer på forsendelsen bestiller vi
      * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang

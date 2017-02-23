@@ -28,8 +28,6 @@ import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -45,13 +43,6 @@ import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ER
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ResponseSignatureInterceptor.class);
-    private boolean shouldThrow = true;
-
-    public void setThrowOnError(final boolean shouldThrow) {
-        this.shouldThrow = shouldThrow;
-    }
 
     private final EventLogger eventLogger;
     private final ApiService apiService;
@@ -84,23 +75,18 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
             instance.update(signatureString.getBytes());
             boolean verified = instance.verify(serverSignaturBytes);
             if (!verified) {
-                throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Melding fra server matcher ikke signatur.");
+                throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Response from server did not match signature.");
             } else {
-                eventLogger.log("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren " + X_Digipost_Signature
-                        + " var OK: " + serverSignaturBase64);
+                eventLogger.log("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren "
+                        + X_Digipost_Signature + " var OK: " + serverSignaturBase64);
             }
         } catch (Exception e) {
-            if (shouldThrow) {
-                if (e instanceof DigipostClientException) {
-                    throw (DigipostClientException) e;
-                } else {
-                    throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-                            "Det skjedde en feil under signatursjekk: " + e.getMessage());
-                }
+            if (e instanceof DigipostClientException) {
+                throw (DigipostClientException) e;
             } else {
-                LOG.warn("Feil under validering av server signatur: '" + e.getMessage() + "'. " +
-                        (LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));
-                LOG.debug(e.getMessage(), e);
+                throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
+                        "An exception occured during server response signature verification. "
+                                + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
             }
         }
     }

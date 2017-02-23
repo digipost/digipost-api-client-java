@@ -56,14 +56,7 @@ public class ResponseSignatureFilterTest {
     @Before
     public void setUp() throws URISyntaxException {
         responseSignatureInterceptor = new ResponseSignatureInterceptor(apiServiceMock);
-        responseSignatureInterceptor.setThrowOnError(true);
         when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
-    }
-
-    @Test
-    public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
-        responseSignatureInterceptor.setThrowOnError(false);
-        responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
     }
 
     @Test

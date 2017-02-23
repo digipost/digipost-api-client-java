@@ -339,8 +339,7 @@ public class ApiServiceImpl implements ApiService {
         try(CloseableHttpResponse execute = send(httpGet)) {
 
             if (execute.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                EntryPoint entryPoint = unmarshal(entryPointContext, execute.getEntity().getContent(), EntryPoint.class);
-                return entryPoint;
+                return unmarshal(entryPointContext, execute.getEntity().getContent(), EntryPoint.class);
             } else {
                 ErrorMessage errorMessage = unmarshal(errorMessageContext, execute.getEntity().getContent(), ErrorMessage.class);
                 throw new DigipostClientException(errorMessage);

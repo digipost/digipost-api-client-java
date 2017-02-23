@@ -59,7 +59,6 @@ public class ResponseDateInterceptorTest {
     @Before
     public void setUp() {
         responseDateInterceptor = new ResponseDateInterceptor(clock);
-        responseDateInterceptor.setThrowOnError(true);
         when(httpResponseMock.getStatusLine()).thenReturn(new StatusLineMock(200));
     }
 
@@ -70,7 +69,7 @@ public class ResponseDateInterceptorTest {
             responseDateInterceptor.process(httpResponseMock, httpContextMock);
             fail("Skulle ha kastet feil grunnet manglende Date-header");
         } catch (DigipostClientException e) {
-            assertThat(e.getMessage(), containsString("Mangler Date-header"));
+            assertThat(e.getMessage(), containsString("Missing Date header in response"));
         }
     }
 
@@ -84,7 +83,7 @@ public class ResponseDateInterceptorTest {
             responseDateInterceptor.process(httpResponseMock, httpContextMock);
             fail("Skulle kastet feil grunnet feilaktig Date header format");
         } catch (DigipostClientException e) {
-            assertThat(e.getMessage(), containsString("Date-header '16. januar 2012 - 16:14:23' kunne ikke parses"));
+            assertThat(e.getMessage(), containsString("Unable to parse Date header '16. januar 2012 - 16:14:23'"));
         }
     }
 
@@ -98,7 +97,7 @@ public class ResponseDateInterceptorTest {
             responseDateInterceptor.process(httpResponseMock, httpContextMock);
             fail("Skulle kastet feil grunnet for ny Date header");
         } catch (DigipostClientException e) {
-            assertThat(e.getMessage(), containsString("Date-header fra server er for ny"));
+            assertThat(e.getMessage(), containsString("Date-header from server is too early"));
         }
     }
 
@@ -112,15 +111,7 @@ public class ResponseDateInterceptorTest {
             responseDateInterceptor.process(httpResponseMock, httpContextMock);
             fail("Skulle kastet feil grunnet for gammel Date header");
         } catch (DigipostClientException e) {
-            assertThat(e.getMessage(), containsString("Date-header fra server er for gammel"));
+            assertThat(e.getMessage(), containsString("Date header in response from server is too old"));
         }
     }
-
-    @Test
-    public void skal_ikke_kaste_feil_om_vi_ikke_vil_det() throws IOException, HttpException {
-        responseDateInterceptor.setThrowOnError(false);
-        when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
-        responseDateInterceptor.process(httpResponseMock, httpContextMock);
-    }
-
 }
