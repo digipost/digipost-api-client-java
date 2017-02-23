@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.filters.response;
 
-import no.digipost.api.client.MessageSenderTest.StatusLineMock;
+import no.digipost.api.client.MessageSenderTest;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
@@ -59,12 +59,11 @@ public class ResponseDateInterceptorTest {
     @Before
     public void setUp() {
         responseDateInterceptor = new ResponseDateInterceptor(clock);
-        when(httpResponseMock.getStatusLine()).thenReturn(new StatusLineMock(200));
     }
 
     @Test
     public void skal_kaste_exception_når_Date_header_mangler() throws IOException, HttpException {
-        when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
+        when(httpResponseMock.getStatusLine()).thenReturn(new MessageSenderTest.StatusLineMock(200));
         try {
             responseDateInterceptor.process(httpResponseMock, httpContextMock);
             fail("Skulle ha kastet feil grunnet manglende Date-header");
@@ -77,7 +76,6 @@ public class ResponseDateInterceptorTest {
     public void skal_kaste_feil_når_Date_header_er_på_feil_format() throws IOException, HttpException {
         List<BasicHeader> headers = new ArrayList<>();
         headers.add(new BasicHeader("Date", "16. januar 2012 - 16:14:23"));
-        when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
         when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
         try {
             responseDateInterceptor.process(httpResponseMock, httpContextMock);
@@ -91,7 +89,6 @@ public class ResponseDateInterceptorTest {
     public void skal_kaste_feil_når_Date_header_er_for_ny() throws IOException, HttpException {
         List<BasicHeader> headers = new ArrayList<>();
         headers.add(new BasicHeader("Date", "Tue, 04 Nov 2014 21:20:58 GMT"));
-        when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
         when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
         try {
             responseDateInterceptor.process(httpResponseMock, httpContextMock);
@@ -105,7 +102,6 @@ public class ResponseDateInterceptorTest {
     public void skal_kaste_feil_når_Date_header_er_for_gammel() throws IOException, HttpException {
         List<BasicHeader> headers = new ArrayList<>();
         headers.add(new BasicHeader("Date", "Tue, 04 Nov 2014 21:00:58 GMT"));
-        when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
         when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
         try {
             responseDateInterceptor.process(httpResponseMock, httpContextMock);
