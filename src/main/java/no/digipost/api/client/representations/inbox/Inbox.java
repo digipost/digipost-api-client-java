@@ -36,4 +36,12 @@ public class Inbox {
     public Inbox(List<InboxDocument> documents) {
         this.documents = documents;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Inbox{");
+        sb.append("documents=").append(documents);
+        sb.append('}');
+        return sb.toString();
+    }
 }

@@ -19,7 +19,6 @@ import no.digipost.api.client.ApiService;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
-import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.protocol.HttpContext;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,7 +33,6 @@ import java.net.URISyntaxException;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 public class ResponseSignatureFilterTest {
@@ -56,7 +54,6 @@ public class ResponseSignatureFilterTest {
     @Before
     public void setUp() throws URISyntaxException {
         responseSignatureInterceptor = new ResponseSignatureInterceptor(apiServiceMock);
-        when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
     }
 
     @Test
@@ -65,8 +62,13 @@ public class ResponseSignatureFilterTest {
             responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
             fail("Skulle kastet feil grunnet manglende signatur header");
         } catch (DigipostClientException e) {
-            assertThat(e.getMessage(), containsString("Mangler X-Digipost-Signature-header"));
+            assertThat(e.getMessage(), containsString("Missing X-Digipost-Signature header"));
         }
     }
 
+    @Test
+    public void skal_ikke_kaste_feil_om_server_signatur_mangler_for_kall_som_eksplisitt_ikke_krever_signatur() throws IOException, HttpException {
+        when(httpContextMock.getAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE)).thenReturn(true);
+        responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
+    }
 }

@@ -17,16 +17,8 @@ package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.EntryPoint;
-import no.digipost.api.client.representations.ErrorMessage;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MayHaveSender;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
@@ -52,9 +44,10 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpCoreContext;
 
 import javax.xml.bind.JAXB;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -69,14 +62,7 @@ import static java.util.Optional.ofNullable;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
-import static no.digipost.api.client.util.JAXBContextUtils.autocompleteContext;
-import static no.digipost.api.client.util.JAXBContextUtils.entryPointContext;
-import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
-import static no.digipost.api.client.util.JAXBContextUtils.identificationContext;
-import static no.digipost.api.client.util.JAXBContextUtils.marshal;
-import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
-import static no.digipost.api.client.util.JAXBContextUtils.recipientsContext;
-import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
+import static no.digipost.api.client.util.JAXBContextUtils.*;
 
 public class ApiServiceImpl implements ApiService {
 
@@ -335,8 +321,9 @@ public class ApiServiceImpl implements ApiService {
     private EntryPoint fetchEntryPoint() throws IOException {
         HttpGet httpGet = new HttpGet(digipostUrl + ENTRY_POINT);
         httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
-
-        try(CloseableHttpResponse execute = send(httpGet)) {
+        final HttpCoreContext httpCoreContext = HttpCoreContext.create();
+        httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
+        try(CloseableHttpResponse execute = send(httpGet, httpCoreContext)) {
 
             if (execute.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 return unmarshal(entryPointContext, execute.getEntity().getContent(), EntryPoint.class);
@@ -348,12 +335,20 @@ public class ApiServiceImpl implements ApiService {
     }
 
     private CloseableHttpResponse send(HttpRequestBase request){
+        return send(request, null);
+    }
+
+    private CloseableHttpResponse send(HttpRequestBase request, HttpContext context){
         try {
             if(config != null){
                 request.setConfig(config);
             }
             request.setHeader(X_Digipost_UserId, brokerId + "");
-            return httpClient.execute(request);
+            if (context == null) {
+                return httpClient.execute(request);
+            } else {
+                return httpClient.execute(request, context);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -419,29 +414,26 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public Inbox getInbox(SenderId senderId) {
-        try {
-            return getResource(String.format("/%s/inbox", senderId.getId()), Inbox.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        return getResource(String.format("/%s/inbox", senderId.getId()), Inbox.class);
     }
 
     @Override
     public InputStream getInboxDocumentContentStream(InboxDocument inboxDocument) {
-        HttpGet httpGet = new HttpGet(digipostUrl + inboxDocument.getContentUri());
-        httpGet.setHeader(HttpHeaders.ACCEPT, "WILDCARD");
-
-        try (CloseableHttpResponse execute = send(httpGet)){
-            Communicator.checkResponse(execute, eventLogger);
-            return execute.getEntity().getContent();
+        HttpGet httpGet = new HttpGet(inboxDocument.getContentUri());
+        httpGet.setHeader(HttpHeaders.ACCEPT, ContentType.WILDCARD.toString());
+        final HttpCoreContext httpCoreContext = HttpCoreContext.create();
+        httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
+        final CloseableHttpResponse response = send(httpGet, httpCoreContext);
+        Communicator.checkResponse(response, eventLogger);
+        try {
+            return response.getEntity().getContent();
         } catch (IOException e) {
-            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage(), e);
         }
     }
 
     @Override
     public void deleteInboxDocument(InboxDocument inboxDocument) {
-        HttpDelete httpDelete = new HttpDelete(digipostUrl + inboxDocument.getDeleteUri().getPath());
-        send(httpDelete);
+        send(new HttpDelete(inboxDocument.getDeleteUri()));
     }
 }

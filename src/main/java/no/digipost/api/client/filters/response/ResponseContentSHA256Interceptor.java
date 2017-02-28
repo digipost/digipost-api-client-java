@@ -39,7 +39,7 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
     @Override
     public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
         final HttpEntity entity = response.getEntity();
-        if (entity != null && entity.getContent() != null) {
+        if (entity != null && entity.getContent() != null && entity.getContentLength() > 0) {
             String hashHeaderValue = Optional.ofNullable(response.getFirstHeader(X_Content_SHA256))
                     .map(Header::getValue)
                     .filter(StringUtils::isNoneBlank)

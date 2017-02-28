@@ -180,6 +180,14 @@ public interface ApiService {
 
     Inbox getInbox(SenderId senderId);
 
+    /**
+     * Gets the content of the document.
+     *
+     * The content is streamed directly from the server. No in memory buffering.
+     *
+     * @param inboxDocument
+     * @return Document content stream. This stream is attached to the underlying HTTP connection so remember to close it
+     */
     InputStream getInboxDocumentContentStream(InboxDocument inboxDocument);
 
     void deleteInboxDocument(InboxDocument inboxDocument);
