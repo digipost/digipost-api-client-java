@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.time.ZonedDateTime;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -117,7 +118,7 @@ public class DigipostClient {
         this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 
         this.apiService = overriddenApiService == null ?
-                new ApiServiceImpl(httpClientBuilder, senderAccountId, this.eventLogger, digipostUrl, proxy) : overriddenApiService;
+                new ApiServiceImpl(httpClientBuilder, senderAccountId, this.eventLogger, URI.create(digipostUrl), proxy) : overriddenApiService;
 
         this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
         this.deliverer = new MessageDeliverer(deliveryType, messageSender);

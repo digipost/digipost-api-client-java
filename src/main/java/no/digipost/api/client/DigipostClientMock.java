@@ -15,13 +15,14 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.util.DigipostApiMock.Method;
-import no.digipost.api.client.util.DigipostApiMock.RequestsAndResponses;
 import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.DigipostApiMock;
+import no.digipost.api.client.util.DigipostApiMock.Method;
+import no.digipost.api.client.util.DigipostApiMock.MockRequest;
+import no.digipost.api.client.util.DigipostApiMock.RequestsAndResponses;
 import no.digipost.http.client3.DigipostHttpClientFactory;
 import no.digipost.http.client3.DigipostHttpClientSettings;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -34,14 +35,19 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.security.*;
+import java.net.URI;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
-import static no.digipost.api.client.util.DigipostApiMock.MockRequest;
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 
 /**
@@ -63,7 +69,7 @@ public class DigipostClientMock {
             throw new RuntimeException("Stepwise REST is not yet supported by " + DigipostClientMock.class.getName());
         }
 
-        String host = "http://localhost:" + PORT;
+        URI host = URI.create("http://localhost:" + PORT);
 
         HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 

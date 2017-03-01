@@ -80,15 +80,14 @@ public class ApiServiceImpl implements ApiService {
     private static final String ENTRY_POINT = "/";
     private final long brokerId;
     private CloseableHttpClient httpClient;
-    private final String digipostUrl;
+    private final URI digipostUrl;
     private final RequestConfig config;
     private final HttpClientBuilder httpClientBuilder;
 
     private final Cached cached;
     private final EventLogger eventLogger;
 
-    public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long senderAccountId, EventLogger eventLogger, String digipostUrl,
-                          HttpHost proxy) {
+    public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long senderAccountId, EventLogger eventLogger, URI digipostUrl, HttpHost proxy) {
         this.brokerId = senderAccountId;
         this.eventLogger = eventLogger;
         this.digipostUrl = digipostUrl;
@@ -116,7 +115,7 @@ public class ApiServiceImpl implements ApiService {
 
         EntryPoint entryPoint = getEntryPoint();
 
-        HttpPost httpPost = new HttpPost(digipostUrl + entryPoint.getCreateMessageUri().getPath());
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(entryPoint.getCreateMessageUri().getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader("MIME-Version", "1.0");
         httpPost.removeHeaders("Accept-Encoding");
@@ -129,7 +128,7 @@ public class ApiServiceImpl implements ApiService {
     public CloseableHttpResponse identifyAndGetEncryptionKey(final Identification identification) {
         EntryPoint entryPoint = getEntryPoint();
 
-        HttpPost httpPost = new HttpPost(digipostUrl + entryPoint.getIdentificationWithEncryptionKeyUri().getPath());
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(entryPoint.getIdentificationWithEncryptionKeyUri().getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
@@ -143,7 +142,7 @@ public class ApiServiceImpl implements ApiService {
 
         EntryPoint entryPoint = getEntryPoint();
 
-        HttpPost httpPost = new HttpPost(digipostUrl + entryPoint.getCreateMessageUri().getPath());
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(entryPoint.getCreateMessageUri().getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
@@ -154,7 +153,7 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public CloseableHttpResponse fetchExistingMessage(final URI location) {
-        HttpGet httpGet = new HttpGet(digipostUrl + location.getPath());
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(location.getPath()));
         httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         return send(httpGet);
     }
@@ -170,7 +169,7 @@ public class ApiServiceImpl implements ApiService {
     public CloseableHttpResponse getEncryptionKeyForPrint() {
         EntryPoint entryPoint = getEntryPoint();
 
-        HttpGet httpGet = new HttpGet(digipostUrl + entryPoint.getPrintEncryptionKey().getPath());
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(entryPoint.getPrintEncryptionKey().getPath()));
         httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         return send(httpGet);
     }
@@ -181,7 +180,7 @@ public class ApiServiceImpl implements ApiService {
 
         byte[] content = readLetterContent(letterContent);
 
-        HttpPost httpPost = new HttpPost(digipostUrl + addContentLink.getUri().getPath());
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(addContentLink.getUri().getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_OCTET_STREAM.toString());
         httpPost.setEntity(new ByteArrayEntity(content));
@@ -192,7 +191,7 @@ public class ApiServiceImpl implements ApiService {
     public CloseableHttpResponse send(final MessageDelivery createdMessage) {
         Link sendLink = fetchSendLink(createdMessage);
 
-        HttpPost httpPost = new HttpPost(digipostUrl + sendLink.getUri().getPath());
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(sendLink.getUri().getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setEntity(null);
         return send(httpPost);
@@ -229,7 +228,7 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public CloseableHttpResponse getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
         DateTimeFormatter urlParamPattern = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
-        URIBuilder builder = new URIBuilder().setPath(digipostUrl + getEntryPoint().getDocumentEventsUri().getPath())
+        URIBuilder builder = new URIBuilder(digipostUrl.resolve(getEntryPoint().getDocumentEventsUri().getPath()))
                 .setParameter("from", urlParamPattern.format(from))
                 .setParameter("to", urlParamPattern.format(to))
                 .setParameter("offset", String.valueOf(offset))
@@ -263,7 +262,7 @@ public class ApiServiceImpl implements ApiService {
 
     private CloseableHttpResponse getDocumentStatus(String path) {
 
-        HttpGet httpGet = new HttpGet(digipostUrl + path);
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(path));
         httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
         return send(httpGet);
@@ -271,14 +270,14 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public CloseableHttpResponse getContent(String path) {
-        HttpGet httpGet = new HttpGet(digipostUrl + path);
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(path));
 
         return send(httpGet);
     }
 
     @Override
     public Recipients search(final String searchString) {
-        HttpGet httpGet = new HttpGet(digipostUrl + getEntryPoint().getSearchUri().getPath() + "/" + searchString);
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(getEntryPoint().getSearchUri().getPath() + "/" + searchString));
         httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
         try(CloseableHttpResponse response = send(httpGet)){
@@ -290,7 +289,7 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public Autocomplete searchSuggest(final String searchString) {
-        HttpGet httpGet = new HttpGet(digipostUrl + getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString);
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString));
         httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
 
@@ -319,7 +318,7 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public CloseableHttpResponse identifyRecipient(final Identification identification) {
 
-        HttpPost httpPost = new HttpPost(digipostUrl + getEntryPoint().getIdentificationUri().getPath());
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(getEntryPoint().getIdentificationUri().getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
@@ -330,7 +329,7 @@ public class ApiServiceImpl implements ApiService {
     }
 
     private EntryPoint fetchEntryPoint() throws IOException {
-        HttpGet httpGet = new HttpGet(digipostUrl + ENTRY_POINT);
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(ENTRY_POINT));
         httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
         try(CloseableHttpResponse execute = send(httpGet)) {
@@ -393,7 +392,7 @@ public class ApiServiceImpl implements ApiService {
 
     private <R, P> R getResource(final String path, final Map<String, P> queryParams, final Class<R> entityType) {
         try {
-            HttpGet httpGet = new HttpGet(digipostUrl + path);
+            HttpGet httpGet = new HttpGet(digipostUrl.resolve(path));
             URIBuilder uriBuilder = new URIBuilder(httpGet.getURI());
 
             for (Entry<String, P> param : queryParams.entrySet()) {
