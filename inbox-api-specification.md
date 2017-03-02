@@ -41,11 +41,11 @@ Inbox inbox = client.getInbox(senderId);
 
 |Parameter|Type  |Description|
 |---------|------|-----------|
-|deliveryTimeBefore|ISO8601 DateTime|Only get documents delivered before this timestamp|
-|maxResults|int|Maximum number of returned documents (default: 100)|
+|offset|int|Skip *offset* number of documents for pagination (default: 0)|
+|limit|int|Maximum number of returned documents (default: 100)|
 
 ```http
-GET /<sender-id>/inbox?deliveryTimeBefore=2017-02-14T08:25:00+01:00&maxResults=100
+GET /<sender-id>/inbox?offset=0&maxResults=100
 Accept: application/vnd.digipost-v7+xml
 ```
 

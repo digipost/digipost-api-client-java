@@ -231,8 +231,12 @@ public class DigipostClient {
     }
 
 	public Inbox getInbox(SenderId senderId) {
-		return inboxCommunicator.getInbox(senderId);
+		return getInbox(senderId, 0, 100);
 	}
+
+    public Inbox getInbox(SenderId senderId, int offset, int limit) {
+        return inboxCommunicator.getInbox(senderId, offset, limit);
+    }
 
 	public InputStream getInboxDocumentContent(InboxDocument inboxDocument) {
 		return inboxCommunicator.getInboxDocumentContentStream(inboxDocument);
@@ -240,7 +244,9 @@ public class DigipostClient {
 
 	public void deleteInboxDocument(InboxDocument inboxDocument) {
 		inboxCommunicator.deleteInboxDocument(inboxDocument);
-	}private void log(final String stringToSignMsg) {
+	}
+
+	private void log(final String stringToSignMsg) {
 		LOG.debug(stringToSignMsg);
 		eventLogger.log(stringToSignMsg);
 	}

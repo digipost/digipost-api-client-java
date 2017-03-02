@@ -413,8 +413,11 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public Inbox getInbox(SenderId senderId) {
-        return getResource(String.format("/%s/inbox", senderId.getId()), Inbox.class);
+    public Inbox getInbox(SenderId senderId, int offset, int limit) {
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("offset", String.valueOf(offset));
+        queryParams.put("limit", String.valueOf(limit));
+        return getResource(String.format("/%s/inbox", senderId.getId()), queryParams, Inbox.class);
     }
 
     @Override

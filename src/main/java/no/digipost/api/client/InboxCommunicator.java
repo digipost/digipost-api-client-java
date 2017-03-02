@@ -20,6 +20,7 @@ import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 
 public class InboxCommunicator extends Communicator{
 
@@ -27,8 +28,8 @@ public class InboxCommunicator extends Communicator{
         super(apiService, eventLogger);
     }
 
-    public Inbox getInbox(SenderId senderId) {
-        return apiService.getInbox(senderId);
+    public Inbox getInbox(SenderId senderId, int offset, int limit) {
+        return apiService.getInbox(senderId, offset, limit);
     }
 
     public InputStream getInboxDocumentContentStream(InboxDocument inboxDocument) {

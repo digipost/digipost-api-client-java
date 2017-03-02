@@ -178,7 +178,7 @@ public interface ApiService {
      */
     SenderInformation getSenderInformation(String orgnr, String avsenderenhet);
 
-    Inbox getInbox(SenderId senderId);
+    Inbox getInbox(SenderId senderId, int offset, int limit);
 
     /**
      * Gets the content of the document.
