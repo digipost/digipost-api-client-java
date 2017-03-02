@@ -168,26 +168,26 @@ public class XsdValidationTest {
 
     @Test
     public void validateDocumentEvents() {
-        DocumentEvent openedEvent = new DocumentEvent(randomUUID().toString(), OPENED, ZonedDateTime.now());
+        DocumentEvent openedEvent = new DocumentEvent(randomUUID().toString(), OPENED, ZonedDateTime.now(), ZonedDateTime.now());
 
-        DocumentEvent failedEmailNotificationEvent = new DocumentEvent(randomUUID().toString(), EMAIL_NOTIFICATION_FAILED, ZonedDateTime.now(),
+        DocumentEvent failedEmailNotificationEvent = new DocumentEvent(randomUUID().toString(), EMAIL_NOTIFICATION_FAILED, ZonedDateTime.now(), ZonedDateTime.now(),
                 new EmailNotificationFailedMetadata("emailAddress", "ERROR_CODE"));
 
-        DocumentEvent failedSmsNotificationEvent = new DocumentEvent(randomUUID().toString(), SMS_NOTIFICATION_FAILED, ZonedDateTime.now(),
+        DocumentEvent failedSmsNotificationEvent = new DocumentEvent(randomUUID().toString(), SMS_NOTIFICATION_FAILED, ZonedDateTime.now(), ZonedDateTime.now(),
                 new SmsNotificationFailedMetadata("12345678", "ERROR_CODE"));
 
-        DocumentEvent printFailedEvent = new DocumentEvent(randomUUID().toString(), PRINT_FAILED, ZonedDateTime.now(),
+        DocumentEvent printFailedEvent = new DocumentEvent(randomUUID().toString(), PRINT_FAILED, ZonedDateTime.now(), ZonedDateTime.now(),
                 new FailedPrintMetadata("Feil dimensjoner"));
 
-        DocumentEvent postmarkedEvent = new DocumentEvent(randomUUID().toString(), POSTMARKED, ZonedDateTime.now(),
+        DocumentEvent postmarkedEvent = new DocumentEvent(randomUUID().toString(), POSTMARKED, ZonedDateTime.now(), ZonedDateTime.now(),
                 new PostmarkedMetadata(ZonedDateTime.now()));
 
-        DocumentEvent movedFilesEvent = new DocumentEvent(randomUUID().toString(), MOVE_FILES_FROM_PUBLIC_SECTOR, ZonedDateTime.now(),
+        DocumentEvent movedFilesEvent = new DocumentEvent(randomUUID().toString(), MOVE_FILES_FROM_PUBLIC_SECTOR, ZonedDateTime.now(), ZonedDateTime.now(),
                 new MoveFilesFromPublicSectorMetadata(true, ZonedDateTime.now().minusDays(3), "Subject", NORMAL, IDPORTEN_3, "fake-cert",
                         "dest-mailbox", "dest-mailbox-address", asList(new DocumentMetadata(UUID.randomUUID().toString(), null)))
         );
 
-        DocumentEvent shreddedEvent = new DocumentEvent(randomUUID().toString(), SHREDDED, ZonedDateTime.now());
+        DocumentEvent shreddedEvent = new DocumentEvent(randomUUID().toString(), SHREDDED, ZonedDateTime.now(), ZonedDateTime.now());
 
         DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent,
                 failedSmsNotificationEvent, printFailedEvent, movedFilesEvent, postmarkedEvent, shreddedEvent));

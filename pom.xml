@@ -14,7 +14,7 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>8.0-SNAPSHOT</version>
+    <version>8.0-SNAPSHIT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 

@@ -38,20 +38,25 @@ public class DocumentEvent {
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
     private ZonedDateTime created;
+    @XmlAttribute(name = "document-created", required = true)
+    @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+    @XmlSchemaType(name = "dateTime")
+    private ZonedDateTime documentCreated;
     @XmlElement(name = "metadata")
     private EventMetadata metadata;
 
     public DocumentEvent() {
     }
 
-    public DocumentEvent(String uuid, DocumentEventType type, ZonedDateTime created) {
-        this(uuid, type, created, null);
+    public DocumentEvent(String uuid, DocumentEventType type, ZonedDateTime created, ZonedDateTime documentCreated) {
+        this(uuid, type, created, documentCreated, null);
     }
 
-    public DocumentEvent(String uuid, DocumentEventType type, ZonedDateTime created, EventMetadata metadata) {
+    public DocumentEvent(String uuid, DocumentEventType type, ZonedDateTime created, ZonedDateTime documentCreated, EventMetadata metadata) {
         this.uuid = uuid;
         this.type = type;
         this.created = created;
+        this.documentCreated = documentCreated;
         this.metadata = metadata;
     }
 
@@ -69,5 +74,9 @@ public class DocumentEvent {
 
     public EventMetadata getMetadata() {
         return metadata;
+    }
+
+    public ZonedDateTime getDocumentCreated() {
+        return documentCreated;
     }
 }
