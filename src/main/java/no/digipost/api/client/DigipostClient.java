@@ -230,18 +230,48 @@ public class DigipostClient {
         return documentCommunicator.getDocumentStatus(senderId, uuid);
     }
 
-	public Inbox getInbox(SenderId senderId) {
+    public InputStream getContent(final String path) {
+        return documentCommunicator.getContent(path);
+    }
+
+    /**
+     * Get the first 100 documents in the inbox for the organisation represented by senderId.
+     *
+     * @param senderId Either an organisation that you operate on behalf of or your brokerId
+     * @return Inbox element with the 100 first documents
+     */
+    public Inbox getInbox(SenderId senderId) {
 		return getInbox(senderId, 0, 100);
 	}
 
+    /**
+     * Get documents from the inbox for the organisation represented by senderId.
+     *
+     * @param senderId Either an organisation that you operate on behalf of or your brokerId
+     * @param offset Number of documents to skip. For pagination
+     * @param limit Maximum number of documents to retrieve (max 1000)
+     * @return Inbox element with the 100 first documents
+     */
     public Inbox getInbox(SenderId senderId, int offset, int limit) {
         return inboxCommunicator.getInbox(senderId, offset, limit);
     }
 
+    /**
+     * Get the content of a document as a stream. The content is streamed from the server so remember to
+     * close the stream to prevent connection leaks.
+     *
+     * @param inboxDocument The document to get content for
+     * @return Entire content of the document as a stream
+     */
 	public InputStream getInboxDocumentContent(InboxDocument inboxDocument) {
 		return inboxCommunicator.getInboxDocumentContentStream(inboxDocument);
 	}
 
+    /**
+     * Delets the given document from the server
+     *
+     * @param inboxDocument The document to delete
+     */
 	public void deleteInboxDocument(InboxDocument inboxDocument) {
 		inboxCommunicator.deleteInboxDocument(inboxDocument);
 	}
@@ -250,10 +280,6 @@ public class DigipostClient {
 		LOG.debug(stringToSignMsg);
 		eventLogger.log(stringToSignMsg);
 	}
-
-    public InputStream getContent(final String path) {
-        return documentCommunicator.getContent(path);
-    }
 
     public static class DigipostClientBuilder{
         private ApiFlavor deliveryType = ApiFlavor.ATOMIC_REST;
