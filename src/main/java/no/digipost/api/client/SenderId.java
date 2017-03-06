@@ -17,13 +17,13 @@ package no.digipost.api.client;
 
 public class SenderId {
 
-	private final long id;
+    private final long id;
 
-	public SenderId(final long id) {
-		this.id = id;
-	}
+    public SenderId(final long id) {
+        this.id = id;
+    }
 
-	public long getId() {
-		return id;
-	}
+    public long getId() {
+        return id;
+    }
 }
