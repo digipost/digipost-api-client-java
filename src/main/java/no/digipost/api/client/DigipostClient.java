@@ -73,11 +73,11 @@ public class DigipostClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
 
-	private final EventLogger eventLogger;
-	private final ApiService apiService;
-	private final MessageSender messageSender;
-	private final MessageDeliverer deliverer;
-	private final DocumentCommunicator documentCommunicator;
+    private final EventLogger eventLogger;
+    private final ApiService apiService;
+    private final MessageSender messageSender;
+    private final MessageDeliverer deliverer;
+    private final DocumentCommunicator documentCommunicator;
     private final InboxCommunicator inboxCommunicator;
 
     private final ResponseSignatureInterceptor responseSignatureInterceptor;
@@ -122,9 +122,9 @@ public class DigipostClient {
         this.apiService = overriddenApiService == null ?
                 new ApiServiceImpl(httpClientBuilder, senderAccountId, this.eventLogger, digipostUrl, proxy) : overriddenApiService;
 
-		this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
-		this.deliverer = new MessageDeliverer(deliveryType, messageSender);
-		this.documentCommunicator = new DocumentCommunicator(apiService, this.eventLogger);
+        this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
+        this.deliverer = new MessageDeliverer(deliveryType, messageSender);
+        this.documentCommunicator = new DocumentCommunicator(apiService, this.eventLogger);
         this.inboxCommunicator = new InboxCommunicator(apiService, this.eventLogger);
         this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
 
@@ -241,8 +241,8 @@ public class DigipostClient {
      * @return Inbox element with the 100 first documents
      */
     public Inbox getInbox(SenderId senderId) {
-		return getInbox(senderId, 0, 100);
-	}
+        return getInbox(senderId, 0, 100);
+    }
 
     /**
      * Get documents from the inbox for the organisation represented by senderId.
@@ -263,23 +263,23 @@ public class DigipostClient {
      * @param inboxDocument The document to get content for
      * @return Entire content of the document as a stream
      */
-	public InputStream getInboxDocumentContent(InboxDocument inboxDocument) {
-		return inboxCommunicator.getInboxDocumentContentStream(inboxDocument);
-	}
+    public InputStream getInboxDocumentContent(InboxDocument inboxDocument) {
+        return inboxCommunicator.getInboxDocumentContentStream(inboxDocument);
+    }
 
     /**
      * Delets the given document from the server
      *
      * @param inboxDocument The document to delete
      */
-	public void deleteInboxDocument(InboxDocument inboxDocument) {
-		inboxCommunicator.deleteInboxDocument(inboxDocument);
-	}
+    public void deleteInboxDocument(InboxDocument inboxDocument) {
+        inboxCommunicator.deleteInboxDocument(inboxDocument);
+    }
 
-	private void log(final String stringToSignMsg) {
-		LOG.debug(stringToSignMsg);
-		eventLogger.log(stringToSignMsg);
-	}
+    private void log(final String stringToSignMsg) {
+        LOG.debug(stringToSignMsg);
+        eventLogger.log(stringToSignMsg);
+    }
 
     public static class DigipostClientBuilder{
         private ApiFlavor deliveryType = ApiFlavor.ATOMIC_REST;
