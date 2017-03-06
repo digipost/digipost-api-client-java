@@ -50,13 +50,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Stream;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofMinutes;
@@ -76,16 +71,10 @@ import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.*;
 import static no.digipost.api.client.representations.sender.SenderStatus.VALID_SENDER;
 import static no.digipost.api.client.util.JAXBContextUtils.*;
-import static no.motif.Singular.the;
 import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.Matchers.is;
-import static org.joda.time.DateTime.now;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.then;
@@ -362,12 +351,7 @@ public class MessageSenderTest {
         final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).encrypt();
         final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).encrypt());
 
-		final List<Document> allDocuments = the(printDocument).append(printAttachments).collect();
-
-		for (Document document : allDocuments) {
-			document.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt")));
-		}
-
+        concat(Stream.of(printDocument), printAttachments.stream()).forEach(document -> document.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt"))));
 
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		marshal(messageDeliveryContext,
