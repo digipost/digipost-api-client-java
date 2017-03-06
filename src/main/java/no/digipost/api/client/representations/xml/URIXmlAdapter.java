@@ -20,13 +20,13 @@ import java.net.URI;
 
 public class URIXmlAdapter extends XmlAdapter<String, URI> {
 
-	@Override
-	public URI unmarshal(final String value) {
-		return URI.create(value);
-	}
+    @Override
+    public URI unmarshal(final String value) {
+        return URI.create(value);
+    }
 
-	@Override
-	public String marshal(final URI uri) {
-		return uri.toString();
-	}
+    @Override
+    public String marshal(final URI uri) {
+        return uri.toString();
+    }
 }

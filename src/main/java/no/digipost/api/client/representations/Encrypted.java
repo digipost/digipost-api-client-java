@@ -23,12 +23,12 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "encrypted")
 public class Encrypted {
-	@XmlAttribute(name = "number-of-pages")
-	public Integer numberOfPages;
+    @XmlAttribute(name = "number-of-pages")
+    public Integer numberOfPages;
 
-	public Encrypted(){}
+    public Encrypted(){}
 
-	public Encrypted(Integer numberOfPages){
-		this.numberOfPages = numberOfPages;
-	}
+    public Encrypted(Integer numberOfPages){
+        this.numberOfPages = numberOfPages;
+    }
 }

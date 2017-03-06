@@ -31,9 +31,9 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class PrintDetails {
 
-    public static enum PostType { A, B }
-    public static enum NondeliverableHandling {	RETURN_TO_SENDER, SHRED }
-    public static enum PrintColors { MONOCHROME, COLORS; }
+    public enum PostType {A, B}
+    public enum NondeliverableHandling {RETURN_TO_SENDER, SHRED}
+    public enum PrintColors {MONOCHROME, COLORS}
 
 
     @XmlElement(required = true)
