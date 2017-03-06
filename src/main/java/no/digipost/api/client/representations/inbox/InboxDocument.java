@@ -108,18 +108,17 @@ public class InboxDocument {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("InboxDocument{");
-        sb.append("id=").append(id);
-        sb.append(", subject='").append(subject).append('\'');
-        sb.append(", sender='").append(sender).append('\'');
-        sb.append(", deliveryTime=").append(deliveryTime);
-        sb.append(", firstAccessed=").append(firstAccessed);
-        sb.append(", authenticationLevel=").append(authenticationLevel);
-        sb.append(", contentType='").append(contentType).append('\'');
-        sb.append(", contentUri=").append(contentUri);
-        sb.append(", deleteUri=").append(deleteUri);
-        sb.append(", attachments=").append(attachments);
-        sb.append('}');
-        return sb.toString();
+        return "InboxDocument{" +
+                "id=" + id +
+                ", subject='" + subject + '\'' +
+                ", sender='" + sender + '\'' +
+                ", deliveryTime=" + deliveryTime +
+                ", firstAccessed=" + firstAccessed +
+                ", authenticationLevel=" + authenticationLevel +
+                ", contentType='" + contentType + '\'' +
+                ", contentUri=" + contentUri +
+                ", deleteUri=" + deleteUri +
+                ", attachments=" + attachments +
+                '}';
     }
 }

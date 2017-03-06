@@ -30,7 +30,7 @@ public class Inbox {
     public final List<InboxDocument> documents;
 
     public Inbox() {
-        this(new ArrayList<InboxDocument>());
+        this(new ArrayList<>());
     }
 
     public Inbox(List<InboxDocument> documents) {
@@ -39,9 +39,6 @@ public class Inbox {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Inbox{");
-        sb.append("documents=").append(documents);
-        sb.append('}');
-        return sb.toString();
+        return "Inbox{documents=" + documents + "}";
     }
 }
