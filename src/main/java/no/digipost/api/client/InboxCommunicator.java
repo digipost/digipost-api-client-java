@@ -20,7 +20,6 @@ import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 
 import java.io.InputStream;
-import java.time.ZonedDateTime;
 
 public class InboxCommunicator extends Communicator{
 
