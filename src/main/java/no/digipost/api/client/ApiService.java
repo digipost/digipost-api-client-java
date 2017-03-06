@@ -178,17 +178,29 @@ public interface ApiService {
      */
     SenderInformation getSenderInformation(String orgnr, String avsenderenhet);
 
+    /**
+     * Get documents from the inbox for the organisation represented by senderId.
+     *
+     * @param senderId Either an organisation that you operate on behalf of or your brokerId
+     * @param offset Number of documents to skip. For pagination
+     * @param limit Maximum number of documents to retrieve (max 1000)
+     * @return Inbox element with the n=limit first documents
+     */
     Inbox getInbox(SenderId senderId, int offset, int limit);
 
     /**
-     * Gets the content of the document.
+     * Get the content of a document as a stream. The content is streamed from the server so remember to
+     * close the stream to prevent connection leaks.
      *
-     * The content is streamed directly from the server. No in memory buffering.
-     *
-     * @param inboxDocument
-     * @return Document content stream. This stream is attached to the underlying HTTP connection so remember to close it
+     * @param inboxDocument The document to get content for
+     * @return Entire content of the document as a stream
      */
     InputStream getInboxDocumentContentStream(InboxDocument inboxDocument);
 
+    /**
+     * Delets the given document from the server
+     *
+     * @param inboxDocument The document to delete
+     */
     void deleteInboxDocument(InboxDocument inboxDocument);
 }

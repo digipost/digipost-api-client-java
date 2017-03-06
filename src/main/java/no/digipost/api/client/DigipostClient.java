@@ -250,7 +250,7 @@ public class DigipostClient {
      * @param senderId Either an organisation that you operate on behalf of or your brokerId
      * @param offset Number of documents to skip. For pagination
      * @param limit Maximum number of documents to retrieve (max 1000)
-     * @return Inbox element with the 100 first documents
+     * @return Inbox element with the n=limit first documents
      */
     public Inbox getInbox(SenderId senderId, int offset, int limit) {
         return inboxCommunicator.getInbox(senderId, offset, limit);
