@@ -20,42 +20,42 @@ import javax.xml.bind.annotation.XmlRegistry;
 @XmlRegistry
 public class ObjectFactory {
 
-	public ObjectFactory() {
-	}
+    public ObjectFactory() {
+    }
 
-	public Recipients createRecipients() {
-		return new Recipients();
-	}
+    public Recipients createRecipients() {
+        return new Recipients();
+    }
 
-	public ErrorMessage createErrorMessage() {
-		return new ErrorMessage();
-	}
+    public ErrorMessage createErrorMessage() {
+        return new ErrorMessage();
+    }
 
-	public Autocomplete createAutocomplete() {
-		return new Autocomplete();
-	}
+    public Autocomplete createAutocomplete() {
+        return new Autocomplete();
+    }
 
-	public Message createMessage() {
-		return new Message();
-	}
+    public Message createMessage() {
+        return new Message();
+    }
 
-	public MessageDelivery createMessageDelivery() {
-		return new MessageDelivery();
-	}
+    public MessageDelivery createMessageDelivery() {
+        return new MessageDelivery();
+    }
 
-	public EntryPoint createEntryPoint() {
-		return new EntryPoint();
-	}
+    public EntryPoint createEntryPoint() {
+        return new EntryPoint();
+    }
 
-	public Invoice createInvoice() {
-		return new Invoice();
-	}
+    public Invoice createInvoice() {
+        return new Invoice();
+    }
 
-	public DocumentEvents createDocumentEvents() {
-		return new DocumentEvents();
-	}
+    public DocumentEvents createDocumentEvents() {
+        return new DocumentEvents();
+    }
 
-	public DocumentStatus createDocumentStatus() {
-		return new DocumentStatus();
-	}
+    public DocumentStatus createDocumentStatus() {
+        return new DocumentStatus();
+    }
 }

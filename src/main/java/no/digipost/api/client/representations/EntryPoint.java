@@ -29,59 +29,59 @@ import static no.digipost.api.client.representations.Relation.*;
 @XmlRootElement(name = "entrypoint")
 public class EntryPoint extends Representation {
 
-	@XmlElement(name = "certificate", required = false)
-	private String certificate;
+    @XmlElement(name = "certificate", required = false)
+    private String certificate;
 
-	public EntryPoint(final String certificate, final Link... links) {
-		super(links);
-		this.certificate = certificate;
-	}
+    public EntryPoint(final String certificate, final Link... links) {
+        super(links);
+        this.certificate = certificate;
+    }
 
-	public EntryPoint() {
-	}
+    public EntryPoint() {
+    }
 
-	public URI getCreateMessageUri() {
-		return getLinkByRelationName(CREATE_MESSAGE).getUri();
-	}
+    public URI getCreateMessageUri() {
+        return getLinkByRelationName(CREATE_MESSAGE).getUri();
+    }
 
-	public URI getPrintEncryptionKey() {
-		return getLinkByRelationName(GET_PRINT_ENCRYPTION_KEY).getUri();
-	}
+    public URI getPrintEncryptionKey() {
+        return getLinkByRelationName(GET_PRINT_ENCRYPTION_KEY).getUri();
+    }
 
-	public URI getSearchUri() {
-		return getLinkByRelationName(SEARCH).getUri();
-	}
+    public URI getSearchUri() {
+        return getLinkByRelationName(SEARCH).getUri();
+    }
 
-	public URI getAutocompleteUri() {
-		return getLinkByRelationName(AUTOCOMPLETE).getUri();
-	}
+    public URI getAutocompleteUri() {
+        return getLinkByRelationName(AUTOCOMPLETE).getUri();
+    }
 
-	public URI getIdentificationUri() {
-		return getLinkByRelationName(IDENTIFY_RECIPIENT).getUri();
-	}
+    public URI getIdentificationUri() {
+        return getLinkByRelationName(IDENTIFY_RECIPIENT).getUri();
+    }
 
-	public URI getIdentificationWithEncryptionKeyUri() {
-		return getLinkByRelationName(IDENTIFY_RECIPIENT_WITH_ENCRYPTION_KEY).getUri();
-	}
+    public URI getIdentificationWithEncryptionKeyUri() {
+        return getLinkByRelationName(IDENTIFY_RECIPIENT_WITH_ENCRYPTION_KEY).getUri();
+    }
 
-	public URI getDocumentEventsUri() {
-		return getLinkByRelationName(DOCUMENT_EVENTS).getUri();
-	}
+    public URI getDocumentEventsUri() {
+        return getLinkByRelationName(DOCUMENT_EVENTS).getUri();
+    }
 
-	public URI getSenderInformationUri() {
-		return getLinkByRelationName(GET_SENDER_INFORMATION).getUri();
-	}
+    public URI getSenderInformationUri() {
+        return getLinkByRelationName(GET_SENDER_INFORMATION).getUri();
+    }
 
-	public String getCertificate() {
-		return certificate;
-	}
+    public String getCertificate() {
+        return certificate;
+    }
 
-	@XmlElement(name = "link")
-	protected List<Link> getLink() {
-		return links;
-	}
+    @XmlElement(name = "link")
+    protected List<Link> getLink() {
+        return links;
+    }
 
-	protected void setLink(final List<Link> links) {
-		this.links = links;
-	}
+    protected void setLink(final List<Link> links) {
+        this.links = links;
+    }
 }

@@ -24,46 +24,46 @@ import java.util.Objects;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sender-organization", propOrder = {
-		"organizationId",
-		"partId"
+        "organizationId",
+        "partId"
 })
 public final class SenderOrganization {
 
-	@XmlElement(name = "organization-id", nillable = false)
-	public final String organizationId;
+    @XmlElement(name = "organization-id", nillable = false)
+    public final String organizationId;
 
-	@XmlElement(name = "part-id")
-	public final String partId;
+    @XmlElement(name = "part-id")
+    public final String partId;
 
 
-	@SuppressWarnings("unused")
-	private SenderOrganization() {
-		this(null, null);
-	}
+    @SuppressWarnings("unused")
+    private SenderOrganization() {
+        this(null, null);
+    }
 
-	public SenderOrganization(@XmlElement(name = "organization-id", nillable = false) String organizationId, @XmlElement(name = "part-id") String partId) {
-		this.organizationId = organizationId;
-		this.partId = partId;
-	}
+    public SenderOrganization(@XmlElement(name = "organization-id", nillable = false) String organizationId, @XmlElement(name = "part-id") String partId) {
+        this.organizationId = organizationId;
+        this.partId = partId;
+    }
 
-	@Override
-	public String toString() {
-		return organizationId + (partId == null ? "" : ":" + partId);
-	}
+    @Override
+    public String toString() {
+        return organizationId + (partId == null ? "" : ":" + partId);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof SenderOrganization) {
-			SenderOrganization that = (SenderOrganization) obj;
-			return Objects.equals(this.organizationId, that.organizationId)
-				&& Objects.equals(this.partId, that.partId);
-		}
-		return false;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SenderOrganization) {
+            SenderOrganization that = (SenderOrganization) obj;
+            return Objects.equals(this.organizationId, that.organizationId)
+                && Objects.equals(this.partId, that.partId);
+        }
+        return false;
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(organizationId, partId);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(organizationId, partId);
+    }
 
 }

@@ -16,15 +16,15 @@
 package no.digipost.api.client.representations;
 
 public abstract class RecipientIdentifier {
-	protected final String identifier;
+    protected final String identifier;
 
-	public RecipientIdentifier(final String identifier) {
-		this.identifier = identifier;
-	}
+    public RecipientIdentifier(final String identifier) {
+        this.identifier = identifier;
+    }
 
-	public String asString() {
-		return identifier;
-	}
+    public String asString() {
+        return identifier;
+    }
 
-	public abstract boolean isPersonalIdentificationNumber();
+    public abstract boolean isPersonalIdentificationNumber();
 }

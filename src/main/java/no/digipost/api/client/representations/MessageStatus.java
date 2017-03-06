@@ -22,17 +22,17 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum MessageStatus {
 
-	NOT_COMPLETE,
-	COMPLETE,
-	DELIVERED,
-	DELIVERED_TO_PRINT;
+    NOT_COMPLETE,
+    COMPLETE,
+    DELIVERED,
+    DELIVERED_TO_PRINT;
 
-	public String value() {
-		return name();
-	}
+    public String value() {
+        return name();
+    }
 
-	public static MessageStatus fromValue(final String v) {
-		return valueOf(v);
-	}
+    public static MessageStatus fromValue(final String v) {
+        return valueOf(v);
+    }
 
 }

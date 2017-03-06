@@ -30,9 +30,9 @@ import java.util.Map;
  */
 final class PrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
 
-	private final MessageSender sender;
-	private final Message printMessage;
-	private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
+    private final MessageSender sender;
+    private final Message printMessage;
+    private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
 
     PrintOnlyMessage(Message printMessage, MessageSender sender) {
@@ -57,9 +57,10 @@ final class PrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
     }
 
 
-	@Override
+    @Override
     public MessageDelivery send() {
-		return sender.sendMultipartMessage(printMessage, documents);
+        return sender.sendMultipartMessage(printMessage, documents);
     }
 
 }
+

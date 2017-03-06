@@ -17,10 +17,16 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
-import org.joda.time.DateTime;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,43 +34,43 @@ import java.util.List;
 @XmlType(name = "move-files-from-public-sector-metadata")
 public class MoveFilesFromPublicSectorMetadata extends EventMetadata {
 
-	@XmlAttribute(name = "opened")
-	public final Boolean opened;
-	@XmlAttribute(name = "delivery-time", required = true)
-	@XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
-	@XmlSchemaType(name = "dateTime")
-	public final DateTime deliveryTime;
-	@XmlAttribute(name = "subject")
-	public final String subject;
-	@XmlAttribute(name = "sensitivity-level")
-	public final SensitivityLevel sensitivityLevel;
-	@XmlAttribute(name = "authentication-level")
-	public final AuthenticationLevel authenticationLevel;
-	@XmlAttribute(name = "destination-mailbox")
-	public final String destinationMailbox;
-	@XmlAttribute(name = "destination-mailbox-address")
-	public final String destinationMailboxAddress;
+    @XmlAttribute(name = "opened")
+    public final Boolean opened;
+    @XmlAttribute(name = "delivery-time", required = true)
+    @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+    @XmlSchemaType(name = "dateTime")
+    public final ZonedDateTime deliveryTime;
+    @XmlAttribute(name = "subject")
+    public final String subject;
+    @XmlAttribute(name = "sensitivity-level")
+    public final SensitivityLevel sensitivityLevel;
+    @XmlAttribute(name = "authentication-level")
+    public final AuthenticationLevel authenticationLevel;
+    @XmlAttribute(name = "destination-mailbox")
+    public final String destinationMailbox;
+    @XmlAttribute(name = "destination-mailbox-address")
+    public final String destinationMailboxAddress;
 
-	@XmlElement(name = "document")
-	public final List<DocumentMetadata> documents;
-	@XmlElement(name = "x509Certificate")
-	public final String x509Certificate;
+    @XmlElement(name = "document")
+    public final List<DocumentMetadata> documents;
+    @XmlElement(name = "x509Certificate")
+    public final String x509Certificate;
 
-	public MoveFilesFromPublicSectorMetadata() {
-		this(null, null, null, null, null, null, null, null, new ArrayList<DocumentMetadata>());
-	}
+    public MoveFilesFromPublicSectorMetadata() {
+        this(null, null, null, null, null, null, null, null, new ArrayList<DocumentMetadata>());
+    }
 
-	public MoveFilesFromPublicSectorMetadata(Boolean opened, DateTime deliveryTime, String subject, SensitivityLevel sensitivityLevel,
-	                                         AuthenticationLevel authenticationLevel, String x509Certificate, String destinationMailbox,
-	                                         String destinationMailboxAddress, List<DocumentMetadata> documents) {
-		this.opened = opened;
-		this.deliveryTime = deliveryTime;
-		this.subject = subject;
-		this.sensitivityLevel = sensitivityLevel;
-		this.authenticationLevel = authenticationLevel;
-		this.x509Certificate = x509Certificate;
-		this.destinationMailbox = destinationMailbox;
-		this.destinationMailboxAddress = destinationMailboxAddress;
-		this.documents = documents;
-	}
+    public MoveFilesFromPublicSectorMetadata(Boolean opened, ZonedDateTime deliveryTime, String subject, SensitivityLevel sensitivityLevel,
+                                             AuthenticationLevel authenticationLevel, String x509Certificate, String destinationMailbox,
+                                             String destinationMailboxAddress, List<DocumentMetadata> documents) {
+        this.opened = opened;
+        this.deliveryTime = deliveryTime;
+        this.subject = subject;
+        this.sensitivityLevel = sensitivityLevel;
+        this.authenticationLevel = authenticationLevel;
+        this.x509Certificate = x509Certificate;
+        this.destinationMailbox = destinationMailbox;
+        this.destinationMailboxAddress = destinationMailboxAddress;
+        this.documents = documents;
+    }
 }

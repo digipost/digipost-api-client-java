@@ -1,4 +1,3 @@
-package no.digipost.api.client.util;
 /**
  * Copyright (C) Posten Norge AS
  *
@@ -14,30 +13,29 @@ package no.digipost.api.client.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.tz.FixedDateTimeZone;
-
+package no.digipost.api.client.util;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class DateUtils {
 
-	public static final String RFC_1123_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
-	private static final DateTimeFormatter fmt = DateTimeFormat.forPattern(RFC_1123_DATE_FORMAT).withZone(FixedDateTimeZone.forID("GMT")).withLocale(Locale.ENGLISH);
+    public static final String RFC_1123_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
+    private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(RFC_1123_DATE_FORMAT).withZone(ZoneId.of("GMT")).withLocale(Locale.ENGLISH);
 
-	/**
-	 * Returns an RFC 1123 date format used in HTTP
-	 */
-	public static String formatDate(DateTime dateTime) {
-		return fmt.print(dateTime);
-	}
+    /**
+     * Returns an RFC 1123 date format used in HTTP
+     */
+    public static String formatDate(ZonedDateTime dateTime) {
+        return dateTime.format(fmt);
+    }
 
-	/**
-	 * Return an DateTime parsed from an RFC 1123 compliant string
-	 */
-	public static DateTime parseDate(String dateTime) {
-		return fmt.parseDateTime(dateTime);
-	}
+    /**
+     * Return a {@link ZonedDateTime} parsed from an RFC 1123 compliant string
+     */
+    public static ZonedDateTime parseDate(String dateTime) {
+        return ZonedDateTime.parse(dateTime, fmt);
+    }
 
 }

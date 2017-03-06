@@ -49,120 +49,120 @@ import static no.digipost.api.client.util.DigipostApiMock.MockRequest;
  */
 public class DigipostClientMock {
 
-	private final DigipostClient client;
-	private final ApiService apiService;
-	public final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
-	private static DigipostApiMock digipostApiMock = new DigipostApiMock();
-	private static final String KEY_STORE_PASSWORD = "Qwer12345";
-	private static final String KEY_STORE_ALIAS = "apiTest";
-	private static final int PORT = 6666;
+    private final DigipostClient client;
+    private final ApiService apiService;
+    public final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
+    private static DigipostApiMock digipostApiMock = new DigipostApiMock();
+    private static final String KEY_STORE_PASSWORD = "Qwer12345";
+    private static final String KEY_STORE_ALIAS = "apiTest";
+    private static final int PORT = 6666;
 
 	public DigipostClientMock() {
 		String host = "http://localhost:" + PORT;
 
-		HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
+        HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 
 		apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host, null);
 		apiService.buildApacheHttpClientBuilder();
 		client = new DigipostClient(newBuilder().build(), "digipostmock-url", 1, new Signer() {
 
-			@Override
-			public byte[] sign(String dataToSign) {
-				return new byte[0];
-			}
-		}, apiService);
-	}
+            @Override
+            public byte[] sign(String dataToSign) {
+                return new byte[0];
+            }
+        }, apiService);
+    }
 
-	public void start(){
-		KeyPair keyPair = getKeyPair(KEY_STORE_ALIAS, KEY_STORE_PASSWORD);
-		digipostApiMock.start(PORT, requestsAndResponsesMap, keyPair);
-	}
+    public void start(){
+        KeyPair keyPair = getKeyPair(KEY_STORE_ALIAS, KEY_STORE_PASSWORD);
+        digipostApiMock.start(PORT, requestsAndResponsesMap, keyPair);
+    }
 
-	public static KeyPair getKeyPair(final String alias, final String password) {
-		try {
-			KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-			keystore.load(DigipostClientMock.class.getClass().getResourceAsStream("/mockKeystore.jks"), KEY_STORE_PASSWORD.toCharArray());
+    public static KeyPair getKeyPair(final String alias, final String password) {
+        try {
+            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keystore.load(DigipostClientMock.class.getClass().getResourceAsStream("/mockKeystore.jks"), KEY_STORE_PASSWORD.toCharArray());
 
-			Key key = keystore.getKey(alias, password.toCharArray());
-			Certificate cert = keystore.getCertificate(alias);
-			PublicKey publicKey = cert.getPublicKey();
+            Key key = keystore.getKey(alias, password.toCharArray());
+            Certificate cert = keystore.getCertificate(alias);
+            PublicKey publicKey = cert.getPublicKey();
 
-			return new KeyPair(publicKey, (PrivateKey) key);
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
-	}
+            return new KeyPair(publicKey, (PrivateKey) key);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 
-	public void shutdownWebserver(){
-		digipostApiMock.stop();
-	}
+    public void shutdownWebserver(){
+        digipostApiMock.stop();
+    }
 
-	public DigipostClient getClient() {
-		return client;
-	}
+    public DigipostClient getClient() {
+        return client;
+    }
 
-	public Map<String, MockRequest> getAllRequests(Method method) {
-		return requestsAndResponsesMap.get(method).getRequests();
-	}
+    public Map<String, MockRequest> getAllRequests(Method method) {
+        return requestsAndResponsesMap.get(method).getRequests();
+    }
 
-	public MockRequest getRequest(Method method, String requestKey) {
-		return requestsAndResponsesMap.get(method).getRequest(requestKey);
-	}
+    public MockRequest getRequest(Method method, String requestKey) {
+        return requestsAndResponsesMap.get(method).getRequest(requestKey);
+    }
 
-	public void addExpectedResponse(Method method, CloseableHttpResponse response) {
-		RequestsAndResponses requestsAndResponses = requestsAndResponsesMap.get(method);
+    public void addExpectedResponse(Method method, CloseableHttpResponse response) {
+        RequestsAndResponses requestsAndResponses = requestsAndResponsesMap.get(method);
 
-		requestsAndResponses.addExpectedResponse(response);
-	}
+        requestsAndResponses.addExpectedResponse(response);
+    }
 
-	public void addExpectedException(Method method, RuntimeException exception) {
-		RequestsAndResponses requestsAndResponses = requestsAndResponsesMap.get(method);
+    public void addExpectedException(Method method, RuntimeException exception) {
+        RequestsAndResponses requestsAndResponses = requestsAndResponsesMap.get(method);
 
-		requestsAndResponses.addExpectedException(exception);
-	}
+        requestsAndResponses.addExpectedException(exception);
+    }
 
-	public void reset() {
-		digipostApiMock.init();
-	}
+    public void reset() {
+        digipostApiMock.init();
+    }
 
 
-	/**
-	 * Threadsafe instance for marshalling and validating.
-	 */
-	public static class ValidatingMarshaller {
-		private final JAXBContext jaxbContext;
-		private final Schema schema;
+    /**
+     * Threadsafe instance for marshalling and validating.
+     */
+    public static class ValidatingMarshaller {
+        private final JAXBContext jaxbContext;
+        private final Schema schema;
 
-		public ValidatingMarshaller(JAXBContext jaxbContext, Schema schema) {
-			this.jaxbContext = jaxbContext;
-			this.schema = schema;
-		}
+        public ValidatingMarshaller(JAXBContext jaxbContext, Schema schema) {
+            this.jaxbContext = jaxbContext;
+            this.schema = schema;
+        }
 
-		public void marshal(Object jaxbElement, ContentHandler handler) {
-			Marshaller marshaller;
-			try {
-				marshaller = jaxbContext.createMarshaller();
-				marshaller.setSchema(schema);
-				marshaller.marshal(jaxbElement, handler);
-			} catch (JAXBException e) {
-				StringWriter w = new StringWriter();
-				PrintWriter printWriter = new PrintWriter(w);
-				e.printStackTrace(printWriter);
-				throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, "DigipostClientMock failed to marshall the " + jaxbElement.getClass().getSimpleName() + " to xml.\n\n" + w.toString());
-			}
-		}
-	}
+        public void marshal(Object jaxbElement, ContentHandler handler) {
+            Marshaller marshaller;
+            try {
+                marshaller = jaxbContext.createMarshaller();
+                marshaller.setSchema(schema);
+                marshaller.marshal(jaxbElement, handler);
+            } catch (JAXBException e) {
+                StringWriter w = new StringWriter();
+                PrintWriter printWriter = new PrintWriter(w);
+                e.printStackTrace(printWriter);
+                throw new DigipostClientException(ErrorCode.PROBLEM_WITH_REQUEST, "DigipostClientMock failed to marshall the " + jaxbElement.getClass().getSimpleName() + " to xml.\n\n" + w.toString());
+            }
+        }
+    }
 
-	/**
-	 * Used to validate that requests are according to XSD
-	 */
-	public static ValidatingMarshaller initMarshaller() {
-		try {
-			SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-			Schema schema = schemaFactory.newSchema(DigipostClient.class.getResource("/xsd/api_v7.xsd"));
-			return new ValidatingMarshaller(JAXBContext.newInstance("no.digipost.api.client.representations"), schema);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    /**
+     * Used to validate that requests are according to XSD
+     */
+    public static ValidatingMarshaller initMarshaller() {
+        try {
+            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema schema = schemaFactory.newSchema(DigipostClient.class.getResource("/xsd/api_v7.xsd"));
+            return new ValidatingMarshaller(JAXBContext.newInstance("no.digipost.api.client.representations"), schema);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

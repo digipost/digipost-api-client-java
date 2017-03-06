@@ -19,10 +19,10 @@ import java.util.SortedMap;
 
 public interface ResponseToVerify {
 
-	int getStatus();
+    int getStatus();
 
-	SortedMap<String, String> getHeaders();
+    SortedMap<String, String> getHeaders();
 
-	String getPath();
+    String getPath();
 
 }

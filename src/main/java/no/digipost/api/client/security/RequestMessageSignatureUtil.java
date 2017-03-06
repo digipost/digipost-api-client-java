@@ -26,44 +26,44 @@ import static no.digipost.api.client.Headers.*;
 
 public class RequestMessageSignatureUtil {
 
-	private static final List<String> HEADERS_FOR_SIGNATURE = Arrays.asList(Content_MD5.toLowerCase(), HttpHeaders.DATE.toLowerCase(),
-			X_Digipost_UserId.toLowerCase(), X_Content_SHA256.toLowerCase());
+    private static final List<String> HEADERS_FOR_SIGNATURE = Arrays.asList(Content_MD5.toLowerCase(), HttpHeaders.DATE.toLowerCase(),
+            X_Digipost_UserId.toLowerCase(), X_Content_SHA256.toLowerCase());
 
-	public static String getCanonicalRequestRepresentation(final RequestToSign request) {
-		StringBuilder s = new StringBuilder();
-		s.append(getCanonicalMethodRepresentation(request));
-		s.append(getCanonicalUrlRepresentation(request));
-		s.append(getCanonicalHeaderRepresentation(request));
-		s.append(getCanonicalParameterRepresentation(request));
-		return s.toString();
-	}
+    public static String getCanonicalRequestRepresentation(final RequestToSign request) {
+        StringBuilder s = new StringBuilder();
+        s.append(getCanonicalMethodRepresentation(request));
+        s.append(getCanonicalUrlRepresentation(request));
+        s.append(getCanonicalHeaderRepresentation(request));
+        s.append(getCanonicalParameterRepresentation(request));
+        return s.toString();
+    }
 
-	private static String getCanonicalMethodRepresentation(final RequestToSign request) {
-		return request.getMethod().toUpperCase() + "\n";
-	}
+    private static String getCanonicalMethodRepresentation(final RequestToSign request) {
+        return request.getMethod().toUpperCase() + "\n";
+    }
 
-	private static String getCanonicalUrlRepresentation(final RequestToSign request) {
-		return request.getPath().toLowerCase() + "\n";
-	}
+    private static String getCanonicalUrlRepresentation(final RequestToSign request) {
+        return request.getPath().toLowerCase() + "\n";
+    }
 
-	private static String getCanonicalHeaderRepresentation(final RequestToSign request) {
-		SortedMap<String, String> headers = request.getHeaders();
-		StringBuilder headersString = new StringBuilder();
-		for (Entry<String, String> entry : headers.entrySet()) {
-			String key = entry.getKey();
-			if (isHeaderForSignature(key)) {
-				headersString.append(key.toLowerCase() + ": " + entry.getValue() + "\n");
-			}
-		}
-		return headersString.toString();
-	}
+    private static String getCanonicalHeaderRepresentation(final RequestToSign request) {
+        SortedMap<String, String> headers = request.getHeaders();
+        StringBuilder headersString = new StringBuilder();
+        for (Entry<String, String> entry : headers.entrySet()) {
+            String key = entry.getKey();
+            if (isHeaderForSignature(key)) {
+                headersString.append(key.toLowerCase() + ": " + entry.getValue() + "\n");
+            }
+        }
+        return headersString.toString();
+    }
 
-	private static String getCanonicalParameterRepresentation(final RequestToSign request) {
-		return request.getParameters().toLowerCase() + "\n";
-	}
+    private static String getCanonicalParameterRepresentation(final RequestToSign request) {
+        return request.getParameters().toLowerCase() + "\n";
+    }
 
-	private static boolean isHeaderForSignature(final String key) {
-		return HEADERS_FOR_SIGNATURE.contains(key.toLowerCase());
-	}
+    private static boolean isHeaderForSignature(final String key) {
+        return HEADERS_FOR_SIGNATURE.contains(key.toLowerCase());
+    }
 
 }

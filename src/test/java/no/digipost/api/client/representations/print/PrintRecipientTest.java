@@ -24,38 +24,38 @@ import org.junit.Test;
 
 public class PrintRecipientTest {
 
-	@Test
-	public void testSameRecipientAsWithNorwegianAddress() {
-		assertTrue(newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City").isSameRecipientAs(
-				newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City")));
+    @Test
+    public void testSameRecipientAsWithNorwegianAddress() {
+        assertTrue(newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City").isSameRecipientAs(
+                newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City")));
 
-		assertTrue(newNorwegianRecipient("Name", "Zip", "City").isSameRecipientAs(
-				newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City")));
+        assertTrue(newNorwegianRecipient("Name", "Zip", "City").isSameRecipientAs(
+                newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City")));
 
-		assertTrue(newNorwegianRecipient("Name ", " Zip", " City ").isSameRecipientAs(
-				newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City")));
+        assertTrue(newNorwegianRecipient("Name ", " Zip", " City ").isSameRecipientAs(
+                newNorwegianRecipient("Name", "Address1", "Address2", "Address3", "Zip", "City")));
 
-		assertFalse(newNorwegianRecipient("Other name", "Zip", "City").isSameRecipientAs(newNorwegianRecipient("Name", "Zip", "City")));
+        assertFalse(newNorwegianRecipient("Other name", "Zip", "City").isSameRecipientAs(newNorwegianRecipient("Name", "Zip", "City")));
 
-		assertFalse(newNorwegianRecipient("Name", "OtherZip", "City").isSameRecipientAs(newNorwegianRecipient("Name", "Zip", "City")));
-	}
+        assertFalse(newNorwegianRecipient("Name", "OtherZip", "City").isSameRecipientAs(newNorwegianRecipient("Name", "Zip", "City")));
+    }
 
-	@Test
-	public void testSameRecipientAsWithForeignAddress() {
-		assertTrue(newForeignAddress("Name", "Address2", "Sverige", null).isSameRecipientAs(
-				newForeignAddress("Name", "Address2", "Sverige", null)));
+    @Test
+    public void testSameRecipientAsWithForeignAddress() {
+        assertTrue(newForeignAddress("Name", "Address2", "Sverige", null).isSameRecipientAs(
+                newForeignAddress("Name", "Address2", "Sverige", null)));
 
-		assertFalse(newForeignAddress("Name", "Address1", "Sverige", null).isSameRecipientAs(
-				newForeignAddress("Name", "Address2", "Sverige", null)));
+        assertFalse(newForeignAddress("Name", "Address1", "Sverige", null).isSameRecipientAs(
+                newForeignAddress("Name", "Address2", "Sverige", null)));
 
-		assertTrue(newForeignAddress("Name", "Address2", null, "SE").isSameRecipientAs(
-				newForeignAddress("Name", "Address2", null, "SE")));
+        assertTrue(newForeignAddress("Name", "Address2", null, "SE").isSameRecipientAs(
+                newForeignAddress("Name", "Address2", null, "SE")));
 
-		assertFalse(newForeignAddress("Name", "Address1", "Sverige", null).isSameRecipientAs(
-				newForeignAddress("Name", "Address1", "Danmark", null)));
+        assertFalse(newForeignAddress("Name", "Address1", "Sverige", null).isSameRecipientAs(
+                newForeignAddress("Name", "Address1", "Danmark", null)));
 
-		assertFalse(newForeignAddress("Name", "Address2", null, "DK").isSameRecipientAs(
-				newForeignAddress("Name", "Address2", null, "SE")));
-	}
+        assertFalse(newForeignAddress("Name", "Address2", null, "DK").isSameRecipientAs(
+                newForeignAddress("Name", "Address2", null, "SE")));
+    }
 
 }

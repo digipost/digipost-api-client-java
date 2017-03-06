@@ -29,92 +29,92 @@ import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 @XmlType(name = "norwegian-address", propOrder = { "addressline1", "addressline2", "addressline3", "zipCode", "city" })
 public class NorwegianAddress {
 
-	public NorwegianAddress() {
-		this(null, null, null);
-	}
+    public NorwegianAddress() {
+        this(null, null, null);
+    }
 
-	public NorwegianAddress(final String zipCode, final String city) {
-		this(null, zipCode, city);
-	}
+    public NorwegianAddress(final String zipCode, final String city) {
+        this(null, zipCode, city);
+    }
 
-	public NorwegianAddress(final String addressline1, final String zipCode, final String city) {
-		this(addressline1, null, zipCode, city);
-	}
+    public NorwegianAddress(final String addressline1, final String zipCode, final String city) {
+        this(addressline1, null, zipCode, city);
+    }
 
-	public NorwegianAddress(final String addressline1, final String addressline2, final String zipCode, final String city) {
-		this(addressline1, addressline2, null, zipCode, city);
-	}
+    public NorwegianAddress(final String addressline1, final String addressline2, final String zipCode, final String city) {
+        this(addressline1, addressline2, null, zipCode, city);
+    }
 
-	public NorwegianAddress(final String addressline1, final String addressline2, final String addressline3, final String zipCode, final String city) {
-		this.addressline1 = addressline1;
-		this.addressline2 = addressline2;
-		this.addressline3 = addressline3;
-		this.zipCode = zipCode;
-		this.city = city;
-	}
+    public NorwegianAddress(final String addressline1, final String addressline2, final String addressline3, final String zipCode, final String city) {
+        this.addressline1 = addressline1;
+        this.addressline2 = addressline2;
+        this.addressline3 = addressline3;
+        this.zipCode = zipCode;
+        this.city = city;
+    }
 
-	protected String addressline1;
-	protected String addressline2;
-	protected String addressline3;
-	@XmlElement(name = "zip-code", required = true)
-	protected String zipCode;
-	@XmlElement(required = true)
-	protected String city;
+    protected String addressline1;
+    protected String addressline2;
+    protected String addressline3;
+    @XmlElement(name = "zip-code", required = true)
+    protected String zipCode;
+    @XmlElement(required = true)
+    protected String city;
 
-	public String getAddressline1() {
-		return addressline1;
-	}
+    public String getAddressline1() {
+        return addressline1;
+    }
 
-	public void setAddressline1(final String value) {
-		addressline1 = value;
-	}
+    public void setAddressline1(final String value) {
+        addressline1 = value;
+    }
 
-	public String getAddressline2() {
-		return addressline2;
-	}
+    public String getAddressline2() {
+        return addressline2;
+    }
 
-	public void setAddressline2(final String value) {
-		addressline2 = value;
-	}
+    public void setAddressline2(final String value) {
+        addressline2 = value;
+    }
 
-	public String getAddressline3() {
-		return addressline3;
-	}
+    public String getAddressline3() {
+        return addressline3;
+    }
 
-	public void setAddressline3(String value) {
-		addressline3 = value;
-	}
+    public void setAddressline3(String value) {
+        addressline3 = value;
+    }
 
-	public List<String> getAddresslines() {
-		List<String> lines = new ArrayList<>(3);
-		if (addressline1 != null) lines.add(addressline1);
-		if (addressline2 != null) lines.add(addressline2);
-		if (addressline3 != null) lines.add(addressline3);
-		return lines;
-	}
+    public List<String> getAddresslines() {
+        List<String> lines = new ArrayList<>(3);
+        if (addressline1 != null) lines.add(addressline1);
+        if (addressline2 != null) lines.add(addressline2);
+        if (addressline3 != null) lines.add(addressline3);
+        return lines;
+    }
 
-	public String getZipCode() {
-		return zipCode;
-	}
+    public String getZipCode() {
+        return zipCode;
+    }
 
-	public void setZipCode(final String value) {
-		zipCode = value;
-	}
+    public void setZipCode(final String value) {
+        zipCode = value;
+    }
 
-	public String getCity() {
-		return city;
-	}
+    public String getCity() {
+        return city;
+    }
 
-	public void setCity(final String value) {
-		city = value;
-	}
+    public void setCity(final String value) {
+        city = value;
+    }
 
-	public boolean isSameAddressAs(final NorwegianAddress other) {
-		return other != null && trimEquals(city, other.city) && trimEquals(zipCode, other.zipCode);
-	}
+    public boolean isSameAddressAs(final NorwegianAddress other) {
+        return other != null && trimEquals(city, other.city) && trimEquals(zipCode, other.zipCode);
+    }
 
-	private boolean trimEquals(final String first, final String second) {
-		return trimToEmpty(first).equals(trimToEmpty(second));
-	}
+    private boolean trimEquals(final String first, final String second) {
+        return trimToEmpty(first).equals(trimToEmpty(second));
+    }
 
 }

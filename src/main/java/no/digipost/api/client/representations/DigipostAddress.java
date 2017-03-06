@@ -19,18 +19,18 @@ import org.apache.commons.lang3.StringUtils;
 
 public class DigipostAddress extends RecipientIdentifier {
 
-	public DigipostAddress(final String address) {
-		super(address);
-		assert !StringUtils.isEmpty(address) : "DigipostAddress cannot be empty";
-	}
+    public DigipostAddress(final String address) {
+        super(address);
+        assert !StringUtils.isEmpty(address) : "DigipostAddress cannot be empty";
+    }
 
-	@Override
-	public String toString() {
-		return String.format("%s(%s)", getClass().getSimpleName(), identifier);
-	}
+    @Override
+    public String toString() {
+        return String.format("%s(%s)", getClass().getSimpleName(), identifier);
+    }
 
-	@Override
-	public boolean isPersonalIdentificationNumber() {
-		return false;
-	}
+    @Override
+    public boolean isPersonalIdentificationNumber() {
+        return false;
+    }
 }

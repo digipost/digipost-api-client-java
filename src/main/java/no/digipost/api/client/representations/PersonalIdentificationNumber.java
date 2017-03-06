@@ -17,12 +17,12 @@ package no.digipost.api.client.representations;
 
 public class PersonalIdentificationNumber extends RecipientIdentifier {
 
-	public PersonalIdentificationNumber(final String birthNumber) {
-		super(birthNumber);
-	}
+    public PersonalIdentificationNumber(final String birthNumber) {
+        super(birthNumber);
+    }
 
-	@Override
-	public boolean isPersonalIdentificationNumber() {
-		return true;
-	}
+    @Override
+    public boolean isPersonalIdentificationNumber() {
+        return true;
+    }
 }

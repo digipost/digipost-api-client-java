@@ -29,15 +29,15 @@ import static org.junit.Assert.assertTrue;
 
 public class SenderInformationTest {
 
-	@Test
-	public void marshallValidateXmlAndUnmarshall() {
-		SenderInformation senderInformation = new SenderInformation(null, NO_INFO_AVAILABLE, Collections.<SenderFeature>emptyList());
-		SenderInformation unmarshalled = marshallValidateAndUnmarshall(senderInformation);
-		assertTrue(reflectionEquals(senderInformation, unmarshalled));
+    @Test
+    public void marshallValidateXmlAndUnmarshall() {
+        SenderInformation senderInformation = new SenderInformation(null, NO_INFO_AVAILABLE, Collections.<SenderFeature>emptyList());
+        SenderInformation unmarshalled = marshallValidateAndUnmarshall(senderInformation);
+        assertTrue(reflectionEquals(senderInformation, unmarshalled));
 
-		senderInformation = new SenderInformation(1L, VALID_SENDER, asList(DIGIPOST_DELIVERY.withNoParam(), SenderFeatureName.from("no.digipost.feature.delivery.pizza").withNoParam()));
-		unmarshalled = marshallValidateAndUnmarshall(senderInformation);
-		assertTrue(reflectionEquals(senderInformation, unmarshalled));
-	}
+        senderInformation = new SenderInformation(1L, VALID_SENDER, asList(DIGIPOST_DELIVERY.withNoParam(), SenderFeatureName.from("no.digipost.feature.delivery.pizza").withNoParam()));
+        unmarshalled = marshallValidateAndUnmarshall(senderInformation);
+        assertTrue(reflectionEquals(senderInformation, unmarshalled));
+    }
 
 }

@@ -19,25 +19,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ErrorType {
-	SERVER,
-	CONFIGURATION,
-	CLIENT_TECHNICAL,
-	CLIENT_DATA,
-	NONE,
-	UNKNOWN;
+    SERVER,
+    CONFIGURATION,
+    CLIENT_TECHNICAL,
+    CLIENT_DATA,
+    NONE,
+    UNKNOWN;
 
-	public static final Map<no.digipost.api.client.representations.ErrorType, ErrorType> toErrorTypeMap = new HashMap<>();
+    public static final Map<no.digipost.api.client.representations.ErrorType, ErrorType> toErrorTypeMap = new HashMap<>();
 
-	static {
-		toErrorTypeMap.put(no.digipost.api.client.representations.ErrorType.SERVER, SERVER);
-		toErrorTypeMap.put(no.digipost.api.client.representations.ErrorType.CLIENT_DATA, CLIENT_DATA);
-		toErrorTypeMap.put(no.digipost.api.client.representations.ErrorType.CLIENT_TECHNICAL, CLIENT_TECHNICAL);
-		toErrorTypeMap.put(no.digipost.api.client.representations.ErrorType.CONFIGURATION, CONFIGURATION);
-		toErrorTypeMap.put(no.digipost.api.client.representations.ErrorType.NONE, NONE);
-	}
+    static {
+        toErrorTypeMap.put(no.digipost.api.client.representations.ErrorType.SERVER, SERVER);
+        toErrorTypeMap.put(no.digipost.api.client.representations.ErrorType.CLIENT_DATA, CLIENT_DATA);
+        toErrorTypeMap.put(no.digipost.api.client.representations.ErrorType.CLIENT_TECHNICAL, CLIENT_TECHNICAL);
+        toErrorTypeMap.put(no.digipost.api.client.representations.ErrorType.CONFIGURATION, CONFIGURATION);
+        toErrorTypeMap.put(no.digipost.api.client.representations.ErrorType.NONE, NONE);
+    }
 
-	public static ErrorType resolve(no.digipost.api.client.representations.ErrorType errorType) {
-		ErrorType translated = toErrorTypeMap.get(errorType);
-		return translated != null ? translated : UNKNOWN;
-	}
+    public static ErrorType resolve(no.digipost.api.client.representations.ErrorType errorType) {
+        ErrorType translated = toErrorTypeMap.get(errorType);
+        return translated != null ? translated : UNKNOWN;
+    }
 }

@@ -21,15 +21,15 @@ import java.security.PrivateKey;
 
 public class FileKeystoreSigner implements Signer {
 
-	private final PrivateKey privateKey;
+    private final PrivateKey privateKey;
 
-	public FileKeystoreSigner(final InputStream certificate, final String password) {
-		privateKey = CryptoUtil.loadKeyFromP12(certificate, password);
-	}
+    public FileKeystoreSigner(final InputStream certificate, final String password) {
+        privateKey = CryptoUtil.loadKeyFromP12(certificate, password);
+    }
 
-	@Override
-	public byte[] sign(final String dataToSign) {
-		return CryptoUtil.sign(privateKey, dataToSign);
-	}
+    @Override
+    public byte[] sign(final String dataToSign) {
+        return CryptoUtil.sign(privateKey, dataToSign);
+    }
 
 }

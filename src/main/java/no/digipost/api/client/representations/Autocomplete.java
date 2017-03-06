@@ -27,28 +27,28 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Autocomplete extends Representation {
 
-	@XmlElement(name = "suggestion")
-	private final List<Suggestion> suggestions;
+    @XmlElement(name = "suggestion")
+    private final List<Suggestion> suggestions;
 
-	public Autocomplete(final List<Suggestion> suggestions, final Link... links) {
-		super(links);
-		this.suggestions = suggestions;
-	}
+    public Autocomplete(final List<Suggestion> suggestions, final Link... links) {
+        super(links);
+        this.suggestions = suggestions;
+    }
 
-	Autocomplete() {
-		this(new ArrayList<Suggestion>());
-	}
+    Autocomplete() {
+        this(new ArrayList<Suggestion>());
+    }
 
-	public List<Suggestion> getSuggestions() {
-		return suggestions;
-	}
+    public List<Suggestion> getSuggestions() {
+        return suggestions;
+    }
 
-	@XmlElement(name = "link")
-	protected List<Link> getLink() {
-		return links;
-	}
+    @XmlElement(name = "link")
+    protected List<Link> getLink() {
+        return links;
+    }
 
-	protected void setLink(final List<Link> links) {
-		this.links = links;
-	}
+    protected void setLink(final List<Link> links) {
+        this.links = links;
+    }
 }

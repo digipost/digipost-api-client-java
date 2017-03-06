@@ -19,12 +19,12 @@ import java.util.SortedMap;
 
 public interface RequestToSign {
 
-	String getMethod();
+    String getMethod();
 
-	SortedMap<String, String> getHeaders();
+    SortedMap<String, String> getHeaders();
 
-	String getPath();
+    String getPath();
 
-	String getParameters();
+    String getParameters();
 
 }

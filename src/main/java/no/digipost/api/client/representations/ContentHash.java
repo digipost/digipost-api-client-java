@@ -25,18 +25,18 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlType(name = "content-hash")
 public class ContentHash {
 
-	@XmlValue
-	private String value;
+    @XmlValue
+    private String value;
 
-	@XmlAttribute(name = "hash-algorithm")
-	private String hashAlgorithm;
+    @XmlAttribute(name = "hash-algorithm")
+    private String hashAlgorithm;
 
-	public String getHash() {
-		return value;
-	}
+    public String getHash() {
+        return value;
+    }
 
-	public String getHashAlgorithm() {
-		return hashAlgorithm;
-	}
+    public String getHashAlgorithm() {
+        return hashAlgorithm;
+    }
 
 }

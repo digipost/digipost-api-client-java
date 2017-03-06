@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE macker PUBLIC "-//innig//DTD Macker 0.4//EN" "http://innig.net/macker/dtd/macker-0.4.dtd">
+<macker>
+    <ruleset name="Restrict use of Joda Time">
+        <access-rule>
+            <message>
+                Only Java Time API should be used. Joda Time is currently required because of digipost-cache,
+                but its use should be isolated to certain designated internal classes.
+            </message>
+            <deny>
+                <from class="**" />
+                <to class="org.joda.**" />
+            </deny>
+            <allow>
+                <from class="no.digipost.api.client.Cached" />
+                <to class="org.joda.**" />
+            </allow>
+        </access-rule>
+    </ruleset>
+</macker>

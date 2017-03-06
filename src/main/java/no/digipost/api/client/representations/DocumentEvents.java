@@ -25,18 +25,18 @@ import java.util.List;
 @XmlRootElement(name = "document-events")
 public class DocumentEvents {
 
-	@XmlElement(name = "event")
-	private List<DocumentEvent> events = new ArrayList<>();
+    @XmlElement(name = "event")
+    private List<DocumentEvent> events = new ArrayList<>();
 
-	public DocumentEvents() {
-		this(new ArrayList<DocumentEvent>());
-	}
+    public DocumentEvents() {
+        this(new ArrayList<DocumentEvent>());
+    }
 
-	public DocumentEvents(List<DocumentEvent> events) {
-		this.events = events;
-	}
+    public DocumentEvents(List<DocumentEvent> events) {
+        this.events = events;
+    }
 
-	public List<DocumentEvent> getEvents() {
-		return events;
-	}
+    public List<DocumentEvent> getEvents() {
+        return events;
+    }
 }

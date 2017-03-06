@@ -32,33 +32,33 @@ import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBu
  */
 @SuppressWarnings("unused")
 public class SokEksempel {
-	// Din virksomhets Digipost-kontoid
-	private static final long AVSENDERS_KONTOID = 10987;
+    // Din virksomhets Digipost-kontoid
+    private static final long AVSENDERS_KONTOID = 10987;
 
-	// Passordet sertifikatfilen er beskyttet med
-	private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
+    // Passordet sertifikatfilen er beskyttet med
+    private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
 
-	public static void main(final String[] args) {
+    public static void main(final String[] args) {
 
-		// 1. Vi leser inn sertifikatet du har knyttet til din Digipost-konto (i
-		// .p12-formatet)
-		InputStream sertifikatInputStream = lesInnSertifikat();
+        // 1. Vi leser inn sertifikatet du har knyttet til din Digipost-konto (i
+        // .p12-formatet)
+        InputStream sertifikatInputStream = lesInnSertifikat();
 
 		// 2. Vi oppretter en DigipostClient
 		DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
-		// 3. Vi søker etter personer med matchende navn eller adresse
-		List<Recipient> recipients = client.search("Ole Nilsen Stavanger").getRecipients();
+        // 3. Vi søker etter personer med matchende navn eller adresse
+        List<Recipient> recipients = client.search("Ole Nilsen Stavanger").getRecipients();
 
-	}
+    }
 
-	private static InputStream lesInnSertifikat() {
-		try {
-			// Leser inn sertifikatet
-			return new FileInputStream(new File("/path/til/sertifikatfil.p12"));
-		} catch (FileNotFoundException e) {
-			// Håndter at sertifikatet ikke kunne leses!
-			throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);
-		}
-	}
+    private static InputStream lesInnSertifikat() {
+        try {
+            // Leser inn sertifikatet
+            return new FileInputStream(new File("/path/til/sertifikatfil.p12"));
+        } catch (FileNotFoundException e) {
+            // Håndter at sertifikatet ikke kunne leses!
+            throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);
+        }
+    }
 }

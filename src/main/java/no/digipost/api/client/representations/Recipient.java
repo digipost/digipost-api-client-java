@@ -25,73 +25,73 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Recipient extends Representation {
 
-	private String firstname;
-	private String middlename;
-	private String lastname;
-	@XmlElement(name = "digipost-address", required = true)
-	private String digipostAddress;
-	@XmlElement(name = "mobile-number")
-	protected String mobileNumber;
-	@XmlElement(name = "organisation-number")
-	private String organisationNumber;
-	@XmlElement(name = "organisation-name")
-	private String organisationName;
-	@XmlElement(name = "address")
-	private final List<Address> addresses;
+    private String firstname;
+    private String middlename;
+    private String lastname;
+    @XmlElement(name = "digipost-address", required = true)
+    private String digipostAddress;
+    @XmlElement(name = "mobile-number")
+    protected String mobileNumber;
+    @XmlElement(name = "organisation-number")
+    private String organisationNumber;
+    @XmlElement(name = "organisation-name")
+    private String organisationName;
+    @XmlElement(name = "address")
+    private final List<Address> addresses;
 
-	public Recipient(final String firstName, final String middleName, final String lastName, final String digipostAddress,
-			final List<Address> addresses, final Link... links) {
-		super(links);
-		firstname = firstName;
-		middlename = middleName;
-		lastname = lastName;
-		this.digipostAddress = digipostAddress;
-		this.addresses = addresses;
-	}
+    public Recipient(final String firstName, final String middleName, final String lastName, final String digipostAddress,
+            final List<Address> addresses, final Link... links) {
+        super(links);
+        firstname = firstName;
+        middlename = middleName;
+        lastname = lastName;
+        this.digipostAddress = digipostAddress;
+        this.addresses = addresses;
+    }
 
-	Recipient() {
-		addresses = new ArrayList<Address>();
-	}
+    Recipient() {
+        addresses = new ArrayList<Address>();
+    }
 
-	public String getFirstname() {
-		return firstname;
-	}
+    public String getFirstname() {
+        return firstname;
+    }
 
-	public String getMiddlename() {
-		return middlename;
-	}
+    public String getMiddlename() {
+        return middlename;
+    }
 
-	public String getLastname() {
-		return lastname;
-	}
+    public String getLastname() {
+        return lastname;
+    }
 
-	public String getDigipostAddress() {
-		return digipostAddress;
-	}
+    public String getDigipostAddress() {
+        return digipostAddress;
+    }
 
-	public String getOrganisationName() {
-		return organisationName;
-	}
+    public String getOrganisationName() {
+        return organisationName;
+    }
 
-	public String getOrganisationNumber() {
-		return organisationNumber;
-	}
+    public String getOrganisationNumber() {
+        return organisationNumber;
+    }
 
-	public List<Address> getAddresses() {
-		return addresses;
-	}
+    public List<Address> getAddresses() {
+        return addresses;
+    }
 
-	public Link getSelfLink() {
-		return getLinkByRelationName(Relation.SELF);
-	}
+    public Link getSelfLink() {
+        return getLinkByRelationName(Relation.SELF);
+    }
 
-	@XmlElement(name = "link")
-	protected List<Link> getLinks() {
-		return links;
-	}
+    @XmlElement(name = "link")
+    protected List<Link> getLinks() {
+        return links;
+    }
 
-	protected void setLinks(final List<Link> links) {
-		this.links = links;
-	}
+    protected void setLinks(final List<Link> links) {
+        this.links = links;
+    }
 
 }

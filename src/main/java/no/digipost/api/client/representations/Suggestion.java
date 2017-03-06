@@ -21,25 +21,25 @@ import javax.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Suggestion {
-	@XmlElement(name = "search-string")
-	private String searchString;
-	@XmlElement(name = "link")
-	private Link searchLink;
+    @XmlElement(name = "search-string")
+    private String searchString;
+    @XmlElement(name = "link")
+    private Link searchLink;
 
-	public Suggestion(final String searchString, final Link searchLink) {
-		this.searchString = searchString;
-		this.searchLink = searchLink;
-	}
+    public Suggestion(final String searchString, final Link searchLink) {
+        this.searchString = searchString;
+        this.searchLink = searchLink;
+    }
 
-	Suggestion() {
-	}
+    Suggestion() {
+    }
 
-	public String getSearchString() {
-		return searchString;
-	}
+    public String getSearchString() {
+        return searchString;
+    }
 
-	public Link getSearchLink() {
-		return searchLink;
-	}
+    public Link getSearchLink() {
+        return searchLink;
+    }
 
 }

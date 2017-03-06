@@ -27,6 +27,7 @@ import no.digipost.api.client.util.FakeEncryptionKey;
 import no.digipost.api.client.util.MockfriendlyResponse;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
+import no.digipost.time.ControllableClock;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.ProtocolVersion;
@@ -34,10 +35,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHeader;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
-import org.joda.time.Duration;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,9 +49,20 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.*;
 
+import static java.time.Duration.ofMillis;
+import static java.time.Duration.ofMinutes;
+import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
+import static java.util.stream.Stream.concat;
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.pdf.EksempelPdf.*;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
@@ -74,6 +82,10 @@ import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.Matchers.is;
 import static org.joda.time.DateTime.now;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.then;
@@ -84,258 +96,261 @@ public class MessageSenderTest {
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
-	private static final Logger LOG = LoggerFactory.getLogger(MessageSenderTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MessageSenderTest.class);
 
-	static {
-		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
-	}
+    static {
+        CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
+    }
 
-	@Mock
-	private CloseableHttpResponse mockClientResponse;
+    @Mock
+    private CloseableHttpResponse mockClientResponse;
 
-	@Mock
-	private CloseableHttpResponse mockClientResponse2;
+    @Mock
+    private CloseableHttpResponse mockClientResponse2;
 
-	@Mock
-	private ApiService api;
+    @Mock
+    private ApiService api;
 
-	@Mock
-	IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey;
+    @Mock
+    private IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey;
 
-	private MockfriendlyResponse encryptionKeyResponse;
+    private MockfriendlyResponse encryptionKeyResponse;
 
-	@Spy
-	private PdfValidator pdfValidator;
+    private final ControllableClock clock = ControllableClock.freezedAt(Instant.now());
 
-	private MessageSender sender;
-	private MessageSender cachelessSender;
-	private EncryptionKey fakeEncryptionKey;
+    @Spy
+    private PdfValidator pdfValidator;
 
-	@Before
-	public void setup() {
-		this.fakeEncryptionKey = FakeEncryptionKey.createFakeEncryptionKey();
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		marshal(encryptionKeyContext, fakeEncryptionKey, bao);
+    private MessageSender sender;
+    private MessageSender cachelessSender;
+    private EncryptionKey fakeEncryptionKey;
 
-		encryptionKeyResponse = MockfriendlyResponse.MockedResponseBuilder.create()
-				.status(SC_OK)
-				.entity(new ByteArrayEntity(bao.toByteArray()))
-				.build();
+    @Before
+    public void setup() {
+        this.fakeEncryptionKey = FakeEncryptionKey.createFakeEncryptionKey();
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(encryptionKeyContext, fakeEncryptionKey, bao);
 
-		sender = new MessageSender(newBuilder().cachePrintKey(true).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
+        encryptionKeyResponse = MockfriendlyResponse.MockedResponseBuilder.create()
+                .status(SC_OK)
+                .entity(new ByteArrayEntity(bao.toByteArray()))
+                .build();
 
-		cachelessSender = new MessageSender(newBuilder().cachePrintKey(false).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
-	}
+        sender = new MessageSender(newBuilder().cachePrintKey(true).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator, clock);
 
+        cachelessSender = new MessageSender(newBuilder().cachePrintKey(false).build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator, clock);
+    }
 
-	@Test
-	public void skalHenteEksisterendeForsendelseHvisDenFinnesFraForr() {
-		Message forsendelseIn = lagDefaultForsendelse();
 
-		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_CONFLICT));
-		when(mockClientResponse.getFirstHeader(anyString())).thenReturn(new BasicHeader("head", "er"));
+    @Test
+    public void skalHenteEksisterendeForsendelseHvisDenFinnesFraForr() {
+        Message forsendelseIn = lagDefaultForsendelse();
 
-		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
+        when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_CONFLICT));
+        when(mockClientResponse.getFirstHeader(anyString())).thenReturn(new BasicHeader("head", "er"));
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, Channel.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
+        when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
-		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
+        MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, Channel.DIGIPOST, MessageStatus.NOT_COMPLETE, null);
 
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
-		HttpEntity forsendelse = new ByteArrayEntity(bao.toByteArray());
+        when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 
-		when(mockClientResponse2.getEntity()).thenReturn(forsendelse);
-		when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
+        HttpEntity forsendelse = new ByteArrayEntity(bao.toByteArray());
 
-		MessageDelivery delivery = sender.createOrFetchMessage(forsendelseIn);
-		then(api).should().fetchExistingMessage(any(URI.class));
+        when(mockClientResponse2.getEntity()).thenReturn(forsendelse);
+        when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
 
-		assertTrue(delivery.isSameMessageAs(forsendelseIn));
-	}
+        MessageDelivery delivery = sender.createOrFetchMessage(forsendelseIn);
+        then(api).should().fetchExistingMessage(any(URI.class));
 
-	@Test
-	public void skalKasteFeilHvisForsendelseAlleredeLevert() {
-		Message forsendelseIn = lagDefaultForsendelse();
+        assertTrue(delivery.isSameMessageAs(forsendelseIn));
+    }
 
-		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_CONFLICT));
-		when(mockClientResponse.getFirstHeader(anyString())).thenReturn(new BasicHeader("head", "er"));
-		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
+    @Test
+    public void skalKasteFeilHvisForsendelseAlleredeLevert() {
+        Message forsendelseIn = lagDefaultForsendelse();
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, Channel.DIGIPOST, DELIVERED, now());
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
+        when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_CONFLICT));
+        when(mockClientResponse.getFirstHeader(anyString())).thenReturn(new BasicHeader("head", "er"));
+        when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
-		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
-		when(mockClientResponse2.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
-		when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
+        MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, Channel.DIGIPOST, DELIVERED, now());
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
 
-		try {
-			sender.createOrFetchMessage(forsendelseIn);
-			fail();
-		} catch (DigipostClientException e) {
-			assertEquals(ErrorCode.DIGIPOST_MESSAGE_ALREADY_DELIVERED, e.getErrorCode());
-		}
+        when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
+        when(mockClientResponse2.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
+        when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
 
-	}
+        try {
+            sender.createOrFetchMessage(forsendelseIn);
+            fail();
+        } catch (DigipostClientException e) {
+            assertEquals(ErrorCode.DIGIPOST_MESSAGE_ALREADY_DELIVERED, e.getErrorCode());
+        }
 
-	@Test
-	public void skalKasteFeilHvisForsendelseAlleredeLevertTilPrint() {
-		Message forsendelseIn = lagDefaultForsendelse();
+    }
 
-		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_CONFLICT));
-		when(mockClientResponse.getFirstHeader(anyString())).thenReturn(new BasicHeader("head", "er"));
-		when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
+    @Test
+    public void skalKasteFeilHvisForsendelseAlleredeLevertTilPrint() {
+        Message forsendelseIn = lagDefaultForsendelse();
 
-		MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, PRINT, DELIVERED_TO_PRINT, now());
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
+        when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_CONFLICT));
+        when(mockClientResponse.getFirstHeader(anyString())).thenReturn(new BasicHeader("head", "er"));
+        when(api.createMessage(forsendelseIn)).thenReturn(mockClientResponse);
 
-		when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
-		when(mockClientResponse2.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
-		when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
+        MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, PRINT, DELIVERED_TO_PRINT, now());
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
 
-		try {
-			sender.createOrFetchMessage(forsendelseIn);
-			fail();
-		} catch (DigipostClientException e) {
-			assertEquals(ErrorCode.PRINT_MESSAGE_ALREADY_DELIVERED, e.getErrorCode());
-		}
+        when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
+        when(mockClientResponse2.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
+        when(api.fetchExistingMessage((URI) any())).thenReturn(mockClientResponse2);
 
-	}
+        try {
+            sender.createOrFetchMessage(forsendelseIn);
+            fail();
+        } catch (DigipostClientException e) {
+            assertEquals(ErrorCode.PRINT_MESSAGE_ALREADY_DELIVERED, e.getErrorCode());
+        }
 
-	@Test
-	public void skal_bruke_cached_print_encryption_key() {
-		when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
+    }
 
-		sender.getEncryptionKeyForPrint();
-		then(api).should(times(1)).getEncryptionKeyForPrint();
+    @Test
+    public void skal_bruke_cached_print_encryption_key() {
+        when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
 
-		sender.getEncryptionKeyForPrint();
-		then(api).should(times(1)).getEncryptionKeyForPrint();
+        sender.getEncryptionKeyForPrint();
+        then(api).should(times(1)).getEncryptionKeyForPrint();
 
-		DateTimeUtils.setCurrentMillisOffset(Duration.standardMinutes(10).getMillis());
-		sender.getEncryptionKeyForPrint();
-		then(api).should(times(2)).getEncryptionKeyForPrint();
-	}
+        clock.timePasses(ofMinutes(5));
+        sender.getEncryptionKeyForPrint();
+        then(api).should(times(1)).getEncryptionKeyForPrint();
 
-	@Test
-	public void skal_ikke_bruke_cached_print_encryption_key_da_encryption_er_avskrudd() {
-		when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
+        clock.timePasses(ofMillis(1));
+        sender.getEncryptionKeyForPrint();
+        then(api).should(times(2)).getEncryptionKeyForPrint();
+    }
 
-		cachelessSender.getEncryptionKeyForPrint();
-		then(api).should(times(1)).getEncryptionKeyForPrint();
+    @Test
+    public void skal_ikke_bruke_cached_print_encryption_key_da_encryption_er_avskrudd() {
+        when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
 
-		cachelessSender.getEncryptionKeyForPrint();
-		then(api).should(times(2)).getEncryptionKeyForPrint();
+        cachelessSender.getEncryptionKeyForPrint();
+        then(api).should(times(1)).getEncryptionKeyForPrint();
 
-		DateTimeUtils.setCurrentMillisOffset(Duration.standardMinutes(10).getMillis());
-		cachelessSender.getEncryptionKeyForPrint();
-		then(api).should(times(3)).getEncryptionKeyForPrint();
-	}
+        cachelessSender.getEncryptionKeyForPrint();
+        then(api).should(times(2)).getEncryptionKeyForPrint();
 
+        clock.timePasses(ofMinutes(10));
+        cachelessSender.getEncryptionKeyForPrint();
+        then(api).should(times(3)).getEncryptionKeyForPrint();
+    }
 
-	@Test
-	public void fallback_to_print_changes_filetype_html_to_pdf() {
-		IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey =
-				new IdentificationResultWithEncryptionKey(IdentificationResult.digipost("123"), fakeEncryptionKey);
 
-		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(200));
+    @Test
+    public void fallback_to_print_changes_filetype_html_to_pdf() {
+        IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey =
+                new IdentificationResultWithEncryptionKey(IdentificationResult.digipost("123"), fakeEncryptionKey);
 
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		marshal(identificationResultWithEncryptionKeyContext, identificationResultWithEncryptionKey, bao);
+        when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(200));
 
-		when(mockClientResponse.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(identificationResultWithEncryptionKeyContext, identificationResultWithEncryptionKey, bao);
 
-		when(api.identifyAndGetEncryptionKey(any(Identification.class))).thenReturn(mockClientResponse);
+        when(mockClientResponse.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
 
-		CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
-		ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
-		marshal(messageDeliveryContext,
-				new MessageDelivery(UUID.randomUUID().toString(), Channel.PRINT, MessageStatus.COMPLETE, DateTime.now()), bao2);
+        when(api.identifyAndGetEncryptionKey(any(Identification.class))).thenReturn(mockClientResponse);
 
-		when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray()));
-		when(response.getStatusLine()).thenReturn(new StatusLineMock(200));
+        CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
+        ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
+        marshal(messageDeliveryContext,
+                new MessageDelivery(UUID.randomUUID().toString(), Channel.PRINT, MessageStatus.COMPLETE, now()), bao2);
 
-		when(api.multipartMessage(any(HttpEntity.class))).thenReturn(response);
+        when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray()));
+        when(response.getStatusLine()).thenReturn(new StatusLineMock(200));
 
-		String messageId = UUID.randomUUID().toString();
-		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).encrypt();
-		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).encrypt());
-		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
-		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+        when(api.multipartMessage(any(HttpEntity.class))).thenReturn(response);
 
-		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+        String messageId = UUID.randomUUID().toString();
+        final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).encrypt();
+        final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).encrypt());
+        PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+        PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-		MessageSender messageSender = new MessageSender(newBuilder().build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
-		Message message = newMessage(messageId, printDocument).attachments(printAttachments)
-				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
+        Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
 
-		documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
-		for (Document attachment : printAttachments) {
-			documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
-		}
+        MessageSender messageSender = new MessageSender(newBuilder().build(), api, DigipostClient.NOOP_EVENT_LOGGER, pdfValidator);
+        Message message = newMessage(messageId, printDocument).attachments(printAttachments)
+                .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
 
-		messageSender.sendMultipartMessage(message, documentAndContent);
-	}
+        documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
+        for (Document attachment : printAttachments) {
+            documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
+        }
 
-	@Test
-	public void setDigipostContentToUUIDTest(){
-		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).encrypt();
-		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
-		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
-		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+        messageSender.sendMultipartMessage(message, documentAndContent);
+    }
 
-		List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).encrypt());
-		Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
-				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
+    @Test
+    public void setDigipostContentToUUIDTest(){
+        Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).encrypt();
+        Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+        PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+        PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-		documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
-		for (Document attachment : printAttachments) {
-			documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
-		}
+        List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).encrypt());
+        Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
+                .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
 
-		Map<Document, InputStream> documentAndInputStreams = new HashMap<>();
-		Message digipostCopyMessage = Message.copyMessageWithOnlyDigipostDetails(message);
-		MessageSender.setDigipostContentToUUID(documentAndContent, documentAndInputStreams, digipostCopyMessage.getAllDocuments());
+        documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+        for (Document attachment : printAttachments) {
+            documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+        }
 
-		for(Document doc : digipostCopyMessage.getAllDocuments()){
-			InputStream inputStream = documentAndInputStreams.get(doc);
-			assertThat(inputStream, is(documentAndContent.get(doc.uuid).getDigipostContent()));
-		}
+        Map<Document, InputStream> documentAndInputStreams = new HashMap<>();
+        Message digipostCopyMessage = Message.copyMessageWithOnlyDigipostDetails(message);
+        MessageSender.setDigipostContentToUUID(documentAndContent, documentAndInputStreams, digipostCopyMessage.getAllDocuments());
 
-		assertThat(digipostCopyMessage.recipient.hasPrintDetails(), is(false));
-		assertThat(digipostCopyMessage.recipient.hasDigipostIdentification(),is(true));
-	}
+        digipostCopyMessage.getAllDocuments().forEach(doc -> {
+            InputStream inputStream = documentAndInputStreams.get(doc);
+            assertThat(inputStream, is(documentAndContent.get(doc.uuid).getDigipostContent()));
+        });
 
-	@Test
-	public void setPrintContentToUUIDTest(){
-		Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).encrypt();
-		Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
-		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
-		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+        assertThat(digipostCopyMessage.recipient.hasPrintDetails(), is(false));
+        assertThat(digipostCopyMessage.recipient.hasDigipostIdentification(),is(true));
+    }
 
-		List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).encrypt());
-		Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
-				.recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
+    @Test
+    public void setPrintContentToUUIDTest(){
+        Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).encrypt();
+        Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+        PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+        PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-		documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
-		for (Document attachment : printAttachments) {
-			documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
-		}
+        List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).encrypt());
+        Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
+                .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress, A))).build();
 
-		Map<Document, InputStream> documentAndInputStreams = new HashMap<>();
-		Message printCopyMessage = Message.copyMessageWithOnlyPrintDetails(message);
-		MessageSender.setPrintContentToUUID(documentAndContent, documentAndInputStreams, printCopyMessage.getAllDocuments());
+        documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+        for (Document attachment : printAttachments) {
+            documentAndContent.put(attachment.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
+        }
 
-		for(Document doc : printCopyMessage.getAllDocuments()){
-			InputStream inputStream = documentAndInputStreams.get(doc);
-			assertThat(inputStream, is(documentAndContent.get(doc.uuid).getPrintContent()));
-		}
+        Map<Document, InputStream> documentAndInputStreams = new HashMap<>();
+        Message printCopyMessage = Message.copyMessageWithOnlyPrintDetails(message);
+        MessageSender.setPrintContentToUUID(documentAndContent, documentAndInputStreams, printCopyMessage.getAllDocuments());
 
-		assertThat(printCopyMessage.recipient.hasPrintDetails(), is(true));
-		assertThat(printCopyMessage.recipient.hasDigipostIdentification(),is(false));
-	}
+        printCopyMessage.getAllDocuments().forEach(doc -> {
+            InputStream inputStream = documentAndInputStreams.get(doc);
+            assertThat(inputStream, is(documentAndContent.get(doc.uuid).getPrintContent()));
+        });
+
+        assertThat(printCopyMessage.recipient.hasPrintDetails(), is(true));
+        assertThat(printCopyMessage.recipient.hasDigipostIdentification(),is(false));
+    }
 
 	@Test
 	public void passes_pdf_validation_for_printonly_message() throws IOException {
@@ -344,8 +359,8 @@ public class MessageSenderTest {
 		when(api.multipartMessage(any(HttpEntity.class))).thenReturn(mockClientResponse);
 		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 
-		final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).encrypt();
-		final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).encrypt());
+        final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).encrypt();
+        final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).encrypt());
 
 		final List<Document> allDocuments = the(printDocument).append(printAttachments).collect();
 
@@ -362,14 +377,14 @@ public class MessageSenderTest {
 				.thenReturn(new ByteArrayEntity(bao.toByteArray()));
 
 
-		PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
-		PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+        PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+        PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-		when(api.getSenderInformation(any(MayHaveSender.class))).thenReturn(new SenderInformation(1337L, VALID_SENDER,
-				asList(
-						DIGIPOST_DELIVERY.withNoParam(), DELIVERY_DIRECT_TO_PRINT.withNoParam(), DELIVERY_DIRECT_TO_PRINT.withNoParam(),
-						PRINTVALIDATION_FONTS.withNoParam(), PRINTVALIDATION_MARGINS_LEFT.withNoParam(), PRINTVALIDATION_PDFVERSION.withNoParam())
-		));
+        when(api.getSenderInformation(any(MayHaveSender.class))).thenReturn(new SenderInformation(1337L, VALID_SENDER,
+                asList(
+                        DIGIPOST_DELIVERY.withNoParam(), DELIVERY_DIRECT_TO_PRINT.withNoParam(), DELIVERY_DIRECT_TO_PRINT.withNoParam(),
+                        PRINTVALIDATION_FONTS.withNoParam(), PRINTVALIDATION_MARGINS_LEFT.withNoParam(), PRINTVALIDATION_PDFVERSION.withNoParam())
+        ));
 
 		LOG.debug("Tester direkte til print");
 		MessageDeliverer deliverer = new MessageDeliverer(sender);
@@ -387,45 +402,40 @@ public class MessageSenderTest {
 		reset(pdfValidator);
 	}
 
-	private Message lagDefaultForsendelse() {
-		return lagEnkeltForsendelse("emne", UUID.randomUUID().toString(), "12345678900");
-	}
+    private Message lagDefaultForsendelse() {
+        return lagEnkeltForsendelse("emne", UUID.randomUUID().toString(), "12345678900");
+    }
 
-	private Message lagEnkeltForsendelse(final String subject, final String messageId, final String fnr) {
-		return newMessage(messageId, new Document(UUID.randomUUID().toString(), subject, FileType.PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-				.personalIdentificationNumber(new PersonalIdentificationNumber(fnr))
-				.build();
-	}
-
-
+    private Message lagEnkeltForsendelse(final String subject, final String messageId, final String fnr) {
+        return newMessage(messageId, new Document(UUID.randomUUID().toString(), subject, FileType.PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+                .personalIdentificationNumber(new PersonalIdentificationNumber(fnr))
+                .build();
+    }
 
 
 
-	@After
-	public void resetToSystemClock() {
-		DateTimeUtils.setCurrentMillisSystem();
-	}
 
-	public static class StatusLineMock implements StatusLine {
 
-		private final int statusCode;
-		public StatusLineMock(int statusCode){
-			this.statusCode = statusCode;
-		}
+    public static class StatusLineMock implements StatusLine {
 
-		@Override
-		public ProtocolVersion getProtocolVersion() {
-			return null;
-		}
+        private final int statusCode;
+        public StatusLineMock(int statusCode){
+            this.statusCode = statusCode;
+        }
 
-		@Override
-		public int getStatusCode() {
-			return statusCode;
-		}
+        @Override
+        public ProtocolVersion getProtocolVersion() {
+            return null;
+        }
 
-		@Override
-		public String getReasonPhrase() {
-			return null;
-		}
-	}
+        @Override
+        public int getStatusCode() {
+            return statusCode;
+        }
+
+        @Override
+        public String getReasonPhrase() {
+            return null;
+        }
+    }
 }

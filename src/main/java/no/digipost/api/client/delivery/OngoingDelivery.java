@@ -39,47 +39,47 @@ import java.io.InputStream;
 public interface OngoingDelivery<OPERATIONS extends OngoingDelivery<OPERATIONS> & OngoingDelivery.SendableDelivery> {
 
 
-	/**
-	 * Laster opp innhold til et dokument.
-	 */
-	OPERATIONS addContent(Document document, InputStream content);
+    /**
+     * Laster opp innhold til et dokument.
+     */
+    OPERATIONS addContent(Document document, InputStream content);
 
 
 
-	/**
-	 * Operasjoner for å sende forsendelser direkte til print.
-	 * Alt dokumentinnhold i forsendelsen må være PDF.
-	 */
-	public static interface ForPrintOnly extends OngoingDelivery<SendableForPrintOnly> {
-	}
+    /**
+     * Operasjoner for å sende forsendelser direkte til print.
+     * Alt dokumentinnhold i forsendelsen må være PDF.
+     */
+    public static interface ForPrintOnly extends OngoingDelivery<SendableForPrintOnly> {
+    }
 
 
 
-	/**
-	 * Operasjoner for å sende forsendelser til Digipost, men mulig fallback til print
-	 * dersom avsender har egnet avtale for dette.
-	 */
-	public static interface WithPrintFallback extends OngoingDelivery<SendableWithPrintFallback> {
+    /**
+     * Operasjoner for å sende forsendelser til Digipost, men mulig fallback til print
+     * dersom avsender har egnet avtale for dette.
+     */
+    public static interface WithPrintFallback extends OngoingDelivery<SendableWithPrintFallback> {
 
-		/**
-		 * Laster opp innhold til et dokument med alternativt innhold for print (må være PDF).
-		 *
-		 * @return videre operasjoner for å fullføre leveransen.
-		 */
-		SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent);
-	}
+        /**
+         * Laster opp innhold til et dokument med alternativt innhold for print (må være PDF).
+         *
+         * @return videre operasjoner for å fullføre leveransen.
+         */
+        SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent);
+    }
 
 
 
-	public static interface SendableDelivery {
-		/**
-		 * Sender forsendelsen.
-		 */
-		MessageDelivery send();
-	}
+    public static interface SendableDelivery {
+        /**
+         * Sender forsendelsen.
+         */
+        MessageDelivery send();
+    }
 
-	public static interface SendableForPrintOnly extends SendableDelivery, ForPrintOnly { }
+    public static interface SendableForPrintOnly extends SendableDelivery, ForPrintOnly { }
 
-	public static interface SendableWithPrintFallback extends SendableDelivery, WithPrintFallback { }
+    public static interface SendableWithPrintFallback extends SendableDelivery, WithPrintFallback { }
 
 }

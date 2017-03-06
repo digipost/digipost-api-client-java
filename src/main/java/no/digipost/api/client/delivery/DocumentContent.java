@@ -18,43 +18,43 @@ package no.digipost.api.client.delivery;
 import java.io.InputStream;
 
 public class DocumentContent {
-	private final InputStream digipostContent;
-	private final InputStream printContent;
+    private final InputStream digipostContent;
+    private final InputStream printContent;
 
-	private DocumentContent(InputStream digipostContent, InputStream printContent){
-		this.digipostContent = digipostContent;
-		this.printContent = printContent;
-	}
+    private DocumentContent(InputStream digipostContent, InputStream printContent){
+        this.digipostContent = digipostContent;
+        this.printContent = printContent;
+    }
 
-	public InputStream getPrintContent(){
-		if(printContent == null){
-			throw new IllegalAccessError("Content ikke tilgjengelig, dette er et digipost DocumentContent");
-		}
+    public InputStream getPrintContent(){
+        if(printContent == null){
+            throw new IllegalAccessError("Content ikke tilgjengelig, dette er et digipost DocumentContent");
+        }
 
-		return printContent;
-	}
+        return printContent;
+    }
 
-	public InputStream getDigipostContent(){
-		if(digipostContent == null){
-			throw new IllegalAccessError("Content ikke tilgjengelig, dette er et print DocumentContent");
-		}
+    public InputStream getDigipostContent(){
+        if(digipostContent == null){
+            throw new IllegalAccessError("Content ikke tilgjengelig, dette er et print DocumentContent");
+        }
 
-		return digipostContent;
-	}
+        return digipostContent;
+    }
 
-	public static DocumentContent CreateDigiPostContent(InputStream content){
-		return new DocumentContent(content, null);
-	}
+    public static DocumentContent CreateDigiPostContent(InputStream content){
+        return new DocumentContent(content, null);
+    }
 
-	public static DocumentContent CreatePrintContent(InputStream content){
-		return new DocumentContent(null, content);
-	}
+    public static DocumentContent CreatePrintContent(InputStream content){
+        return new DocumentContent(null, content);
+    }
 
-	public static DocumentContent CreateMultiStreamContent(InputStream digipostContent, InputStream printContent){
-		return new DocumentContent(digipostContent, printContent);
-	}
+    public static DocumentContent CreateMultiStreamContent(InputStream digipostContent, InputStream printContent){
+        return new DocumentContent(digipostContent, printContent);
+    }
 
-	public static DocumentContent CreateBothStreamContent(InputStream content){
-		return new DocumentContent(content, content);
-	}
+    public static DocumentContent CreateBothStreamContent(InputStream content){
+        return new DocumentContent(content, content);
+    }
 }

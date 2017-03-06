@@ -17,10 +17,10 @@ package no.digipost.api.client.representations;
 
 public class MediaTypes {
 
-	public static final String DIGIPOST_MEDIA_TYPE_V7 = "application/vnd.digipost-v7+xml";
-	public static final String DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7 = "vnd.digipost-v7+xml";
-	public static final String DIGIPOST_MULTI_MEDIA_TYPE_V7 = "multipart/" + DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7;
+    public static final String DIGIPOST_MEDIA_TYPE_V7 = "application/vnd.digipost-v7+xml";
+    public static final String DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7 = "vnd.digipost-v7+xml";
+    public static final String DIGIPOST_MULTI_MEDIA_TYPE_V7 = "multipart/" + DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7;
 
-	public static final String APPLICATION_PDF = "application/pdf";
+    public static final String APPLICATION_PDF = "application/pdf";
 
 }
