@@ -26,6 +26,7 @@ import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
@@ -35,7 +36,7 @@ import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ER
 import static org.apache.http.HttpHeaders.DATE;
 
 public class ResponseDateInterceptor implements HttpResponseInterceptor {
-    private static final int ACCEPTABLE_TIME_DIFF_MINUTES = 5;
+    private static final Duration ACCEPTABLE_TIME_DIFF = Duration.ofMinutes(5);
 
     private final Clock clock;
 
@@ -46,7 +47,6 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
     public ResponseDateInterceptor(Clock clock) {
         this.clock = clock;
     }
-
 
     @Override
     public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
@@ -70,13 +70,13 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
     }
 
     private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final ZonedDateTime parsedDate) {
-        if (parsedDate.isBefore(now(clock).minusMinutes(ACCEPTABLE_TIME_DIFF_MINUTES))) {
+        if (parsedDate.isBefore(now(clock).minus(ACCEPTABLE_TIME_DIFF))) {
             throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date header in response from server is too old: " + headerDate);
         }
     }
 
     private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final ZonedDateTime parsedDate) {
-        if (parsedDate.isAfter(now(clock).plusMinutes(ACCEPTABLE_TIME_DIFF_MINUTES))) {
+        if (parsedDate.isAfter(now(clock).plus(ACCEPTABLE_TIME_DIFF))) {
             throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header from server is too early: " + headerDate);
         }
     }
