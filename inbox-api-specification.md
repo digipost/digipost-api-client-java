@@ -45,7 +45,7 @@ Inbox inbox = client.getInbox(senderId);
 |limit|int|Maximum number of returned documents (default: 100)|
 
 ```http
-GET /<sender-id>/inbox?offset=0&maxResults=100
+GET /<sender-id>/inbox?offset=0&limit=100
 Accept: application/vnd.digipost-v7+xml
 ```
 
