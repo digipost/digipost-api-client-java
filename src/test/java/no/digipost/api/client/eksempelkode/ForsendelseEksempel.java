@@ -16,7 +16,6 @@
 package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
@@ -51,8 +50,8 @@ public class ForsendelseEksempel {
         // .p12-formatet)
         InputStream sertifikatInputStream = lesInnSertifikat();
 
-        // 2. Vi oppretter en DigipostClient
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+		// 2. Vi oppretter en DigipostClient
+		DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         // 3. Vi oppretter et fødselsnummerobjekt
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");

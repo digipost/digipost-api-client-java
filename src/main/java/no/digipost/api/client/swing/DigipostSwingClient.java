@@ -17,7 +17,6 @@ package no.digipost.api.client.swing;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.EventLogger;
-import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.DigipostAddress;
@@ -635,19 +634,19 @@ public class DigipostSwingClient {
                 CardLayout layout = (CardLayout) contentPane.getLayout();
                 layout.show(contentPane, BREV);
 
-                try {
-                    client = new DigipostClient(newBuilder().build(),ApiFlavor.STEPWISE_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
-                            newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger, null, null);
-                } catch (NumberFormatException e1) {
-                    eventLogger.log("FEIL: Avsenders ID må være et tall > 0");
-                } catch (IOException e1) {
-                    eventLogger.log("FEIL: Klarte ikke å lese sertifikatfil:\n" + e1);
-                } catch (Exception e1) {
-                    eventLogger.log("FEIL: Kunne ikke initialisere Digipost-API-klienten. Dette kan f.eks skyldes at"
-                            + " sertifikatfilen var ugyldig, eller at du skrev inn feil passord. Feilmelding var:\n" + e1.getMessage());
-                }
-            }
-        });
+				try {
+					client = new DigipostClient(newBuilder().build(), endpointField.getText(), Long.parseLong(senderField.getText()),
+							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger, null, null);
+				} catch (NumberFormatException e1) {
+					eventLogger.log("FEIL: Avsenders ID må være et tall > 0");
+				} catch (IOException e1) {
+					eventLogger.log("FEIL: Klarte ikke å lese sertifikatfil:\n" + e1);
+				} catch (Exception e1) {
+					eventLogger.log("FEIL: Kunne ikke initialisere Digipost-API-klienten. Dette kan f.eks skyldes at"
+							+ " sertifikatfilen var ugyldig, eller at du skrev inn feil passord. Feilmelding var:\n" + e1.getMessage());
+				}
+			}
+		});
 
         Component verticalStrut = Box.createVerticalStrut(20);
         GridBagConstraints gbc_verticalStrut = new GridBagConstraints();
