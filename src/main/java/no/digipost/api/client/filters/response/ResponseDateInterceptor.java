@@ -17,31 +17,27 @@ package no.digipost.api.client.filters.response;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.util.DateUtils;
-import no.digipost.api.client.util.LoggingUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.protocol.HttpContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Optional;
 
 import static java.time.ZonedDateTime.now;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.http.HttpHeaders.DATE;
 
 public class ResponseDateInterceptor implements HttpResponseInterceptor {
+    private static final Duration ACCEPTABLE_TIME_DIFF = Duration.ofMinutes(5);
 
-    private static final Logger LOG = LoggerFactory.getLogger(ResponseDateInterceptor.class);
-    private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
-
-    private boolean shouldThrow = true;
     private final Clock clock;
 
     public ResponseDateInterceptor() {
@@ -52,61 +48,36 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
         this.clock = clock;
     }
 
-    public void setThrowOnError(boolean shouldThrow) {
-        this.shouldThrow = shouldThrow;
-    }
-
     @Override
     public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-        String dateHeader = null;
-        Header firstHeader = response.getFirstHeader(DATE);
-        if(firstHeader != null){
-            dateHeader = firstHeader.getValue();
-        }
-
-        try {
-            if (isNotBlank(dateHeader)) {
-                sjekkDato(dateHeader);
-            } else {
-                throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-                        "Mangler Date-header - server-signatur kunne ikke sjekkes");
-            }
-        } catch (Exception e) {
-            LoggingUtil.logResponse(response);
-            if (shouldThrow) {
-                if (e instanceof DigipostClientException) {
-                    throw (DigipostClientException) e;
-                } else {
-                    throw new DigipostClientException(SERVER_SIGNATURE_ERROR,
-                            "Det skjedde en feil under signatursjekk: " + e.getMessage());
-                }
-            } else {
-                LOG.warn("Feil under validering av server-signatur: '" + e.getMessage() + "'. " +
-                        (LOG.isDebugEnabled() ? "" : "Konfigurer debug-logging for " + LOG.getName() + " for å se full stacktrace."));
-                LOG.debug(e.getMessage(), e);
-            }
-        }
+        final String dateHeader = Optional.ofNullable(response.getFirstHeader(DATE))
+                .map(Header::getValue)
+                .filter(StringUtils::isNoneBlank)
+                .orElseThrow(() -> new DigipostClientException(SERVER_SIGNATURE_ERROR,
+                    String.format("Missing %s header in response. This header is expected in all response. Http status was %s",
+                            DATE, response.getStatusLine())));
+        checkDate(dateHeader);
     }
 
-    private void sjekkDato(String dateOnRFC1123Format) {
+    private void checkDate(String dateOnRFC1123Format) {
         try {
             ZonedDateTime date = DateUtils.parseDate(dateOnRFC1123Format);
             sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date);
             sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date);
         } catch (DateTimeParseException e) {
-            throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header '" + dateOnRFC1123Format + "' kunne ikke parses (er den 'RFC 1123 compliant'?) - server-signatur kunne ikke sjekkes");
+            throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Unable to parse Date header '" + dateOnRFC1123Format + "' (is it 'RFC 1123 compliant'?)");
         }
     }
 
     private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final ZonedDateTime parsedDate) {
-        if (parsedDate.isBefore(now(clock).minusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
-            throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for gammel: " + headerDate);
+        if (parsedDate.isBefore(now(clock).minus(ACCEPTABLE_TIME_DIFF))) {
+            throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date header in response from server is too old: " + headerDate);
         }
     }
 
     private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final ZonedDateTime parsedDate) {
-        if (parsedDate.isAfter(now(clock).plusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
-            throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header fra server er for ny: " + headerDate);
+        if (parsedDate.isAfter(now(clock).plus(ACCEPTABLE_TIME_DIFF))) {
+            throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Date-header from server is too early: " + headerDate);
         }
     }
 }
