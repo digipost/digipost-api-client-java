@@ -28,20 +28,20 @@ import java.util.Map;
  * Sender en forsendelse direkte til print gjennom Digipost i ett kall.
  * (Krever at avsender har fått tilgang til print.)
  */
-final class AtomicPrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
+final class PrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
 
     private final MessageSender sender;
     private final Message printMessage;
     private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
 
-    AtomicPrintOnlyMessage(Message printMessage, MessageSender sender) {
-        if (!printMessage.isDirectPrint()) {
-            throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
-                    + "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
-        }
-        this.printMessage = printMessage;
-        this.sender = sender;
+    PrintOnlyMessage(Message printMessage, MessageSender sender) {
+    	if (!printMessage.isDirectPrint()) {
+    		throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
+    				+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
+    	}
+    	this.printMessage = printMessage;
+    	this.sender = sender;
     }
 
 
@@ -51,9 +51,9 @@ final class AtomicPrintOnlyMessage implements OngoingDelivery.SendableForPrintOn
      * @return videre operasjoner for å fullføre leveransen.
      */
     @Override
-    public AtomicPrintOnlyMessage addContent(Document document, InputStream content) {
-        documents.put(document.uuid, DocumentContent.CreatePrintContent(content));
-        return this;
+    public PrintOnlyMessage addContent(Document document, InputStream content) {
+    	documents.put(document.uuid, DocumentContent.CreatePrintContent(content));
+    	return this;
     }
 
 
@@ -63,3 +63,4 @@ final class AtomicPrintOnlyMessage implements OngoingDelivery.SendableForPrintOn
     }
 
 }
+

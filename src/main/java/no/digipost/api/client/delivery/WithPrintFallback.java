@@ -21,15 +21,24 @@ import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 
 import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-final class StepwiseWithPrintFallback implements OngoingDelivery.SendableWithPrintFallback {
+/**
+ * Sender en forsendelse gjennom Digipost i ett kall. Dersom mottaker ikke er
+ * digipostbruker og det ligger printdetaljer på forsendelsen bestiller vi
+ * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
+ * til print.)
+ */
+final class WithPrintFallback implements OngoingDelivery.SendableWithPrintFallback {
+
     private final MessageSender sender;
-    private MessageDelivery delivery;
+    private final Message message;
+    private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
-
-    StepwiseWithPrintFallback(Message message, MessageSender sender) {
-        this.sender = sender;
-        this.delivery = sender.createOrFetchMessage(message);
+    WithPrintFallback(Message message, MessageSender sender) {
+    	this.message = message;
+    	this.sender = sender;
     }
 
 
@@ -40,24 +49,19 @@ final class StepwiseWithPrintFallback implements OngoingDelivery.SendableWithPri
      */
     @Override
     public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
-        return addContent(document, content, content);
-    }
-
-
-    @Override
-    public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
-        this.delivery = sender.addContent(delivery, delivery.getDocumentByUuid(document.uuid), content, printContent);
+        documents.put(document.uuid, DocumentContent.CreateBothStreamContent(content));
         return this;
     }
 
+    @Override
+    public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
+        documents.put(document.uuid, DocumentContent.CreateMultiStreamContent(content, printContent));
+        return this;
+    }
 
-    /**
-     * Sender forsendelsen gjennom Digipost. Dersom mottaker ikke er Digipostbruker
-     * og det ligger printdetaljer på forsendelsen bestiller vi print av brevet
-     * til vanlig postgang. (Krever at avsender har fått tilgang til print.)
-     */
     @Override
     public MessageDelivery send() {
-        return sender.sendMessage(delivery);
+        return sender.sendMultipartMessage(message, documents);
     }
 }
+
