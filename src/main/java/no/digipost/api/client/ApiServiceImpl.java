@@ -53,11 +53,11 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.Optional.ofNullable;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
@@ -216,10 +216,9 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public CloseableHttpResponse getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
-        DateTimeFormatter urlParamPattern = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
         URIBuilder builder = new URIBuilder(digipostUrl.resolve(getEntryPoint().getDocumentEventsUri().getPath()))
-                .setParameter("from", urlParamPattern.format(from))
-                .setParameter("to", urlParamPattern.format(to))
+                .setParameter("from", ISO_OFFSET_DATE_TIME.format(from))
+                .setParameter("to", ISO_OFFSET_DATE_TIME.format(to))
                 .setParameter("offset", String.valueOf(offset))
                 .setParameter("maxResults", String.valueOf(maxResults));
 
