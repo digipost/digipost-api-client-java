@@ -27,7 +27,7 @@ The sender is the organization that wants access to it's inbox in Digipost. Ever
 
 * Type: XML over HTTP RESTful API
 * Media type for XML: `application/vnd.digipost-v7+xml`
-* [Java client library available](https://github.com/digipost/digipost-api-client-java/tree/api-for-postkasse-bedrift)
+* [Java client library available](https://github.com/digipost/digipost-api-client-java)
 
 ## Get Inbox
 
