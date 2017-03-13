@@ -1075,4 +1075,28 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+    <xsd:element name="inbox" type="inbox" />
+
+    <xsd:complexType name="inbox">
+        <xsd:sequence>
+            <xsd:element name="document" type="inbox-document" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="inbox-document">
+        <xsd:sequence>
+            <xsd:element name="id" type="xsd:long" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="subject" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="sender" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="delivery-time" type="xsd:dateTime" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="first-accessed" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="authentication-level" type="authentication-level" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="content-type" type="xsd:string" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="content-uri" type="xsd:string" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="delete-uri" type="xsd:string" minOccurs="0" maxOccurs="1" />
+            <xsd:sequence>
+                <xsd:element name="attachment" type="inbox-document" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:sequence>
+        </xsd:sequence>
+    </xsd:complexType>
 </xsd:schema>

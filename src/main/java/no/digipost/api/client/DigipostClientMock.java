@@ -15,11 +15,13 @@
  */
 package no.digipost.api.client;
 
+import java.net.URI;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.DigipostApiMock;
 import no.digipost.api.client.util.DigipostApiMock.Method;
+import no.digipost.api.client.util.DigipostApiMock.MockRequest;
 import no.digipost.api.client.util.DigipostApiMock.RequestsAndResponses;
 import no.digipost.http.client3.DigipostHttpClientFactory;
 import no.digipost.http.client3.DigipostHttpClientSettings;
@@ -35,13 +37,16 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.security.*;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
-import static no.digipost.api.client.util.DigipostApiMock.MockRequest;
 
 /**
  * Instansierer en DigipostClient som ikke går mot faktiskt Digipost REST-api endepunkt og
@@ -58,7 +63,7 @@ public class DigipostClientMock {
     private static final int PORT = 6666;
 
 	public DigipostClientMock() {
-		String host = "http://localhost:" + PORT;
+        URI host = URI.create("http://localhost:" + PORT);
 
         HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 
