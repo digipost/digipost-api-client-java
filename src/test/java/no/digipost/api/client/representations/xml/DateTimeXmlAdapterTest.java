@@ -42,10 +42,7 @@ public class DateTimeXmlAdapterTest {
         String xmlDateTimeString = adapter.marshal(rightNowInAmerica);
 
         boolean daylightSavings = newYorkZone.getRules().isDaylightSavings(rightNowInAmerica.toInstant());
-        if(daylightSavings) {
-            assertThat(adapter.unmarshal(xmlDateTimeString), is(rightNowInAmerica.withZoneSameInstant(ZoneId.of("GMT-4"))));
-        } else {
-            assertThat(adapter.unmarshal(xmlDateTimeString), is(rightNowInAmerica.withZoneSameInstant(ZoneId.of("GMT-5"))));
-        }
+        ZoneId gmtZone = daylightSavings ? ZoneId.of("GMT-4") : ZoneId.of("GMT-5");
+        assertThat(adapter.unmarshal(xmlDateTimeString), is(rightNowInAmerica.withZoneSameInstant(gmtZone)));
     }
 }
