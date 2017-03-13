@@ -1,16 +1,14 @@
 ---
+identifier: index
 layout: default
-title: Home
-description:
-isHome: true
 redirect_from: /
 ---
 
 <!-- Documentation -->
 {% for dok in site.v6_1 %}
-	{% if dok.id %}
+	{% if dok.identifier != 'index' %}
 		<section class="bs-docs-section">  
-	  		<h1 id="{{ dok.id }}" class="page-header">{{ dok.title}}</h1>
+	  		<h1 id="{{ dok.identifier }}" class="page-header">{{ dok.title}}</h1>
 	  		{{dok.content}}  
 		</section>
 	{% endif%}

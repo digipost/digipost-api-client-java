@@ -1,9 +1,7 @@
 ---
 title: Use cases
-id: usecases
+identifier: usecases
 layout: default
-description: Use cases for sending digital mail
-isHome: false
 ---
 
 <p>The Java client library also includes <a href="https://github.com/digipost/digipost-api-client-java/tree/master/src/test/java/no/digipost/api/client/eksempelkode">relevant tests</a> that include similar examples to below.</p>
