@@ -18,7 +18,16 @@ package no.digipost.api.client;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.EntryPoint;
+import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.MayHaveSender;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
@@ -53,16 +62,23 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.Optional.ofNullable;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
-import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.autocompleteContext;
+import static no.digipost.api.client.util.JAXBContextUtils.entryPointContext;
+import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
+import static no.digipost.api.client.util.JAXBContextUtils.identificationContext;
+import static no.digipost.api.client.util.JAXBContextUtils.marshal;
+import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
+import static no.digipost.api.client.util.JAXBContextUtils.recipientsContext;
+import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
 public class ApiServiceImpl implements ApiService {
 
@@ -75,6 +91,8 @@ public class ApiServiceImpl implements ApiService {
 
     private final Cached cached;
     private final EventLogger eventLogger;
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
+
 
     public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long senderAccountId, EventLogger eventLogger, URI digipostUrl, HttpHost proxy) {
         this.brokerId = senderAccountId;
@@ -217,8 +235,8 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public CloseableHttpResponse getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
         URIBuilder builder = new URIBuilder(digipostUrl.resolve(getEntryPoint().getDocumentEventsUri().getPath()))
-                .setParameter("from", ISO_OFFSET_DATE_TIME.format(from))
-                .setParameter("to", ISO_OFFSET_DATE_TIME.format(to))
+                .setParameter("from", DATE_TIME_FORMAT.format(from))
+                .setParameter("to", DATE_TIME_FORMAT.format(to))
                 .setParameter("offset", String.valueOf(offset))
                 .setParameter("maxResults", String.valueOf(maxResults));
 
