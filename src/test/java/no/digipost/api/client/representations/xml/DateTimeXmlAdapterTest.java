@@ -15,11 +15,13 @@
  */
 package no.digipost.api.client.representations.xml;
 
+import java.util.TimeZone;
 import org.junit.Test;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -35,8 +37,15 @@ public class DateTimeXmlAdapterTest {
 
     @Test
     public void unmarshall_yields_datetime_with_region_based_zoneId_replaced_with_GMT_offset() {
-        ZonedDateTime rightNowInAmerica = ZonedDateTime.now(ZoneId.of("America/New_York"));
+        ZoneId newYorkZone = ZoneId.of("America/New_York");
+        ZonedDateTime rightNowInAmerica = ZonedDateTime.now(newYorkZone);
         String xmlDateTimeString = adapter.marshal(rightNowInAmerica);
-        assertThat(adapter.unmarshal(xmlDateTimeString), is(rightNowInAmerica.withZoneSameInstant(ZoneId.of("GMT-5"))));
+
+        boolean daylightSavings = newYorkZone.getRules().isDaylightSavings(rightNowInAmerica.toInstant());
+        if(daylightSavings) {
+            assertThat(adapter.unmarshal(xmlDateTimeString), is(rightNowInAmerica.withZoneSameInstant(ZoneId.of("GMT-4"))));
+        } else {
+            assertThat(adapter.unmarshal(xmlDateTimeString), is(rightNowInAmerica.withZoneSameInstant(ZoneId.of("GMT-5"))));
+        }
     }
 }
