@@ -50,7 +50,7 @@ header:
 # github buttons
 githubButton:
   user: digipost
-  repo: digipost-api-client-dotnet
+  repo: digipost-api-client-java
 
 # twitter buttons
 twitter:
