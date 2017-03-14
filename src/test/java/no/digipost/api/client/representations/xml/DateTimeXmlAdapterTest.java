@@ -35,8 +35,12 @@ public class DateTimeXmlAdapterTest {
 
     @Test
     public void unmarshall_yields_datetime_with_region_based_zoneId_replaced_with_GMT_offset() {
-        ZonedDateTime rightNowInAmerica = ZonedDateTime.now(ZoneId.of("America/New_York"));
+        ZoneId newYorkZone = ZoneId.of("America/New_York");
+        ZonedDateTime rightNowInAmerica = ZonedDateTime.now(newYorkZone);
         String xmlDateTimeString = adapter.marshal(rightNowInAmerica);
-        assertThat(adapter.unmarshal(xmlDateTimeString), is(rightNowInAmerica.withZoneSameInstant(ZoneId.of("GMT-5"))));
+
+        boolean daylightSavings = newYorkZone.getRules().isDaylightSavings(rightNowInAmerica.toInstant());
+        ZoneId gmtZone = daylightSavings ? ZoneId.of("GMT-4") : ZoneId.of("GMT-5");
+        assertThat(adapter.unmarshal(xmlDateTimeString), is(rightNowInAmerica.withZoneSameInstant(gmtZone)));
     }
 }
