@@ -4,14 +4,13 @@ identifier: send
 layout: default
 ---
 
-<p>The Java client library also includes <a href="https://github.com/digipost/digipost-api-client-java/tree/master/src/test/java/no/digipost/api/client/eksempelkode">relevant tests</a> that include similar examples to below.</p>
+The Java client library also includes [relevant tests](https://github.com/digipost/digipost-api-client-java/tree/master/src/test/java/no/digipost/api/client/eksempelkode) that include similar examples to below.
 
-<p>The below examples instantiate a client in each example. This is done for example purposes only.</p>
+The below examples instantiate a client in each example. This is done for example purposes only.
 
-<h3 id="uc01">Send one letter to recipient via personal identification number</h3>
+### Send one letter to recipient via personal identification number
 
-{% highlight java %}
-
+```java
 InputStream certificateStream = new FileInputStream("certificate.p12");
 
 DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, certificateStream, CERTIFICATE_PASSWORD);
@@ -27,13 +26,11 @@ Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument
 client.createMessage(message)
         .addContent(primaryDocument, new FileInputStream("content.pdf"))
         .send();
+```
 
-{% endhighlight %}
+### Send one letter to recipient via name and address
 
-<h3 id="uc02">Send one letter to recipient via name and address</h3>
-
-{% highlight java %}
-
+```java
 InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
 DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
@@ -49,13 +46,11 @@ Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
 client.createMessage(message)
         .addContent(primaryDocument, new FileInputStream("content.pdf"))
         .send();
+```
 
-{% endhighlight %}
+### Send one letter with multiple attachments
 
-<h3 id="uc03">Send one letter with multiple attachments</h3>
-
-{% highlight java %}
-
+```java
 InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
 DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
@@ -78,13 +73,11 @@ client.createMessage(message)
         .addContent(attachment1, new FileInputStream("attachment1_content.pdf"))
         .addContent(attachment2, new FileInputStream("attachment2_content.pdf"))
         .send();
+```
 
-{% endhighlight %}
+### Send invoice
 
-<h3 id="uc04">Send invoice</h3>
-
-{% highlight java %}
-
+```java
 InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
 DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
@@ -101,13 +94,11 @@ Message message = Message.MessageBuilder.newMessage(UUID2, invoice)
 client.createMessage(message)
         .addContent(invoice, new FileInputStream("invoice.pdf"))
         .send();
+```
 
-{% endhighlight %}
+### Send letter with SMS notification
 
-<h3 id="uc05">Send letter with SMS notification</h3>
-
-{% highlight java %}
-
+```java
 InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
 DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
@@ -124,13 +115,11 @@ Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
 client.createMessage(message)
         .addContent(primaryDocument, new FileInputStream("content.pdf"))
         .send();
+```
 
-{% endhighlight %}
+### Send letter with fallback to print
 
-<h3 id="uc07">Send letter with fallback to print</h3>
-
-{% highlight java %}
-
+```java
 InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
 DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
@@ -151,13 +140,11 @@ Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
 MessageDelivery result = client.createMessage(message)
         .addContent(primaryDocument, new FileInputStream("content.pdf"))
         .send();
+```
 
-{% endhighlight %}
+### Send letter with higher security level
 
-<h3 id="uc08">Send letter with higher security level</h3>
-
-{% highlight java %}
-
+```java
 InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
 DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
@@ -175,13 +162,11 @@ Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
 client.createMessage(message)
         .addContent(primaryDocument, new FileInputStream("content.pdf"))
         .send();
+```
 
-{% endhighlight %}
+### Identify user based on personal identification number
 
-<h3 id="uc09">Identify user based on personal identification number</h3>
-
-{% highlight java %}
-
+```java
 InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
 DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
@@ -191,15 +176,13 @@ PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787
 Identification identification = new Identification(pin);
 
 IdentificationResult identificationResult = client.identifyRecipient(identification);
+```
 
-{% endhighlight %}
-
-<h3 id="uc10">Send letter through Norsk Helsenett</h3>
+### Send letter through Norsk Helsenett
 
 The Digipost API is accessible from both internet and Norsk Helsenett (NHN). Both entry points use the same API, the only difference is the base URL.
 
-{% highlight java %}
-
+```java
 InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
 // API URL is different when request is sent from NHN
@@ -216,5 +199,4 @@ Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
 client.createMessage(message)
         .addContent(primaryDocument, new FileInputStream("content.pdf"))
         .send();
-
-{% endhighlight %}
+```
