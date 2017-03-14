@@ -91,8 +91,10 @@ public class ApiServiceImpl implements ApiService {
 
     private final Cached cached;
     private final EventLogger eventLogger;
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
+    // This pattern is hard to get right. The same pattern may not yield the same strings when formatting dates with Joda vs. Java time,
+    // which was the case for the pattern "yyyy-MM-dd'T'HH:mm:ss.SSSZZ". See commit messages for 59caeb5737e45a15 and dcf41785a84f42caf935 for details.
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
     public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long senderAccountId, EventLogger eventLogger, URI digipostUrl, HttpHost proxy) {
         this.brokerId = senderAccountId;
