@@ -16,25 +16,11 @@
 package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.representations.*;
-import no.digipost.api.client.representations.AuthenticationLevel;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.FileType;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.IdentificationResult;
-import no.digipost.api.client.representations.Invoice;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.MessageRecipient;
-import no.digipost.api.client.representations.NameAndAddress;
-import no.digipost.api.client.representations.NorwegianAddress;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.PrintDetails;
-import no.digipost.api.client.representations.PrintRecipient;
-import no.digipost.api.client.representations.SensitivityLevel;
-import no.digipost.api.client.representations.SmsNotification;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -44,20 +30,29 @@ import java.util.UUID;
 
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 
-public class GithubPagesEksempler {
+public class GithubPagesSendExamples {
 
-    private static final long AVSENDERS_KONTOID = 1;
+    private static final long SENDER_ID = 1;
     private static final String UUID1 = UUID.randomUUID().toString();
     private static final String UUID2 = UUID.randomUUID().toString();
     private static final String UUID3 = UUID.randomUUID().toString();
     private static final String UUID4 = UUID.randomUUID().toString();
-    private static final String SERTIFIKAT_PASSORD = "passord";
+    private static final String CERTIFICATE_PASSWORD = "passord";
+
+    private DigipostClient client;
+
+    public void set_up_client() throws FileNotFoundException {
+        long senderId = 123456;
+
+        DigipostClient client = new DigipostClient(
+                new DigipostClientConfig.DigipostClientConfigBuilder().build(),
+                "https://api.digipost.no",
+                senderId,
+                new FileInputStream("certificate.p12"), "TheSecretPassword");
+
+    }
 
     public void send_one_letter_to_recipient_via_personal_identification_number() throws IOException {
-
-        InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
@@ -74,10 +69,6 @@ public class GithubPagesEksempler {
 
     public void send_one_letter_to_recipient_via_name_and_address() throws IOException {
 
-        InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
-
         NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1", "Oppgang B", "0001", "Oslo");
 
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
@@ -93,10 +84,6 @@ public class GithubPagesEksempler {
     }
 
     public void send_one_letter_with_multiple_attachments() throws IOException {
-
-        InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
@@ -121,10 +108,6 @@ public class GithubPagesEksempler {
 
     public void send_invoice() throws IOException {
 
-        InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
-
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
         // An invoice requires four extra fields (KID, amount, account and due date). The use of the Invoice class will trigger payment functionality i Digipost.
@@ -142,10 +125,6 @@ public class GithubPagesEksempler {
 
     public void send_letter_with_sms_notification() throws IOException {
 
-        InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
-
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
         // The time the SMS is sent out can be based on time after letter is delivered or a specific date. This example specifies that the SMS should be sent out one day after the letter i delivered.
@@ -162,10 +141,6 @@ public class GithubPagesEksempler {
     }
 
     public void send_letter_with_fallback_to_print() throws IOException {
-
-        InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
@@ -188,10 +163,6 @@ public class GithubPagesEksempler {
 
     public void send_letter_with_higher_security_level() throws IOException {
 
-        InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
-
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
         // TWO_FACTOR - require BankID or BuyPass authentication to open letter
@@ -210,10 +181,6 @@ public class GithubPagesEksempler {
 
     public void identify_user_based_on_personal_identification_number() throws IOException {
 
-        InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
-
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
         Identification identification = new Identification(pin);
@@ -227,7 +194,7 @@ public class GithubPagesEksempler {
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
         // API URL is different when request is sent from NHN
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.nhn.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.nhn.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
