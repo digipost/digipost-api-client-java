@@ -49,7 +49,6 @@ public class GithubPagesSendExamples {
                 "https://api.digipost.no",
                 senderId,
                 new FileInputStream("certificate.p12"), "TheSecretPassword");
-
     }
 
     public void send_one_letter_to_recipient_via_personal_identification_number() throws IOException {
