@@ -17,7 +17,6 @@ package no.digipost.api.client.swing;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.EventLogger;
-import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.DigipostAddress;
@@ -385,11 +384,11 @@ public class DigipostSwingClient {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 JOptionPane.showMessageDialog(brevPanel, "Opplasting av vedlegg støttes ikke p.t. av Swing-klienten.");
-//				filChooser.showOpenDialog(brevPanel);
-//				File filFile = filChooser.getSelectedFile();
-//				if (filFile != null) {
-//					attachmentContentField.setText(filFile.toString());
-//				}
+//                filChooser.showOpenDialog(brevPanel);
+//                File filFile = filChooser.getSelectedFile();
+//                if (filFile != null) {
+//                    attachmentContentField.setText(filFile.toString());
+//                }
             }
         });
         brevMainPanel.add(addAttachmentContentButton, createGridBagConstraints(GridBagConstraints.WEST, 5, 12));
@@ -636,7 +635,7 @@ public class DigipostSwingClient {
                 layout.show(contentPane, BREV);
 
                 try {
-                    client = new DigipostClient(newBuilder().build(),ApiFlavor.STEPWISE_REST, endpointField.getText(), Long.parseLong(senderField.getText()),
+                    client = new DigipostClient(newBuilder().build(), endpointField.getText(), Long.parseLong(senderField.getText()),
                             newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger, null, null);
                 } catch (NumberFormatException e1) {
                     eventLogger.log("FEIL: Avsenders ID må være et tall > 0");

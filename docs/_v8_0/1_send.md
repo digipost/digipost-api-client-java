@@ -13,7 +13,6 @@ long senderId = 123456;
 
 DigipostClient client = new DigipostClient(
         new DigipostClientConfig.DigipostClientConfigBuilder().build(),
-        ApiFlavor.ATOMIC_REST,
         "https://api.digipost.no",
         senderId,
         new FileInputStream("certificate.p12"), "TheSecretPassword");

@@ -13,7 +13,6 @@ long senderId = 123456;
 
 DigipostClient client = new DigipostClient(
         new DigipostClientConfig.DigipostClientConfigBuilder().build(),
-        ApiFlavor.ATOMIC_REST,
         "https://api.digipost.no",
         senderId,
         new FileInputStream("certificate.p12"), "TheSecretPassword");
@@ -22,35 +21,17 @@ DigipostClient client = new DigipostClient(
 ### Get documents in inbox
 
 ```java
-long senderId = 123456;
-
-DigipostClient client = new DigipostClient(
-        new DigipostClientConfig.DigipostClientConfigBuilder().build(),
-        ApiFlavor.ATOMIC_REST,
-        "https://api.digipost.no",
-        senderId,
-        new FileInputStream("certificate.p12"), "TheSecretPassword");
-
-//get first 100 documents
-final Inbox first100 = client.getInbox(new SenderId(senderId), 0, 100);
+ //get first 100 documents
+final Inbox first100 = client.getInbox(new SenderId(123456), 0, 100);
 
 //get next 100 documents
-final Inbox next100 = client.getInbox(new SenderId(senderId), 100, 100);
+final Inbox next100 = client.getInbox(new SenderId(123456), 100, 100);
 ```
 
 ### Download document content
 
 ```java
-long senderId = 123456;
-
-DigipostClient client = new DigipostClient(
-        new DigipostClientConfig.DigipostClientConfigBuilder().build(),
-        ApiFlavor.ATOMIC_REST,
-        "https://api.digipost.no",
-        senderId,
-        new FileInputStream("certificate.p12"), "TheSecretPassword");
-
-final Inbox inbox = client.getInbox(new SenderId(senderId));
+final Inbox inbox = client.getInbox(new SenderId(123456));
 
 final InboxDocument documentMetadata = inbox.documents.get(0);
 
@@ -61,16 +42,7 @@ final InputStream documentContent = client.getInboxDocumentContent(documentMetad
 ### Delete document
 
 ```java
-long senderId = 123456;
-
-DigipostClient client = new DigipostClient(
-        new DigipostClientConfig.DigipostClientConfigBuilder().build(),
-        ApiFlavor.ATOMIC_REST,
-        "https://api.digipost.no",
-        senderId,
-        new FileInputStream("certificate.p12"), "TheSecretPassword");
-
-final Inbox inbox = client.getInbox(new SenderId(senderId));
+final Inbox inbox = client.getInbox(new SenderId(123456));
 
 final InboxDocument documentMetadata = inbox.documents.get(0);
 
@@ -80,16 +52,7 @@ client.deleteInboxDocument(documentMetadata);
 ### Download attachment content
 
 ```java
-long senderId = 123456;
-
-DigipostClient client = new DigipostClient(
-        new DigipostClientConfig.DigipostClientConfigBuilder().build(),
-        ApiFlavor.ATOMIC_REST,
-        "https://api.digipost.no",
-        senderId,
-        new FileInputStream("certificate.p12"), "TheSecretPassword");
-
-final Inbox inbox = client.getInbox(new SenderId(senderId));
+final Inbox inbox = client.getInbox(new SenderId(123456));
 
 final InboxDocument documentMetadata = inbox.documents.get(0);
 final InboxDocument attachment = documentMetadata.getAttachments().get(0);

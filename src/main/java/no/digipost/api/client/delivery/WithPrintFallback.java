@@ -25,41 +25,43 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Sender en forsendelse direkte til print gjennom Digipost i ett kall.
- * (Krever at avsender har fått tilgang til print.)
+ * Sender en forsendelse gjennom Digipost i ett kall. Dersom mottaker ikke er
+ * digipostbruker og det ligger printdetaljer på forsendelsen bestiller vi
+ * print av brevet til vanlig postgang. (Krever at avsender har fått tilgang
+ * til print.)
  */
-final class AtomicPrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
+final class WithPrintFallback implements OngoingDelivery.SendableWithPrintFallback {
 
     private final MessageSender sender;
-    private final Message printMessage;
+    private final Message message;
     private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
-
-    AtomicPrintOnlyMessage(Message printMessage, MessageSender sender) {
-        if (!printMessage.isDirectPrint()) {
-            throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
-                    + "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
-        }
-        this.printMessage = printMessage;
+    WithPrintFallback(Message message, MessageSender sender) {
+        this.message = message;
         this.sender = sender;
     }
 
 
     /**
-     * Laster opp innhold til et dokument. Merk: må være PDF-format.
+     * Laster opp innhold til et dokument.
      *
      * @return videre operasjoner for å fullføre leveransen.
      */
     @Override
-    public AtomicPrintOnlyMessage addContent(Document document, InputStream content) {
-        documents.put(document.uuid, DocumentContent.CreatePrintContent(content));
+    public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content) {
+        documents.put(document.uuid, DocumentContent.CreateBothStreamContent(content));
         return this;
     }
 
+    @Override
+    public OngoingDelivery.SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent) {
+        documents.put(document.uuid, DocumentContent.CreateMultiStreamContent(content, printContent));
+        return this;
+    }
 
     @Override
     public MessageDelivery send() {
-        return sender.sendMultipartMessage(printMessage, documents);
+        return sender.sendMultipartMessage(message, documents);
     }
-
 }
+

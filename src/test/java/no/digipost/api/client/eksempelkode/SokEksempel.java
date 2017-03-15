@@ -15,8 +15,6 @@
  */
 package no.digipost.api.client.eksempelkode;
 
-import no.digipost.api.client.delivery.ApiFlavor;
-
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.representations.Recipient;
 
@@ -47,7 +45,7 @@ public class SokEksempel {
         InputStream sertifikatInputStream = lesInnSertifikat();
 
         // 2. Vi oppretter en DigipostClient
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.STEPWISE_REST, "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         // 3. Vi søker etter personer med matchende navn eller adresse
         List<Recipient> recipients = client.search("Ole Nilsen Stavanger").getRecipients();

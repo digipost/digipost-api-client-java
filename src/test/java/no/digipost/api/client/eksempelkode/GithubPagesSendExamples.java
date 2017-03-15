@@ -17,7 +17,6 @@ package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
-import no.digipost.api.client.delivery.ApiFlavor;
 import no.digipost.api.client.representations.*;
 
 import java.io.FileInputStream;
@@ -47,11 +46,9 @@ public class GithubPagesSendExamples {
 
         DigipostClient client = new DigipostClient(
                 new DigipostClientConfig.DigipostClientConfigBuilder().build(),
-                ApiFlavor.ATOMIC_REST,
                 "https://api.digipost.no",
                 senderId,
                 new FileInputStream("certificate.p12"), "TheSecretPassword");
-
     }
 
     public void send_one_letter_to_recipient_via_personal_identification_number() throws IOException {
@@ -196,7 +193,7 @@ public class GithubPagesSendExamples {
         InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
 
         // API URL is different when request is sent from NHN
-        DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.nhn.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.nhn.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
