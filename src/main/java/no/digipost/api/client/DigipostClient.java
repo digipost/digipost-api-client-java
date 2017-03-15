@@ -122,11 +122,11 @@ public class DigipostClient {
         this.apiService = overriddenApiService == null ?
                 new ApiServiceImpl(httpClientBuilder, senderAccountId, this.eventLogger, URI.create(digipostUrl), proxy) : overriddenApiService;
 
-		this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
-		this.deliverer = new MessageDeliverer(messageSender);
-		this.documentCommunicator = new DocumentCommunicator(apiService, this.eventLogger);
+        this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
+        this.deliverer = new MessageDeliverer(messageSender);
+        this.documentCommunicator = new DocumentCommunicator(apiService, this.eventLogger);
         this.inboxCommunicator = new InboxCommunicator(apiService, this.eventLogger);
-		this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
+        this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
 
         apiService.addFilter(new RequestDateInterceptor(this.eventLogger));
         apiService.addFilter(new RequestUserAgentInterceptor());
@@ -281,9 +281,8 @@ public class DigipostClient {
         eventLogger.log(stringToSignMsg);
     }
 
-
-	public static class DigipostClientBuilder{
-        private final String digipostURL;
+    public static class DigipostClientBuilder{
+        private  final String digipostURL;
         private final long senderAccountId;
         private final InputStream certificateP12File;
         private final String certificatePassword;

@@ -20,6 +20,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.DigipostApiMock;
 import no.digipost.api.client.util.DigipostApiMock.Method;
+import no.digipost.api.client.util.DigipostApiMock.MockRequest;
 import no.digipost.api.client.util.DigipostApiMock.RequestsAndResponses;
 import no.digipost.api.client.util.DigipostApiMock.MockRequest;
 import no.digipost.http.client3.DigipostHttpClientFactory;
@@ -64,7 +65,7 @@ public class DigipostClientMock {
     private static final String KEY_STORE_ALIAS = "apiTest";
     private static final int PORT = 6666;
 
-	public DigipostClientMock() {
+    public DigipostClientMock() {
         URI host = URI.create("http://localhost:" + PORT);
 
         HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
