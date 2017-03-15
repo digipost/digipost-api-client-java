@@ -384,11 +384,11 @@ public class DigipostSwingClient {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 JOptionPane.showMessageDialog(brevPanel, "Opplasting av vedlegg støttes ikke p.t. av Swing-klienten.");
-//				filChooser.showOpenDialog(brevPanel);
-//				File filFile = filChooser.getSelectedFile();
-//				if (filFile != null) {
-//					attachmentContentField.setText(filFile.toString());
-//				}
+//                filChooser.showOpenDialog(brevPanel);
+//                File filFile = filChooser.getSelectedFile();
+//                if (filFile != null) {
+//                    attachmentContentField.setText(filFile.toString());
+//                }
             }
         });
         brevMainPanel.add(addAttachmentContentButton, createGridBagConstraints(GridBagConstraints.WEST, 5, 12));
@@ -634,19 +634,19 @@ public class DigipostSwingClient {
                 CardLayout layout = (CardLayout) contentPane.getLayout();
                 layout.show(contentPane, BREV);
 
-				try {
-					client = new DigipostClient(newBuilder().build(), endpointField.getText(), Long.parseLong(senderField.getText()),
-							newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger, null, null);
-				} catch (NumberFormatException e1) {
-					eventLogger.log("FEIL: Avsenders ID må være et tall > 0");
-				} catch (IOException e1) {
-					eventLogger.log("FEIL: Klarte ikke å lese sertifikatfil:\n" + e1);
-				} catch (Exception e1) {
-					eventLogger.log("FEIL: Kunne ikke initialisere Digipost-API-klienten. Dette kan f.eks skyldes at"
-							+ " sertifikatfilen var ugyldig, eller at du skrev inn feil passord. Feilmelding var:\n" + e1.getMessage());
-				}
-			}
-		});
+                try {
+                    client = new DigipostClient(newBuilder().build(), endpointField.getText(), Long.parseLong(senderField.getText()),
+                            newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger, null, null);
+                } catch (NumberFormatException e1) {
+                    eventLogger.log("FEIL: Avsenders ID må være et tall > 0");
+                } catch (IOException e1) {
+                    eventLogger.log("FEIL: Klarte ikke å lese sertifikatfil:\n" + e1);
+                } catch (Exception e1) {
+                    eventLogger.log("FEIL: Kunne ikke initialisere Digipost-API-klienten. Dette kan f.eks skyldes at"
+                            + " sertifikatfilen var ugyldig, eller at du skrev inn feil passord. Feilmelding var:\n" + e1.getMessage());
+                }
+            }
+        });
 
         Component verticalStrut = Box.createVerticalStrut(20);
         GridBagConstraints gbc_verticalStrut = new GridBagConstraints();

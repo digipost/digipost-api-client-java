@@ -50,8 +50,8 @@ public class ForsendelseEksempelDigipostadresse {
         // .p12-formatet)
         InputStream sertifikatInputStream = lesInnSertifikat();
 
-		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        // 2. Vi oppretter en DigipostClient
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         // 3. Vi oppretter et digipostadresseobjekt
         DigipostAddress address = new DigipostAddress("fornavn.etternavn#6789");

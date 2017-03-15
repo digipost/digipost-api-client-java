@@ -37,8 +37,8 @@ final class WithPrintFallback implements OngoingDelivery.SendableWithPrintFallba
     private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
     WithPrintFallback(Message message, MessageSender sender) {
-    	this.message = message;
-    	this.sender = sender;
+        this.message = message;
+        this.sender = sender;
     }
 
 

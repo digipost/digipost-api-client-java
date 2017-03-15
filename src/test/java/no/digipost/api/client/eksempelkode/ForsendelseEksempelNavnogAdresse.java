@@ -50,8 +50,8 @@ public class ForsendelseEksempelNavnogAdresse {
         // (i .p12-formatet)
         InputStream sertifikatInputStream = lesInnSertifikat();
 
-		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        // 2. Vi oppretter en DigipostClient
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         // 3. Vi oppretter et nameandaddress-objekt
         NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1", "Oppgang B", "0001", "Oslo");

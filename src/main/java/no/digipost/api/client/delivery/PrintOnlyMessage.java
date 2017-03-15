@@ -36,12 +36,12 @@ final class PrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
 
 
     PrintOnlyMessage(Message printMessage, MessageSender sender) {
-    	if (!printMessage.isDirectPrint()) {
-    		throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
-    				+ "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
-    	}
-    	this.printMessage = printMessage;
-    	this.sender = sender;
+        if (!printMessage.isDirectPrint()) {
+            throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
+                    + "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");
+        }
+        this.printMessage = printMessage;
+        this.sender = sender;
     }
 
 
@@ -52,8 +52,8 @@ final class PrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
      */
     @Override
     public PrintOnlyMessage addContent(Document document, InputStream content) {
-    	documents.put(document.uuid, DocumentContent.CreatePrintContent(content));
-    	return this;
+        documents.put(document.uuid, DocumentContent.CreatePrintContent(content));
+        return this;
     }
 
 

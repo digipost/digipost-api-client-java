@@ -20,20 +20,20 @@ import no.digipost.api.client.representations.Message;
 
 public class MessageDeliverer {
 
-	private final MessageSender sender;
+    private final MessageSender sender;
 
-	public MessageDeliverer(MessageSender sender) {
-		this.sender = sender;
-	}
+    public MessageDeliverer(MessageSender sender) {
+        this.sender = sender;
+    }
 
 
-	public OngoingDelivery.WithPrintFallback createMessage(Message message) {
-		return new WithPrintFallback(message, sender);
+    public OngoingDelivery.WithPrintFallback createMessage(Message message) {
+        return new WithPrintFallback(message, sender);
 
-	}
+    }
 
-	public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
-		return new PrintOnlyMessage(printMessage, sender);
-	}
+    public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
+        return new PrintOnlyMessage(printMessage, sender);
+    }
 
 }

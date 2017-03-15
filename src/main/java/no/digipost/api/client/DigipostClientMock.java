@@ -70,9 +70,9 @@ public class DigipostClientMock {
 
         HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 
-		apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host, null);
-		apiService.buildApacheHttpClientBuilder();
-		client = new DigipostClient(newBuilder().build(), "digipostmock-url", 1, new Signer() {
+        apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host, null);
+        apiService.buildApacheHttpClientBuilder();
+        client = new DigipostClient(newBuilder().build(), "digipostmock-url", 1, new Signer() {
 
             @Override
             public byte[] sign(String dataToSign) {
