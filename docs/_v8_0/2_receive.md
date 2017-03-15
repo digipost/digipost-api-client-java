@@ -6,6 +6,19 @@ layout: default
 
 The inbox API makes it possible for an organisation to manage messages received in Digipost.
 
+### Instantiate and configure the client
+
+```java
+long senderId = 123456;
+
+DigipostClient client = new DigipostClient(
+        new DigipostClientConfig.DigipostClientConfigBuilder().build(),
+        ApiFlavor.ATOMIC_REST,
+        "https://api.digipost.no",
+        senderId,
+        new FileInputStream("certificate.p12"), "TheSecretPassword");
+```
+
 ### Get documents in inbox
 
 ```java

@@ -6,15 +6,22 @@ layout: default
 
 The Java client library also includes [relevant tests](https://github.com/digipost/digipost-api-client-java/tree/master/src/test/java/no/digipost/api/client/eksempelkode) that include similar examples to below.
 
-The below examples instantiate a client in each example. This is done for example purposes only.
+### Instantiate and configure the client
+
+```java
+long senderId = 123456;
+
+DigipostClient client = new DigipostClient(
+        new DigipostClientConfig.DigipostClientConfigBuilder().build(),
+        ApiFlavor.ATOMIC_REST,
+        "https://api.digipost.no",
+        senderId,
+        new FileInputStream("certificate.p12"), "TheSecretPassword");
+```
 
 ### Send one letter to recipient via personal identification number
 
 ```java
-InputStream certificateStream = new FileInputStream("certificate.p12");
-
-DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, certificateStream, CERTIFICATE_PASSWORD);
-
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
@@ -31,10 +38,6 @@ client.createMessage(message)
 ### Send one letter to recipient via name and address
 
 ```java
-InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
-
 NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1", "Oppgang B", "0001", "Oslo");
 
 Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
@@ -51,10 +54,6 @@ client.createMessage(message)
 ### Send one letter with multiple attachments
 
 ```java
-InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
-
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
@@ -78,10 +77,6 @@ client.createMessage(message)
 ### Send invoice
 
 ```java
-InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
-
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 // An invoice requires four extra fields (KID, amount, account and due date). The use of the Invoice class will trigger payment functionality i Digipost.
@@ -99,10 +94,6 @@ client.createMessage(message)
 ### Send letter with SMS notification
 
 ```java
-InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
-
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 // The time the SMS is sent out can be based on time after letter is delivered or a specific date. This example specifies that the SMS should be sent out one day after the letter i delivered.
@@ -120,10 +111,6 @@ client.createMessage(message)
 ### Send letter with fallback to print
 
 ```java
-InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
-
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
@@ -145,10 +132,6 @@ MessageDelivery result = client.createMessage(message)
 ### Send letter with higher security level
 
 ```java
-InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
-DigipostClient client = new DigipostClient(newBuilder().build(), ApiFlavor.ATOMIC_REST, "https://api.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
-
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
 // TWO_FACTOR - require BankID or BuyPass authentication to open letter
