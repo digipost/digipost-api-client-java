@@ -985,6 +985,7 @@
         <xsd:attribute name="uuid" type="uuid" use="required" />
         <xsd:attribute name="type" type="event-type" use="required" />
         <xsd:attribute name="created" type="xsd:dateTime" use="required" />
+        <xsd:attribute name="document-created" type="xsd:dateTime" use="required" />
     </xsd:complexType>
 
     <xsd:complexType name="event-metadata" abstract="true" />
