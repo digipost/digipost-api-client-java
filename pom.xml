@@ -14,7 +14,7 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>8.1</version>
+    <version>8.2-SNAPSHOT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 
@@ -507,7 +507,7 @@
         <connection>scm:git:git@github.com:digipost/digipost-api-client-java.git</connection>
         <developerConnection>scm:git:git@github.com:digipost/digipost-api-client-java.git</developerConnection>
         <url>scm:git:git@github.com:digipost/digipost-api-client-java</url>
-        <tag>8.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
 </project>
