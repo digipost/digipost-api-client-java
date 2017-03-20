@@ -44,8 +44,8 @@ public class AutocompleteEksempel {
         // .p12-formatet)
         InputStream sertifikatInputStream = lesInnSertifikat();
 
-		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        // 2. Vi oppretter en DigipostClient
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         // 3. Vi ber om forslag til autofullføring
         List<Suggestion> suggestions = client.getAutocompleteSuggestions("Gunn").getSuggestions();

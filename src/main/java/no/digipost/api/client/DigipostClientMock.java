@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client;
 
-import java.net.URI;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.security.Signer;
@@ -23,6 +22,7 @@ import no.digipost.api.client.util.DigipostApiMock;
 import no.digipost.api.client.util.DigipostApiMock.Method;
 import no.digipost.api.client.util.DigipostApiMock.MockRequest;
 import no.digipost.api.client.util.DigipostApiMock.RequestsAndResponses;
+import no.digipost.api.client.util.DigipostApiMock.MockRequest;
 import no.digipost.http.client3.DigipostHttpClientFactory;
 import no.digipost.http.client3.DigipostHttpClientSettings;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -35,8 +35,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyStore;
@@ -47,6 +49,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
+import static no.digipost.api.client.util.DigipostApiMock.MockRequest;
 
 /**
  * Instansierer en DigipostClient som ikke går mot faktiskt Digipost REST-api endepunkt og
@@ -62,14 +65,14 @@ public class DigipostClientMock {
     private static final String KEY_STORE_ALIAS = "apiTest";
     private static final int PORT = 6666;
 
-	public DigipostClientMock() {
+    public DigipostClientMock() {
         URI host = URI.create("http://localhost:" + PORT);
 
         HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 
-		apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host, null);
-		apiService.buildApacheHttpClientBuilder();
-		client = new DigipostClient(newBuilder().build(), "digipostmock-url", 1, new Signer() {
+        apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host, null);
+        apiService.buildApacheHttpClientBuilder();
+        client = new DigipostClient(newBuilder().build(), "digipostmock-url", 1, new Signer() {
 
             @Override
             public byte[] sign(String dataToSign) {

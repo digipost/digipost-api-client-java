@@ -14,7 +14,7 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>8.0-SNAPSHOT</version>
+    <version>8.1-SNAPSHOT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 
@@ -281,6 +281,7 @@
                         <exclude>**/*.xsd</exclude>
                         <exclude>**/*.jks</exclude>
                         <exclude>**/user-agent.properties</exclude>
+                        <exclude>docs/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>

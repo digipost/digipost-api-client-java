@@ -27,7 +27,8 @@ The sender is the organization that wants access to it's inbox in Digipost. Ever
 
 * Type: XML over HTTP RESTful API
 * Media type for XML: `application/vnd.digipost-v7+xml`
-* [Java client library available](https://github.com/digipost/digipost-api-client-java/tree/api-for-postkasse-bedrift)
+* [Java client library available](https://github.com/digipost/digipost-api-client-java)
+* [.NET client library available](https://github.com/digipost/digipost-api-client-dotnet)
 
 ## Get Inbox
 
@@ -45,7 +46,7 @@ Inbox inbox = client.getInbox(senderId);
 |limit|int|Maximum number of returned documents (default: 100)|
 
 ```http
-GET /<sender-id>/inbox?offset=0&maxResults=100
+GET /<sender-id>/inbox?offset=0&limit=100
 Accept: application/vnd.digipost-v7+xml
 ```
 

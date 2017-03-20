@@ -341,24 +341,24 @@ public class MessageSenderTest {
         assertThat(printCopyMessage.recipient.hasDigipostIdentification(),is(false));
     }
 
-	@Test
-	public void passes_pdf_validation_for_printonly_message() throws IOException {
-		String messageId = UUID.randomUUID().toString();
-		when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
-		when(api.multipartMessage(any(HttpEntity.class))).thenReturn(mockClientResponse);
-		when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
+    @Test
+    public void passes_pdf_validation_for_printonly_message() throws IOException {
+        String messageId = UUID.randomUUID().toString();
+        when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
+        when(api.multipartMessage(any(HttpEntity.class))).thenReturn(mockClientResponse);
+        when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 
         final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).encrypt();
         final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).encrypt());
 
         concat(Stream.of(printDocument), printAttachments.stream()).forEach(document -> document.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt"))));
 
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		marshal(messageDeliveryContext,
-				new MessageDelivery(messageId, PRINT, DELIVERED_TO_PRINT, now()), bao);
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(messageDeliveryContext,
+                new MessageDelivery(messageId, PRINT, DELIVERED_TO_PRINT, now()), bao);
 
-		when(mockClientResponse.getEntity())
-				.thenReturn(new ByteArrayEntity(bao.toByteArray()));
+        when(mockClientResponse.getEntity())
+                .thenReturn(new ByteArrayEntity(bao.toByteArray()));
 
 
         PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
@@ -370,21 +370,21 @@ public class MessageSenderTest {
                         PRINTVALIDATION_FONTS.withNoParam(), PRINTVALIDATION_MARGINS_LEFT.withNoParam(), PRINTVALIDATION_PDFVERSION.withNoParam())
         ));
 
-		LOG.debug("Tester direkte til print");
-		MessageDeliverer deliverer = new MessageDeliverer(sender);
-		Message message = newMessage(messageId, printDocument).attachments(printAttachments).printDetails(new PrintDetails(recipient, returnAddress, A)).build();
+        LOG.debug("Tester direkte til print");
+        MessageDeliverer deliverer = new MessageDeliverer(sender);
+        Message message = newMessage(messageId, printDocument).attachments(printAttachments).printDetails(new PrintDetails(recipient, returnAddress, A)).build();
 
-		SendableForPrintOnly sendable = deliverer
-				.createPrintOnlyMessage(message)
-				.addContent(message.primaryDocument, pdf20Pages());
-		for (Document attachment : printAttachments) {
-			sendable.addContent(attachment, printablePdf1Page());
-		}
-		MessageDelivery delivery = sendable.send();
-		assertThat(delivery.getStatus(), is(DELIVERED_TO_PRINT));
-		then(pdfValidator).should(times(2)).validate(any(byte[].class), any(PdfValidationSettings.class));
-		reset(pdfValidator);
-	}
+        SendableForPrintOnly sendable = deliverer
+                .createPrintOnlyMessage(message)
+                .addContent(message.primaryDocument, pdf20Pages());
+        for (Document attachment : printAttachments) {
+            sendable.addContent(attachment, printablePdf1Page());
+        }
+        MessageDelivery delivery = sendable.send();
+        assertThat(delivery.getStatus(), is(DELIVERED_TO_PRINT));
+        then(pdfValidator).should(times(2)).validate(any(byte[].class), any(PdfValidationSettings.class));
+        reset(pdfValidator);
+    }
 
     private Message lagDefaultForsendelse() {
         return lagEnkeltForsendelse("emne", UUID.randomUUID().toString(), "12345678900");

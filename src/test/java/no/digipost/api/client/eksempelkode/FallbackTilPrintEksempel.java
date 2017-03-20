@@ -56,8 +56,8 @@ public class FallbackTilPrintEksempel {
         // .p12-formatet)
         InputStream sertifikatInputStream = lesInnSertifikat();
 
-		// 3. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        // 3. Vi oppretter en DigipostClient
+        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
 
         // 4. Vi oppretter et fødselsnummerobjekt som skal brukes til å
         // identifisere mottaker i Digipost
@@ -74,10 +74,10 @@ public class FallbackTilPrintEksempel {
                 .recipient(new MessageRecipient(pin, printDetails))
                 .build();
 
-		// 7. Foreløpig støtter Digipost kun å sende krypterte brev til print. Kaller du på
-		// encrypt() så vil klientbiblioteket krypterer filen for
-		// deg før den oversendes Digipost.
-		primaryDocument.encrypt();
+        // 7. Foreløpig støtter Digipost kun å sende krypterte brev til print. Kaller du på
+        // encrypt() så vil klientbiblioteket krypterer filen for
+        // deg før den oversendes Digipost.
+        primaryDocument.encrypt();
 
         // 8. Vi oppretter forsendelsen, legger til innhold og alternativt
         // innhold for print, og til slutt sender forsendelsen. Alt håndteres
