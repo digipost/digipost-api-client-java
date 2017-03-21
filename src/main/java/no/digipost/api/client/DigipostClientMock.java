@@ -22,7 +22,6 @@ import no.digipost.api.client.util.DigipostApiMock;
 import no.digipost.api.client.util.DigipostApiMock.Method;
 import no.digipost.api.client.util.DigipostApiMock.MockRequest;
 import no.digipost.api.client.util.DigipostApiMock.RequestsAndResponses;
-import no.digipost.api.client.util.DigipostApiMock.MockRequest;
 import no.digipost.http.client3.DigipostHttpClientFactory;
 import no.digipost.http.client3.DigipostHttpClientSettings;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -49,7 +48,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
-import static no.digipost.api.client.util.DigipostApiMock.MockRequest;
 
 /**
  * Instansierer en DigipostClient som ikke går mot faktiskt Digipost REST-api endepunkt og
