@@ -81,14 +81,21 @@ public final class SenderFeatureName {
     public static final SenderFeatureName PRINTVALIDATION_MARGINS_LEFT = new SenderFeatureName("no.digipost.feature.validation.print.margins.left", false);
 
     /**
-     * For brev som skal til print og fysisk levering vil dokumenter med
-     * for smal venstremarg til å få plass til EA-strekkode bli avvist.
+     * For brev som skal til print og fysisk levering vil dokumenter som
+     * ikke er A4 bli avvist, bleed kan brukes til å mjuka upp kraven.
      */
-    public static final SenderFeatureName PRINTVALIDATION_BLEED = new SenderFeatureName("no.digipost.feature.validation.print.bleed", false);
+    public static final SenderFeatureName POSITIVE_PRINTVALIDATION_BLEED = new SenderFeatureName("no.digipost.feature.validation.print.bleed", false);
+
+    /**
+     * For brev som skal til print og fysisk levering vil dokumenter som
+     * ikke er A4 bli avvist, bleed kan brukes til å mjuka upp kraven.
+     */
+    public static final SenderFeatureName NEGATIVE_PRINTVALIDATION_BLEED = new SenderFeatureName("no.digipost.feature.validation.print.negativebleed", false);
 
     private static final Map<String, SenderFeatureName> KNOWN_FEATURES = Stream.of(
             DIGIPOST_DELIVERY, DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK, DELIVERY_DIRECT_TO_PRINT,
-            PRINTVALIDATION_FONTS, PRINTVALIDATION_MARGINS_LEFT, PRINTVALIDATION_PAGEAMOUNT, PRINTVALIDATION_PDFVERSION, PRINTVALIDATION_BLEED)
+            PRINTVALIDATION_FONTS, PRINTVALIDATION_MARGINS_LEFT, PRINTVALIDATION_PAGEAMOUNT, PRINTVALIDATION_PDFVERSION, POSITIVE_PRINTVALIDATION_BLEED,
+            NEGATIVE_PRINTVALIDATION_BLEED)
                 .collect(collectingAndThen(toMap((SenderFeatureName name) -> name.identificator, identity()), Collections::unmodifiableMap));
 
     public final String identificator;

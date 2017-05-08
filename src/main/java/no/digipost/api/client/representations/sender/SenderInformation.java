@@ -28,12 +28,14 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_BLEED;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.POSITIVE_PRINTVALIDATION_BLEED;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.NEGATIVE_PRINTVALIDATION_BLEED;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_FONTS;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_MARGINS_LEFT;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PAGEAMOUNT;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PDFVERSION;
-import static no.digipost.print.validate.PdfValidationSettings.DEFAULT_BLEED_MM;
+import static no.digipost.print.validate.PdfValidationSettings.DEFAULT_POSITIVE_BLEED_MM;
+import static no.digipost.print.validate.PdfValidationSettings.DEFAULT_NEGATIVE_BLEED_MM;
 
 /**
  * Informasjon om en avsender. Bruk
@@ -112,13 +114,15 @@ public class SenderInformation
     }
 
     public PdfValidationSettings getPdfValidationSettings() {
-        SenderFeature bleed = get(PRINTVALIDATION_BLEED);
+        SenderFeature positiveBleed = get(POSITIVE_PRINTVALIDATION_BLEED);
+        SenderFeature negativeBleed = get(NEGATIVE_PRINTVALIDATION_BLEED);
         return new PdfValidationSettings(
                 hasEnabled(PRINTVALIDATION_MARGINS_LEFT),
                 hasEnabled(PRINTVALIDATION_FONTS),
                 hasEnabled(PRINTVALIDATION_PAGEAMOUNT),
                 hasEnabled(PRINTVALIDATION_PDFVERSION),
-                bleed != null ? bleed.getIntParam() : DEFAULT_BLEED_MM
+                positiveBleed != null ? positiveBleed.getIntParam() : DEFAULT_POSITIVE_BLEED_MM,
+                negativeBleed != null ? negativeBleed.getIntParam() : DEFAULT_NEGATIVE_BLEED_MM
         );
     }
 }
