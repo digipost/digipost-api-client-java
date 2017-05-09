@@ -82,7 +82,7 @@ public final class SenderFeatureName {
 
     /**
      * For brev som skal til print og fysisk levering vil dokumenter som
-     * ikke er A4 bli avvist, bleed kan brukes til å mjuka upp kraven.
+     * ikke er A4 bli avvist, bleed kan brukes til å mjuke upp kraven.
      */
     public static final SenderFeatureName POSITIVE_PRINTVALIDATION_BLEED = new SenderFeatureName("no.digipost.feature.validation.print.bleed", false);
 
