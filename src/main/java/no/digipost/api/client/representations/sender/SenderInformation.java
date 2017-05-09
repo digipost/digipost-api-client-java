@@ -28,8 +28,8 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.POSITIVE_PRINTVALIDATION_BLEED;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.NEGATIVE_PRINTVALIDATION_BLEED;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_POSITIVE_BLEED;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_NEGATIVE_BLEED;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_FONTS;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_MARGINS_LEFT;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PAGEAMOUNT;
@@ -114,8 +114,8 @@ public class SenderInformation
     }
 
     public PdfValidationSettings getPdfValidationSettings() {
-        SenderFeature positiveBleed = get(POSITIVE_PRINTVALIDATION_BLEED);
-        SenderFeature negativeBleed = get(NEGATIVE_PRINTVALIDATION_BLEED);
+        SenderFeature positiveBleed = get(PRINTVALIDATION_POSITIVE_BLEED);
+        SenderFeature negativeBleed = get(PRINTVALIDATION_NEGATIVE_BLEED);
         return new PdfValidationSettings(
                 hasEnabled(PRINTVALIDATION_MARGINS_LEFT),
                 hasEnabled(PRINTVALIDATION_FONTS),
