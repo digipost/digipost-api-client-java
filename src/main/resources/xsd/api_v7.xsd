@@ -566,7 +566,7 @@
             <xsd:element name="subject" minOccurs="0" maxOccurs="1">
                 <xsd:simpleType>
                     <xsd:restriction base="xsd:string">
-                        <xsd:maxLength value="100"/>
+                        <xsd:maxLength value="255"/>
                     </xsd:restriction>
                 </xsd:simpleType>
             </xsd:element>
