@@ -83,7 +83,7 @@ public class Document extends Representation {
 
     @XmlElementWrapper(name="metadata")
     @XmlElements({
-            @XmlElement(type = Residence.class, namespace = "http://api.digipost.no/schema/datatypes"),
+            @XmlElement(name = "residence", type = Residence.class, namespace = "http://api.digipost.no/schema/datatypes"),
             @XmlElement(name = "appointment", type = Appointment.class, namespace = "http://api.digipost.no/schema/datatypes")
     })
     protected List<DataType> metadata;
