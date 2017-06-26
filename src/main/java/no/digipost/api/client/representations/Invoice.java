@@ -35,8 +35,7 @@ import java.time.LocalDate;
     "account",
     "dueDate"
 })
-public class Invoice
-    extends Document
+public class Invoice extends Document
 {
 
     @XmlElement(required = true)
@@ -77,7 +76,7 @@ public class Invoice
                    EmailNotification emailNotification, AuthenticationLevel authenticationLevel, SensitivityLevel sensitivityLevel,
                    String kid, BigDecimal amount, String account, LocalDate dueDate, Boolean opened, String... technicalType) {
         super(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel,
-                opened, technicalType);
+                opened, null, technicalType);
         this.kid = kid;
         this.amount = amount;
         this.account = account;

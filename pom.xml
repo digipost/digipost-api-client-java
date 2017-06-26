@@ -150,6 +150,12 @@
             <artifactId>undertow-core</artifactId>
             <version>2.0.0.Alpha1</version>
         </dependency>
+        <dependency>
+            <groupId>no.digipost</groupId>
+            <artifactId>digipost-data-types</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -406,6 +412,21 @@
                                         <include>io.undertow:undertow-core</include>
                                         <include>org.jboss.logging:jboss-logging</include>
                                         <include>org.jboss.xnio:xnio-api</include>
+                                        <include>no.digipost:digipost-data-types</include>
+                                        <include>com.fasterxml.jackson.core:jackson-databind</include>
+                                        <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
+                                        <include>com.fasterxml.jackson.core:jackson-annotations</include>
+                                        <include>com.fasterxml.jackson.module:jackson-module-jaxb-annotations</include>
+                                        <include>org.hibernate:hibernate-validator</include>
+                                        <include>com.fasterxml:classmate</include>
+                                        <include>org.glassfish:javax.el</include>
+                                        <include>javax.validation:validation-api</include>
+                                        <include>org.springframework:spring-context</include>
+                                        <include>org.springframework:spring-aop</include>
+                                        <include>org.springframework:spring-core</include>
+                                        <include>org.springframework:spring-expression</include>
+                                        <include>org.springframework:spring-beans</include>
+                                        <include>com.fasterxml.jackson.core:jackson-core</include>
                                     </includes>
                                     <searchTransitive>true</searchTransitive>
                                     <message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før distribusjon. Husk også å oppdatere fila «NOTICE».</message>

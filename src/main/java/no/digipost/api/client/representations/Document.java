@@ -16,14 +16,12 @@
 
 package no.digipost.api.client.representations;
 
+import no.digipost.api.datatypes.DataType;
+import no.digipost.api.datatypes.types.Appointment;
+import no.digipost.api.datatypes.types.Residence;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -51,7 +49,8 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
         "sensitivityLevel",
         "encrypted",
         "contentHash",
-        "links"
+        "links",
+        "metadata"
 })
 @XmlSeeAlso({ Invoice.class })
 public class Document extends Representation {
@@ -82,6 +81,13 @@ public class Document extends Representation {
     @XmlElement(name = "content-hash", nillable = false)
     protected ContentHash contentHash;
 
+    @XmlElementWrapper(name="metadata")
+    @XmlElements({
+            @XmlElement(type = Residence.class, namespace = "http://api.digipost.no/schema/datatypes"),
+            @XmlElement(name = "appointment", type = Appointment.class, namespace = "http://api.digipost.no/schema/datatypes")
+    })
+    protected List<DataType> metadata;
+
     @XmlElement(name = "link")
     protected List<Link> getLinks() {
         return links;
@@ -96,21 +102,21 @@ public class Document extends Representation {
      * Constructor for just the required fields of a document.
      */
     public Document(String uuid, String subject, FileType fileType) {
-        this(uuid, subject, fileType, null, null, null, null, null, null, (String[]) null);
+        this(uuid, subject, fileType, null, null, null, null, null, null, null, (String[]) null);
     }
 
     public Document(String uuid, String subject, FileType fileType, String openingReceipt,
                     SmsNotification smsNotification, EmailNotification emailNotification,
                     AuthenticationLevel authenticationLevel,
                     SensitivityLevel sensitivityLevel) {
-        this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel, null, (String[]) null);
+        this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel, null, null, (String[]) null);
     }
 
 
     public Document(String uuid, String subject, FileType fileType, String openingReceipt,
                     SmsNotification smsNotification, EmailNotification emailNotification,
                     AuthenticationLevel authenticationLevel,
-                    SensitivityLevel sensitivityLevel, Boolean opened, String... technicalType) {
+                    SensitivityLevel sensitivityLevel, Boolean opened, List<DataType> metadata, String... technicalType) {
         this.uuid = lowerCase(uuid);
         this.subject = subject;
         this.digipostFileType = Objects.toString(fileType, null);
@@ -121,6 +127,7 @@ public class Document extends Representation {
         this.authenticationLevel = authenticationLevel;
         this.sensitivityLevel = sensitivityLevel;
         this.technicalType = parseTechnicalTypes(technicalType);
+        this.metadata = metadata;
         validate();
     }
 
@@ -142,7 +149,7 @@ public class Document extends Representation {
 
     public Document copyDocumentAndSetDigipostFileTypeToPdf(){
         Document newDoc = new Document(this.uuid, this.subject, new FileType("pdf"), this.openingReceipt, this.smsNotification, this.emailNotification,
-                this.authenticationLevel, this.sensitivityLevel, this.opened, this.getTechnicalType());
+                this.authenticationLevel, this.sensitivityLevel, this.opened, this.metadata, this.getTechnicalType());
 
         newDoc.encrypted  = this.encrypted == null ? null : this.encrypted.copy();
         newDoc.setContentHash(this.contentHash);

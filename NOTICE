@@ -19,20 +19,30 @@ This software includes third party software subject to the following licenses:
   Apache HttpCore under Apache License, Version 2.0
   Apache JempBox under Apache License, Version 2.0
   Apache PDFBox under Apache License, Version 2.0
+  Bean Validation API under The Apache Software License, Version 2.0
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
   Byte Buddy (without dependencies) under The Apache Software License, Version 2.0
   Byte Buddy Java agent under The Apache Software License, Version 2.0
+  ClassMate under The Apache Software License, Version 2.0
   Digipost API Client under The Apache Software License, Version 2.0
   Digipost Caching under The Apache Software License, Version 2.0
   Digipost Digg under The Apache Software License, Version 2.0
   Digipost HTTP Client Builder under The Apache Software License, Version 2.0
   Digipost Printability Validator under The Apache Software License, Version 2.0
+  digipost-data-types under The Apache Software License, Version 2.0
   EqualsVerifier under The Apache Software License, Version 2.0
+  Expression Language 3.0 under CDDL + GPLv2 with classpath exception
   generics-resolver under The MIT License
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
   Hamcrest Core under New BSD License
   Hamcrest library under New BSD License
+  Hibernate Validator Engine under Apache License, Version 2.0
+  Jackson datatype: JSR310 under The Apache Software License, Version 2.0
+  Jackson module: JAXB-annotations under The Apache Software License, Version 2.0
+  Jackson-annotations under The Apache Software License, Version 2.0
+  Jackson-core under The Apache Software License, Version 2.0
+  jackson-databind under The Apache Software License, Version 2.0
   javaruntype under The Apache Software License, Version 2.0
   Javassist under Mozilla Public License 1.1
   JBoss Logging 3 under Apache License, version 2.0
