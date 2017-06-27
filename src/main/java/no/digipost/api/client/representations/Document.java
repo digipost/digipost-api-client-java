@@ -16,12 +16,12 @@
 
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.representations.xml.DataTypeXmlAdapter;
 import no.digipost.api.datatypes.DataType;
-import no.digipost.api.datatypes.types.Appointment;
-import no.digipost.api.datatypes.types.Residence;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -81,11 +81,9 @@ public class Document extends Representation {
     @XmlElement(name = "content-hash", nillable = false)
     protected ContentHash contentHash;
 
+    @XmlJavaTypeAdapter(DataTypeXmlAdapter.class)
+    @XmlAnyElement
     @XmlElementWrapper(name="metadata")
-    @XmlElements({
-            @XmlElement(name = "residence", type = Residence.class, namespace = "http://api.digipost.no/schema/datatypes"),
-            @XmlElement(name = "appointment", type = Appointment.class, namespace = "http://api.digipost.no/schema/datatypes")
-    })
     protected List<DataType> metadata;
 
     @XmlElement(name = "link")
