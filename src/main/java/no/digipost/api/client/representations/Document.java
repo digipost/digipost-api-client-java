@@ -16,8 +16,8 @@
 
 package no.digipost.api.client.representations;
 
-import no.digipost.api.client.representations.xml.DataTypeXmlAdapter;
 import no.digipost.api.datatypes.DataType;
+import no.digipost.api.datatypes.marshalling.DataTypeXmlAdapter;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.*;
