@@ -13,5 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://api.digipost.no/schema/v7", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema
+        (namespace = "http://api.digipost.no/schema/v7", xmlns = {
+                @javax.xml.bind.annotation.XmlNs(prefix = "ns1", namespaceURI = "http://api.digipost.no/schema/v7"),
+                @javax.xml.bind.annotation.XmlNs(prefix = "ns2", namespaceURI = no.digipost.api.datatypes.marshalling.DataTypesJAXBContext.DIGIPOST_DATATYPES_NAMESPACE)},
+                elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package no.digipost.api.client.representations;
