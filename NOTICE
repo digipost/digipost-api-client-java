@@ -39,7 +39,6 @@ This software includes third party software subject to the following licenses:
   Hamcrest library under New BSD License
   Hibernate Validator Engine under Apache License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
-  Jackson module: JAXB-annotations under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
