@@ -15,17 +15,7 @@
  */
 package no.digipost.api.client.util;
 
-import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.DocumentEvents;
-import no.digipost.api.client.representations.DocumentStatus;
-import no.digipost.api.client.representations.EncryptionKey;
-import no.digipost.api.client.representations.EntryPoint;
-import no.digipost.api.client.representations.ErrorMessage;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.IdentificationResultWithEncryptionKey;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 
 import javax.xml.bind.JAXBContext;
@@ -37,7 +27,7 @@ import java.io.OutputStream;
 public class JAXBContextUtils {
     public static final JAXBContext entryPointContext = initContext(EntryPoint.class);
     public static final JAXBContext errorMessageContext = initContext(ErrorMessage.class);
-    public static final JAXBContext identificationContext = initContext(Identification.class);
+    public static final JAXBContext identificationContext = initContext(Identification.class, IdentificationResult.class);
     public static final JAXBContext messageContext = initContext(Message.class);
     public static final JAXBContext recipientsContext = initContext(Recipients.class);
     public static final JAXBContext autocompleteContext = initContext(Autocomplete.class);
@@ -48,7 +38,7 @@ public class JAXBContextUtils {
     public static final JAXBContext identificationResultWithEncryptionKeyContext = initContext(IdentificationResultWithEncryptionKey.class);
     public static final JAXBContext senderInformationContext = initContext(SenderInformation.class);
 
-    private static JAXBContext initContext(Class<?> clazz) {
+    private static JAXBContext initContext(Class<?>... clazz) {
         try {
             return JAXBContext.newInstance(clazz);
         } catch (JAXBException e) {
