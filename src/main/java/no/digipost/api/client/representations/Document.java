@@ -103,6 +103,10 @@ public class Document extends Representation {
         this(uuid, subject, fileType, null, null, null, null, null, null, null, (String[]) null);
     }
 
+    public Document(String uuid, String subject, FileType fileType, List<DataType> metadata) {
+        this(uuid, subject, fileType, null, null, null, null, null, null, metadata, (String[]) null);
+    }
+
     public Document(String uuid, String subject, FileType fileType, String openingReceipt,
                     SmsNotification smsNotification, EmailNotification emailNotification,
                     AuthenticationLevel authenticationLevel,
