@@ -136,7 +136,7 @@ public class Document extends Representation {
             }
         }
 
-        return cleanedStrings.size() != 0 ? StringUtils.join(cleanedStrings, ",") : null;
+        return !cleanedStrings.isEmpty() ? StringUtils.join(cleanedStrings, ",") : null;
 
     }
 
