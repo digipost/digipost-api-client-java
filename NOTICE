@@ -41,13 +41,12 @@ This software includes third party software subject to the following licenses:
   JUnit under Eclipse Public License 1.0
   junit-quickcheck-core under The MIT License
   junit-quickcheck-generators under The MIT License
-  Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
-  Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   mockito-core under The MIT License
   Motif under Apache License 2.0
   Objenesis under Apache 2
   OGNL - Object Graph Navigation Library under The Apache Software License, Version 2.0
   SLF4J API Module under MIT License
+  SLF4J Simple Binding under MIT License
   Undertow Core under Apache License Version 2.0
   XNIO API under Public Domain
   XNIO NIO Implementation under Public Domain

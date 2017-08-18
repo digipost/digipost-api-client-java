@@ -19,8 +19,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <bouncycastle.version>1.54</bouncycastle.version>
-        <slf4j.version>1.7.22</slf4j.version>
-        <logback.version>1.1.9</logback.version>
+        <slf4j.version>1.7.25</slf4j.version>
         <jaxb.version>2.2.7</jaxb.version>
         <jsr173_api.version>1.0</jsr173_api.version>
     </properties>
@@ -42,11 +41,10 @@
             <version>${slf4j.version}</version>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-            <scope>runtime</scope>
-            <optional>true</optional>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -386,9 +384,7 @@
                                         <include>joda-time:joda-time</include>
                                         <include>org.javassist:javassist:*:jar:compile</include>
                                         <include>org.jvnet.mimepull:mimepull:*:jar:compile</include>
-                                        <include>ch.qos.logback:logback-classic:${logback.version}:jar:compile</include>
-                                        <include>ch.qos.logback:logback-core:${logback.version}:jar:compile</include>
-                                        <include>org.slf4j:slf4j-api:${slf4j.version}:jar:compile</include>
+                                        <include>org.slf4j</include>
                                         <include>com.github.runeflobakk:motif</include>
                                         <include>org.apache.pdfbox:fontbox</include>
                                         <include>org.apache.pdfbox:pdfbox</include>
