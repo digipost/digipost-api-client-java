@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>8.5-SNAPSHOT</version>
+    <version>8.5.reference-from-sender-SNAPSHOT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 
@@ -220,6 +220,9 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
                     <version>2.4</version>
+                    <configuration>
+                        <generateBackupPoms>false</generateBackupPoms>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
