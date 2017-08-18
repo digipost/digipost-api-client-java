@@ -18,20 +18,24 @@ package no.digipost.api.client;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.ErrorType;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.DataBindingException;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static no.digipost.api.client.representations.ErrorType.SERVER;
 import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
@@ -72,16 +76,35 @@ public abstract class Communicator {
     }
 
     protected static ErrorMessage fetchErrorMessageString(final CloseableHttpResponse response) {
+        final HttpEntity responseEntity = response.getEntity();
+        final StatusLine statusLine = response.getStatusLine();
+        final ErrorType errorType = ErrorType.fromResponseStatus(statusLine);
+        if (responseEntity == null) {
+            return new ErrorMessage(errorType, statusLine + " (respons hadde ikke noe innhold)");
+        }
+
+        final byte[] responseContent;
         try {
-            ErrorMessage errorMessage = unmarshal(errorMessageContext, response.getEntity().getContent(), ErrorMessage.class);
+            responseContent = EntityUtils.toByteArray(responseEntity);
+        } catch (IOException e) {
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR,
+                    "Server returnerte " + statusLine + ", men klienten feilet ved lesing av responsen: " + e.getMessage(), e);
+        }
+
+        try {
+            ErrorMessage errorMessage = unmarshal(errorMessageContext, new ByteArrayInputStream(responseContent), ErrorMessage.class);
             response.close();
             return errorMessage != null ? errorMessage : ErrorMessage.EMPTY;
         } catch (IllegalStateException | DataBindingException e) {
-            return new ErrorMessage(SERVER, ErrorCode.SERVER_ERROR.name(),
-                    e.getClass().getSimpleName() + ": Det skjedde en feil på serveren (" + e.getMessage() +
-                            "), men klienten kunne ikke lese responsen.");
-        } catch (IOException e) {
-            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
+            return new ErrorMessage(errorType, errorType.name(),
+                    "Det skjedde en feil på serveren (" + statusLine + "), " +
+                    "men klienten kunne ikke lese responsen fordi " + e.getClass().getSimpleName() + ": '" + e.getMessage() + "'. " +
+                    (responseContent.length > 0 ? "Respons: " + new String(responseContent) : "Ikke noe innhold i respons."));
+        } catch (Exception e) {
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR,
+                    "Det skjedde en feil på serveren (" + statusLine + "), " +
+                    "men klienten kunne ikke lese responsen fordi " + e.getClass().getSimpleName() + ": '" + e.getMessage() + "'. " +
+                    (responseContent.length > 0 ? "Respons: " + new String(responseContent) : "Ikke noe innhold i respons."), e);
         }
     }
 
