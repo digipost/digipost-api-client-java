@@ -20,8 +20,6 @@
 
         <bouncycastle.version>1.54</bouncycastle.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <jaxb.version>2.2.7</jaxb.version>
-        <jsr173_api.version>1.0</jsr173_api.version>
     </properties>
 
     <dependencies>
@@ -42,6 +40,12 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>${slf4j.version}</version>
             <scope>test</scope>
@@ -50,6 +54,12 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -387,18 +397,15 @@
                             <rules>
                                 <bannedDependencies>
                                     <excludes>
+                                        <!-- Exclude all except test-scope, as we do not need to whitelist dependencies only needed for buildtime testing -->
                                         <exclude>*:*:*:jar:compile</exclude>
+                                        <exclude>*:*:*:jar:runtime</exclude>
+                                        <exclude>*:*:*:jar:provided</exclude>
                                     </excludes>
                                     <includes>
                                         <include>org.bouncycastle:bcprov-jdk15on:${bouncycastle.version}:jar:compile</include>
                                         <include>org.bouncycastle:bcpkix-jdk15on:${bouncycastle.version}:jar:compile</include>
-                                        <include>commons-io:commons-io</include>
-                                        <include>org.apache.commons:commons-lang3</include>
-                                        <include>com.sun.xml.bind:jaxb-core:${jaxb.version}:jar:compile</include>
-                                        <include>com.sun.xml.bind:jaxb-impl:${jaxb.version}:jar:compile</include>
-                                        <include>org.joda:joda-convert</include>
                                         <include>joda-time:joda-time</include>
-                                        <include>org.javassist:javassist:*:jar:compile</include>
                                         <include>org.jvnet.mimepull:mimepull:*:jar:compile</include>
                                         <include>org.slf4j</include>
                                         <include>com.github.runeflobakk:motif</include>
@@ -409,14 +416,16 @@
                                         <include>no.digipost:cache</include>
                                         <include>com.google.guava:guava</include>
                                         <include>no.digipost:http-client-builder3</include>
-                                        <include>org.apache.httpcomponents:httpclient</include>
+                                        <include>commons-io:commons-io</include>
                                         <include>commons-codec:commons-codec</include>
-                                        <include>commons-logging:commons-logging</include>
+                                        <include>org.apache.commons:commons-lang3</include>
+                                        <include>org.apache.httpcomponents:httpclient</include>
                                         <include>org.apache.httpcomponents:httpcore</include>
                                         <include>org.apache.httpcomponents:httpmime</include>
                                         <include>io.undertow:undertow-core</include>
                                         <include>org.jboss.logging:jboss-logging</include>
                                         <include>org.jboss.xnio:xnio-api</include>
+                                        <include>org.jboss.xnio:xnio-nio</include>
                                     </includes>
                                     <searchTransitive>true</searchTransitive>
                                     <message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før distribusjon. Husk også å oppdatere fila «NOTICE».</message>
