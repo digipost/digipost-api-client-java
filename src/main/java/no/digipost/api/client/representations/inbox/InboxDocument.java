@@ -25,17 +25,21 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "inbox-document")
 public class InboxDocument {
 
-    @XmlElement()
+    @XmlElement
     protected long id;
+    @XmlElement(name = "reference-from-sender")
+    protected String referenceFromSender;
     @XmlElement(required = true)
     protected String subject;
     @XmlElement(required = true)
@@ -106,6 +110,10 @@ public class InboxDocument {
         return attachments;
     }
 
+    public Optional<String> getReferenceFromSender() {
+        return Optional.ofNullable(referenceFromSender);
+    }
+
     @Override
     public String toString() {
         return "InboxDocument{" +
@@ -118,7 +126,9 @@ public class InboxDocument {
                 ", contentType='" + contentType + '\'' +
                 ", contentUri=" + contentUri +
                 ", deleteUri=" + deleteUri +
+                getReferenceFromSender().map(ref -> ", referenceFromSender='" + ref + "'").orElse("") +
                 ", attachments=" + attachments +
                 '}';
     }
+
 }
