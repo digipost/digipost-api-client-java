@@ -160,8 +160,7 @@ public class DigipostClient {
     }
 
     public IdentificationResult identifyRecipient(final Identification identification) {
-        try(CloseableHttpResponse response = apiService.identifyRecipient(identification))
-        {
+        try (CloseableHttpResponse response = apiService.identifyRecipient(identification)) {
             Communicator.checkResponse(response, eventLogger);
             return JAXBContextUtils.unmarshal(JAXBContextUtils.identificationContext, response.getEntity().getContent(), IdentificationResult.class);
         } catch (IOException e) {

@@ -41,6 +41,7 @@ public class DocumentTest {
 
         assertThat(Document.parseTechnicalTypes((String[]) null), nullValue());
         assertThat(Document.parseTechnicalTypes(), nullValue());
+        assertThat(Document.parseTechnicalTypes("", "   ", null), nullValue());
     }
 
     @Test
