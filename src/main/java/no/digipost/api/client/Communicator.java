@@ -60,11 +60,11 @@ public abstract class Communicator {
     }
 
     public static void checkResponse(final CloseableHttpResponse response, EventLogger eventLogger) {
-        int status = response.getStatusLine().getStatusCode();
-        if (!responseOk(status)) {
-            ErrorMessage error = fetchErrorMessageString(response);
+        final StatusLine status = response.getStatusLine();
+        if (!responseOk(status.getStatusCode())) {
+            final ErrorMessage error = fetchErrorMessageString(status, response.getEntity());
             log(error.toString(), eventLogger);
-            switch (status) {
+            switch (status.getStatusCode()) {
                 case HttpStatus.SC_INTERNAL_SERVER_ERROR:
                     throw new DigipostClientException(ErrorCode.SERVER_ERROR, error.getErrorMessage());
                 case HttpStatus.SC_SERVICE_UNAVAILABLE:
@@ -75,9 +75,7 @@ public abstract class Communicator {
         }
     }
 
-    protected static ErrorMessage fetchErrorMessageString(final CloseableHttpResponse response) {
-        final HttpEntity responseEntity = response.getEntity();
-        final StatusLine statusLine = response.getStatusLine();
+    protected static ErrorMessage fetchErrorMessageString(final StatusLine statusLine, final HttpEntity responseEntity) {
         final ErrorType errorType = ErrorType.fromResponseStatus(statusLine);
         if (responseEntity == null) {
             return new ErrorMessage(errorType, statusLine + " (respons hadde ikke noe innhold)");
@@ -93,7 +91,6 @@ public abstract class Communicator {
 
         try {
             ErrorMessage errorMessage = unmarshal(errorMessageContext, new ByteArrayInputStream(responseContent), ErrorMessage.class);
-            response.close();
             return errorMessage != null ? errorMessage : ErrorMessage.EMPTY;
         } catch (IllegalStateException | DataBindingException e) {
             return new ErrorMessage(errorType, errorType.name(),

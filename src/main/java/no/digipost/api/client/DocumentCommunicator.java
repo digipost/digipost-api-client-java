@@ -18,6 +18,7 @@ package no.digipost.api.client;
 import no.digipost.api.client.representations.DocumentEvents;
 import no.digipost.api.client.representations.DocumentStatus;
 import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.util.HttpClientUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
 import java.io.IOException;
@@ -45,22 +46,7 @@ public class DocumentCommunicator extends Communicator {
     }
 
     public InputStream getContent(String path) {
-        CloseableHttpResponse response = null;
-        try {
-            response = apiService.getContent(path);
-            checkResponse(response, eventLogger);
-            return response.getEntity().getContent();
-
-        } catch (Exception e) {
-            if (response != null) {
-                try {
-                    response.close();
-                } catch (IOException closingException) {
-                    e.addSuppressed(closingException);
-                }
-            }
-            throw e instanceof RuntimeException ? (RuntimeException) e : new RuntimeException(e.getMessage(), e);
-        }
+        return HttpClientUtils.safelyOfferEntityStreamExternally(apiService.getContent(path), eventLogger);
     }
 
     public DocumentStatus getDocumentStatus(Link linkToDocumentStatus) {
