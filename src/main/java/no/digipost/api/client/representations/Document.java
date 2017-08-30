@@ -18,23 +18,27 @@ package no.digipost.api.client.representations;
 
 import no.digipost.api.datatypes.DataType;
 import no.digipost.api.datatypes.marshalling.DataTypeXmlAdapter;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.apache.commons.lang3.StringUtils.lowerCase;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "document", propOrder = {
@@ -134,19 +138,14 @@ public class Document extends Representation {
     }
 
     static String parseTechnicalTypes(String... technicalTypes){
-        if(technicalTypes == null || technicalTypes.length == 0){
+        if(technicalTypes == null || technicalTypes.length == 0) {
             return null;
         }
 
-        Set<String> cleanedStrings = new HashSet<>();
-        for(String st : technicalTypes){
-            if(st != null && !st.isEmpty()){
-                cleanedStrings.add(st.trim());
-            }
-        }
-
-        return cleanedStrings.size() != 0 ? StringUtils.join(cleanedStrings, ",") : null;
-
+        return Stream.of(technicalTypes)
+            .filter(s -> Objects.nonNull(s) && !s.isEmpty())
+            .map(String::trim)
+            .collect(collectingAndThen(joining(","), joined -> joined.isEmpty() ? null : joined));
     }
 
     public Document copyDocumentAndSetDigipostFileTypeToPdf(){

@@ -33,6 +33,7 @@ import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.api.client.util.HttpClientUtils;
 import no.digipost.api.client.util.MultipartNoLengthCheckHttpEntity;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -57,6 +58,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 
 import javax.xml.bind.JAXB;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -444,13 +446,7 @@ public class ApiServiceImpl implements ApiService {
         httpGet.setHeader(HttpHeaders.ACCEPT, ContentType.WILDCARD.toString());
         final HttpCoreContext httpCoreContext = HttpCoreContext.create();
         httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
-        final CloseableHttpResponse response = send(httpGet, httpCoreContext);
-        Communicator.checkResponse(response, eventLogger);
-        try {
-            return response.getEntity().getContent();
-        } catch (IOException e) {
-            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage(), e);
-        }
+        return HttpClientUtils.safelyOfferEntityStreamExternally(send(httpGet, httpCoreContext), eventLogger);
     }
 
     @Override

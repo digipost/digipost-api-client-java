@@ -12,7 +12,6 @@ This software includes third party software subject to the following licenses:
   Apache Commons Codec under The Apache Software License, Version 2.0
   Apache Commons IO under Apache License, Version 2.0
   Apache Commons Lang under Apache License, Version 2.0
-  Apache Commons Logging under The Apache Software License, Version 2.0
   Apache FontBox under Apache License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
   Apache HttpClient Mime under Apache License, Version 2.0
@@ -35,6 +34,7 @@ This software includes third party software subject to the following licenses:
   Expression Language 3.0 under CDDL + GPLv2 with classpath exception
   generics-resolver under The MIT License
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
+  Java Hamcrest under BSD Licence 3
   Hamcrest Core under New BSD License
   Hamcrest library under New BSD License
   Hibernate Validator Engine under Apache License, Version 2.0
@@ -45,18 +45,17 @@ This software includes third party software subject to the following licenses:
   javaruntype under The Apache Software License, Version 2.0
   Javassist under Mozilla Public License 1.1
   JBoss Logging 3 under Apache License, version 2.0
-  JCL 1.1.1 implemented over SLF4J under MIT License
+  JCL 1.2 implemented over SLF4J under MIT License
   Joda-Time under Apache 2
   JUnit under Eclipse Public License 1.0
   junit-quickcheck-core under The MIT License
   junit-quickcheck-generators under The MIT License
-  Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
-  Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   mockito-core under The MIT License
   Motif under Apache License 2.0
   Objenesis under Apache 2
   OGNL - Object Graph Navigation Library under The Apache Software License, Version 2.0
   SLF4J API Module under MIT License
+  SLF4J Simple Binding under MIT License
   Undertow Core under Apache License Version 2.0
   XNIO API under Public Domain
   XNIO NIO Implementation under Public Domain
