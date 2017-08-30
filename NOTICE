@@ -34,14 +34,12 @@ This software includes third party software subject to the following licenses:
   Expression Language 3.0 under CDDL + GPLv2 with classpath exception
   generics-resolver under The MIT License
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
-  Java Hamcrest under BSD Licence 3
-  Hamcrest Core under New BSD License
-  Hamcrest library under New BSD License
   Hibernate Validator Engine under Apache License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
+  Java Hamcrest under BSD Licence 3
   javaruntype under The Apache Software License, Version 2.0
   Javassist under Mozilla Public License 1.1
   JBoss Logging 3 under Apache License, version 2.0
