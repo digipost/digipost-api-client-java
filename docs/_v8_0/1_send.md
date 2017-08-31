@@ -182,3 +182,26 @@ client.createMessage(message)
         .addContent(primaryDocument, new FileInputStream("content.pdf"))
         .send();
 ```
+
+### Send appointment
+
+```java
+PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+
+ZonedDateTime startTime = ZonedDateTime.of(2017, 10, 23, 10, 0, 0, 0, ZoneId.systemDefault());
+AppointmentAddress address = new AppointmentAddress("Storgata 1", "0001", "Oslo");
+Info preparation = new Info("Preparation", "Please do not eat or drink 6 hours prior to examination");
+Info about = new Info("About Oslo X-Ray center", "Oslo X-Ray center is specialized in advanced image diagnostics...");
+final List<Info> info = Arrays.asList(preparation, about);
+Appointment appointment = new Appointment(startTime, startTime.plusMinutes(30), "Please arrive 15 minutes early", "Oslo X-Ray center", address, "Lower back examination", info);
+
+Document primaryDocument = new Document(UUID1, "X-Ray appointment", FileType.PDF, Collections.singletonList(appointment));
+
+Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
+        .personalIdentificationNumber(pin)
+        .build();
+
+client.createMessage(message)
+        .addContent(primaryDocument, new FileInputStream("content.pdf"))
+        .send();
+```
