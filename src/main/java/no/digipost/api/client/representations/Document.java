@@ -54,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.*;
         "encrypted",
         "contentHash",
         "links",
-        "metadata"
+        "datatype"
 })
 @XmlSeeAlso({ Invoice.class })
 public class Document extends Representation {
@@ -87,8 +87,8 @@ public class Document extends Representation {
 
     @XmlJavaTypeAdapter(DataTypeXmlAdapter.class)
     @XmlAnyElement
-    @XmlElementWrapper(name="metadata")
-    protected List<DataType> metadata;
+    @XmlElementWrapper(name="datatype")
+    protected List<DataType> datatype;
 
     @XmlElement(name = "link")
     protected List<Link> getLinks() {
@@ -107,8 +107,8 @@ public class Document extends Representation {
         this(uuid, subject, fileType, null, null, null, null, null, null, null, (String[]) null);
     }
 
-    public Document(String uuid, String subject, FileType fileType, List<DataType> metadata) {
-        this(uuid, subject, fileType, null, null, null, null, null, null, metadata, (String[]) null);
+    public Document(String uuid, String subject, FileType fileType, List<DataType> datatype) {
+        this(uuid, subject, fileType, null, null, null, null, null, null, datatype, (String[]) null);
     }
 
     public Document(String uuid, String subject, FileType fileType, String openingReceipt,
@@ -122,7 +122,7 @@ public class Document extends Representation {
     public Document(String uuid, String subject, FileType fileType, String openingReceipt,
                     SmsNotification smsNotification, EmailNotification emailNotification,
                     AuthenticationLevel authenticationLevel,
-                    SensitivityLevel sensitivityLevel, Boolean opened, List<DataType> metadata, String... technicalType) {
+                    SensitivityLevel sensitivityLevel, Boolean opened, List<DataType> datatype, String... technicalType) {
         this.uuid = lowerCase(uuid);
         this.subject = subject;
         this.digipostFileType = Objects.toString(fileType, null);
@@ -133,7 +133,7 @@ public class Document extends Representation {
         this.authenticationLevel = authenticationLevel;
         this.sensitivityLevel = sensitivityLevel;
         this.technicalType = parseTechnicalTypes(technicalType);
-        this.metadata = metadata;
+        this.datatype = datatype;
         validate();
     }
 
@@ -150,7 +150,7 @@ public class Document extends Representation {
 
     public Document copyDocumentAndSetDigipostFileTypeToPdf(){
         Document newDoc = new Document(this.uuid, this.subject, new FileType("pdf"), this.openingReceipt, this.smsNotification, this.emailNotification,
-                this.authenticationLevel, this.sensitivityLevel, this.opened, this.metadata, this.getTechnicalType());
+                this.authenticationLevel, this.sensitivityLevel, this.opened, this.datatype, this.getTechnicalType());
 
         newDoc.encrypted  = this.encrypted == null ? null : this.encrypted.copy();
         newDoc.setContentHash(this.contentHash);

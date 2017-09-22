@@ -51,7 +51,7 @@ public class DocumentTest {
 
         String[] allFieldsThatAreUsedForCopyInMessage = new String[]{"UUID_PATTERN", "uuid", "subject", "digipostFileType",
                 "opened", "openingReceipt", "smsNotification", "emailNotification", "authenticationLevel", "sensitivityLevel",
-                "encrypted", "contentHash", "metadata", "technicalType"};
+                "encrypted", "contentHash", "datatype", "technicalType"};
 
         for(int i = 0; i < messageFields.length; i++){
             for(int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++){
