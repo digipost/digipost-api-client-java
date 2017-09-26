@@ -29,6 +29,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -86,9 +87,9 @@ public class Document extends Representation {
     protected ContentHash contentHash;
 
     @XmlJavaTypeAdapter(DataTypeXmlAdapter.class)
-    // @XmlAnyElement
-    @XmlElement(name="data-type")
-    protected DataType dataType;
+    @XmlAnyElement
+    @XmlElementWrapper(name="data-type")
+    protected List<DataType> dataType;
 
     @XmlElement(name = "link")
     protected List<Link> getLinks() {
@@ -133,7 +134,7 @@ public class Document extends Representation {
         this.authenticationLevel = authenticationLevel;
         this.sensitivityLevel = sensitivityLevel;
         this.technicalType = parseTechnicalTypes(technicalType);
-        this.dataType = dataType;
+        this.dataType = dataType != null ? Collections.singletonList(dataType) : null;
         validate();
     }
 
@@ -150,7 +151,7 @@ public class Document extends Representation {
 
     public Document copyDocumentAndSetDigipostFileTypeToPdf(){
         Document newDoc = new Document(this.uuid, this.subject, new FileType("pdf"), this.openingReceipt, this.smsNotification, this.emailNotification,
-                this.authenticationLevel, this.sensitivityLevel, this.opened, this.dataType, this.getTechnicalType());
+                this.authenticationLevel, this.sensitivityLevel, this.opened, this.dataType != null ? this.dataType.get(0) : null, this.getTechnicalType());
 
         newDoc.encrypted  = this.encrypted == null ? null : this.encrypted.copy();
         newDoc.setContentHash(this.contentHash);
