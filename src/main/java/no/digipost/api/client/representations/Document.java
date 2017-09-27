@@ -17,17 +17,13 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.datatypes.DataType;
-import no.digipost.api.datatypes.marshalling.DataTypeXmlAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,7 +50,7 @@ import static org.apache.commons.lang3.StringUtils.*;
         "encrypted",
         "contentHash",
         "links",
-        "metadata"
+        "dataType"
 })
 @XmlSeeAlso({ Invoice.class })
 public class Document extends Representation {
@@ -85,10 +81,8 @@ public class Document extends Representation {
     @XmlElement(name = "content-hash", nillable = false)
     protected ContentHash contentHash;
 
-    @XmlJavaTypeAdapter(DataTypeXmlAdapter.class)
-    @XmlAnyElement
-    @XmlElementWrapper(name="metadata")
-    protected List<DataType> metadata;
+    @XmlElement(name="data-type")
+    protected DataTypeHolder dataType;
 
     @XmlElement(name = "link")
     protected List<Link> getLinks() {
@@ -107,8 +101,8 @@ public class Document extends Representation {
         this(uuid, subject, fileType, null, null, null, null, null, null, null, (String[]) null);
     }
 
-    public Document(String uuid, String subject, FileType fileType, List<DataType> metadata) {
-        this(uuid, subject, fileType, null, null, null, null, null, null, metadata, (String[]) null);
+    public Document(String uuid, String subject, FileType fileType, DataType dataType) {
+        this(uuid, subject, fileType, null, null, null, null, null, null, dataType, (String[]) null);
     }
 
     public Document(String uuid, String subject, FileType fileType, String openingReceipt,
@@ -122,7 +116,7 @@ public class Document extends Representation {
     public Document(String uuid, String subject, FileType fileType, String openingReceipt,
                     SmsNotification smsNotification, EmailNotification emailNotification,
                     AuthenticationLevel authenticationLevel,
-                    SensitivityLevel sensitivityLevel, Boolean opened, List<DataType> metadata, String... technicalType) {
+                    SensitivityLevel sensitivityLevel, Boolean opened, DataType dataType, String... technicalType) {
         this.uuid = lowerCase(uuid);
         this.subject = subject;
         this.digipostFileType = Objects.toString(fileType, null);
@@ -133,7 +127,7 @@ public class Document extends Representation {
         this.authenticationLevel = authenticationLevel;
         this.sensitivityLevel = sensitivityLevel;
         this.technicalType = parseTechnicalTypes(technicalType);
-        this.metadata = metadata;
+        this.dataType = dataType != null ? new DataTypeHolder(dataType) : null;
         validate();
     }
 
@@ -150,7 +144,7 @@ public class Document extends Representation {
 
     public Document copyDocumentAndSetDigipostFileTypeToPdf(){
         Document newDoc = new Document(this.uuid, this.subject, new FileType("pdf"), this.openingReceipt, this.smsNotification, this.emailNotification,
-                this.authenticationLevel, this.sensitivityLevel, this.opened, this.metadata, this.getTechnicalType());
+                this.authenticationLevel, this.sensitivityLevel, this.opened, this.dataType != null ? this.dataType.get() : null, this.getTechnicalType());
 
         newDoc.encrypted  = this.encrypted == null ? null : this.encrypted.copy();
         newDoc.setContentHash(this.contentHash);

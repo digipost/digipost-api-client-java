@@ -226,7 +226,7 @@ public class GithubPagesSendExamples {
         List<Info> info = Arrays.asList(preparation, about);
         Appointment appointment = new Appointment(startTime, startTime.plusMinutes(30), "Please arrive 15 minutes early", "Oslo X-Ray center", address, "Lower back examination", info);
 
-        Document primaryDocument = new Document(UUID1, "X-Ray appointment", FileType.PDF, Collections.singletonList(appointment));
+        Document primaryDocument = new Document(UUID1, "X-Ray appointment", FileType.PDF, appointment);
 
         Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
                 .personalIdentificationNumber(pin)
