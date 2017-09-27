@@ -17,19 +17,14 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.datatypes.DataType;
-import no.digipost.api.datatypes.marshalling.DataTypeXmlAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -86,10 +81,8 @@ public class Document extends Representation {
     @XmlElement(name = "content-hash", nillable = false)
     protected ContentHash contentHash;
 
-    @XmlJavaTypeAdapter(DataTypeXmlAdapter.class)
-    @XmlAnyElement
-    @XmlElementWrapper(name="data-type")
-    protected List<DataType> dataType;
+    @XmlElement(name="data-type")
+    protected DataTypeHolder dataType;
 
     @XmlElement(name = "link")
     protected List<Link> getLinks() {
@@ -134,7 +127,7 @@ public class Document extends Representation {
         this.authenticationLevel = authenticationLevel;
         this.sensitivityLevel = sensitivityLevel;
         this.technicalType = parseTechnicalTypes(technicalType);
-        this.dataType = dataType != null ? Collections.singletonList(dataType) : null;
+        this.dataType = dataType != null ? new DataTypeHolder(dataType) : null;
         validate();
     }
 
@@ -151,7 +144,7 @@ public class Document extends Representation {
 
     public Document copyDocumentAndSetDigipostFileTypeToPdf(){
         Document newDoc = new Document(this.uuid, this.subject, new FileType("pdf"), this.openingReceipt, this.smsNotification, this.emailNotification,
-                this.authenticationLevel, this.sensitivityLevel, this.opened, this.dataType != null ? this.dataType.get(0) : null, this.getTechnicalType());
+                this.authenticationLevel, this.sensitivityLevel, this.opened, this.dataType != null ? this.dataType.get() : null, this.getTechnicalType());
 
         newDoc.encrypted  = this.encrypted == null ? null : this.encrypted.copy();
         newDoc.setContentHash(this.contentHash);
