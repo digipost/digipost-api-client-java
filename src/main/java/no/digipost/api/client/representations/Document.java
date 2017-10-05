@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -219,6 +220,10 @@ public class Document extends Representation {
 
     public boolean isOpened() {
         return opened != null && opened;
+    }
+
+    public Optional<DataType> getDataType() {
+        return Optional.ofNullable(dataType).map(DataTypeHolder::get);
     }
 
     @Override
