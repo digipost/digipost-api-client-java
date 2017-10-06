@@ -18,6 +18,9 @@ package no.digipost.api.client.eksempelkode;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.representations.*;
+import no.digipost.api.datatypes.types.Appointment;
+import no.digipost.api.datatypes.types.AppointmentAddress;
+import no.digipost.api.datatypes.types.Info;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,7 +28,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
@@ -209,5 +216,24 @@ public class GithubPagesSendExamples {
 
     }
 
+    public void send_appointment() throws FileNotFoundException {
+        PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
+        ZonedDateTime startTime = ZonedDateTime.of(2017, 10, 23, 10, 0, 0, 0, ZoneId.systemDefault());
+        AppointmentAddress address = new AppointmentAddress("Storgata 1", "0001", "Oslo");
+        Info preparation = new Info("Preparation", "Please do not eat or drink 6 hours prior to examination");
+        Info about = new Info("About Oslo X-Ray center", "Oslo X-Ray center is specialized in advanced image diagnostics...");
+        List<Info> info = Arrays.asList(preparation, about);
+        Appointment appointment = new Appointment(startTime, startTime.plusMinutes(30), "Please arrive 15 minutes early", "Oslo X-Ray center", address, "Lower back examination", info);
+
+        Document primaryDocument = new Document(UUID1, "X-Ray appointment", FileType.PDF, appointment);
+
+        Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
+                .personalIdentificationNumber(pin)
+                .build();
+
+        client.createMessage(message)
+                .addContent(primaryDocument, new FileInputStream("content.pdf"))
+                .send();
+    }
 }

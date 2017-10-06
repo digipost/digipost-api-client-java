@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>8.7-SNAPSHOT</version>
+    <version>9.1-SNAPSHOT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 
@@ -154,6 +154,12 @@
             <artifactId>undertow-core</artifactId>
             <version>2.0.0.Alpha1</version>
         </dependency>
+        <dependency>
+            <groupId>no.digipost</groupId>
+            <artifactId>digipost-data-types</artifactId>
+            <version>0.6</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -426,6 +432,16 @@
                                         <include>org.jboss.logging:jboss-logging</include>
                                         <include>org.jboss.xnio:xnio-api</include>
                                         <include>org.jboss.xnio:xnio-nio</include>
+                                        <include>no.digipost:digipost-data-types</include>
+                                        <include>com.fasterxml.jackson.core:jackson-databind</include>
+                                        <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
+                                        <include>com.fasterxml.jackson.core:jackson-annotations</include>
+                                        <include>com.fasterxml.jackson.module:jackson-module-jaxb-annotations</include>
+                                        <include>org.hibernate:hibernate-validator</include>
+                                        <include>com.fasterxml:classmate</include>
+                                        <include>org.glassfish:javax.el</include>
+                                        <include>javax.validation:validation-api</include>
+                                        <include>com.fasterxml.jackson.core:jackson-core</include>
                                     </includes>
                                     <searchTransitive>true</searchTransitive>
                                     <message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før distribusjon. Husk også å oppdatere fila «NOTICE».</message>
