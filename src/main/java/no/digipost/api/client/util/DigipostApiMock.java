@@ -19,6 +19,10 @@ import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.BlockingHandler;
+import io.undertow.server.handlers.form.FormData;
+import io.undertow.server.handlers.form.FormData.FormValue;
+import io.undertow.server.handlers.form.FormParserFactory;
+import io.undertow.server.handlers.form.MultiPartParserDefinition;
 import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import no.digipost.api.client.Headers;
@@ -30,7 +34,6 @@ import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.ErrorType;
 import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Relation;
@@ -41,6 +44,7 @@ import no.digipost.api.client.representations.sender.SenderStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -50,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -63,12 +68,20 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
 
+import static io.undertow.util.Headers.CONTENT_DISPOSITION;
+import static io.undertow.util.Headers.CONTENT_TYPE;
+import static io.undertow.util.Headers.extractQuotedValueFromHeader;
 import static java.lang.Integer.parseInt;
 import static java.time.ZonedDateTime.now;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
 import static no.digipost.api.client.util.JAXBContextUtils.encryptionKeyContext;
 import static no.digipost.api.client.util.JAXBContextUtils.entryPointContext;
@@ -78,6 +91,7 @@ import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
 import static no.digipost.api.client.util.JAXBContextUtils.messageDeliveryContext;
 import static no.digipost.api.client.util.JAXBContextUtils.senderInformationContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
+import static org.apache.commons.lang3.StringUtils.abbreviate;
 import static org.apache.http.HttpStatus.SC_OK;
 
 public class DigipostApiMock implements HttpHandler {
@@ -152,7 +166,7 @@ public class DigipostApiMock implements HttpHandler {
 
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
 
-        if(method.equals(new HttpString("POST"))){
+        if (method.equals(new HttpString("POST"))){
             httpResponse = serviceMultipartrequest(httpContext, bao);
 
         } else if(requestPath.equals("/printkey")) {
@@ -164,13 +178,17 @@ public class DigipostApiMock implements HttpHandler {
         } else if(requestPath.equals("/getdocumentstatus")) {
             CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_DOCUMENT_STATUS).getResponse(httpContext.getRequestPath());
             httpResponse = response.getStatusLine().getStatusCode();
-            response.getEntity().writeTo(bao);
-
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                entity.writeTo(bao);
+            }
         } else if(requestPath.equals("/getdocumentevents")) {
             CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_DOCUMENTS_EVENTS).getResponse(httpContext.getRequestPath());
             httpResponse = response.getStatusLine().getStatusCode();
-            response.getEntity().writeTo(bao);
-
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                entity.writeTo(bao);
+            }
         } else if(requestPath.equals("/")){
             marshal(entryPointContext, new EntryPoint(certificate, new Link(Relation.CREATE_MESSAGE, new DigipostUri("http://localhost:9999/create")),
                     new Link(Relation.GET_PRINT_ENCRYPTION_KEY, new DigipostUri("http://localhost:9999/printkey")),
@@ -180,7 +198,10 @@ public class DigipostApiMock implements HttpHandler {
         } else {
             CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_CONTENT).getResponse(httpContext.getRequestPath());
             httpResponse = response.getStatusLine().getStatusCode();
-            response.getEntity().writeTo(bao);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                entity.writeTo(bao);
+            }
         }
 
         byte[] bytes = bao.toByteArray();
@@ -230,25 +251,44 @@ public class DigipostApiMock implements HttpHandler {
     }
 
     private int serviceMultipartrequest(HttpServerExchange httpContext, ByteArrayOutputStream bao) throws IOException {
-        String multipart = new String(IOUtils.toByteArray(httpContext.getInputStream()));
-        String messageString = getMessageFromXMLString(multipart);
+        HeaderMap requestHeaders = httpContext.getRequestHeaders();
+        String digipostMultipartContentType = requestHeaders.getFirst(CONTENT_TYPE);
+        String boundary = extractQuotedValueFromHeader(digipostMultipartContentType, "boundary");
+        requestHeaders.addFirst(CONTENT_TYPE, MultiPartParserDefinition.MULTIPART_FORM_DATA + "; boundary=" + boundary);
+        FormData parsedMultipart = FormParserFactory.builder()
+                .addParser(new MultiPartParserDefinition())
+                .build()
+                .createParser(httpContext)
+                .parseBlocking();
+        Map<String, ContentPart> parts = stream(parsedMultipart.spliterator(), false)
+            .flatMap(partName -> parsedMultipart.get(partName).stream())
+            .map(ContentPart::new)
+            .collect(toMap(ContentPart::getName, Function.identity(),
+                    (part1WithDuplicateName, part2WithDuplicateName) -> {
+                        throw new RuntimeException("Found two parts with same name: " + part1WithDuplicateName + ", " + part2WithDuplicateName);
+                    },
+                    LinkedHashMap::new));
 
-        ByteArrayInputStream messageStream = new ByteArrayInputStream(messageString.getBytes());
 
-        Message message = unmarshal(messageContext, messageStream, Message.class);
+        String messageString = Optional.ofNullable(parts.remove("message"))
+                .orElseThrow(() -> new NoSuchElementException("Message part of multipart not found in " + parts))
+                .content;
+
+        Message message;
+        try (InputStream messageStream = new ByteArrayInputStream(messageString.getBytes())) {
+            message = unmarshal(messageContext, messageStream, Message.class);
+        }
+
         RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
         CloseableHttpResponse response = requestsAndResponses.getResponse(message.primaryDocument.subject);
+        HttpEntity entity = response.getEntity();
+        if (entity != null) {
+            entity.writeTo(bao);
+        }
 
-        response.getEntity().writeTo(bao);
-
-        requestsAndResponses.addRequest(new DigipostRequest(message, getContentparts(multipart)));
+        requestsAndResponses.addRequest(new DigipostRequest(message, new ArrayList<>(parts.values())));
 
         return response.getStatusLine().getStatusCode();
-    }
-
-    private static String getMessageFromXMLString(String multipart) throws IOException {
-        String messageString = multipart.substring(multipart.indexOf("<?xml"));
-        return messageString.substring(0, messageString.indexOf("</message>") + 10);
     }
 
     private static String generateXContentSHA256(byte[] bytes){
@@ -297,34 +337,11 @@ public class DigipostApiMock implements HttpHandler {
         requestsAndResponsesMap.put(Method.MULTIPART_MESSAGE, new RequestsAndResponses(new MultipartRequestMatcher()));
     }
 
-    public List<ContentPart> getContentparts(String multipartString){
-        List<ContentPart> contentParts = new ArrayList<>();
-        String splitString = multipartString.substring(0, multipartString.indexOf("\r\n"));
 
-        String[] split = multipartString.split(splitString);
-
-        for (String bodyPart : split) {
-            if(bodyPart.contains("Content-Type: ")) {
-                String contentType = bodyPart.substring(bodyPart.indexOf("Content-Type: ") + 14);
-                contentType = contentType.substring(0, contentType.indexOf("\r\n"));
-                if (!contentType.equals(MediaTypes.DIGIPOST_MEDIA_TYPE_V7)) {
-                    contentParts.add(new ContentPart(contentType));
-                }
-            }
-        }
-
-        return contentParts;
-    }
-
-
-
+    @FunctionalInterface
     public interface RequestMatcher {
         CloseableHttpResponse findResponse(String requestString);
-        public static final RequestMatcher NO_OP = new RequestMatcher() {
-            @Override public CloseableHttpResponse findResponse(String requestString) {
-                return null;
-            }
-        };
+        public static final RequestMatcher NO_OP = requestString -> null;
     }
 
     public static class RequestsAndResponses {
@@ -480,12 +497,29 @@ public class DigipostApiMock implements HttpHandler {
 
     }
 
-    public static class ContentPart {
+    public static final class ContentPart {
 
+        public final String name;
         public final String mediaType;
+        public final String content;
 
-        public ContentPart(String mediaType) {
+        public ContentPart(FormValue part) {
+            this(extractQuotedValueFromHeader(part.getHeaders().getFirst(CONTENT_DISPOSITION), "filename"), part.getHeaders().get(CONTENT_TYPE).getFirst(), part.getValue());
+        }
+
+        public ContentPart(String name, String mediaType, String content) {
+            this.name = name;
             this.mediaType = mediaType;
+            this.content = content;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return "Content '" + name + "' (" + mediaType + "): " + abbreviate(content, 15);
         }
     }
 }

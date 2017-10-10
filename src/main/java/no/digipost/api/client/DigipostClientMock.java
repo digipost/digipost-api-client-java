@@ -46,6 +46,7 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 
@@ -64,9 +65,13 @@ public class DigipostClientMock {
     private static final int PORT = 6666;
 
     public DigipostClientMock() {
+        this(UnaryOperator.identity());
+    }
+
+    public DigipostClientMock(UnaryOperator<DigipostHttpClientSettings> clientCustomizer) {
         URI host = URI.create("http://localhost:" + PORT);
 
-        HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
+        HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(clientCustomizer.apply(DigipostHttpClientSettings.DEFAULT));
 
         apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host, null);
         apiService.buildApacheHttpClientBuilder();

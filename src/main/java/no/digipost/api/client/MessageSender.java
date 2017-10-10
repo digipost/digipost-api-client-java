@@ -54,6 +54,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Duration.between;
 import static java.time.Duration.ofMinutes;
 import static java.util.Optional.empty;
@@ -109,13 +110,14 @@ public class MessageSender extends Communicator {
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
             marshal(messageContext, singleChannelMessage, bao);
             ByteArrayBody attachment = new ByteArrayBody(bao.toByteArray(),
-                    ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V7),"message");
+                    ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V7, UTF_8), "message");
 
             MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create()
                     .setMode(HttpMultipartMode.STRICT)
                     .setMimeSubtype(DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7)
                     .addPart(FormBodyPartBuilder.create("message", attachment)
                             .addField("Content-Disposition", "attachment;" + " filename=\"message\"")
+                            .addField("Content-Transfer-Encoding", UTF_8.displayName())
                             .build());
 
             for (Entry<Document, InputStream> documentAndContent : preparedDocuments.entrySet()) {
