@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
+import static no.digipost.http.client3.DigipostHttpClientDefaults.DEFAULT_TIMEOUTS_MS;
 
 /**
  * Instansierer en DigipostClient som ikke går mot faktiskt Digipost REST-api endepunkt og
@@ -66,7 +67,7 @@ public class DigipostClientMock {
     public DigipostClientMock() {
         URI host = URI.create("http://localhost:" + PORT);
 
-        HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
+        HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT.timeouts(DEFAULT_TIMEOUTS_MS.all(0)));
 
         apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host, null);
         apiService.buildApacheHttpClientBuilder();
