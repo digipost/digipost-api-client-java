@@ -117,7 +117,6 @@ public class MessageSender extends Communicator {
                     .setMimeSubtype(DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7)
                     .addPart(FormBodyPartBuilder.create("message", attachment)
                             .addField("Content-Disposition", "attachment;" + " filename=\"message\"")
-                            .addField("Content-Transfer-Encoding", UTF_8.displayName())
                             .build());
 
             for (Entry<Document, InputStream> documentAndContent : preparedDocuments.entrySet()) {
