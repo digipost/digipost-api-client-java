@@ -20,6 +20,11 @@ DigipostClient client = new DigipostClient(
 
 ### Get documents in inbox
 
+The inbox call outputs a list of documents ordered by delivery time. `Offset` is the start index of the list, and `limit` is the max number of documents to be returned. The `offset` and `limit` is therefore not in any way connected to `InboxDocument.id`.
+
+The values `offset` and `limit` is meant for pagination so that one can fetch 100 and then the next 100. 
+
+
 ```java
  //get first 100 documents
 final Inbox first100 = client.getInbox(new SenderId(123456), 0, 100);
@@ -27,6 +32,8 @@ final Inbox first100 = client.getInbox(new SenderId(123456), 0, 100);
 //get next 100 documents
 final Inbox next100 = client.getInbox(new SenderId(123456), 100, 100);
 ```
+
+We have now fetched the 200 newest inbox documents. As long as no new documents are received, the two API-calls shown above will always return the same result. If we now receive a new document, this will change. The first 100 will now contain 1 new document and 99 documents we have seen before. This means that as soon as you stumble upon a document you have seen before you can stop processing, given that all the following older ones have been processed. 
 
 ### Download document content
 
