@@ -183,7 +183,7 @@ client.createMessage(message)
         .send();
 ```
 
-### Send Datatype: appointment
+### Send Datatype Appointment
 
 All datatypes are sent in the same way. Each document can accomodate one datatype-object. An exhaustive list of
 available datatypes and their documentation can be found at
