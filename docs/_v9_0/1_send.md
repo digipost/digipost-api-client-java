@@ -185,7 +185,7 @@ client.createMessage(message)
 
 ### Send Datatype Appointment
 
-All datatypes are sent in the same way. Each document can accomodate one datatype-object. An exhaustive list of
+All datatypes are sent in the same way. Each document can accommodate one datatype-object. An exhaustive list of
 available datatypes and their documentation can be found at
 [digipost/digipost-data-types](https://github.com/digipost/digipost-data-types).
 
