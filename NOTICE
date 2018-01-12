@@ -8,7 +8,6 @@ Licensed under Apache 2 - http://www.apache.org/licenses/LICENSE-2.0.html
 
 This software includes third party software subject to the following licenses:
 
-  Antlr 3 Runtime under BSD licence
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons IO under Apache License, Version 2.0
   Apache Commons Lang under Apache License, Version 2.0
@@ -21,39 +20,24 @@ This software includes third party software subject to the following licenses:
   Bean Validation API under The Apache Software License, Version 2.0
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
-  Byte Buddy (without dependencies) under The Apache Software License, Version 2.0
-  Byte Buddy Java agent under The Apache Software License, Version 2.0
   ClassMate under The Apache Software License, Version 2.0
   Digipost API Client under The Apache Software License, Version 2.0
   Digipost Caching under The Apache Software License, Version 2.0
-  Digipost Digg under The Apache Software License, Version 2.0
   Digipost HTTP Client Builder under The Apache Software License, Version 2.0
   Digipost Printability Validator under The Apache Software License, Version 2.0
   digipost-data-types under The Apache Software License, Version 2.0
-  EqualsVerifier under The Apache Software License, Version 2.0
   Expression Language 3.0 under CDDL + GPLv2 with classpath exception
-  generics-resolver under The MIT License
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
   Hibernate Validator Engine under Apache License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
-  Java Hamcrest under BSD Licence 3
-  javaruntype under The Apache Software License, Version 2.0
-  Javassist under Mozilla Public License 1.1
   JBoss Logging 3 under Apache License, version 2.0
   JCL 1.2 implemented over SLF4J under MIT License
   Joda-Time under Apache 2
-  JUnit under Eclipse Public License 1.0
-  junit-quickcheck-core under The MIT License
-  junit-quickcheck-generators under The MIT License
-  mockito-core under The MIT License
   Motif under Apache License 2.0
-  Objenesis under Apache 2
-  OGNL - Object Graph Navigation Library under The Apache Software License, Version 2.0
   SLF4J API Module under MIT License
-  SLF4J Simple Binding under MIT License
   Undertow Core under Apache License Version 2.0
   XNIO API under Public Domain
   XNIO NIO Implementation under Public Domain

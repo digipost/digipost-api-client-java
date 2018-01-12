@@ -192,12 +192,15 @@
                 <plugin>
                     <groupId>org.jasig.maven</groupId>
                     <artifactId>maven-notice-plugin</artifactId>
-                    <version>1.0.6.1</version>
+                    <version>1.1.0</version>
                     <configuration>
                         <noticeTemplate>${project.basedir}/src/main/notice/NOTICE.template</noticeTemplate>
                         <licenseMapping>
                             <param>${project.basedir}/src/main/notice/license-mappings.xml</param>
                         </licenseMapping>
+                        <excludeScopes>
+                            <excludeScope>test</excludeScope>
+                        </excludeScopes>
                     </configuration>
                 </plugin>
                 <plugin>
