@@ -44,7 +44,6 @@ import static no.digipost.api.client.representations.ErrorType.CLIENT_DATA;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.MessageStatus.DELIVERED;
-import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static no.digipost.api.client.representations.XmlTestHelper.marshallValidateAndUnmarshall;
 import static org.hamcrest.Matchers.is;
@@ -139,7 +138,7 @@ public class XsdValidationTest {
         Message message = newMessage(randomUUID().toString(),
                         new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
                 )
-                .recipient(new MessageRecipient(new PrintDetails(address, address, B)))
+                .recipient(new MessageRecipient(new PrintDetails(address, address)))
                 .build();
         marshallValidateAndUnmarshall(message);
     }
@@ -150,7 +149,7 @@ public class XsdValidationTest {
         Message message = newMessage(randomUUID().toString(),
                         new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
                 )
-                .recipient(new MessageRecipient(new PrintDetails(address, address, B)))
+                .recipient(new MessageRecipient(new PrintDetails(address, address)))
                 .build();
         marshallValidateAndUnmarshall(message);
     }
@@ -161,7 +160,7 @@ public class XsdValidationTest {
         Message message = newMessage(randomUUID().toString(),
                         new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
                 )
-                .recipient(new MessageRecipient(new PrintDetails(address, address, B)))
+                .recipient(new MessageRecipient(new PrintDetails(address, address)))
                 .build();
         marshallValidateAndUnmarshall(message);
     }

@@ -23,7 +23,6 @@ import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.Message.MessageBuilder;
 import no.digipost.api.client.representations.NorwegianAddress;
 import no.digipost.api.client.representations.PrintDetails;
-import no.digipost.api.client.representations.PrintDetails.PostType;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.util.DigipostPublicKey;
@@ -86,7 +85,7 @@ public class DocumentsPreparerTest {
     private final Document primaryDocument = new Document(UUID.randomUUID().toString(), "primary", PDF);
     private final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{ put(primaryDocument, printablePdf1Page()); }};
     private final MessageBuilder messageBuilder = MessageBuilder.newMessage("m_id", primaryDocument).printDetails(
-            new PrintDetails(new PrintRecipient("Joe Schmoe", new NorwegianAddress("7845", "Far away")), new PrintRecipient("Dolly Parton", new NorwegianAddress("8942", "Farther away")), PostType.A));
+            new PrintDetails(new PrintRecipient("Joe Schmoe", new NorwegianAddress("7845", "Far away")), new PrintRecipient("Dolly Parton", new NorwegianAddress("8942", "Farther away"))));
 
     @Test
     public void failsIfMessageHasAnyDocumentsRequiringPreEncryptionAndNoEncryptionKeyIsSupplied() throws IOException {

@@ -29,7 +29,6 @@ import no.digipost.api.client.representations.NorwegianAddress;
 import no.digipost.api.client.representations.OrganisationNumber;
 import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.PrintDetails;
-import no.digipost.api.client.representations.PrintDetails.PostType;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.SmsNotification;
 
@@ -481,7 +480,7 @@ public class DigipostSwingClient {
                         NorwegianAddress norwegianAddress = new NorwegianAddress(addressline1, addressline2, zipCode, city);
                         PrintRecipient printRecipient, returnAddress;
                         returnAddress = printRecipient = new PrintRecipient(name, norwegianAddress);
-                        PrintDetails printDetails = new PrintDetails(printRecipient, returnAddress, PostType.B);
+                        PrintDetails printDetails = new PrintDetails(printRecipient, returnAddress);
 
                         MessageRecipient recipient;
                         if (fallbackToPrintCheckBox.isSelected()) {

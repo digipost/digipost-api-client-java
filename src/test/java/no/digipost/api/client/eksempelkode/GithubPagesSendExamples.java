@@ -17,7 +17,22 @@ package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.AuthenticationLevel;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.FileType;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.Invoice;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.MessageRecipient;
+import no.digipost.api.client.representations.NameAndAddress;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.PrintDetails;
+import no.digipost.api.client.representations.PrintRecipient;
+import no.digipost.api.client.representations.SensitivityLevel;
+import no.digipost.api.client.representations.SmsNotification;
 import no.digipost.api.datatypes.types.Appointment;
 import no.digipost.api.datatypes.types.AppointmentAddress;
 import no.digipost.api.datatypes.types.Info;
@@ -31,7 +46,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -154,7 +168,7 @@ public class GithubPagesSendExamples {
 
         PrintDetails printDetails = new PrintDetails(
                 new PrintRecipient("Ola Nordmann", new NorwegianAddress("Prinsensveien 123", "0460", "Oslo")),
-                new PrintRecipient("Norgesbedriften", new NorwegianAddress("Akers Àle 2", "0400", "Oslo")), PrintDetails.PostType.B, PrintDetails.PrintColors.MONOCHROME, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER);
+                new PrintRecipient("Norgesbedriften", new NorwegianAddress("Akers Àle 2", "0400", "Oslo")), PrintDetails.PrintColors.MONOCHROME, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER);
 
         Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
                 .recipient(new MessageRecipient(pin, printDetails))
