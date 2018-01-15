@@ -102,9 +102,9 @@ public class MessageTest {
                 .digipostAddress(new DigipostAddress("Test2"))
                 .senderId(1L).deliveryTime(ZonedDateTime.now()).invoiceReference("Invoice")
                 .recipient(new MessageRecipient(new DigipostAddress("TestAdress"), new PrintDetails(
-                        new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop"))
-                        , new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop")),
-                        PrintDetails.PostType.A, PrintDetails.PrintColors.COLORS, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER))).build();
+                        new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop")),
+                        new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop")),
+                        PrintDetails.PrintColors.COLORS, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER))).build();
 
         Message copyOfMessageWithPrintDetailsOnly = Message.copyMessageWithOnlyPrintDetails(message);
 
@@ -117,7 +117,6 @@ public class MessageTest {
         assertNull(copyOfMessageWithPrintDetailsOnly.recipient.organisationNumber);
         assertNull(copyOfMessageWithPrintDetailsOnly.recipient.personalIdentificationNumber);
         assertThat(copyOfMessageWithPrintDetailsOnly.recipient.printDetails.nondeliverableHandling, is(message.recipient.printDetails.nondeliverableHandling));
-        assertThat(copyOfMessageWithPrintDetailsOnly.recipient.printDetails.postType, is(message.recipient.printDetails.postType));
         assertThat(copyOfMessageWithPrintDetailsOnly.recipient.printDetails.printColors, is(message.recipient.printDetails.printColors));
 
         assertThat("When copying to only print, the file type should be set to pdf",

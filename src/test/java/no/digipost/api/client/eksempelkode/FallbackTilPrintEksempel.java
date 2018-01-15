@@ -16,7 +16,14 @@
 package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageRecipient;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.PrintDetails;
+import no.digipost.api.client.representations.PrintRecipient;
+import no.digipost.api.client.representations.SmsNotification;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -31,7 +38,6 @@ import static no.digipost.api.client.representations.AuthenticationLevel.PASSWOR
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.PrintDetails.NondeliverableHandling.RETURN_TO_SENDER;
-import static no.digipost.api.client.representations.PrintDetails.PostType.B;
 import static no.digipost.api.client.representations.PrintDetails.PrintColors.MONOCHROME;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
@@ -68,7 +74,7 @@ public class FallbackTilPrintEksempel {
         Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
         PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer","Mottakers poststed")),
-                new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), B, MONOCHROME, RETURN_TO_SENDER);
+                new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), MONOCHROME, RETURN_TO_SENDER);
         String dinForsendelseId = UUID.randomUUID().toString();
         Message message = newMessage(dinForsendelseId, primaryDocument)
                 .recipient(new MessageRecipient(pin, printDetails))

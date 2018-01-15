@@ -31,7 +31,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class PrintDetails {
 
-    public enum PostType {A, B}
     public enum NondeliverableHandling {RETURN_TO_SENDER, SHRED}
     public enum PrintColors {MONOCHROME, COLORS}
 
@@ -40,24 +39,27 @@ public class PrintDetails {
     protected PrintRecipient recipient;
     @XmlElement(name = "return-address", required = true)
     protected PrintRecipient returnAddress;
-    @XmlElement(name = "post-type", required = true)
-    protected PostType postType;
     @XmlElement(name = "color")
     protected PrintColors printColors;
     @XmlElement(name ="nondeliverable-handling")
     protected NondeliverableHandling nondeliverableHandling;
 
+    /**
+     * As of 2018, Posten is no longer separating between A and B priority. PostType will eventually be removed from the API.
+     * Until then, it is hardcoded to "A" to pass XSD validation, but is ignored by Digipost.
+     */
+    @XmlElement(name = "post-type", required = true)
+    private final String postType = "A";
 
     PrintDetails() {}
 
-    public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final PostType postType) {
-        this(recipient, returnAddress, postType, null, null);
+    public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress) {
+        this(recipient, returnAddress, null, null);
     }
 
-    public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final PostType postType, final PrintColors colors, final NondeliverableHandling nondeliverableHandling) {
+    public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final PrintColors colors, final NondeliverableHandling nondeliverableHandling) {
         this.recipient = recipient;
         this.returnAddress = returnAddress;
-        this.postType = postType;
         this.printColors = colors;
         this.nondeliverableHandling = nondeliverableHandling;
     }
@@ -68,10 +70,6 @@ public class PrintDetails {
 
     public PrintRecipient getReturnAddress() {
         return returnAddress;
-    }
-
-    public PostType getPostType() {
-        return postType;
     }
 
     public PrintColors getPrintColors() {
