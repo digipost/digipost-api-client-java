@@ -183,11 +183,22 @@ client.createMessage(message)
         .send();
 ```
 
-### Send Datatype Appointment
+### Send a message with extra computer readable data
+
+Starting with version 9 of the Digipost API, messages can have extra bits of computer readable information that
+allows the creation of a customized, dynamic user experience for messages in Digipost. These extra bits of
+information are referred to as "Datatypes".
 
 All datatypes are sent in the same way. Each document can accommodate one datatype-object. An exhaustive list of
 available datatypes and their documentation can be found at
 [digipost/digipost-data-types](https://github.com/digipost/digipost-data-types).
+
+For convenience, all datatypes are available as java-classes in the java client library.
+
+#### Datatype Appointment
+
+In this example, an appointment-datatype that allows for certain calendar-related functions is added to a
+message.
 
 ```java
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
@@ -197,6 +208,7 @@ AppointmentAddress address = new AppointmentAddress("Storgata 1", "0001", "Oslo"
 Info preparation = new Info("Preparation", "Please do not eat or drink 6 hours prior to examination");
 Info about = new Info("About Oslo X-Ray center", "Oslo X-Ray center is specialized in advanced image diagnostics...");
 List<Info> info = Arrays.asList(preparation, about);
+
 Appointment appointment = new Appointment(startTime, startTime.plusMinutes(30), "Please arrive 15 minutes early", "Oslo X-Ray center", address, "Lower back examination", info);
 
 Document primaryDocument = new Document(UUID1, "X-Ray appointment", FileType.PDF, appointment);
