@@ -202,6 +202,7 @@ message.
 
 ```java
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+UUID messageUUID = UUID.randomUUID();
 
 ZonedDateTime startTime = ZonedDateTime.of(2017, 10, 23, 10, 0, 0, 0, ZoneId.systemDefault());
 AppointmentAddress address = new AppointmentAddress("Storgata 1", "0001", "Oslo");
@@ -211,7 +212,7 @@ List<Info> info = Arrays.asList(preparation, about);
 
 Appointment appointment = new Appointment(startTime, startTime.plusMinutes(30), "Please arrive 15 minutes early", "Oslo X-Ray center", address, "Lower back examination", info);
 
-Document primaryDocument = new Document(UUID1, "X-Ray appointment", FileType.PDF, appointment);
+Document primaryDocument = new Document(messageUUID, "X-Ray appointment", FileType.PDF, appointment);
 
 Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
         .personalIdentificationNumber(pin)
@@ -219,5 +220,30 @@ Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument
 
 client.createMessage(message)
         .addContent(primaryDocument, new FileInputStream("content.pdf"))
+        .send();
+```
+
+#### Datatype ExternalLink
+
+This Datatype enhances a message in Digipost with a button which sends the user to an external site. The button
+can optionally have a deadline, a description and a custom text. 
+
+```java
+PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+UUID messageUUID = UUID.randomUUID();
+
+URI externalLinkTarget = URI.create("https://example.org/loan-offer/uniqueCustomerId/");
+ZonedDateTime deadline = ZonedDateTime.of(2018, 10, 23, 10, 0, 0, 0, ZoneId.systemDefault());
+
+ExternalLink externalLink = new ExternalLink(externalLinkTarget, deadline, "Please read the terms, and use the button above to accept them. The offer expires at 23/10-2018 10:00.", "Accept offer");
+
+Document primaryDocument = new Document(messageUUID, "Housing loan application", FileType.PDF, externalLink);
+
+Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
+        .personalIdentificationNumber(pin)
+        .build();
+
+client.createMessage(message)
+        .addContent(primaryDocument, new FileInputStream("terms.pdf"))
         .send();
 ```
