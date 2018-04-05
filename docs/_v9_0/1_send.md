@@ -183,23 +183,36 @@ client.createMessage(message)
         .send();
 ```
 
-### Send Datatype Appointment
+### Send a message with extra computer readable data
+
+Starting with version 9 of the Digipost API, messages can have extra bits of computer readable information that
+allows the creation of a customized, dynamic user experience for messages in Digipost. These extra bits of
+information are referred to as "Datatypes".
 
 All datatypes are sent in the same way. Each document can accommodate one datatype-object. An exhaustive list of
 available datatypes and their documentation can be found at
 [digipost/digipost-data-types](https://github.com/digipost/digipost-data-types).
 
+For convenience, all datatypes are available as java-classes in the java client library.
+
+#### Datatype Appointment
+
+In this example, an appointment-datatype that allows for certain calendar-related functions is added to a
+message.
+
 ```java
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+UUID messageUUID = UUID.randomUUID();
 
 ZonedDateTime startTime = ZonedDateTime.of(2017, 10, 23, 10, 0, 0, 0, ZoneId.systemDefault());
 AppointmentAddress address = new AppointmentAddress("Storgata 1", "0001", "Oslo");
 Info preparation = new Info("Preparation", "Please do not eat or drink 6 hours prior to examination");
 Info about = new Info("About Oslo X-Ray center", "Oslo X-Ray center is specialized in advanced image diagnostics...");
 List<Info> info = Arrays.asList(preparation, about);
+
 Appointment appointment = new Appointment(startTime, startTime.plusMinutes(30), "Please arrive 15 minutes early", "Oslo X-Ray center", address, "Lower back examination", info);
 
-Document primaryDocument = new Document(UUID1, "X-Ray appointment", FileType.PDF, appointment);
+Document primaryDocument = new Document(messageUUID, "X-Ray appointment", FileType.PDF, appointment);
 
 Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
         .personalIdentificationNumber(pin)
@@ -207,5 +220,30 @@ Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument
 
 client.createMessage(message)
         .addContent(primaryDocument, new FileInputStream("content.pdf"))
+        .send();
+```
+
+#### Datatype ExternalLink
+
+This Datatype enhances a message in Digipost with a button which sends the user to an external site. The button
+can optionally have a deadline, a description and a custom text. 
+
+```java
+PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+UUID messageUUID = UUID.randomUUID();
+
+URI externalLinkTarget = URI.create("https://example.org/loan-offer/uniqueCustomerId/");
+ZonedDateTime deadline = ZonedDateTime.of(2018, 10, 23, 10, 0, 0, 0, ZoneId.systemDefault());
+
+ExternalLink externalLink = new ExternalLink(externalLinkTarget, deadline, "Please read the terms, and use the button above to accept them. The offer expires at 23/10-2018 10:00.", "Accept offer");
+
+Document primaryDocument = new Document(messageUUID, "Housing loan application", FileType.PDF, externalLink);
+
+Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
+        .personalIdentificationNumber(pin)
+        .build();
+
+client.createMessage(message)
+        .addContent(primaryDocument, new FileInputStream("terms.pdf"))
         .send();
 ```
