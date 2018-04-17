@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -27,7 +28,8 @@ import javax.xml.bind.annotation.XmlType;
     "returnAddress",
     "postType",
     "printColors",
-    "nondeliverableHandling"
+    "nondeliverableHandling",
+    "instruction"
 })
 public class PrintDetails {
 
@@ -43,6 +45,9 @@ public class PrintDetails {
     protected PrintColors printColors;
     @XmlElement(name ="nondeliverable-handling")
     protected NondeliverableHandling nondeliverableHandling;
+
+    @XmlElement
+    protected List<PrintInstruction> instruction;
 
     /**
      * As of 2018, Posten is no longer separating between A and B priority. PostType will eventually be removed from the API.
@@ -62,6 +67,10 @@ public class PrintDetails {
         this.returnAddress = returnAddress;
         this.printColors = colors;
         this.nondeliverableHandling = nondeliverableHandling;
+    }
+
+    public void setInstruction(List<PrintInstruction> instruction) {
+        this.instruction = instruction;
     }
 
     public PrintRecipient getRecipient() {
