@@ -61,4 +61,12 @@ public class Recipients extends Representation {
     protected void setLink(final List<Link> links) {
         this.links = links;
     }
+
+    @Override
+    public String toString() {
+        return "Recipients{" +
+                "recipients=" + recipients +
+                ", links=" + links +
+                '}';
+    }
 }
