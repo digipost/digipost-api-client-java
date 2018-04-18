@@ -24,6 +24,8 @@ import javax.xml.bind.JAXBException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static no.digipost.api.client.util.ExceptionUtils.exceptionNameAndMessage;
+
 public class JAXBContextUtils {
     public static final JAXBContext entryPointContext = initContext(EntryPoint.class);
     public static final JAXBContext errorMessageContext = initContext(ErrorMessage.class);
@@ -50,7 +52,7 @@ public class JAXBContextUtils {
         try {
             context.createMarshaller().marshal(objectToMarshall, outputStream);
         } catch (JAXBException e) {
-            throw new RuntimeException("Failed when trying to marshal object to outputstream", e);
+            throw new RuntimeException("Failed when trying to marshal object to outputstream. Cause: " + exceptionNameAndMessage(e), e);
         }
     }
 
@@ -58,7 +60,7 @@ public class JAXBContextUtils {
         try {
             return type.cast(context.createUnmarshaller().unmarshal(inputStream));
         } catch (JAXBException e) {
-            throw new RuntimeException("Failed when trying to unmarshal inputstream to object", e);
+            throw new RuntimeException("Failed when trying to unmarshal inputstream to object. Cause: " + exceptionNameAndMessage(e), e);
         }
     }
 }

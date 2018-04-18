@@ -33,6 +33,7 @@ import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.api.client.util.ExceptionUtils;
 import no.digipost.api.client.util.HttpClientUtils;
 import no.digipost.api.client.util.MultipartNoLengthCheckHttpEntity;
 import org.apache.commons.io.IOUtils;
@@ -61,8 +62,11 @@ import javax.xml.bind.JAXB;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -73,6 +77,7 @@ import static java.util.Optional.ofNullable;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
+import static no.digipost.api.client.util.ExceptionUtils.exceptionNameAndMessage;
 import static no.digipost.api.client.util.JAXBContextUtils.autocompleteContext;
 import static no.digipost.api.client.util.JAXBContextUtils.entryPointContext;
 import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
@@ -287,26 +292,34 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public Recipients search(final String searchString) {
-        HttpGet httpGet = new HttpGet(digipostUrl.resolve(getEntryPoint().getSearchUri().getPath() + "/" + searchString));
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(createEncodedURIPath(getEntryPoint().getSearchUri().getPath() + "/" + searchString)));
         httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
         try(CloseableHttpResponse response = send(httpGet)){
             return unmarshal(recipientsContext, response.getEntity().getContent(), Recipients.class);
         } catch (IOException e) {
-            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, "Error while unmarshalling response: " + exceptionNameAndMessage(e), e);
+        }
+    }
+
+    private URI createEncodedURIPath(String path) {
+        try {
+            return new URI(null, null, path, null);
+        } catch (URISyntaxException e) {
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, "Error encoding search path because of " + exceptionNameAndMessage(e), e);
         }
     }
 
     @Override
     public Autocomplete searchSuggest(final String searchString) {
-        HttpGet httpGet = new HttpGet(digipostUrl.resolve(getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString));
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(createEncodedURIPath(getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString)));
         httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
 
         try(CloseableHttpResponse response = send(httpGet)) {
             return unmarshal(autocompleteContext, response.getEntity().getContent(), Autocomplete.class);
         } catch (IOException e) {
-            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, "Error while unmarshalling response: " + exceptionNameAndMessage(e), e);
         }
     }
 
