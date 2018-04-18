@@ -29,7 +29,7 @@ import java.util.List;
     "postType",
     "printColors",
     "nondeliverableHandling",
-    "instruction"
+    "printInstructions"
 })
 public class PrintDetails {
 
@@ -46,8 +46,8 @@ public class PrintDetails {
     @XmlElement(name ="nondeliverable-handling")
     protected NondeliverableHandling nondeliverableHandling;
 
-    @XmlElement
-    protected List<PrintInstruction> instruction;
+    @XmlElement(name = "print-instructions")
+    protected PrintInstructions printInstructions;
 
     /**
      * As of 2018, Posten is no longer separating between A and B priority. PostType will eventually be removed from the API.
@@ -69,8 +69,10 @@ public class PrintDetails {
         this.nondeliverableHandling = nondeliverableHandling;
     }
 
-    public void setInstruction(List<PrintInstruction> instruction) {
-        this.instruction = instruction;
+    public void setInstruction(List<PrintInstruction> instructions) {
+        if (!instructions.isEmpty()) {
+            this.printInstructions = new PrintInstructions(instructions);
+        }
     }
 
     public PrintRecipient getRecipient() {
