@@ -17,13 +17,14 @@ package no.digipost.api.client;
 
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.sender.SenderInformation;
-import no.digipost.cache.inmemory.Cache;
-import no.digipost.cache.inmemory.SingleCached;
+import no.digipost.cache2.inmemory.Cache;
+import no.digipost.cache2.inmemory.SingleCached;
 
+import java.time.Duration;
 import java.util.concurrent.Callable;
 
-import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
-import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
+import static no.digipost.cache2.inmemory.CacheConfig.expireAfterAccess;
+import static no.digipost.cache2.inmemory.CacheConfig.useSoftValues;
 
 final class Cached {
 
@@ -31,8 +32,8 @@ final class Cached {
     final Cache<String, SenderInformation> senderInformation;
 
     Cached(Callable<EntryPoint> entryPointFetcher) {
-        this.entryPoint = new SingleCached<>("digipost-entrypoint", entryPointFetcher, expireAfterAccess(org.joda.time.Duration.standardMinutes(5)), useSoftValues);
-        this.senderInformation = new Cache<>("sender-information", expireAfterAccess(org.joda.time.Duration.standardMinutes(5)), useSoftValues);
+        this.entryPoint = new SingleCached<>("digipost-entrypoint", entryPointFetcher, expireAfterAccess(Duration.ofMinutes(5)), useSoftValues);
+        this.senderInformation = Cache.create("sender-information", expireAfterAccess(Duration.ofMinutes(5)), useSoftValues);
     }
 
 }
