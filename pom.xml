@@ -394,7 +394,6 @@
                                         <include>org.bouncycastle:bcpkix-jdk15on:${bouncycastle.version}:jar:compile</include>
                                         <include>org.jvnet.mimepull:mimepull:*:jar:compile</include>
                                         <include>org.slf4j</include>
-                                        <include>com.github.runeflobakk:motif</include>
                                         <include>org.apache.pdfbox:fontbox</include>
                                         <include>org.apache.pdfbox:pdfbox</include>
                                         <include>org.apache.pdfbox:jempbox</include>
