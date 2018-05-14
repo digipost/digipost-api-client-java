@@ -17,9 +17,10 @@ This software includes third party software subject to the following licenses:
   Apache HttpCore under Apache License, Version 2.0
   Apache JempBox under Apache License, Version 2.0
   Apache PDFBox under Apache License, Version 2.0
-  Bean Validation API under The Apache Software License, Version 2.0
+  Bean Validation API under Apache License 2.0
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
+  Caffeine cache under Apache License, Version 2.0
   ClassMate under The Apache Software License, Version 2.0
   Digipost API Client under The Apache Software License, Version 2.0
   Digipost Caching under The Apache Software License, Version 2.0
@@ -27,7 +28,6 @@ This software includes third party software subject to the following licenses:
   Digipost Printability Validator under The Apache Software License, Version 2.0
   digipost-data-types under The Apache Software License, Version 2.0
   Expression Language 3.0 under CDDL + GPLv2 with classpath exception
-  Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
   Hibernate Validator Engine under Apache License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
@@ -35,8 +35,6 @@ This software includes third party software subject to the following licenses:
   jackson-databind under The Apache Software License, Version 2.0
   JBoss Logging 3 under Apache License, version 2.0
   JCL 1.2 implemented over SLF4J under MIT License
-  Joda-Time under Apache 2
-  Motif under Apache License 2.0
   SLF4J API Module under MIT License
   Undertow Core under Apache License Version 2.0
   XNIO API under Public Domain
