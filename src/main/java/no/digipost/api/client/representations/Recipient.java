@@ -94,4 +94,18 @@ public class Recipient extends Representation {
         this.links = links;
     }
 
+    @Override
+    public String toString() {
+        return "Recipient{" +
+                "firstname='" + firstname + '\'' +
+                ", middlename='" + middlename + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", digipostAddress='" + digipostAddress + '\'' +
+                ", mobileNumber='" + mobileNumber + '\'' +
+                ", organisationNumber='" + organisationNumber + '\'' +
+                ", organisationName='" + organisationName + '\'' +
+                ", addresses=" + addresses +
+                ", links=" + links +
+                '}';
+    }
 }

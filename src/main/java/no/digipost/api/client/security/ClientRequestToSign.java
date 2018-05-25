@@ -49,7 +49,7 @@ public class ClientRequestToSign implements RequestToSign {
     @Override
     public String getPath() {
         try {
-            String path = new URI(clientRequest.getRequestLine().getUri()).getPath();
+            String path = new URI(clientRequest.getRequestLine().getUri()).getRawPath();
             return path != null ? path : "";
         } catch (URISyntaxException e) {
             throw new RuntimeException(e.getMessage(), e);
