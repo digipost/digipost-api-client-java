@@ -45,7 +45,6 @@ public class PrintDetails {
     protected PrintColors printColors;
     @XmlElement(name ="nondeliverable-handling")
     protected NondeliverableHandling nondeliverableHandling;
-
     @XmlElement(name = "print-instructions")
     protected PrintInstructions printInstructions;
 
