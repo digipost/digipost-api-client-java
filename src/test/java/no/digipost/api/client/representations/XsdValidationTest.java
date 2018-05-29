@@ -166,6 +166,21 @@ public class XsdValidationTest {
     }
 
     @Test
+    public void validate_print_message_with_print_instructions() {
+        PrintRecipient address = new PrintRecipient("name", new NorwegianAddress("1234", "Oslo"));
+
+        PrintDetails printDetails = new PrintDetails(address, address);
+        printDetails.setInstruction(Arrays.asList(new PrintInstruction("returkonvolutt", "true")));
+
+        Message message = newMessage(randomUUID().toString(),
+                new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+        )
+                .recipient(new MessageRecipient(printDetails))
+                .build();
+        marshallValidateAndUnmarshall(message);
+    }
+
+    @Test
     public void validateDocumentEvents() {
         DocumentEvent openedEvent = new DocumentEvent(randomUUID().toString(), OPENED, ZonedDateTime.now(), ZonedDateTime.now());
 

@@ -496,6 +496,20 @@
             <xsd:element name="post-type" type="post-type" minOccurs="1" maxOccurs="1" />
             <xsd:element name="color" type="print-colors" minOccurs="0" maxOccurs="1" default="MONOCHROME"/>
             <xsd:element name="nondeliverable-handling" type="nondeliverable-handling" minOccurs="0" maxOccurs="1" default="RETURN_TO_SENDER"/>
+            <xsd:element name="print-instructions" type="print-instructions" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="print-instructions">
+        <xsd:sequence>
+            <xsd:element name="print-instruction" type="print-instruction" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="print-instruction">
+        <xsd:sequence>
+            <xsd:element name="key" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="value" type="xsd:string" minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
 
