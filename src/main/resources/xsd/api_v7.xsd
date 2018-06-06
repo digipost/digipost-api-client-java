@@ -1115,6 +1115,34 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:element name="new-user-account" type="new-user-account" />
+
+    <xsd:complexType name="new-user-account">
+        <xsd:sequence>
+            <xsd:element name="national-identity-number" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="phone-number" type="phone-number" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="email-address" type="xsd:string" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="phone-number">
+        <xsd:sequence>
+            <xsd:element name="country-code" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="phone-number" type="xsd:string" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="new-user-account-result" type="new-user-account-result" />
+
+    <xsd:complexType name="new-user-account-result">
+        <xsd:sequence>
+            <xsd:element name="digipost-address" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="encryption-key" type="encryption-key" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="result-code" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="result-description" type="xsd:string" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
     <xsd:complexType name="data-type">
         <xsd:sequence>
             <xsd:any namespace="http://api.digipost.no/schema/datatypes" minOccurs="1" maxOccurs="1"/>

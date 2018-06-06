@@ -30,13 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.DataBindingException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
+import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
 /**
@@ -90,7 +89,7 @@ public abstract class Communicator {
         }
 
         try {
-            ErrorMessage errorMessage = unmarshal(errorMessageContext, new ByteArrayInputStream(responseContent), ErrorMessage.class);
+            ErrorMessage errorMessage = unmarshal(jaxbContext, new ByteArrayInputStream(responseContent), ErrorMessage.class);
             return errorMessage != null ? errorMessage : ErrorMessage.EMPTY;
         } catch (IllegalStateException | DataBindingException e) {
             return new ErrorMessage(errorType, errorType.name(),

@@ -28,22 +28,18 @@ import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.accounts.NewUserAccount;
+import no.digipost.api.client.representations.accounts.NewUserAccountResult;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
-import no.digipost.api.client.util.ExceptionUtils;
 import no.digipost.api.client.util.HttpClientUtils;
 import no.digipost.api.client.util.MultipartNoLengthCheckHttpEntity;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.HttpStatus;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -62,30 +58,21 @@ import javax.xml.bind.JAXB;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
 import static no.digipost.api.client.util.ExceptionUtils.exceptionNameAndMessage;
-import static no.digipost.api.client.util.JAXBContextUtils.autocompleteContext;
-import static no.digipost.api.client.util.JAXBContextUtils.entryPointContext;
-import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
-import static no.digipost.api.client.util.JAXBContextUtils.identificationContext;
-import static no.digipost.api.client.util.JAXBContextUtils.marshal;
-import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
-import static no.digipost.api.client.util.JAXBContextUtils.recipientsContext;
-import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
+import static no.digipost.api.client.util.JAXBContextUtils.*;
 
 public class ApiServiceImpl implements ApiService {
 
@@ -148,7 +135,7 @@ public class ApiServiceImpl implements ApiService {
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(identificationContext,identification, bao);
+        marshal(jaxbContext, identification, bao);
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
         return send(httpPost);
     }
@@ -162,7 +149,7 @@ public class ApiServiceImpl implements ApiService {
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(messageContext, message, bao);
+        marshal(jaxbContext, message, bao);
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
         return send(httpPost);
     }
@@ -296,7 +283,7 @@ public class ApiServiceImpl implements ApiService {
         httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
         try(CloseableHttpResponse response = send(httpGet)){
-            return unmarshal(recipientsContext, response.getEntity().getContent(), Recipients.class);
+            return unmarshal(jaxbContext, response.getEntity().getContent(), Recipients.class);
         } catch (IOException e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR, "Error while unmarshalling response: " + exceptionNameAndMessage(e), e);
         }
@@ -317,7 +304,7 @@ public class ApiServiceImpl implements ApiService {
 
 
         try(CloseableHttpResponse response = send(httpGet)) {
-            return unmarshal(autocompleteContext, response.getEntity().getContent(), Autocomplete.class);
+            return unmarshal(jaxbContext, response.getEntity().getContent(), Autocomplete.class);
         } catch (IOException e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR, "Error while unmarshalling response: " + exceptionNameAndMessage(e), e);
         }
@@ -345,7 +332,7 @@ public class ApiServiceImpl implements ApiService {
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(identificationContext, identification, bao);
+        marshal(jaxbContext, identification, bao);
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
 
         return send(httpPost);
@@ -359,9 +346,9 @@ public class ApiServiceImpl implements ApiService {
         try(CloseableHttpResponse execute = send(httpGet, httpCoreContext)) {
 
             if (execute.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                return unmarshal(entryPointContext, execute.getEntity().getContent(), EntryPoint.class);
+                return unmarshal(jaxbContext, execute.getEntity().getContent(), EntryPoint.class);
             } else {
-                ErrorMessage errorMessage = unmarshal(errorMessageContext, execute.getEntity().getContent(), ErrorMessage.class);
+                ErrorMessage errorMessage = unmarshal(jaxbContext, execute.getEntity().getContent(), ErrorMessage.class);
                 throw new DigipostClientException(errorMessage);
             }
         }
@@ -418,22 +405,26 @@ public class ApiServiceImpl implements ApiService {
 
 
     private <R> R getResource(final String path, final Class<R> entityType) {
-        return getResource(path, new HashMap<String, Object>(), entityType);
+        return getResource(path, emptyMap(), entityType);
     }
 
     private <R, P> R getResource(final String path, final Map<String, P> queryParams, final Class<R> entityType) {
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(path));
+        return requestResource(httpGet, queryParams, entityType);
+    }
+
+    private <R, P> R requestResource(final HttpRequestBase request, final Map<String, P> queryParams, final Class<R> entityType) {
         try {
-            HttpGet httpGet = new HttpGet(digipostUrl.resolve(path));
-            URIBuilder uriBuilder = new URIBuilder(httpGet.getURI());
+            URIBuilder uriBuilder = new URIBuilder(request.getURI());
 
             for (Entry<String, P> param : queryParams.entrySet()) {
                 uriBuilder.setParameter(param.getKey(), param.getValue().toString());
             }
 
-            httpGet.setURI(uriBuilder.build());
-            httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
+            request.setURI(uriBuilder.build());
+            request.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
-            try (CloseableHttpResponse execute = send(httpGet)){
+            try (CloseableHttpResponse execute = send(request)){
                 Communicator.checkResponse(execute, eventLogger);
                 return JAXB.unmarshal(execute.getEntity().getContent(), entityType);
 
@@ -465,5 +456,15 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public void deleteInboxDocument(InboxDocument inboxDocument) {
         send(new HttpDelete(inboxDocument.getDeleteUri()));
+    }
+
+    @Override
+    public NewUserAccountResult createUserAccount(SenderId senderId, NewUserAccount newAccount) {
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve("/" + senderId.asString() + "/user-accounts"));
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(jaxbContext, newAccount, bao);
+        httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
+        return requestResource(httpPost, emptyMap(), NewUserAccountResult.class);
     }
 }

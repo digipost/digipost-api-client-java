@@ -13,28 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
-
-public class SenderId {
-
-    private final long id;
-
-    public SenderId(final long id) {
-        this.id = id;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public String asString() {
-        return String.valueOf(id);
-    }
-
-    @Override
-    public String toString() {
-        return "SenderId{" +
-                "id=" + id +
-                '}';
-    }
-}
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://api.digipost.no/schema/v7", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+package no.digipost.api.client.representations.accounts;

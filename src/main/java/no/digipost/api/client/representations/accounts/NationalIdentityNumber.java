@@ -13,28 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.representations.accounts;
 
-public class SenderId {
+import javax.xml.bind.annotation.XmlValue;
 
-    private final long id;
+public class NationalIdentityNumber {
 
-    public SenderId(final long id) {
-        this.id = id;
+    @XmlValue
+    private final String value;
+
+    public NationalIdentityNumber(String value) {
+        this.value = value;
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public String asString() {
-        return String.valueOf(id);
+    public String getValue() {
+        return value;
     }
 
     @Override
     public String toString() {
-        return "SenderId{" +
-                "id=" + id +
+        return "NationalIdentityNumber{" +
+                "value='" + value + '\'' +
                 '}';
     }
 }

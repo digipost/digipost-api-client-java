@@ -16,6 +16,8 @@
 package no.digipost.api.client.util;
 
 import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.accounts.NewUserAccount;
+import no.digipost.api.client.representations.accounts.NewUserAccountResult;
 import no.digipost.api.client.representations.sender.SenderInformation;
 
 import javax.xml.bind.JAXBContext;
@@ -27,18 +29,11 @@ import java.io.OutputStream;
 import static no.digipost.api.client.util.ExceptionUtils.exceptionNameAndMessage;
 
 public class JAXBContextUtils {
-    public static final JAXBContext entryPointContext = initContext(EntryPoint.class);
-    public static final JAXBContext errorMessageContext = initContext(ErrorMessage.class);
-    public static final JAXBContext identificationContext = initContext(Identification.class, IdentificationResult.class);
-    public static final JAXBContext messageContext = initContext(Message.class);
-    public static final JAXBContext recipientsContext = initContext(Recipients.class);
-    public static final JAXBContext autocompleteContext = initContext(Autocomplete.class);
-    public static final JAXBContext documentEventsContext = initContext(DocumentEvents.class);
-    public static final JAXBContext documentStatusContext = initContext(DocumentStatus.class);
-    public static final JAXBContext messageDeliveryContext = initContext(MessageDelivery.class);
-    public static final JAXBContext encryptionKeyContext = initContext(EncryptionKey.class);
-    public static final JAXBContext identificationResultWithEncryptionKeyContext = initContext(IdentificationResultWithEncryptionKey.class);
-    public static final JAXBContext senderInformationContext = initContext(SenderInformation.class);
+    public static final JAXBContext jaxbContext = initContext(
+            EntryPoint.class, ErrorMessage.class, Identification.class, IdentificationResult.class, Message.class, Recipients.class,
+            Autocomplete.class, DocumentEvents.class, DocumentStatus.class, MessageDelivery.class, EncryptionKey.class,
+            IdentificationResultWithEncryptionKey.class, SenderInformation.class, NewUserAccount.class, NewUserAccountResult.class
+    );
 
     private static JAXBContext initContext(Class<?>... clazz) {
         try {

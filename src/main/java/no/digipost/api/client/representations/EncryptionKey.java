@@ -48,4 +48,11 @@ public class EncryptionKey extends Representation {
         keyId = value;
     }
 
+    @Override
+    public String toString() {
+        return "EncryptionKey{" +
+                "value='" + value + '\'' +
+                ", keyId='" + keyId + '\'' +
+                '}';
+    }
 }
