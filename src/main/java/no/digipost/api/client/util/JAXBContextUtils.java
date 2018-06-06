@@ -16,8 +16,8 @@
 package no.digipost.api.client.util;
 
 import no.digipost.api.client.representations.*;
-import no.digipost.api.client.representations.accounts.NewUserAccount;
-import no.digipost.api.client.representations.accounts.NewUserAccountResult;
+import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.sender.SenderInformation;
 
 import javax.xml.bind.JAXBContext;
@@ -32,7 +32,7 @@ public class JAXBContextUtils {
     public static final JAXBContext jaxbContext = initContext(
             EntryPoint.class, ErrorMessage.class, Identification.class, IdentificationResult.class, Message.class, Recipients.class,
             Autocomplete.class, DocumentEvents.class, DocumentStatus.class, MessageDelivery.class, EncryptionKey.class,
-            IdentificationResultWithEncryptionKey.class, SenderInformation.class, NewUserAccount.class, NewUserAccountResult.class
+            IdentificationResultWithEncryptionKey.class, SenderInformation.class, UserInformation.class, UserAccount.class
     );
 
     private static JAXBContext initContext(Class<?>... clazz) {

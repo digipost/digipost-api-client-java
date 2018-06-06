@@ -21,33 +21,20 @@ import no.digipost.api.client.representations.EncryptionKey;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "new-user-account-result")
-public class NewUserAccountResult {
-
-	public enum ResultCode {
-		OK_CREATED,
-		OK_REACTIVATED,
-		OK_ALLREADY_ACTIVE,
-		ERROR_UNABLE_TO_CREATE;
-	}
+@XmlRootElement(name = "user-account")
+public class UserAccount {
 
 	@XmlElement(name = "digipost-address")
 	private final DigipostAddress digipostAddress;
     @XmlElement(name = "encryption-key")
 	private final EncryptionKey encryptionKey;
-    @XmlElement(name = "result-code")
-	private final String resultCode;
-    @XmlElement(name = "result-description")
-	private final String resultDescription;
 
-	public NewUserAccountResult(DigipostAddress digipostAddress, EncryptionKey encryptionKey, String resultCode, String resultDescription) {
+	public UserAccount(DigipostAddress digipostAddress, EncryptionKey encryptionKey, String resultCode, String resultDescription) {
 		this.digipostAddress = digipostAddress;
 		this.encryptionKey = encryptionKey;
-		this.resultCode = resultCode;
-		this.resultDescription = resultDescription;
 	}
 
-	private NewUserAccountResult() {
+	private UserAccount() {
 	    this(null, null, null, null);
     }
 
@@ -59,21 +46,11 @@ public class NewUserAccountResult {
 		return encryptionKey;
 	}
 
-	public String getResultCode() {
-		return resultCode;
-	}
-
-	public String getResultDescription() {
-		return resultDescription;
-	}
-
     @Override
     public String toString() {
-        return "NewUserAccountResult{" +
+        return "UserAccount{" +
                 "digipostAddress=" + digipostAddress +
                 ", encryptionKey=" + encryptionKey +
-                ", resultCode=" + resultCode +
-                ", resultDescription='" + resultDescription + '\'' +
                 '}';
     }
 }

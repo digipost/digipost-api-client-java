@@ -1115,9 +1115,9 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:element name="new-user-account" type="new-user-account" />
+    <xsd:element name="user-information" type="user-information" />
 
-    <xsd:complexType name="new-user-account">
+    <xsd:complexType name="user-information">
         <xsd:sequence>
             <xsd:element name="national-identity-number" type="xsd:string" minOccurs="1" maxOccurs="1" />
             <xsd:element name="phone-number" type="phone-number" minOccurs="1" maxOccurs="1" />
@@ -1132,9 +1132,9 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:element name="new-user-account-result" type="new-user-account-result" />
+    <xsd:element name="user-account" type="user-account" />
 
-    <xsd:complexType name="new-user-account-result">
+    <xsd:complexType name="user-account">
         <xsd:sequence>
             <xsd:element name="digipost-address" type="xsd:string" minOccurs="1" maxOccurs="1" />
             <xsd:element name="encryption-key" type="encryption-key" minOccurs="1" maxOccurs="1" />

@@ -24,8 +24,8 @@ import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
-import no.digipost.api.client.representations.accounts.NewUserAccount;
-import no.digipost.api.client.representations.accounts.NewUserAccountResult;
+import no.digipost.api.client.representations.accounts.UserAccount;
+import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -206,5 +206,5 @@ public interface ApiService {
      */
     void deleteInboxDocument(InboxDocument inboxDocument);
 
-    NewUserAccountResult createUserAccount(SenderId senderId, NewUserAccount newAccount);
+    UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation newAccount);
 }

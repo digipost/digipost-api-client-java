@@ -27,8 +27,8 @@ import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.client.representations.*;
-import no.digipost.api.client.representations.accounts.NewUserAccount;
-import no.digipost.api.client.representations.accounts.NewUserAccountResult;
+import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -271,8 +271,8 @@ public class DigipostClient {
         inboxCommunicator.deleteInboxDocument(inboxDocument);
     }
 
-    public NewUserAccountResult createUserAccount(SenderId senderId, NewUserAccount newAccount) {
-        return apiService.createUserAccount(senderId, newAccount);
+    public UserAccount createUserAccount(SenderId senderId, UserInformation newAccount) {
+        return apiService.createOrActivateUserAccount(senderId, newAccount);
     }
 
     private void log(final String stringToSignMsg) {

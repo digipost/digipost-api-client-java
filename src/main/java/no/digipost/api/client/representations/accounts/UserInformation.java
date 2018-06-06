@@ -18,8 +18,8 @@ package no.digipost.api.client.representations.accounts;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "new-user-account")
-public class NewUserAccount {
+@XmlRootElement(name = "user-information")
+public class UserInformation {
 
     @XmlElement(name = "national-identity-number", required = true)
 	private final NationalIdentityNumber nationalIdentityNumber;
@@ -28,19 +28,19 @@ public class NewUserAccount {
     @XmlElement(name = "email-address", required = true)
 	private final EmailAddress emailAddress;
 
-	public NewUserAccount(NationalIdentityNumber nationalIdentityNumber, PhoneNumber phoneNumber, EmailAddress emailAddress) {
+	public UserInformation(NationalIdentityNumber nationalIdentityNumber, PhoneNumber phoneNumber, EmailAddress emailAddress) {
 		this.nationalIdentityNumber = nationalIdentityNumber;
 		this.phoneNumber = phoneNumber;
 		this.emailAddress = emailAddress;
 	}
 
-	private NewUserAccount() {
+	private UserInformation() {
 	    this(null, null, null);
     }
 
 	@Override
 	public String toString() {
-		return "NewUserAccount{" +
+		return "UserInformation{" +
 			"nationalIdentityNumber=" + nationalIdentityNumber +
 			", phoneNumber=" + phoneNumber +
 			", emailAddress=" + emailAddress +

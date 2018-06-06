@@ -28,8 +28,8 @@ import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
-import no.digipost.api.client.representations.accounts.NewUserAccount;
-import no.digipost.api.client.representations.accounts.NewUserAccountResult;
+import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
@@ -459,12 +459,12 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public NewUserAccountResult createUserAccount(SenderId senderId, NewUserAccount newAccount) {
+    public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation userInformation) {
         HttpPost httpPost = new HttpPost(digipostUrl.resolve("/" + senderId.asString() + "/user-accounts"));
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(jaxbContext, newAccount, bao);
+        marshal(jaxbContext, userInformation, bao);
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
-        return requestResource(httpPost, emptyMap(), NewUserAccountResult.class);
+        return requestResource(httpPost, emptyMap(), UserAccount.class);
     }
 }
