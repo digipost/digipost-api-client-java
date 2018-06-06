@@ -76,7 +76,7 @@ public abstract class Communicator {
     protected static ErrorMessage fetchErrorMessageString(final StatusLine statusLine, final HttpEntity responseEntity) {
         final ErrorType errorType = ErrorType.fromResponseStatus(statusLine);
         if (responseEntity == null) {
-            return new ErrorMessage(errorType, "status=" + statusLine + ", body=<no content>");
+            return new ErrorMessage(errorType, "status=" + statusLine + ", body=<empty>");
         }
 
         final byte[] responseContent;
@@ -86,28 +86,29 @@ public abstract class Communicator {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR,
                     "status=" + statusLine + ", clientException=" + exceptionNameAndMessage(e), e);
         }
+        if (responseContent.length == 0) {
+            return new ErrorMessage(errorType, "status=" + statusLine + ", body=<empty>");
+        }
 
         try {
             ErrorMessage errorMessage = unmarshal(jaxbContext, new ByteArrayInputStream(responseContent), ErrorMessage.class);
             return errorMessage != null ? errorMessage.withMessage("status=" + statusLine + ", message=" + errorMessage.getErrorMessage()) : ErrorMessage.EMPTY;
         } catch (IllegalStateException | DataBindingException e) {
             return new ErrorMessage(errorType, errorType.name(),
-                    "status=" + statusLine + ", clientException=" + exceptionNameAndMessage(e) +
-                    (responseContent.length > 0 ? ", body=" + new String(responseContent) : "<no content>"));
+                    "status=" + statusLine + ", clientException=" + exceptionNameAndMessage(e) + ", body=" + new String(responseContent));
         } catch (Exception e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR,
-                    "status=" + statusLine + ", clientException=" + exceptionNameAndMessage(e) +
-                    (responseContent.length > 0 ? ", body=" + new String(responseContent) : "<no content>"), e);
+                    "status=" + statusLine + ", clientException=" + exceptionNameAndMessage(e) + ", body=" + new String(responseContent), e);
         }
     }
 
     private static boolean responseOk(final int status) {
         switch (status) {
-        case HttpStatus.SC_CREATED:
-        case HttpStatus.SC_OK:
-            return true;
-        default:
-            return false;
+            case HttpStatus.SC_CREATED:
+            case HttpStatus.SC_OK:
+                return true;
+            default:
+                return false;
         }
     }
 
