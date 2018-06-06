@@ -429,7 +429,7 @@ public class ApiServiceImpl implements ApiService {
                 return JAXB.unmarshal(execute.getEntity().getContent(), entityType);
 
             } catch (IOException e) {
-                throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
+                throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage(), e);
             }
         } catch (URISyntaxException e) {
             throw new RuntimeException(e.getMessage(), e);

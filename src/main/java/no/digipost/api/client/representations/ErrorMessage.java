@@ -101,4 +101,8 @@ public class ErrorMessage extends Representation {
     public void setLink(final List<Link> links) {
         this.links = links;
     }
+
+    public ErrorMessage withMessage(String otherErrorMessage) {
+        return new ErrorMessage(errorType, errorCode, otherErrorMessage, links.toArray(new Link[0]));
+    }
 }
