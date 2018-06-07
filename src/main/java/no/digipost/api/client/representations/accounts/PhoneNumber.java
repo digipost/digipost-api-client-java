@@ -25,6 +25,12 @@ public class PhoneNumber  {
     @XmlElement(name = "phone-number")
 	private final String phoneNumber;
 
+    /**
+     * Creates a phone number consisting of a country calling code and a phone number: +47 12345678
+     *
+     * @param countryCode ITU-T country calling code (without + prefix) for the phoneNumber ie. 47 for Norway
+     * @param phoneNumber Phone number excluding country calling code
+     */
 	public PhoneNumber(String countryCode, String phoneNumber) {
 		this.countryCode = countryCode;
 		this.phoneNumber = phoneNumber;
