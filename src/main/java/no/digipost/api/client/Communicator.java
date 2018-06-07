@@ -103,13 +103,7 @@ public abstract class Communicator {
     }
 
     private static boolean responseOk(final int status) {
-        switch (status) {
-            case HttpStatus.SC_CREATED:
-            case HttpStatus.SC_OK:
-                return true;
-            default:
-                return false;
-        }
+        return status / 100 == 2; //all 2xx is ok
     }
 
     protected void log(final String message) {
