@@ -271,8 +271,8 @@ public class DigipostClient {
         inboxCommunicator.deleteInboxDocument(inboxDocument);
     }
 
-    public UserAccount createUserAccount(SenderId senderId, UserInformation newAccount) {
-        return apiService.createOrActivateUserAccount(senderId, newAccount);
+    public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user) {
+        return apiService.createOrActivateUserAccount(senderId, user);
     }
 
     private void log(final String stringToSignMsg) {
