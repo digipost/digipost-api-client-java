@@ -15,45 +15,29 @@
  */
 package no.digipost.api.client.representations.accounts;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
-@XmlType(name = "phone-number")
 public class PhoneNumber  {
-    @XmlElement(name = "country-code")
-	private final String countryCode;
-    @XmlElement(name = "phone-number")
-	private final String phoneNumber;
+
+    @XmlValue
+	private final String value;
 
     /**
-     * Creates a phone number consisting of a country calling code and a phone number: +47 12345678
-     *
-     * @param countryCode ITU-T country calling code (without + prefix) for the phoneNumber ie. 47 for Norway
-     * @param phoneNumber Phone number excluding country calling code
+     * Creates a phone number consisting of an optional country calling code and a national number: +4799998888
      */
-	public PhoneNumber(String countryCode, String phoneNumber) {
-		this.countryCode = countryCode;
-		this.phoneNumber = phoneNumber;
+	public PhoneNumber(String value) {
+		this.value = value;
 	}
 
-	//jaxb
-	private PhoneNumber() {
-	    this(null, null);
+    @Override
+    public String toString() {
+        return "PhoneNumber{" +
+                "value='" + value + '\'' +
+                '}';
     }
 
-	public String getCountryCode() {
-		return countryCode;
+    public String getValue() {
+		return value;
 	}
 
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
-
-	@Override
-	public String toString() {
-		return "PhoneNumber{" +
-			"countryCode='" + countryCode + '\'' +
-			", phoneNumber='" + phoneNumber + '\'' +
-			'}';
-	}
 }
