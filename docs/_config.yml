@@ -11,8 +11,8 @@ licenseUrl: http://opensource.org/licenses/MIT
 #baseurl: "/sikker-digital-post-net-klient" # the subpath of your site, e.g. /blog/
 baseurl: "/digipost-api-client-java"
 
-currentVersion: "9.0"
-versions: ["9.0", "8.0", "6.1", "6.0"]
+currentVersion: "10.4"
+versions: ["10.4", "9.0", "8.0", "6.1", "6.0"]
 
 collections:
   v6_0:  
@@ -27,6 +27,9 @@ collections:
   v9_0:
     output: true
     permalink: /v9.0/
+  v10_4:
+    output: true
+    permalink: /v10.4/
 
 # list of additional links on the right of the top menu
 headerLinks:
