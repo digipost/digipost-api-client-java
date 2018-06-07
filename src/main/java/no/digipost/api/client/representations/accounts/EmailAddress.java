@@ -27,14 +27,12 @@ public class EmailAddress {
         this.value = value;
     }
 
-    public String getValue() {
+    public String asString() {
         return value;
     }
 
     @Override
     public String toString() {
-        return "EmailAddress{" +
-                "value='" + value + '\'' +
-                '}';
+        return "EmailAddress{" + value + "}";
     }
 }

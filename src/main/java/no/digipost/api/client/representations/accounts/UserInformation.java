@@ -22,40 +22,40 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class UserInformation {
 
     @XmlElement(name = "national-identity-number", required = true)
-	private final NationalIdentityNumber nationalIdentityNumber;
+    private final NationalIdentityNumber nationalIdentityNumber;
     @XmlElement(name = "phone-number", required = true)
-	private final PhoneNumber phoneNumber;
+    private final PhoneNumber phoneNumber;
     @XmlElement(name = "email-address", required = true)
-	private final EmailAddress emailAddress;
+    private final EmailAddress emailAddress;
 
-	public UserInformation(NationalIdentityNumber nationalIdentityNumber, PhoneNumber phoneNumber, EmailAddress emailAddress) {
-		this.nationalIdentityNumber = nationalIdentityNumber;
-		this.phoneNumber = phoneNumber;
-		this.emailAddress = emailAddress;
-	}
-
-	private UserInformation() {
-	    this(null, null, null);
+    public UserInformation(NationalIdentityNumber nationalIdentityNumber, PhoneNumber phoneNumber, EmailAddress emailAddress) {
+        this.nationalIdentityNumber = nationalIdentityNumber;
+        this.phoneNumber = phoneNumber;
+        this.emailAddress = emailAddress;
     }
 
-	@Override
-	public String toString() {
-		return "UserInformation{" +
-			"nationalIdentityNumber=" + nationalIdentityNumber +
-			", phoneNumber=" + phoneNumber +
-			", emailAddress=" + emailAddress +
-			'}';
-	}
+    private UserInformation() {
+        this(null, null, null);
+    }
+
+    @Override
+    public String toString() {
+        return "UserInformation{" +
+                "nationalIdentityNumber=" + nationalIdentityNumber +
+                ", phoneNumber=" + phoneNumber +
+                ", emailAddress=" + emailAddress +
+                '}';
+    }
 
     public NationalIdentityNumber getNationalIdentityNumber() {
         return nationalIdentityNumber;
     }
 
     public PhoneNumber getPhoneNumber() {
-		return phoneNumber;
-	}
+        return phoneNumber;
+    }
 
-	public EmailAddress getEmailAddress() {
-		return emailAddress;
-	}
+    public EmailAddress getEmailAddress() {
+        return emailAddress;
+    }
 }

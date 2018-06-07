@@ -24,27 +24,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "user-account")
 public class UserAccount {
 
-	@XmlElement(name = "digipost-address")
-	private final DigipostAddress digipostAddress;
+    @XmlElement(name = "digipost-address")
+    private final DigipostAddress digipostAddress;
     @XmlElement(name = "encryption-key")
-	private final EncryptionKey encryptionKey;
+    private final EncryptionKey encryptionKey;
 
-	public UserAccount(DigipostAddress digipostAddress, EncryptionKey encryptionKey, String resultCode, String resultDescription) {
-		this.digipostAddress = digipostAddress;
-		this.encryptionKey = encryptionKey;
-	}
-
-	private UserAccount() {
-	    this(null, null, null, null);
+    public UserAccount(DigipostAddress digipostAddress, EncryptionKey encryptionKey, String resultCode, String resultDescription) {
+        this.digipostAddress = digipostAddress;
+        this.encryptionKey = encryptionKey;
     }
 
-	public DigipostAddress getDigipostAddress() {
-		return digipostAddress;
-	}
+    private UserAccount() {
+        this(null, null, null, null);
+    }
 
-	public EncryptionKey getEncryptionKey() {
-		return encryptionKey;
-	}
+    public DigipostAddress getDigipostAddress() {
+        return digipostAddress;
+    }
+
+    public EncryptionKey getEncryptionKey() {
+        return encryptionKey;
+    }
 
     @Override
     public String toString() {

@@ -20,24 +20,21 @@ import javax.xml.bind.annotation.XmlValue;
 public class PhoneNumber  {
 
     @XmlValue
-	private final String value;
+    private final String value;
 
     /**
      * Creates a phone number consisting of an optional country calling code and a national number: +4799998888
      */
-	public PhoneNumber(String value) {
-		this.value = value;
-	}
+    public PhoneNumber(String value) {
+        this.value = value;
+    }
+
+    public String asString() {
+        return value;
+    }
 
     @Override
     public String toString() {
-        return "PhoneNumber{" +
-                "value='" + value + '\'' +
-                '}';
+        return "PhoneNumber{" + value + "}";
     }
-
-    public String getValue() {
-		return value;
-	}
-
 }

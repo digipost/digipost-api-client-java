@@ -26,14 +26,12 @@ public class NationalIdentityNumber {
         this.value = value;
     }
 
-    public String getValue() {
+    public String asString() {
         return value;
     }
 
     @Override
     public String toString() {
-        return "NationalIdentityNumber{" +
-                "value='" + value + '\'' +
-                '}';
+        return "NationalIdentityNumber{" + value + "}";
     }
 }
