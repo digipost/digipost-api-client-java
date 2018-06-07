@@ -33,8 +33,6 @@ public class SenderId {
 
     @Override
     public String toString() {
-        return "SenderId{" +
-                "id=" + id +
-                '}';
+        return "SenderId{" + id + "}";
     }
 }
