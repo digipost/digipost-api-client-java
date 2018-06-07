@@ -206,5 +206,5 @@ public interface ApiService {
      */
     void deleteInboxDocument(InboxDocument inboxDocument);
 
-    UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation newAccount);
+    UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user);
 }

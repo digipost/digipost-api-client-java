@@ -459,11 +459,11 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation userInformation) {
+    public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user) {
         HttpPost httpPost = new HttpPost(digipostUrl.resolve("/" + senderId.asString() + "/user-accounts"));
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(jaxbContext, userInformation, bao);
+        marshal(jaxbContext, user, bao);
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
         return requestResource(httpPost, emptyMap(), UserAccount.class);
     }
