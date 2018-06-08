@@ -23,6 +23,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
 import static no.digipost.api.client.errorhandling.ErrorType.NONE;
 import static no.digipost.api.client.errorhandling.ErrorType.UNKNOWN;
 import static no.digipost.api.client.errorhandling.ErrorType.resolve;
@@ -58,7 +59,7 @@ public class DigipostClientException extends RuntimeException {
     private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, Throwable cause) { this(code, errorTypeFromServer, message, null, cause); }
 
     private DigipostClientException(ErrorCode code, ErrorType errorTypeFromServer, String message, List<Link> links, Throwable cause) {
-        super(code + ": " + message, cause);
+        super(code == GENERAL_ERROR ? message : code + ": " + message, cause);
         this.errorCode = code;
         this.links = links;
         this.errorType = code.getOverriddenErrorType() == UNKNOWN ? errorTypeFromServer : code.getOverriddenErrorType();

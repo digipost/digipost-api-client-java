@@ -18,17 +18,7 @@ package no.digipost.api.client;
 import no.digipost.api.client.delivery.DocumentContent;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.EncryptionKey;
-import no.digipost.api.client.representations.FileType;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.IdentificationResultCode;
-import no.digipost.api.client.representations.IdentificationResultWithEncryptionKey;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MediaTypes;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.MessageStatus;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.util.DigipostPublicKey;
 import no.digipost.api.client.util.Encrypter;
 import no.digipost.print.validate.PdfValidator;
@@ -61,12 +51,7 @@ import static java.util.Optional.empty;
 import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7;
 import static no.digipost.api.client.util.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
-import static no.digipost.api.client.util.JAXBContextUtils.encryptionKeyContext;
-import static no.digipost.api.client.util.JAXBContextUtils.identificationResultWithEncryptionKeyContext;
-import static no.digipost.api.client.util.JAXBContextUtils.marshal;
-import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
-import static no.digipost.api.client.util.JAXBContextUtils.messageDeliveryContext;
-import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
+import static no.digipost.api.client.util.JAXBContextUtils.*;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class MessageSender extends Communicator {
@@ -108,7 +93,7 @@ public class MessageSender extends Communicator {
                     documentInputStream, singleChannelMessage, encrypter, () -> apiService.getSenderInformation(message).getPdfValidationSettings());
 
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
-            marshal(messageContext, singleChannelMessage, bao);
+            marshal(jaxbContext, singleChannelMessage, bao);
             ByteArrayBody attachment = new ByteArrayBody(bao.toByteArray(),
                     ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V7, UTF_8), "message");
 
@@ -136,7 +121,7 @@ public class MessageSender extends Communicator {
 
                 log("Brevet ble sendt. Status: [" + response + "]");
 
-                return unmarshal(messageDeliveryContext, response.getEntity().getContent(), MessageDelivery.class);
+                return unmarshal(jaxbContext, response.getEntity().getContent(), MessageDelivery.class);
 
             } catch (IOException e) {
                 throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e.getMessage());
@@ -168,7 +153,7 @@ public class MessageSender extends Communicator {
                 try(CloseableHttpResponse existingMessageResponse = apiService.fetchExistingMessage(responseToURI(response))) {
                     checkResponse(existingMessageResponse);
                     try {
-                        MessageDelivery delivery = unmarshal(messageDeliveryContext, existingMessageResponse.getEntity().getContent(), MessageDelivery.class);
+                        MessageDelivery delivery = unmarshal(jaxbContext, existingMessageResponse.getEntity().getContent(), MessageDelivery.class);
                         checkThatExistingMessageIsIdenticalToNewMessage(delivery, message);
                         checkThatMessageHasNotAlreadyBeenDelivered(delivery);
                         log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
@@ -181,7 +166,7 @@ public class MessageSender extends Communicator {
                 try {
                     checkResponse(response);
                     log("Forsendelse opprettet. Status: [" + response.getStatusLine().getStatusCode() + "]");
-                    return unmarshal(messageDeliveryContext, response.getEntity().getContent(), MessageDelivery.class);
+                    return unmarshal(jaxbContext, response.getEntity().getContent(), MessageDelivery.class);
 
                 } catch (IOException e) {
                     throw new RuntimeException(e.getMessage(), e);
@@ -250,7 +235,7 @@ public class MessageSender extends Communicator {
         try(CloseableHttpResponse encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri())){
             checkResponse(encryptionKeyResponse);
 
-            EncryptionKey key = unmarshal(encryptionKeyContext, encryptionKeyResponse.getEntity().getContent(), EncryptionKey.class);
+            EncryptionKey key = unmarshal(jaxbContext, encryptionKeyResponse.getEntity().getContent(), EncryptionKey.class);
             return Encrypter.using(new DigipostPublicKey(key)).encrypt(content);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -262,7 +247,7 @@ public class MessageSender extends Communicator {
         try(CloseableHttpResponse response = apiService.identifyAndGetEncryptionKey(identification)){
             checkResponse(response);
             IdentificationResultWithEncryptionKey result =
-                    unmarshal(identificationResultWithEncryptionKeyContext, response.getEntity().getContent(), IdentificationResultWithEncryptionKey.class);
+                    unmarshal(jaxbContext, response.getEntity().getContent(), IdentificationResultWithEncryptionKey.class);
             if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
                 if (result.getEncryptionKey() == null) {
                     throw new DigipostClientException(ErrorCode.SERVER_ERROR, "Server identifisert mottaker som Digipost-bruker, men sendte ikke med krypteringsnøkkel. Indikerer en feil hos Digipost.");
@@ -284,7 +269,7 @@ public class MessageSender extends Communicator {
             log("*** STARTER INTERAKSJON MED API: HENT KRYPTERINGSNØKKEL FOR PRINT ***");
             try(CloseableHttpResponse response = apiService.getEncryptionKeyForPrint()){
                 checkResponse(response);
-                EncryptionKey encryptionKey = unmarshal(encryptionKeyContext, response.getEntity().getContent(), EncryptionKey.class);
+                EncryptionKey encryptionKey = unmarshal(jaxbContext, response.getEntity().getContent(), EncryptionKey.class);
                 cachedPrintKey = new DigipostPublicKey(encryptionKey);
                 printKeyCachedTime = now;
                 return cachedPrintKey;
@@ -307,7 +292,7 @@ public class MessageSender extends Communicator {
 
             log("Innhold ble lagt til. Status: [" + response + "]");
 
-            return unmarshal(messageDeliveryContext, response.getEntity().getContent(), MessageDelivery.class);
+            return unmarshal(jaxbContext, response.getEntity().getContent(), MessageDelivery.class);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -327,7 +312,7 @@ public class MessageSender extends Communicator {
 
             log("Brevet ble sendt. Status: [" + response.toString() + "]");
 
-            MessageDelivery messageDelivery = unmarshal(messageDeliveryContext, response.getEntity().getContent(), MessageDelivery.class);
+            MessageDelivery messageDelivery = unmarshal(jaxbContext, response.getEntity().getContent(), MessageDelivery.class);
             return messageDelivery;
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);

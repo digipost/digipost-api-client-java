@@ -24,6 +24,8 @@ import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.accounts.UserAccount;
+import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -203,4 +205,6 @@ public interface ApiService {
      * @param inboxDocument The document to delete
      */
     void deleteInboxDocument(InboxDocument inboxDocument);
+
+    UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user);
 }

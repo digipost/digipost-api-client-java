@@ -26,14 +26,9 @@ import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.DocumentEvents;
-import no.digipost.api.client.representations.DocumentStatus;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.IdentificationResult;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -55,6 +50,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.time.ZonedDateTime;
 
+import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 
@@ -162,7 +158,7 @@ public class DigipostClient {
     public IdentificationResult identifyRecipient(final Identification identification) {
         try (CloseableHttpResponse response = apiService.identifyRecipient(identification)) {
             Communicator.checkResponse(response, eventLogger);
-            return JAXBContextUtils.unmarshal(JAXBContextUtils.identificationContext, response.getEntity().getContent(), IdentificationResult.class);
+            return JAXBContextUtils.unmarshal(jaxbContext, response.getEntity().getContent(), IdentificationResult.class);
         } catch (IOException e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
         }
@@ -273,6 +269,10 @@ public class DigipostClient {
      */
     public void deleteInboxDocument(InboxDocument inboxDocument) {
         inboxCommunicator.deleteInboxDocument(inboxDocument);
+    }
+
+    public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user) {
+        return apiService.createOrActivateUserAccount(senderId, user);
     }
 
     private void log(final String stringToSignMsg) {

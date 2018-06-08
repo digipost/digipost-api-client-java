@@ -15,7 +15,10 @@
  */
 package no.digipost.api.client.representations;
 
+import javax.xml.bind.annotation.XmlValue;
+
 public abstract class RecipientIdentifier {
+    @XmlValue
     protected final String identifier;
 
     public RecipientIdentifier(final String identifier) {

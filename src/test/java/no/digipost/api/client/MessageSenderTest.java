@@ -20,26 +20,7 @@ import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery.SendableForPrintOnly;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.Channel;
-import no.digipost.api.client.representations.DigipostAddress;
-import no.digipost.api.client.representations.DigipostUri;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.EncryptionKey;
-import no.digipost.api.client.representations.FileType;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.IdentificationResult;
-import no.digipost.api.client.representations.IdentificationResultWithEncryptionKey;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MayHaveSender;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.MessageRecipient;
-import no.digipost.api.client.representations.MessageStatus;
-import no.digipost.api.client.representations.NorwegianAddress;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.PrintDetails;
-import no.digipost.api.client.representations.PrintRecipient;
-import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.util.FakeEncryptionKey;
@@ -69,11 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.time.Duration.ofMillis;
@@ -82,9 +59,7 @@ import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.stream.Stream.concat;
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
-import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
-import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
-import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
+import static no.digipost.api.client.pdf.EksempelPdf.*;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
@@ -92,29 +67,17 @@ import static no.digipost.api.client.representations.MessageStatus.DELIVERED;
 import static no.digipost.api.client.representations.MessageStatus.DELIVERED_TO_PRINT;
 import static no.digipost.api.client.representations.Relation.GET_ENCRYPTION_KEY;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.DELIVERY_DIRECT_TO_PRINT;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.DIGIPOST_DELIVERY;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_FONTS;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_MARGINS_LEFT;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PDFVERSION;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.*;
 import static no.digipost.api.client.representations.sender.SenderStatus.VALID_SENDER;
-import static no.digipost.api.client.util.JAXBContextUtils.encryptionKeyContext;
-import static no.digipost.api.client.util.JAXBContextUtils.identificationResultWithEncryptionKeyContext;
-import static no.digipost.api.client.util.JAXBContextUtils.marshal;
-import static no.digipost.api.client.util.JAXBContextUtils.messageDeliveryContext;
+import static no.digipost.api.client.util.JAXBContextUtils.*;
 import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class MessageSenderTest {
 
@@ -154,7 +117,7 @@ public class MessageSenderTest {
     public void setup() {
         this.fakeEncryptionKey = FakeEncryptionKey.createFakeEncryptionKey();
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(encryptionKeyContext, fakeEncryptionKey, bao);
+        marshal(jaxbContext, fakeEncryptionKey, bao);
 
         encryptionKeyResponse = MockfriendlyResponse.MockedResponseBuilder.create()
                 .status(SC_OK)
@@ -181,7 +144,7 @@ public class MessageSenderTest {
         when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
+        marshal(jaxbContext, eksisterendeForsendelse, bao);
         HttpEntity forsendelse = new ByteArrayEntity(bao.toByteArray());
 
         when(mockClientResponse2.getEntity()).thenReturn(forsendelse);
@@ -203,7 +166,7 @@ public class MessageSenderTest {
 
         MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, Channel.DIGIPOST, DELIVERED, now());
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
+        marshal(jaxbContext, eksisterendeForsendelse, bao);
 
         when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
         when(mockClientResponse2.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
@@ -228,7 +191,7 @@ public class MessageSenderTest {
 
         MessageDelivery eksisterendeForsendelse = new MessageDelivery(forsendelseIn.messageId, PRINT, DELIVERED_TO_PRINT, now());
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(messageDeliveryContext, eksisterendeForsendelse, bao);
+        marshal(jaxbContext, eksisterendeForsendelse, bao);
 
         when(mockClientResponse2.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
         when(mockClientResponse2.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
@@ -283,7 +246,7 @@ public class MessageSenderTest {
         when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(200));
 
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(identificationResultWithEncryptionKeyContext, identificationResultWithEncryptionKey, bao);
+        marshal(jaxbContext, identificationResultWithEncryptionKey, bao);
 
         when(mockClientResponse.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
 
@@ -291,7 +254,7 @@ public class MessageSenderTest {
 
         CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
         ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
-        marshal(messageDeliveryContext,
+        marshal(jaxbContext,
                 new MessageDelivery(UUID.randomUUID().toString(), Channel.PRINT, MessageStatus.COMPLETE, now()), bao2);
 
         when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray()));
@@ -390,7 +353,7 @@ public class MessageSenderTest {
         concat(Stream.of(printDocument), printAttachments.stream()).forEach(document -> document.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt"))));
 
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(messageDeliveryContext,
+        marshal(jaxbContext,
                 new MessageDelivery(messageId, PRINT, DELIVERED_TO_PRINT, now()), bao);
 
         when(mockClientResponse.getEntity())

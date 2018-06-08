@@ -15,13 +15,14 @@
  */
 package no.digipost.api.client.representations;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class DigipostAddress extends RecipientIdentifier {
 
     public DigipostAddress(final String address) {
         super(address);
-        assert !StringUtils.isEmpty(address) : "DigipostAddress cannot be empty";
+    }
+
+    private DigipostAddress() {
+        this(null);
     }
 
     @Override

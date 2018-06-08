@@ -1115,6 +1115,31 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:element name="user-information" type="user-information" />
+
+    <xsd:complexType name="user-information">
+        <xsd:sequence>
+            <xsd:element name="national-identity-number" type="xsd:string" minOccurs="1" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Norwegian national identity number (fødselsnummer)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="phone-number" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="email-address" type="xsd:string" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="user-account" type="user-account" />
+
+    <xsd:complexType name="user-account">
+        <xsd:sequence>
+            <xsd:element name="digipost-address" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="encryption-key" type="encryption-key" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
     <xsd:complexType name="data-type">
         <xsd:sequence>
             <xsd:any namespace="http://api.digipost.no/schema/datatypes" minOccurs="1" maxOccurs="1"/>

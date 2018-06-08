@@ -25,9 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 
-import static no.digipost.api.client.util.JAXBContextUtils.documentEventsContext;
-import static no.digipost.api.client.util.JAXBContextUtils.documentStatusContext;
-import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
+import static no.digipost.api.client.util.JAXBContextUtils.*;
 
 public class DocumentCommunicator extends Communicator {
 
@@ -38,7 +36,7 @@ public class DocumentCommunicator extends Communicator {
     public DocumentEvents getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
         try(CloseableHttpResponse response = apiService.getDocumentEvents(organisation, partId, from, to, offset, maxResults)){;
             checkResponse(response, eventLogger);
-            return unmarshal(documentEventsContext, response.getEntity().getContent(), DocumentEvents.class);
+            return unmarshal(jaxbContext, response.getEntity().getContent(), DocumentEvents.class);
 
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -52,7 +50,7 @@ public class DocumentCommunicator extends Communicator {
     public DocumentStatus getDocumentStatus(Link linkToDocumentStatus) {
         try(CloseableHttpResponse response = apiService.getDocumentStatus(linkToDocumentStatus)){
             checkResponse(response, eventLogger);
-            return unmarshal(documentStatusContext, response.getEntity().getContent(), DocumentStatus.class);
+            return unmarshal(jaxbContext, response.getEntity().getContent(), DocumentStatus.class);
 
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -62,7 +60,7 @@ public class DocumentCommunicator extends Communicator {
     public DocumentStatus getDocumentStatus(long senderId, String uuid) {
         try(CloseableHttpResponse response = apiService.getDocumentStatus(senderId, uuid)) {
             checkResponse(response, eventLogger);
-            return unmarshal(documentStatusContext, response.getEntity().getContent(), DocumentStatus.class);
+            return unmarshal(jaxbContext, response.getEntity().getContent(), DocumentStatus.class);
 
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);

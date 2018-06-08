@@ -30,13 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.DataBindingException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
-import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
+import static no.digipost.api.client.util.ExceptionUtils.exceptionNameAndMessage;
+import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
 /**
@@ -78,7 +76,7 @@ public abstract class Communicator {
     protected static ErrorMessage fetchErrorMessageString(final StatusLine statusLine, final HttpEntity responseEntity) {
         final ErrorType errorType = ErrorType.fromResponseStatus(statusLine);
         if (responseEntity == null) {
-            return new ErrorMessage(errorType, statusLine + " (respons hadde ikke noe innhold)");
+            return new ErrorMessage(errorType, "status=" + statusLine + ", body=<empty>");
         }
 
         final byte[] responseContent;
@@ -86,33 +84,26 @@ public abstract class Communicator {
             responseContent = EntityUtils.toByteArray(responseEntity);
         } catch (IOException e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR,
-                    "Server returnerte " + statusLine + ", men klienten feilet ved lesing av responsen: " + e.getMessage(), e);
+                    "status=" + statusLine + ", clientException=" + exceptionNameAndMessage(e), e);
+        }
+        if (responseContent.length == 0) {
+            return new ErrorMessage(errorType, "status=" + statusLine + ", body=<empty>");
         }
 
         try {
-            ErrorMessage errorMessage = unmarshal(errorMessageContext, new ByteArrayInputStream(responseContent), ErrorMessage.class);
-            return errorMessage != null ? errorMessage : ErrorMessage.EMPTY;
+            ErrorMessage errorMessage = unmarshal(jaxbContext, new ByteArrayInputStream(responseContent), ErrorMessage.class);
+            return errorMessage != null ? errorMessage.withMessage("status=" + statusLine + ", message=" + errorMessage.getErrorMessage()) : ErrorMessage.EMPTY;
         } catch (IllegalStateException | DataBindingException e) {
             return new ErrorMessage(errorType, errorType.name(),
-                    "Det skjedde en feil på serveren (" + statusLine + "), " +
-                    "men klienten kunne ikke lese responsen fordi " + e.getClass().getSimpleName() + ": '" + e.getMessage() + "'. " +
-                    (responseContent.length > 0 ? "Respons: " + new String(responseContent) : "Ikke noe innhold i respons."));
+                    "status=" + statusLine + ", clientException=" + exceptionNameAndMessage(e) + ", body=" + new String(responseContent));
         } catch (Exception e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR,
-                    "Det skjedde en feil på serveren (" + statusLine + "), " +
-                    "men klienten kunne ikke lese responsen fordi " + e.getClass().getSimpleName() + ": '" + e.getMessage() + "'. " +
-                    (responseContent.length > 0 ? "Respons: " + new String(responseContent) : "Ikke noe innhold i respons."), e);
+                    "status=" + statusLine + ", clientException=" + exceptionNameAndMessage(e) + ", body=" + new String(responseContent), e);
         }
     }
 
     private static boolean responseOk(final int status) {
-        switch (status) {
-        case HttpStatus.SC_CREATED:
-        case HttpStatus.SC_OK:
-            return true;
-        default:
-            return false;
-        }
+        return status / 100 == 2; //all 2xx is ok
     }
 
     protected void log(final String message) {
@@ -122,14 +113,6 @@ public abstract class Communicator {
     protected static void log(final String message, EventLogger logger) {
         LOG.debug(message);
         logger.log(message);
-    }
-
-    protected void logThrowable(final Throwable t) {
-        LOG.debug("Feil.", t);
-
-        StringWriter stacktrace = new StringWriter();
-        t.printStackTrace(new PrintWriter(stacktrace));
-        eventLogger.log(stacktrace.toString());
     }
 
     protected boolean resourceAlreadyExists(final CloseableHttpResponse response) {

@@ -13,26 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.representations.accounts;
 
-public class SenderId {
+import javax.xml.bind.annotation.XmlValue;
 
-    private final long id;
+public class PhoneNumber  {
 
-    public SenderId(final long id) {
-        this.id = id;
-    }
+    @XmlValue
+    private final String value;
 
-    public long getId() {
-        return id;
+    /**
+     * Creates a phone number consisting of an optional country calling code and a national number: +4799998888
+     */
+    public PhoneNumber(String value) {
+        this.value = value;
     }
 
     public String asString() {
-        return String.valueOf(id);
+        return value;
     }
 
     @Override
     public String toString() {
-        return "SenderId{" + id + "}";
+        return "PhoneNumber{" + value + "}";
     }
 }

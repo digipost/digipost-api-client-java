@@ -27,16 +27,7 @@ import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import no.digipost.api.client.Headers;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.Channel;
-import no.digipost.api.client.representations.DigipostUri;
-import no.digipost.api.client.representations.EncryptionKey;
-import no.digipost.api.client.representations.EntryPoint;
-import no.digipost.api.client.representations.ErrorMessage;
-import no.digipost.api.client.representations.ErrorType;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.Relation;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.sender.SenderFeature;
 import no.digipost.api.client.representations.sender.SenderFeatureName;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -56,41 +47,19 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.time.Clock;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
-import static io.undertow.util.Headers.CONTENT_DISPOSITION;
-import static io.undertow.util.Headers.CONTENT_TYPE;
-import static io.undertow.util.Headers.extractQuotedValueFromHeader;
+import static io.undertow.util.Headers.*;
 import static java.lang.Integer.parseInt;
 import static java.time.ZonedDateTime.now;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
-import static no.digipost.api.client.util.JAXBContextUtils.encryptionKeyContext;
-import static no.digipost.api.client.util.JAXBContextUtils.entryPointContext;
-import static no.digipost.api.client.util.JAXBContextUtils.errorMessageContext;
-import static no.digipost.api.client.util.JAXBContextUtils.marshal;
-import static no.digipost.api.client.util.JAXBContextUtils.messageContext;
-import static no.digipost.api.client.util.JAXBContextUtils.messageDeliveryContext;
-import static no.digipost.api.client.util.JAXBContextUtils.senderInformationContext;
-import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
+import static no.digipost.api.client.util.JAXBContextUtils.*;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
 import static org.apache.http.HttpStatus.SC_OK;
 
@@ -190,7 +159,7 @@ public class DigipostApiMock implements HttpHandler {
                 entity.writeTo(bao);
             }
         } else if(requestPath.equals("/")){
-            marshal(entryPointContext, new EntryPoint(certificate, new Link(Relation.CREATE_MESSAGE, new DigipostUri("http://localhost:9999/create")),
+            marshal(jaxbContext, new EntryPoint(certificate, new Link(Relation.CREATE_MESSAGE, new DigipostUri("http://localhost:9999/create")),
                     new Link(Relation.GET_PRINT_ENCRYPTION_KEY, new DigipostUri("http://localhost:9999/printkey")),
                     new Link(Relation.GET_SENDER_INFORMATION, new DigipostUri("http://localhost:9999/getsenderinformation")),
                     new Link(Relation.DOCUMENT_EVENTS, new DigipostUri("http://localhost:9999/getdocumentevents"))), bao);
@@ -230,7 +199,7 @@ public class DigipostApiMock implements HttpHandler {
             senderFeatures.add(SenderFeatureName.DIGIPOST_DELIVERY.withNoParam());
             senderFeatures.add(SenderFeatureName.PRINTVALIDATION_FONTS.withNoParam());
             senderFeatures.add(SenderFeatureName.PRINTVALIDATION_PDFVERSION.withNoParam());
-            marshal(senderInformationContext,
+            marshal(jaxbContext,
                     new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
 
             return 200;
@@ -245,7 +214,7 @@ public class DigipostApiMock implements HttpHandler {
         EncryptionKey encryptionKey = new EncryptionKey();
         encryptionKey.setKeyId(PRINT_ID);
         encryptionKey.setValue(PRINT_KEY);
-        marshal(encryptionKeyContext, encryptionKey, bao);
+        marshal(jaxbContext, encryptionKey, bao);
 
         return 200;
     }
@@ -276,7 +245,7 @@ public class DigipostApiMock implements HttpHandler {
 
         Message message;
         try (InputStream messageStream = new ByteArrayInputStream(messageString.getBytes())) {
-            message = unmarshal(messageContext, messageStream, Message.class);
+            message = unmarshal(jaxbContext, messageStream, Message.class);
         }
 
         RequestsAndResponses requestsAndResponses = this.requestsAndResponsesMap.get(Method.MULTIPART_MESSAGE);
@@ -438,7 +407,7 @@ public class DigipostApiMock implements HttpHandler {
         MessageDelivery messageDelivery = new MessageDelivery(UUID.randomUUID().toString(), Channel.DIGIPOST, COMPLETE, now(clock));
 
         org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
-        marshal(messageDeliveryContext, messageDelivery, bao);
+        marshal(jaxbContext, messageDelivery, bao);
 
         return MockfriendlyResponse.MockedResponseBuilder.create()
                 .status(SC_OK)
@@ -469,7 +438,7 @@ public class DigipostApiMock implements HttpHandler {
                     ErrorType translated = EnumUtils.getEnum(ErrorType.class, errorCode.getOverriddenErrorType().name());
 
                     org.apache.commons.io.output.ByteArrayOutputStream bao = new org.apache.commons.io.output.ByteArrayOutputStream();
-                    marshal(errorMessageContext,
+                    marshal(jaxbContext,
                             new ErrorMessage(translated != null ? translated : ErrorType.SERVER, errorCode.name(),
                                     "Generic error-message from digipost-api-client-mock"), bao);
 
