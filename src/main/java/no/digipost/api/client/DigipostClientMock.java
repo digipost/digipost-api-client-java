@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.function.UnaryOperator;
 
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
+import static no.digipost.api.client.UnusedPortFinder.getNextAvailablePort;
 
 /**
  * Instansierer en DigipostClient som ikke går mot faktiskt Digipost REST-api endepunkt og
@@ -58,22 +59,23 @@ public class DigipostClientMock {
 
     private final DigipostClient client;
     private final ApiService apiService;
+    private final int port;
     public final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
     private static DigipostApiMock digipostApiMock = new DigipostApiMock();
     private static final String KEY_STORE_PASSWORD = "Qwer12345";
     private static final String KEY_STORE_ALIAS = "apiTest";
-    private static final int PORT = 6666;
 
     public DigipostClientMock() {
         this(UnaryOperator.identity());
     }
 
     public DigipostClientMock(UnaryOperator<DigipostHttpClientSettings> clientCustomizer) {
-        URI host = URI.create("http://localhost:" + PORT);
+        port = getNextAvailablePort(6666, 6676);
+        URI host = URI.create("http://localhost:" + port);
 
         HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(clientCustomizer.apply(DigipostHttpClientSettings.DEFAULT));
 
-        apiService = new ApiServiceImpl(httpClientBuilder, PORT, null, host, null);
+        apiService = new ApiServiceImpl(httpClientBuilder, port, null, host, null);
         apiService.buildApacheHttpClientBuilder();
         client = new DigipostClient(newBuilder().build(), "digipostmock-url", 1, new Signer() {
 
@@ -86,7 +88,7 @@ public class DigipostClientMock {
 
     public void start(){
         KeyPair keyPair = getKeyPair(KEY_STORE_ALIAS, KEY_STORE_PASSWORD);
-        digipostApiMock.start(PORT, requestsAndResponsesMap, keyPair);
+        digipostApiMock.start(port, requestsAndResponsesMap, keyPair);
     }
 
     public static KeyPair getKeyPair(final String alias, final String password) {
