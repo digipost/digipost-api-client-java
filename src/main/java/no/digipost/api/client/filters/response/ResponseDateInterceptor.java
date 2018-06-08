@@ -51,7 +51,7 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
     @Override
     public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
         final String dateHeader = Optional.ofNullable(response.getFirstHeader(DATE))
-                .map(Header::getValue)
+                .map(h -> h.getValue())
                 .filter(StringUtils::isNoneBlank)
                 .orElseThrow(() -> new DigipostClientException(SERVER_SIGNATURE_ERROR,
                     String.format("Missing %s header in response. This header is expected in all response. Http status was %s",
