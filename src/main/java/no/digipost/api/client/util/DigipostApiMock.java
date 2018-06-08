@@ -72,7 +72,8 @@ public class DigipostApiMock implements HttpHandler {
         GET_CONTENT,
         MULTIPART_MESSAGE,
         GET_DOCUMENTS_EVENTS,
-        GET_DOCUMENT_STATUS
+        GET_DOCUMENT_STATUS,
+        IDENTIFY_RECIPIENT,
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(DigipostApiMock.class);
@@ -135,7 +136,10 @@ public class DigipostApiMock implements HttpHandler {
 
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
 
-        if (method.equals(new HttpString("POST"))){
+        if (requestPath.equals("/identification")) {
+            httpResponse = serviceIdentifyRecipient(httpContext, bao);
+
+        } else if (method.equals(new HttpString("POST"))){
             httpResponse = serviceMultipartrequest(httpContext, bao);
 
         } else if(requestPath.equals("/printkey")) {
@@ -162,7 +166,8 @@ public class DigipostApiMock implements HttpHandler {
             marshal(jaxbContext, new EntryPoint(certificate, new Link(Relation.CREATE_MESSAGE, new DigipostUri("http://localhost:9999/create")),
                     new Link(Relation.GET_PRINT_ENCRYPTION_KEY, new DigipostUri("http://localhost:9999/printkey")),
                     new Link(Relation.GET_SENDER_INFORMATION, new DigipostUri("http://localhost:9999/getsenderinformation")),
-                    new Link(Relation.DOCUMENT_EVENTS, new DigipostUri("http://localhost:9999/getdocumentevents"))), bao);
+                    new Link(Relation.DOCUMENT_EVENTS, new DigipostUri("http://localhost:9999/getdocumentevents")),
+                    new Link(Relation.IDENTIFY_RECIPIENT, new DigipostUri("http://localhost:9999/identification"))), bao);
 
         } else {
             CloseableHttpResponse response = requestsAndResponsesMap.get(Method.GET_CONTENT).getResponse(httpContext.getRequestPath());
@@ -189,6 +194,17 @@ public class DigipostApiMock implements HttpHandler {
 
         httpContext.startBlocking();
         IOUtils.copy(new ByteArrayInputStream(bytes), httpContext.getOutputStream());
+    }
+
+    private int serviceIdentifyRecipient(HttpServerExchange httpContext, ByteArrayOutputStream bao) throws IOException {
+        CloseableHttpResponse response = requestsAndResponsesMap.get(Method.IDENTIFY_RECIPIENT).getResponse(httpContext.getRequestPath());
+        if (response == null) {
+            marshal(jaxbContext, IdentificationResult.digipost("test.testsson#1234"), bao);
+            return 200;
+        } else {
+            response.getEntity().writeTo(bao);
+            return response.getStatusLine().getStatusCode();
+        }
     }
 
     private int serviceSenderInformation(HttpServerExchange httpContext, ByteArrayOutputStream bao) throws IOException {
@@ -304,6 +320,7 @@ public class DigipostApiMock implements HttpHandler {
         requestsAndResponsesMap.put(Method.GET_SENDER_INFORMATION, new RequestsAndResponses());
         requestsAndResponsesMap.put(Method.SEND_MULTIPART_MESSAGE, new RequestsAndResponses());
         requestsAndResponsesMap.put(Method.MULTIPART_MESSAGE, new RequestsAndResponses(new MultipartRequestMatcher()));
+        requestsAndResponsesMap.put(Method.IDENTIFY_RECIPIENT, new RequestsAndResponses());
     }
 
 
