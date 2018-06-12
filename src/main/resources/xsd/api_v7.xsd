@@ -1136,7 +1136,7 @@
     <xsd:complexType name="user-account">
         <xsd:sequence>
             <xsd:element name="digipost-address" type="xsd:string" minOccurs="1" maxOccurs="1" />
-            <xsd:element name="encryption-key" type="encryption-key" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="encryption-key" type="xsd:string" minOccurs="1" maxOccurs="1" />
         </xsd:sequence>
     </xsd:complexType>
 

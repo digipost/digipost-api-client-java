@@ -16,7 +16,6 @@
 package no.digipost.api.client.representations.accounts;
 
 import no.digipost.api.client.representations.DigipostAddress;
-import no.digipost.api.client.representations.EncryptionKey;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -29,13 +28,13 @@ public class UserAccount {
     @XmlElement(name = "encryption-key")
     private final EncryptionKey encryptionKey;
 
-    public UserAccount(DigipostAddress digipostAddress, EncryptionKey encryptionKey, String resultCode, String resultDescription) {
+    public UserAccount(DigipostAddress digipostAddress, EncryptionKey encryptionKey) {
         this.digipostAddress = digipostAddress;
         this.encryptionKey = encryptionKey;
     }
 
     private UserAccount() {
-        this(null, null, null, null);
+        this(null, null);
     }
 
     public DigipostAddress getDigipostAddress() {
