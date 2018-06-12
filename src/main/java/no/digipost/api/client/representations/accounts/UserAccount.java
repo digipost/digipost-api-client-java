@@ -16,7 +16,6 @@
 package no.digipost.api.client.representations.accounts;
 
 import no.digipost.api.client.representations.DigipostAddress;
-import no.digipost.api.client.representations.EncryptionKey;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
