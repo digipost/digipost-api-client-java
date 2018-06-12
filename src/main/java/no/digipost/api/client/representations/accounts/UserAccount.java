@@ -29,13 +29,13 @@ public class UserAccount {
     @XmlElement(name = "encryption-key")
     private final EncryptionKey encryptionKey;
 
-    public UserAccount(DigipostAddress digipostAddress, EncryptionKey encryptionKey, String resultCode, String resultDescription) {
+    public UserAccount(DigipostAddress digipostAddress, EncryptionKey encryptionKey) {
         this.digipostAddress = digipostAddress;
         this.encryptionKey = encryptionKey;
     }
 
     private UserAccount() {
-        this(null, null, null, null);
+        this(null, null);
     }
 
     public DigipostAddress getDigipostAddress() {
