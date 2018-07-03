@@ -16,6 +16,7 @@
 package no.digipost.api.client.representations;
 
 import javax.xml.bind.annotation.XmlValue;
+import java.util.Objects;
 
 public abstract class RecipientIdentifier {
     @XmlValue
@@ -30,4 +31,18 @@ public abstract class RecipientIdentifier {
     }
 
     public abstract boolean isPersonalIdentificationNumber();
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RecipientIdentifier) {
+            RecipientIdentifier that = (RecipientIdentifier) obj;
+            return Objects.equals(this.identifier, that.identifier);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(identifier);
+    }
 }

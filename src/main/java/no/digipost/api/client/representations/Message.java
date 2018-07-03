@@ -289,4 +289,17 @@ public class Message implements MayHaveSender {
         return senderOrganization;
     }
 
+    @Override
+    public String toString() {
+        return "Message{" +
+                "messageId='" + messageId + '\'' +
+                ", senderId=" + senderId +
+                ", senderOrganization=" + senderOrganization +
+                ", recipient=" + recipient +
+                ", deliveryTime=" + deliveryTime +
+                ", invoiceReference='" + invoiceReference + '\'' +
+                ", primaryDocument=" + primaryDocument +
+                ", attachments=" + attachments +
+                '}';
+    }
 }
