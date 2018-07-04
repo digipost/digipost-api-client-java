@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "name-and-address", propOrder = {
@@ -92,5 +93,26 @@ public class NameAndAddress {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", emailAddress='" + emailAddress + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof NameAndAddress) {
+            NameAndAddress that = (NameAndAddress) obj;
+            return Objects.equals(this.addressline1, that.addressline1) &&
+                    Objects.equals(this.addressline2, that.addressline2) &&
+                    Objects.equals(this.postalcode, that.postalcode) &&
+                    Objects.equals(this.city, that.city) &&
+                    Objects.equals(this.fullname, that.fullname) &&
+                    Objects.equals(this.birthDate, that.birthDate) &&
+                    Objects.equals(this.emailAddress, that.emailAddress) &&
+                    Objects.equals(this.phoneNumber, that.phoneNumber);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(addressline1, addressline2, postalcode, city, fullname, birthDate, emailAddress, phoneNumber);
     }
 }

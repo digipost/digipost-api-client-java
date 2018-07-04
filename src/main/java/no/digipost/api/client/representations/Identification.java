@@ -16,6 +16,7 @@
 package no.digipost.api.client.representations;
 
 import javax.xml.bind.annotation.*;
+import java.util.Objects;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -98,6 +99,24 @@ public class Identification {
         } else {
             return "empty";
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Identification) {
+            Identification that = (Identification) obj;
+            return Objects.equals(this.digipostAddress, that.digipostAddress) &&
+                    Objects.equals(this.includePersonaliasForDigipostUser, that.includePersonaliasForDigipostUser) &&
+                    Objects.equals(this.nameAndAddress, that.nameAndAddress) &&
+                    Objects.equals(this.personalIdentificationNumber, that.personalIdentificationNumber) &&
+                    Objects.equals(this.organisationNumber, that.organisationNumber);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(digipostAddress, includePersonaliasForDigipostUser, nameAndAddress, personalIdentificationNumber, organisationNumber);
     }
 }
 
