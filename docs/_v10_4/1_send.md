@@ -116,7 +116,7 @@ Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF)
 
 PrintDetails printDetails = new PrintDetails(
         new PrintRecipient("Ola Nordmann", new NorwegianAddress("Prinsensveien 123", "0460", "Oslo")),
-        new PrintRecipient("Norgesbedriften", new NorwegianAddress("Akers Àle 2", "0400", "Oslo")), PrintDetails.PostType.B, PrintDetails.PrintColors.MONOCHROME, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER);
+        new PrintRecipient("Norgesbedriften", new NorwegianAddress("Akers Àle 2", "0400", "Oslo")), PrintDetails.PrintColors.MONOCHROME, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER);
 
 Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
         .recipient(new MessageRecipient(pin, printDetails))
