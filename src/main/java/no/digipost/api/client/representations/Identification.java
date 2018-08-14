@@ -100,6 +100,8 @@ public class Identification {
     public String toString() {
         if (digipostAddress != null) {
             return digipostAddress;
+        } else if (bankAccountNumber != null) {
+            return bankAccountNumber;
         } else if (personalIdentificationNumber != null) {
             return personalIdentificationNumber;
         } else if (nameAndAddress != null) {
@@ -117,14 +119,15 @@ public class Identification {
                     Objects.equals(this.includePersonaliasForDigipostUser, that.includePersonaliasForDigipostUser) &&
                     Objects.equals(this.nameAndAddress, that.nameAndAddress) &&
                     Objects.equals(this.personalIdentificationNumber, that.personalIdentificationNumber) &&
-                    Objects.equals(this.organisationNumber, that.organisationNumber);
+                    Objects.equals(this.organisationNumber, that.organisationNumber) &&
+                    Objects.equals(this.bankAccountNumber, that.bankAccountNumber);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(digipostAddress, includePersonaliasForDigipostUser, nameAndAddress, personalIdentificationNumber, organisationNumber);
+        return Objects.hash(digipostAddress, includePersonaliasForDigipostUser, nameAndAddress, personalIdentificationNumber, organisationNumber, bankAccountNumber);
     }
 }
 
