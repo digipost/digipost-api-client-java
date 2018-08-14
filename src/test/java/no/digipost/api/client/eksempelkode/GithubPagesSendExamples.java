@@ -17,24 +17,9 @@ package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
-import no.digipost.api.client.representations.AuthenticationLevel;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.FileType;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.IdentificationResult;
-import no.digipost.api.client.representations.Invoice;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.MessageRecipient;
-import no.digipost.api.client.representations.NameAndAddress;
-import no.digipost.api.client.representations.NorwegianAddress;
-import no.digipost.api.client.representations.PersonalIdentificationNumber;
-import no.digipost.api.client.representations.PrintDetails;
-import no.digipost.api.client.representations.PrintRecipient;
-import no.digipost.api.client.representations.SensitivityLevel;
-import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.representations.*;
+import no.digipost.api.datatypes.types.Address;
 import no.digipost.api.datatypes.types.Appointment;
-import no.digipost.api.datatypes.types.AppointmentAddress;
 import no.digipost.api.datatypes.types.Info;
 
 import java.io.FileInputStream;
@@ -234,7 +219,7 @@ public class GithubPagesSendExamples {
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
         ZonedDateTime startTime = ZonedDateTime.of(2017, 10, 23, 10, 0, 0, 0, ZoneId.systemDefault());
-        AppointmentAddress address = new AppointmentAddress("Storgata 1", "0001", "Oslo");
+        Address address = Address.EXAMPLE;
         Info preparation = new Info("Preparation", "Please do not eat or drink 6 hours prior to examination");
         Info about = new Info("About Oslo X-Ray center", "Oslo X-Ray center is specialized in advanced image diagnostics...");
         List<Info> info = Arrays.asList(preparation, about);

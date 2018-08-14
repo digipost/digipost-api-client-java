@@ -23,6 +23,7 @@ import java.util.Objects;
 @XmlType(name = "identification", propOrder = {
         "nameAndAddress",
         "digipostAddress",
+        "bankAccountNumber",
         "organisationNumber",
         "personalIdentificationNumber"
 })
@@ -36,6 +37,8 @@ public class Identification {
     protected NameAndAddress nameAndAddress;
     @XmlElement(name = "digipost-address", nillable = false)
     protected String digipostAddress;
+    @XmlElement(name = "bank-account-number", nillable = false)
+    protected String bankAccountNumber;
     @XmlElement(name = "personal-identification-number", nillable = false)
     protected String personalIdentificationNumber;
     @XmlElement(name = "organisation-number", nillable = false)
@@ -69,6 +72,11 @@ public class Identification {
     public Identification(final OrganisationNumber organisationNumber) {
         this.includePersonaliasForDigipostUser = false;
         this.organisationNumber = organisationNumber.asString();
+    }
+
+    public Identification(final BankAccountNumber bankAccountNumber) {
+        this.includePersonaliasForDigipostUser = false;
+        this.bankAccountNumber = bankAccountNumber.asString();
     }
 
     //JAXB
