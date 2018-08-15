@@ -44,7 +44,7 @@ BankAccountNumber ban = new BankAccountNumber("12345123451");
 Document primaryDocument = new Document(UUID1, "Receipt", FileType.PDF);
 
 Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
-        .personalIdentificationNumber(pin)
+        .bankAccountNumber(ban)
         .build();
 
 client.createMessage(message)
