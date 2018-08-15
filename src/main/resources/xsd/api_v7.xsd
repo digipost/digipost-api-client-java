@@ -435,6 +435,18 @@
                 </xsd:element>
                 <xsd:element name="digipost-address" minOccurs="0" maxOccurs="1" type="xsd:string" nillable="false" />
                 <xsd:element name="name-and-address" minOccurs="0" maxOccurs="1" type="name-and-address" nillable="false" />
+                <xsd:element name="bank-account-number" minOccurs="0" maxOccurs="1" nillable="false">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Bankkontonummer.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                            <xsd:length value="11" />
+                        </xsd:restriction>
+                    </xsd:simpleType>
+                </xsd:element>
             </xsd:choice>
         </xsd:sequence>
         <xsd:attribute name="include-personalias-for-digipost-user" type="xsd:boolean" default="false" />
@@ -469,6 +481,18 @@
                 </xsd:element>
                 <xsd:element name="digipost-address" minOccurs="0" maxOccurs="1" type="xsd:string" nillable="false" />
                 <xsd:element name="name-and-address" minOccurs="0" maxOccurs="1" type="name-and-address" nillable="false" />
+                <xsd:element name="bank-account-number" minOccurs="0" maxOccurs="1" nillable="false">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Bankkontonummer.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                            <xsd:length value="11" />
+                        </xsd:restriction>
+                    </xsd:simpleType>
+                </xsd:element>
             </xsd:choice>
             <xsd:element name="print-details" type="print-details" minOccurs="0" maxOccurs="1" nillable="false" />
         </xsd:sequence>
@@ -493,7 +517,7 @@
         <xsd:sequence>
             <xsd:element name="recipient" type="print-recipient"  minOccurs="1" maxOccurs="1"  />
             <xsd:element name="return-address" type="print-recipient"  minOccurs="1" maxOccurs="1"  />
-            <xsd:element name="post-type" type="post-type" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="post-type" type="post-type" minOccurs="0" maxOccurs="1" default="A" />
             <xsd:element name="color" type="print-colors" minOccurs="0" maxOccurs="1" default="MONOCHROME"/>
             <xsd:element name="nondeliverable-handling" type="nondeliverable-handling" minOccurs="0" maxOccurs="1" default="RETURN_TO_SENDER"/>
             <xsd:element name="print-instructions" type="print-instructions" minOccurs="0" maxOccurs="1"/>
@@ -516,7 +540,7 @@
     <xsd:simpleType name="post-type">
         <xsd:annotation>
             <xsd:documentation>
-                A or B for respectively A-Priority and B-Economy
+                Deprecated. A or B for respectively A-Priority and B-Economy
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
@@ -1081,7 +1105,7 @@
             <xsd:documentation>
                 A UUID (Universally unique identifier). This ID must be globally unique for the sender.
                 With Java, a UUID can be created using UUID.randomUUID(), whereas
-                System.Guid.NewGuid() can be used in .NET C#. O og tilsvarende i andre språk.
+                System.Guid.NewGuid() can be used in .NET C#.
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
@@ -1101,7 +1125,7 @@
         <xsd:sequence>
             <xsd:element name="id" type="xsd:long" minOccurs="1" maxOccurs="1" />
             <xsd:element name="reference-from-sender" type="xsd:string" minOccurs="0" maxOccurs="1" />
-            <xsd:element name="subject" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="subject" type="xsd:string" minOccurs="0" maxOccurs="1" />
             <xsd:element name="sender" type="xsd:string" minOccurs="1" maxOccurs="1" />
             <xsd:element name="delivery-time" type="xsd:dateTime" minOccurs="1" maxOccurs="1" />
             <xsd:element name="first-accessed" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
@@ -1142,7 +1166,7 @@
 
     <xsd:complexType name="data-type">
         <xsd:sequence>
-            <xsd:any namespace="http://api.digipost.no/schema/datatypes" minOccurs="1" maxOccurs="1"/>
+            <xsd:any namespace="http://api.digipost.no/schema/datatypes" minOccurs="1" maxOccurs="1" />
         </xsd:sequence>
     </xsd:complexType>
 </xsd:schema>
