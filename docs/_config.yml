@@ -30,6 +30,9 @@ collections:
   v10_4:
     output: true
     permalink: /v10.4/
+  v10_8:
+    output: true
+    permalink: /v10.8/
 
 # list of additional links on the right of the top menu
 headerLinks:
