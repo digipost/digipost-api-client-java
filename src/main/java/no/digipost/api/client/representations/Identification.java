@@ -23,6 +23,7 @@ import java.util.Objects;
 @XmlType(name = "identification", propOrder = {
         "nameAndAddress",
         "digipostAddress",
+        "bankAccountNumber",
         "organisationNumber",
         "personalIdentificationNumber"
 })
@@ -36,6 +37,8 @@ public class Identification {
     protected NameAndAddress nameAndAddress;
     @XmlElement(name = "digipost-address", nillable = false)
     protected String digipostAddress;
+    @XmlElement(name = "bank-account-number", nillable = false)
+    protected String bankAccountNumber;
     @XmlElement(name = "personal-identification-number", nillable = false)
     protected String personalIdentificationNumber;
     @XmlElement(name = "organisation-number", nillable = false)
@@ -71,6 +74,11 @@ public class Identification {
         this.organisationNumber = organisationNumber.asString();
     }
 
+    public Identification(final BankAccountNumber bankAccountNumber) {
+        this.includePersonaliasForDigipostUser = false;
+        this.bankAccountNumber = bankAccountNumber.asString();
+    }
+
     //JAXB
     public Identification() {
 
@@ -92,6 +100,8 @@ public class Identification {
     public String toString() {
         if (digipostAddress != null) {
             return digipostAddress;
+        } else if (bankAccountNumber != null) {
+            return bankAccountNumber;
         } else if (personalIdentificationNumber != null) {
             return personalIdentificationNumber;
         } else if (nameAndAddress != null) {
@@ -109,14 +119,15 @@ public class Identification {
                     Objects.equals(this.includePersonaliasForDigipostUser, that.includePersonaliasForDigipostUser) &&
                     Objects.equals(this.nameAndAddress, that.nameAndAddress) &&
                     Objects.equals(this.personalIdentificationNumber, that.personalIdentificationNumber) &&
-                    Objects.equals(this.organisationNumber, that.organisationNumber);
+                    Objects.equals(this.organisationNumber, that.organisationNumber) &&
+                    Objects.equals(this.bankAccountNumber, that.bankAccountNumber);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(digipostAddress, includePersonaliasForDigipostUser, nameAndAddress, personalIdentificationNumber, organisationNumber);
+        return Objects.hash(digipostAddress, includePersonaliasForDigipostUser, nameAndAddress, personalIdentificationNumber, organisationNumber, bankAccountNumber);
     }
 }
 
