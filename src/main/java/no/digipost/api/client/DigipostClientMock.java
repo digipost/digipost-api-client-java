@@ -94,7 +94,7 @@ public class DigipostClientMock {
     public static KeyPair getKeyPair(final String alias, final String password) {
         try {
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keystore.load(DigipostClientMock.class.getClass().getResourceAsStream("/mockKeystore.jks"), KEY_STORE_PASSWORD.toCharArray());
+            keystore.load(DigipostClientMock.class.getResourceAsStream("/mockKeystore.jks"), KEY_STORE_PASSWORD.toCharArray());
 
             Key key = keystore.getKey(alias, password.toCharArray());
             Certificate cert = keystore.getCertificate(alias);
