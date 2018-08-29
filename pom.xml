@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>10.10-SNAPSHOT</version>
+    <version>10.11-SNAPSHOT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 
@@ -148,6 +148,7 @@
             <groupId>io.undertow</groupId>
             <artifactId>undertow-core</artifactId>
             <version>2.0.7.Final</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
