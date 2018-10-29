@@ -26,7 +26,7 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>printability-validator</artifactId>
-            <version>2.2</version>
+            <version>3.1</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.5</version>
+            <version>4.5.6</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -64,12 +64,12 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.4.9</version>
+            <version>4.4.10</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
-            <version>4.5.5</version>
+            <version>4.5.6</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.7</version>
+            <version>3.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -117,7 +117,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.18.3</version>
+            <version>2.23.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -141,13 +141,13 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digg</artifactId>
-            <version>0.16</version>
+            <version>0.17</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.undertow</groupId>
             <artifactId>undertow-core</artifactId>
-            <version>2.0.7.Final</version>
+            <version>2.0.15.Final</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -432,7 +432,6 @@
                                         <include>org.slf4j</include>
                                         <include>org.apache.pdfbox:fontbox</include>
                                         <include>org.apache.pdfbox:pdfbox</include>
-                                        <include>org.apache.pdfbox:jempbox</include>
                                         <include>no.digipost:printability-validator</include>
                                         <include>no.digipost:digipost-cache</include>
                                         <include>com.google.code.findbugs:jsr305:jar</include>
