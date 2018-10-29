@@ -36,7 +36,7 @@ public final class HttpClientUtils {
      * of the response, and thus must be handled by the method returning the stream.
      *
      * @param response the response to acquire the entity stream from
-     * @param eventLogger
+     *
      * @return the stream containing the entity of the response.
      */
     public static InputStream safelyOfferEntityStreamExternally(CloseableHttpResponse response, EventLogger eventLogger) {

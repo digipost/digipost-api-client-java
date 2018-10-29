@@ -36,10 +36,10 @@ import static java.util.Optional.ofNullable;
 
 
 /**
- * <p>Java class for feature complex type.
+ * Java class for feature complex type.
  * <p>
- * <p>The following schema fragment specifies the expected content contained within this class.
- * <p>
+ * The following schema fragment specifies the expected content contained within this class.
+ *
  * <pre>
  * &lt;complexType name="feature"&gt;
  *   &lt;simpleContent&gt;

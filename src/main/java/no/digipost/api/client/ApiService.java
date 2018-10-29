@@ -55,7 +55,7 @@ import java.time.ZonedDateTime;
  * til serveren, og dermed bestille print av brevet.
  * <li>Hente dokument-events, dvs. hendelser knyttet til brev man tidligere har sendt</li>
  *
- * <ul>
+ * </ul>
  *
  * For å sende et brev gjennom Digipost er det tilstrekkelig å gjøre disse to
  * kallene:
@@ -127,7 +127,6 @@ public interface ApiService {
      * Returnerer då også publik del av krypteringsnøkkel for Digipost-bruker.
      * Nøkkelen brukes for å kryptere dokument-innhold for dokumenter som
      * skal prekrypteres.
-     * @param identification
      */
     CloseableHttpResponse identifyAndGetEncryptionKey(Identification identification);
 
@@ -142,7 +141,6 @@ public interface ApiService {
 
     /**
      * Henter status på dokumeter som tidligere blitt sendt i Digipost, både via digital og print-kanal.
-     * @param linkToDocumentStatus
      */
     CloseableHttpResponse getDocumentStatus(Link linkToDocumentStatus);
     CloseableHttpResponse getDocumentStatus(long senderId, String uuid);
