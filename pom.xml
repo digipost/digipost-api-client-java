@@ -289,6 +289,7 @@
                         <exclude>**/*.jks</exclude>
                         <exclude>**/user-agent.properties</exclude>
                         <exclude>docs/**</exclude>
+                        <exclude>.java-version</exclude>
                     </excludes>
                 </configuration>
                 <executions>
