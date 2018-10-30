@@ -313,6 +313,7 @@
                         <exclude>**/user-agent.properties</exclude>
                         <exclude>docs/**</exclude>
                         <exclude>.java-version</exclude>
+                        <exclude>.mvn/maven.config</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -336,28 +337,6 @@
                         </manifest>
                     </archive>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-source</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jasig.maven</groupId>
@@ -397,7 +376,9 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.0.5</version>
+                                    <!-- Maven 3.3.1 is needed for .mvn/maven.config to work
+                                         https://maven.apache.org/docs/3.3.1/release-notes.html -->
+                                    <version>3.3.1</version>
                                 </requireMavenVersion>
                             </rules>
                         </configuration>
