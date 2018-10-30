@@ -5,8 +5,7 @@
     <parent>
         <groupId>no.digipost</groupId>
         <artifactId>digipost-open-super-pom</artifactId>
-        <version>1</version>
-        <relativePath />
+        <version>2</version>
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
@@ -205,10 +204,6 @@
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.5.3</version>
-                    <configuration>
-                        <goals>deploy</goals>
-                        <tagNameFormat>@{project.version}</tagNameFormat>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.jasig.maven</groupId>
@@ -242,6 +237,14 @@
                     <version>2.22.1</version>
                 </plugin>
                 <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.0.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.0.1</version>
+                </plugin>
+                <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>3.0.0-M1</version>
                 </plugin>
@@ -269,9 +272,6 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
                     <version>2.7</version>
-                    <configuration>
-                        <generateBackupPoms>false</generateBackupPoms>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
@@ -339,11 +339,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <doclint>all,-missing</doclint>
-                    <quiet>true</quiet>
-                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadoc</id>
@@ -355,15 +350,11 @@
             </plugin>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <includePom>true</includePom>
-                </configuration>
                 <executions>
                     <execution>
                         <id>attach-source</id>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
                     </execution>
                 </executions>
