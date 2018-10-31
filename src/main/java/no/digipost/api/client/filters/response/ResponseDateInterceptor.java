@@ -18,7 +18,6 @@ package no.digipost.api.client.filters.response;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;

@@ -20,6 +20,7 @@ import org.junit.Test;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -29,14 +30,14 @@ public class DateTimeXmlAdapterTest {
 
     @Test
     public void marshall_unmarshall_roundtrip_yields_equal_objects() {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT-8"));
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT-8")).truncatedTo(MILLIS);
         assertThat(adapter.unmarshal(adapter.marshal(now)), is(now));
     }
 
     @Test
     public void unmarshall_yields_datetime_with_region_based_zoneId_replaced_with_GMT_offset() {
         ZoneId newYorkZone = ZoneId.of("America/New_York");
-        ZonedDateTime rightNowInAmerica = ZonedDateTime.now(newYorkZone);
+        ZonedDateTime rightNowInAmerica = ZonedDateTime.now(newYorkZone).truncatedTo(MILLIS);;
         String xmlDateTimeString = adapter.marshal(rightNowInAmerica);
 
         boolean daylightSavings = newYorkZone.getRules().isDaylightSavings(rightNowInAmerica.toInstant());
