@@ -15,15 +15,7 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.EntryPoint;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MayHaveSender;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.inbox.Inbox;
@@ -37,6 +29,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 /**
  * Klasser som implementerer dette interfacet tar seg av de enkelte HTTP-forespørslene
@@ -109,6 +102,11 @@ public interface ApiService {
      *
      */
     CloseableHttpResponse send(MessageDelivery createdMessage);
+
+    /**
+     * Oppdaterer et tidligere sendt dokument med metadata
+     */
+    CloseableHttpResponse update(UUID documentUuid, DocumentUpdate documentUpdate);
 
     Recipients search(String searchString);
 

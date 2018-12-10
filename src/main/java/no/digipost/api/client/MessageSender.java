@@ -16,6 +16,7 @@
 package no.digipost.api.client;
 
 import no.digipost.api.client.delivery.DocumentContent;
+import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.*;
@@ -42,6 +43,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -221,6 +223,21 @@ public class MessageSender extends Communicator {
             deliveredMessage = send(message);
         }
         return deliveredMessage;
+    }
+
+    public DocumentUpdate updateMessage(final UUID uuid, final DocumentUpdate message) {
+        log("*** STARTER INTERAKSJON MED API: OPPDATERER MELDING MED ID " + uuid + " ***");
+        try(CloseableHttpResponse response = apiService.update(uuid, message)){
+
+            checkResponse(response);
+
+            log("Brevet ble sendt. Status: [" + response.toString() + "]");
+
+
+            return null;
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
 

@@ -18,16 +18,7 @@ package no.digipost.api.client;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.EntryPoint;
-import no.digipost.api.client.representations.ErrorMessage;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MayHaveSender;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.inbox.Inbox;
@@ -65,6 +56,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
@@ -199,6 +191,16 @@ public class ApiServiceImpl implements ApiService {
         httpPost.setEntity(null);
         return send(httpPost);
 
+    }
+
+    @Override
+    public CloseableHttpResponse update(DocumentUpdate documentUpdate, UUID documentUuid) {
+        Link updateLink = new Link(Relation.UPDATE_MESSAGE,new DigipostUri("https://docker.host.internal:8282"));
+
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(updateLink.getUri().getPath()));
+        httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
+        httpPost.setEntity(null);
+        return send(httpPost);
     }
 
     private Link fetchAddContentLink(final Document document) {
