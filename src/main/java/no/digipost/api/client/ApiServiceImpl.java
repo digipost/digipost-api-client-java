@@ -18,9 +18,21 @@ package no.digipost.api.client;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.*;
-import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.DigipostUri;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.DocumentUpdate;
+import no.digipost.api.client.representations.EntryPoint;
+import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.MayHaveSender;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.Relation;
 import no.digipost.api.client.representations.accounts.UserAccount;
+import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
@@ -30,7 +42,12 @@ import no.digipost.api.client.util.HttpClientUtils;
 import no.digipost.api.client.util.MultipartNoLengthCheckHttpEntity;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -64,7 +81,9 @@ import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
 import static no.digipost.api.client.util.ExceptionUtils.exceptionNameAndMessage;
-import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
+import static no.digipost.api.client.util.JAXBContextUtils.marshal;
+import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
 public class ApiServiceImpl implements ApiService {
 
@@ -194,8 +213,8 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public CloseableHttpResponse update(DocumentUpdate documentUpdate, UUID documentUuid) {
-        Link updateLink = new Link(Relation.UPDATE_MESSAGE,new DigipostUri("https://docker.host.internal:8282"));
+    public CloseableHttpResponse update(UUID documentUuid, DocumentUpdate documentUpdate) {
+        Link updateLink = new Link(Relation.UPDATE_MESSAGE, new DigipostUri("https://docker.host.internal:8282"));
 
         HttpPost httpPost = new HttpPost(digipostUrl.resolve(updateLink.getUri().getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
