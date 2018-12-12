@@ -49,26 +49,21 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
         this(signer, NOOP_EVENT_LOGGER, hashFilter);
     }
 
-    public RequestSignatureInterceptor(final Signer signer, final EventLogger eventListener, final RequestContentHashFilter hashFilter){
-        eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
+    public RequestSignatureInterceptor(final Signer signer, final EventLogger eventLogger, final RequestContentHashFilter hashFilter){
+        this.eventLogger = eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER;
         this.signer = signer;
         this.hashFilter = hashFilter;
     }
 
     private void setSignatureHeader(final HttpRequest httpRequest) {
         String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ClientRequestToSign(httpRequest));
-        log(getClass().getSimpleName() + " beregnet streng som skal signeres:\n===START SIGNATURSTRENG===\n" + stringToSign
+        eventLogger.log(getClass().getSimpleName() + " beregnet streng som skal signeres:\n===START SIGNATURSTRENG===\n" + stringToSign
                 + "===SLUTT SIGNATURSTRENG===");
 
         byte[] signatureBytes = signer.sign(stringToSign);
         String signature = new String(Base64.encode(signatureBytes));
         httpRequest.setHeader(Headers.X_Digipost_Signature, signature);
-        log(getClass().getSimpleName() + " satt headeren " + Headers.X_Digipost_Signature + "=" + signature);
-    }
-
-    private void log(final String stringToSignMsg) {
-        LOG.debug(stringToSignMsg);
-        eventLogger.log(stringToSignMsg);
+        eventLogger.log(getClass().getSimpleName() + " satt headeren " + Headers.X_Digipost_Signature + "=" + signature);
     }
 
     @Override

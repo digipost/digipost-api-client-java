@@ -31,19 +31,14 @@ public abstract class RequestContentHashFilter {
     private final Class<? extends ExtendedDigest> digestClass;
     private final String header;
 
-    public RequestContentHashFilter(final EventLogger eventListener, final Class<? extends ExtendedDigest> digestClass, final String header) {
-        eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
+    public RequestContentHashFilter(final EventLogger eventLogger, final Class<? extends ExtendedDigest> digestClass, final String header) {
+        this.eventLogger = (eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER).withDebugLogTo(LOG);
         this.digestClass = digestClass;
         this.header = header;
     }
 
     public RequestContentHashFilter(final Class<? extends ExtendedDigest> digestClass, final String header) {
         this(NOOP_EVENT_LOGGER, digestClass, header);
-    }
-
-    private void log(final String stringToSignMsg) {
-        LOG.debug(stringToSignMsg);
-        eventLogger.log(stringToSignMsg);
     }
 
     public void settContentHashHeader(final byte[] data, final HttpRequest httpRequest) {
@@ -54,9 +49,9 @@ public abstract class RequestContentHashFilter {
             instance.doFinal(result, 0);
             String hash = new String(Base64.encode(result));
             httpRequest.setHeader(header, hash);
-            log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
+            eventLogger.log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
         } catch (InstantiationException | IllegalAccessException e) {
-            log("Feil ved generering av " + header + " : " + e.getMessage());
+            eventLogger.log("Feil ved generering av " + header + " : " + e.getMessage());
         }
     }
 }

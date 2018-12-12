@@ -25,12 +25,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 
-import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.HttpClientUtils.checkResponse;
+import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
+import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public class DocumentCommunicator extends Communicator {
+public class DocumentCommunicator  {
+
+    private final ApiService apiService;
+    private final EventLogger eventLogger;
 
     public DocumentCommunicator(final ApiService apiService, final EventLogger eventLogger) {
-        super(apiService, eventLogger);
+        this.apiService = apiService;
+        this.eventLogger = eventLogger;
     }
 
     public DocumentEvents getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {

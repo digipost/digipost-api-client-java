@@ -105,13 +105,7 @@ public class DigipostSwingClient {
     private JTextArea logTextArea;
 
     private DigipostClient client;
-    private final EventLogger eventLogger = new EventLogger() {
-
-        @Override
-        public void log(final String logMesssage) {
-            logTextArea.append(logMesssage + "\n");
-        }
-    };
+    private final EventLogger eventLogger = logMesssage -> logTextArea.append(logMesssage + "\n");
     private JTextField endpointField;
 
     /**

@@ -21,10 +21,12 @@ import no.digipost.api.client.representations.inbox.InboxDocument;
 
 import java.io.InputStream;
 
-public class InboxCommunicator extends Communicator{
+public class InboxCommunicator {
 
-    public InboxCommunicator(final ApiService apiService, final EventLogger eventLogger) {
-        super(apiService, eventLogger);
+    private final ApiService apiService;
+
+    public InboxCommunicator(ApiService apiService) {
+        this.apiService = apiService;
     }
 
     public Inbox getInbox(SenderId senderId, int offset, int limit) {

@@ -26,9 +26,16 @@ import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.*;
-import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.DocumentEvents;
+import no.digipost.api.client.representations.DocumentStatus;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
+import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -50,6 +57,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.time.ZonedDateTime;
 
+import static no.digipost.api.client.util.HttpClientUtils.checkResponse;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -113,27 +121,28 @@ public class DigipostClient {
                           final HttpClientBuilder clientBuilder, final ApiService overriddenApiService, final HttpHost proxy) {
         CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
         HttpClientBuilder httpClientBuilder = clientBuilder == null ? DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT) : clientBuilder;
-        this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
+        EventLogger logger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
 
         this.apiService = overriddenApiService == null ?
-                new ApiServiceImpl(httpClientBuilder, senderAccountId, this.eventLogger, URI.create(digipostUrl), proxy) : overriddenApiService;
+                new ApiServiceImpl(httpClientBuilder, senderAccountId, logger, URI.create(digipostUrl), proxy) : overriddenApiService;
 
-        this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
+        this.messageSender = new MessageSender(config, apiService, logger, new PdfValidator());
         this.deliverer = new MessageDeliverer(messageSender);
-        this.documentCommunicator = new DocumentCommunicator(apiService, this.eventLogger);
-        this.inboxCommunicator = new InboxCommunicator(apiService, this.eventLogger);
+        this.documentCommunicator = new DocumentCommunicator(apiService, logger);
+        this.inboxCommunicator = new InboxCommunicator(apiService);
         this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
 
-        apiService.addFilter(new RequestDateInterceptor(this.eventLogger));
+        apiService.addFilter(new RequestDateInterceptor(logger));
         apiService.addFilter(new RequestUserAgentInterceptor());
-        apiService.addFilter(new RequestSignatureInterceptor(signer, this.eventLogger, new RequestContentSHA256Filter(this.eventLogger)));
+        apiService.addFilter(new RequestSignatureInterceptor(signer, logger, new RequestContentSHA256Filter(logger)));
         apiService.addFilter(responseDateInterceptor);
         apiService.addFilter(responseHashInterceptor);
         apiService.addFilter(responseSignatureInterceptor);
 
         apiService.buildApacheHttpClientBuilder();
 
-        log("Initialiserte apache-klient mot " + digipostUrl);
+        this.eventLogger = eventLogger.withDebugLogTo(LOG);
+        this.eventLogger.log("Initialiserte apache-klient mot " + digipostUrl);
     }
 
     /**
@@ -157,7 +166,7 @@ public class DigipostClient {
 
     public IdentificationResult identifyRecipient(final Identification identification) {
         try (CloseableHttpResponse response = apiService.identifyRecipient(identification)) {
-            Communicator.checkResponse(response, eventLogger);
+            checkResponse(response, eventLogger);
             return JAXBContextUtils.unmarshal(jaxbContext, response.getEntity().getContent(), IdentificationResult.class);
         } catch (IOException e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
@@ -273,11 +282,6 @@ public class DigipostClient {
 
     public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user) {
         return apiService.createOrActivateUserAccount(senderId, user);
-    }
-
-    private void log(final String stringToSignMsg) {
-        LOG.debug(stringToSignMsg);
-        eventLogger.log(stringToSignMsg);
     }
 
     public static class DigipostClientBuilder{

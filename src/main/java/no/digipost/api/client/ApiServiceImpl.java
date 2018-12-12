@@ -38,7 +38,6 @@ import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
-import no.digipost.api.client.util.HttpClientUtils;
 import no.digipost.api.client.util.MultipartNoLengthCheckHttpEntity;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -81,6 +80,8 @@ import static no.digipost.api.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.errorhandling.ErrorCode.PROBLEM_WITH_REQUEST;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
 import static no.digipost.api.client.util.ExceptionUtils.exceptionNameAndMessage;
+import static no.digipost.api.client.util.HttpClientUtils.checkResponse;
+import static no.digipost.api.client.util.HttpClientUtils.safelyOfferEntityStreamExternally;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
@@ -446,7 +447,7 @@ public class ApiServiceImpl implements ApiService {
             request.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
 
             try (CloseableHttpResponse execute = send(request)){
-                Communicator.checkResponse(execute, eventLogger);
+                checkResponse(execute, eventLogger);
                 return JAXB.unmarshal(execute.getEntity().getContent(), entityType);
 
             } catch (IOException e) {
@@ -471,7 +472,7 @@ public class ApiServiceImpl implements ApiService {
         httpGet.setHeader(HttpHeaders.ACCEPT, ContentType.WILDCARD.toString());
         final HttpCoreContext httpCoreContext = HttpCoreContext.create();
         httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
-        return HttpClientUtils.safelyOfferEntityStreamExternally(send(httpGet, httpCoreContext), eventLogger);
+        return safelyOfferEntityStreamExternally(send(httpGet, httpCoreContext), eventLogger);
     }
 
     @Override

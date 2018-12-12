@@ -37,12 +37,12 @@ public class RequestDateInterceptor implements HttpRequestInterceptor {
     private final EventLogger eventLogger;
     private final Clock clock;
 
-    public RequestDateInterceptor(EventLogger eventListener) {
-        this(eventListener, Clock.systemDefaultZone());
+    public RequestDateInterceptor(EventLogger eventLogger) {
+        this(eventLogger, Clock.systemDefaultZone());
     }
 
-    public RequestDateInterceptor(EventLogger eventListener, Clock clock) {
-        this.eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
+    public RequestDateInterceptor(EventLogger eventLogger, Clock clock) {
+        this.eventLogger = (eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER).withDebugLogTo(LOG);
         this.clock = clock;
     }
 
@@ -51,14 +51,9 @@ public class RequestDateInterceptor implements HttpRequestInterceptor {
         modifyRequest(httpRequest);
     }
 
-    private void log(final String stringToSignMsg) {
-        LOG.debug(stringToSignMsg);
-        eventLogger.log(stringToSignMsg);
-    }
-
     private void modifyRequest(final HttpRequest httpRequest) {
         String dateOnRFC1123Format = DateUtils.formatDate(ZonedDateTime.now(clock));
         httpRequest.setHeader(DATE, dateOnRFC1123Format);
-        log(getClass().getSimpleName() + " satt headeren " + DATE + "=" + dateOnRFC1123Format);
+        eventLogger.log(getClass().getSimpleName() + " satt headeren " + DATE + "=" + dateOnRFC1123Format);
     }
 }
