@@ -19,6 +19,7 @@ import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.MessageDelivery;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 
@@ -41,9 +42,19 @@ public interface OngoingDelivery<OPERATIONS extends OngoingDelivery<OPERATIONS> 
 
     /**
      * Laster opp innhold til et dokument.
+     *
+     * @return videre operasjoner for å fullføre leveransen.
      */
     OPERATIONS addContent(Document document, InputStream content);
 
+    /**
+     * Laster opp innhold til et dokument.
+     *
+     * @return videre operasjoner for å fullføre leveransen.
+     */
+    default OPERATIONS addContent(Document document, byte[] content) {
+        return addContent(document, new ByteArrayInputStream(content));
+    }
 
 
     /**
@@ -62,11 +73,20 @@ public interface OngoingDelivery<OPERATIONS extends OngoingDelivery<OPERATIONS> 
     public static interface WithPrintFallback extends OngoingDelivery<SendableWithPrintFallback> {
 
         /**
-         * Laster opp innhold til et dokument med alternativt innhold for print (må være PDF).
+         * Laster opp innhold til et dokument med alternativt innhold for print, hvor sistnevnte må være PDF.
          *
          * @return videre operasjoner for å fullføre leveransen.
          */
         SendableWithPrintFallback addContent(Document document, InputStream content, InputStream printContent);
+
+        /**
+         * Laster opp innhold til et dokument med alternativt innhold for print, hvor sistnevnte må være PDF.
+         *
+         * @return videre operasjoner for å fullføre leveransen.
+         */
+        default SendableWithPrintFallback addContent(Document document, byte[] content, byte[] printContent) {
+            return addContent(document, new ByteArrayInputStream(content), new ByteArrayInputStream(printContent));
+        }
     }
 
 
