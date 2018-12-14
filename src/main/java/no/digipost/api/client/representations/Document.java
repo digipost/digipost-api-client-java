@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,7 +36,9 @@ import java.util.stream.Stream;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.lowerCase;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "document", propOrder = {
@@ -208,6 +211,10 @@ public class Document extends Representation {
 
     public Link getAddContentLink() {
         return getLinkByRelationName(Relation.ADD_CONTENT);
+    }
+
+    public Link getAddDataLink() {
+        return getLinkByRelationName(Relation.ADD_DATA);
     }
 
     public Link getEncryptionKeyLink() {

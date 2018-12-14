@@ -215,7 +215,7 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public CloseableHttpResponse update(UUID documentUuid, DocumentUpdate documentUpdate) {
-        Link updateLink = new Link(Relation.UPDATE_MESSAGE, new DigipostUri("https://docker.host.internal:8282"));
+        Link updateLink = new Link(Relation.ADD_DATA, new DigipostUri("https://docker.host.internal:8282"));
 
         HttpPost httpPost = new HttpPost(digipostUrl.resolve(updateLink.getUri().getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
