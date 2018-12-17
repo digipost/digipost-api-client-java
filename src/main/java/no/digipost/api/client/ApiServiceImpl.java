@@ -19,9 +19,8 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.DigipostUri;
 import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.DocumentUpdate;
+import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Identification;
@@ -30,7 +29,6 @@ import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
-import no.digipost.api.client.representations.Relation;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.inbox.Inbox;
@@ -72,7 +70,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
@@ -102,8 +99,8 @@ public class ApiServiceImpl implements ApiService {
     // which was the case for the pattern "yyyy-MM-dd'T'HH:mm:ss.SSSZZ". See commit messages for 59caeb5737e45a15 and dcf41785a84f42caf935 for details.
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
-    public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long senderAccountId, EventLogger eventLogger, URI digipostUrl, HttpHost proxy) {
-        this.brokerId = senderAccountId;
+    public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long brokerId, EventLogger eventLogger, URI digipostUrl, HttpHost proxy) {
+        this.brokerId = brokerId;
         this.eventLogger = eventLogger;
         this.digipostUrl = digipostUrl;
         if(proxy != null) {
@@ -214,12 +211,15 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public CloseableHttpResponse update(UUID documentUuid, DocumentUpdate documentUpdate) {
-        Link updateLink = new Link(Relation.ADD_DATA, new DigipostUri("https://docker.host.internal:8282"));
+    public CloseableHttpResponse addData(Document document, AdditionalData data) {
+        Link addDataLink = document.getAddDataLink();
 
-        HttpPost httpPost = new HttpPost(digipostUrl.resolve(updateLink.getUri().getPath()));
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(addDataLink.getUri().getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
-        httpPost.setEntity(null);
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(jaxbContext, data, bao);
+        httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
         return send(httpPost);
     }
 

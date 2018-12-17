@@ -32,7 +32,8 @@ public class JAXBContextUtils {
     public static final JAXBContext jaxbContext = initContext(
             EntryPoint.class, ErrorMessage.class, Identification.class, IdentificationResult.class, Message.class, Recipients.class,
             Autocomplete.class, DocumentEvents.class, DocumentStatus.class, MessageDelivery.class, EncryptionKey.class,
-            IdentificationResultWithEncryptionKey.class, SenderInformation.class, UserInformation.class, UserAccount.class
+            IdentificationResultWithEncryptionKey.class, SenderInformation.class, UserInformation.class, UserAccount.class,
+            AdditionalData.class
     );
 
     private static JAXBContext initContext(Class<?>... clazz) {

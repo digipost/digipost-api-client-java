@@ -19,7 +19,7 @@ import no.digipost.api.client.delivery.DocumentContent;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.DocumentUpdate;
+import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.FileType;
 import no.digipost.api.client.representations.Identification;
@@ -55,7 +55,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -255,16 +254,13 @@ public class MessageSender {
         return deliveredMessage;
     }
 
-    public DocumentUpdate updateMessage(final UUID uuid, final DocumentUpdate message) {
-        eventLogger.log("*** STARTER INTERAKSJON MED API: OPPDATERER MELDING MED ID " + uuid + " ***");
-        try(CloseableHttpResponse response = apiService.update(uuid, message)){
+    public void addData(Document document, AdditionalData data) {
+        eventLogger.log("*** STARTER INTERAKSJON MED API: LEGGER TIL DATA PÅ DOKUMENT MED ID " + document.uuid + " ***");
+        try (CloseableHttpResponse response = apiService.addData(document, data)) {
 
             checkResponse(response, eventLogger);
 
-            eventLogger.log("Brevet ble sendt. Status: [" + response.toString() + "]");
-
-
-            return null;
+            eventLogger.log("Data ble lagt til dokument. Status: [" + response.toString() + "]");
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }

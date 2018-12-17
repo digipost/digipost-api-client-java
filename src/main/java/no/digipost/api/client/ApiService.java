@@ -29,7 +29,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 /**
  * Klasser som implementerer dette interfacet tar seg av de enkelte HTTP-forespørslene
@@ -104,9 +103,10 @@ public interface ApiService {
     CloseableHttpResponse send(MessageDelivery createdMessage);
 
     /**
-     * Oppdaterer et tidligere sendt dokument med metadata
+     * Legger til ytterligere mdata til et dokument.
+     * Det er en forutsetning at dokumentet har datatype fra tidligere.
      */
-    CloseableHttpResponse update(UUID documentUuid, DocumentUpdate documentUpdate);
+    CloseableHttpResponse addData(Document document, AdditionalData data);
 
     Recipients search(String searchString);
 
