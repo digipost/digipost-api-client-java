@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.delivery;
 
-import no.digipost.api.client.MessageSender;
+import no.digipost.api.client.internal.MessageSender;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;

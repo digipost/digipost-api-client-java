@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.testing;
 
+import no.digipost.api.client.ApiService;
+import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.util.DigipostApiMock;
-import no.digipost.api.client.util.DigipostApiMock.Method;
-import no.digipost.api.client.util.DigipostApiMock.MockRequest;
-import no.digipost.api.client.util.DigipostApiMock.RequestsAndResponses;
+import no.digipost.api.client.internal.ApiServiceImpl;
+import no.digipost.api.client.testing.DigipostApiMock.Method;
+import no.digipost.api.client.testing.DigipostApiMock.MockRequest;
+import no.digipost.api.client.testing.DigipostApiMock.RequestsAndResponses;
 import no.digipost.http.client3.DigipostHttpClientFactory;
 import no.digipost.http.client3.DigipostHttpClientSettings;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -48,7 +50,7 @@ import java.util.Map;
 import java.util.function.UnaryOperator;
 
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
-import static no.digipost.api.client.UnusedPortFinder.getNextAvailablePort;
+import static no.digipost.api.client.testing.UnusedPortFinder.getNextAvailablePort;
 
 /**
  * Instansierer en DigipostClient som ikke går mot faktiskt Digipost REST-api endepunkt og
@@ -56,11 +58,12 @@ import static no.digipost.api.client.UnusedPortFinder.getNextAvailablePort;
  */
 public class DigipostClientMock {
 
+    public final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
+
     private final DigipostClient client;
     private final ApiService apiService;
     private final int port;
-    public final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
-    private static DigipostApiMock digipostApiMock = new DigipostApiMock();
+    private static final DigipostApiMock digipostApiMock = new DigipostApiMock();
     private static final String KEY_STORE_PASSWORD = "Qwer12345";
     private static final String KEY_STORE_ALIAS = "apiTest";
 
@@ -74,8 +77,7 @@ public class DigipostClientMock {
 
         HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(clientCustomizer.apply(DigipostHttpClientSettings.DEFAULT));
 
-        apiService = new ApiServiceImpl(httpClientBuilder, port, null, host, null);
-        apiService.buildApacheHttpClientBuilder();
+        apiService = new ApiServiceImpl(httpClientBuilder, port, null, host, null, data -> new byte[0]);
         client = new DigipostClient(newBuilder().build(), "digipostmock-url", 1, dataToSign -> new byte[0], apiService);
     }
 

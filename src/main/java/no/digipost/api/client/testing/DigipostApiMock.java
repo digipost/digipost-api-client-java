@@ -1,4 +1,4 @@
-package no.digipost.api.client.util;
+package no.digipost.api.client.testing;
 /**
  * Copyright (C) Posten Norge AS
  *
@@ -32,6 +32,7 @@ import no.digipost.api.client.representations.sender.SenderFeature;
 import no.digipost.api.client.representations.sender.SenderFeatureName;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.representations.sender.SenderStatus;
+import no.digipost.api.client.util.DateUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.EnumUtils;

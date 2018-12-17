@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.pdf;
 
-import no.digipost.api.client.MessageSenderTest;
+import no.digipost.api.client.internal.MessageSenderTest;
 
 import java.io.InputStream;
 

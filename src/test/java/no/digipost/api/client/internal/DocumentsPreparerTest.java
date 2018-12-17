@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.internal;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.internal.DocumentsPreparer;
 import no.digipost.api.client.representations.Channel;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.FileType;

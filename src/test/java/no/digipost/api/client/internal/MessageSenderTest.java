@@ -13,18 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.internal;
 
+import no.digipost.api.client.ApiService;
+import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.delivery.DocumentContent;
 import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery.SendableForPrintOnly;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Channel;
+import no.digipost.api.client.representations.DigipostAddress;
+import no.digipost.api.client.representations.DigipostUri;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.EncryptionKey;
+import no.digipost.api.client.representations.FileType;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.IdentificationResultWithEncryptionKey;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.MayHaveSender;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.MessageRecipient;
+import no.digipost.api.client.representations.MessageStatus;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.PrintDetails;
+import no.digipost.api.client.representations.PrintRecipient;
+import no.digipost.api.client.representations.SmsNotification;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.FakeEncryptionKey;
-import no.digipost.api.client.util.MockfriendlyResponse;
+import no.digipost.api.client.testing.MockfriendlyResponse;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import no.digipost.time.ControllableClock;
@@ -50,7 +71,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.time.Duration.ofMillis;
@@ -59,7 +84,9 @@ import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.stream.Stream.concat;
 import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
-import static no.digipost.api.client.pdf.EksempelPdf.*;
+import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
+import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
+import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
@@ -67,17 +94,27 @@ import static no.digipost.api.client.representations.MessageStatus.DELIVERED;
 import static no.digipost.api.client.representations.MessageStatus.DELIVERED_TO_PRINT;
 import static no.digipost.api.client.representations.Relation.GET_ENCRYPTION_KEY;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.*;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.DELIVERY_DIRECT_TO_PRINT;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.DIGIPOST_DELIVERY;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_FONTS;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_MARGINS_LEFT;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PDFVERSION;
 import static no.digipost.api.client.representations.sender.SenderStatus.VALID_SENDER;
-import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
+import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 public class MessageSenderTest {
 
@@ -270,7 +307,7 @@ public class MessageSenderTest {
 
         Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
 
-        MessageSender messageSender = new MessageSender(newBuilder().build(), api, EventLogger.NOOP_LOGGER, pdfValidator);
+        MessageSender messageSender = new MessageSender(newBuilder().build(), api, EventLogger.NOOP_LOGGER, pdfValidator, clock);
         Message message = newMessage(messageId, printDocument).attachments(printAttachments)
                 .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress))).build();
 

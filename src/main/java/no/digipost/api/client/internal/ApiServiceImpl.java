@@ -13,14 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.internal;
 
+import no.digipost.api.client.ApiService;
+import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.Headers;
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
+import no.digipost.api.client.filters.request.RequestContentHashFilter;
+import no.digipost.api.client.filters.request.RequestDateInterceptor;
+import no.digipost.api.client.filters.request.RequestSignatureInterceptor;
+import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
+import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
+import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
+import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.Document;
-import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Identification;
@@ -36,14 +46,14 @@ import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.api.client.security.Digester;
+import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.MultipartNoLengthCheckHttpEntity;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -70,6 +80,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
@@ -87,10 +98,9 @@ public class ApiServiceImpl implements ApiService {
 
     private static final String ENTRY_POINT = "/";
     private final long brokerId;
-    private CloseableHttpClient httpClient;
+    private final CloseableHttpClient httpClient;
     private final URI digipostUrl;
-    private final RequestConfig config;
-    private final HttpClientBuilder httpClientBuilder;
+    private final Optional<RequestConfig> config;
 
     private final Cached cached;
     private final EventLogger eventLogger;
@@ -99,23 +109,23 @@ public class ApiServiceImpl implements ApiService {
     // which was the case for the pattern "yyyy-MM-dd'T'HH:mm:ss.SSSZZ". See commit messages for 59caeb5737e45a15 and dcf41785a84f42caf935 for details.
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
-    public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long brokerId, EventLogger eventLogger, URI digipostUrl, HttpHost proxy) {
+    public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long brokerId, EventLogger logger, URI digipostUrl, HttpHost proxyHost, Signer signer) {
         this.brokerId = brokerId;
-        this.eventLogger = eventLogger;
+        this.eventLogger = logger;
         this.digipostUrl = digipostUrl;
-        if(proxy != null) {
-            this.config = RequestConfig.custom()
-                    .setProxy(proxy)
-                    .build();
-        } else {
-            this.config = null;
-        }
+        this.config = Optional.ofNullable(proxyHost).map(host -> RequestConfig.custom().setProxy(host).build());
 
-        this.httpClientBuilder = httpClientBuilder;
         this.cached = new Cached(this::fetchEntryPoint);
+        this.httpClient = httpClientBuilder
+            .addInterceptorLast(new RequestDateInterceptor(logger))
+            .addInterceptorLast(new RequestUserAgentInterceptor())
+            .addInterceptorLast(new RequestSignatureInterceptor(signer, logger, new RequestContentHashFilter(logger, Digester.sha256, Headers.X_Content_SHA256)))
+            .addInterceptorLast(new ResponseDateInterceptor())
+            .addInterceptorLast(new ResponseContentSHA256Interceptor())
+            .addInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
+            .build();
     }
 
-    @Override
     public EntryPoint getEntryPoint() {
         return cached.entryPoint.get();
     }
@@ -332,20 +342,6 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
-    @Override
-    public void addFilter(HttpResponseInterceptor interceptor) {
-        httpClientBuilder.addInterceptorLast(interceptor);
-    }
-
-    @Override
-    public void addFilter(HttpRequestInterceptor interceptor) {
-        httpClientBuilder.addInterceptorLast(interceptor);
-    }
-
-    @Override
-    public void buildApacheHttpClientBuilder(){
-        httpClient = httpClientBuilder.build();
-    }
 
     @Override
     public CloseableHttpResponse identifyRecipient(final Identification identification) {
@@ -382,9 +378,7 @@ public class ApiServiceImpl implements ApiService {
 
     private CloseableHttpResponse send(HttpRequestBase request, HttpContext context){
         try {
-            if(config != null){
-                request.setConfig(config);
-            }
+            config.ifPresent(request::setConfig);
             request.setHeader(X_Digipost_UserId, brokerId + "");
             if (context == null) {
                 return httpClient.execute(request);

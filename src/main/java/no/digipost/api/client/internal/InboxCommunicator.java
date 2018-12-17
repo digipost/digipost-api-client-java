@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package no.digipost.api.client;
+package no.digipost.api.client.internal;
 
+import no.digipost.api.client.ApiService;
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 

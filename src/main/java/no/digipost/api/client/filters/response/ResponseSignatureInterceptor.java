@@ -15,8 +15,8 @@
  */
 package no.digipost.api.client.filters.response;
 
-import no.digipost.api.client.ApiService;
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.security.ClientResponseToVerify;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil;
 import org.apache.http.Header;
@@ -32,6 +32,7 @@ import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.function.Supplier;
 
 import static no.digipost.api.client.Headers.X_Digipost_Signature;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
@@ -40,10 +41,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 
     public static final String NOT_SIGNED_RESPONSE = "NOT_SIGNED_RESPONSE";
-    private final ApiService apiService;
+    private final Supplier<EntryPoint> entryPointResolver;
 
-    public ResponseSignatureInterceptor(final ApiService apiService) {
-        this.apiService = apiService;
+    public ResponseSignatureInterceptor(final Supplier<EntryPoint> entryPointResolver) {
+        this.entryPointResolver = entryPointResolver;
     }
 
     @Override
@@ -94,7 +95,7 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 
     public X509Certificate lastSertifikat() {
         try {
-            InputStream certStream = new ByteArrayInputStream(apiService.getEntryPoint().getCertificate().getBytes());
+            InputStream certStream = new ByteArrayInputStream(entryPointResolver.get().getCertificate().getBytes());
 
             CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
             X509Certificate sertifikat = (X509Certificate) cf.generateCertificate(certStream);

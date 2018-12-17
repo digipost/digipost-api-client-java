@@ -15,15 +15,21 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.AdditionalData;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.MayHaveSender;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
 import java.io.InputStream;
@@ -32,37 +38,24 @@ import java.time.ZonedDateTime;
 
 /**
  * Klasser som implementerer dette interfacet tar seg av de enkelte HTTP-forespørslene
- * man kan gjøre mot REST-API-et, nemlig:
+ * man kan gjøre mot REST-API-et:
  *
  * <ul>
- * <li>Hente søkeforslag (autocomplete)</li>
- * <li>Søke etter mottakere</li>
- * <li>Opprette en forsendelsesressurs på serveren
- * <li>Hente en allerede opprettet forsendelsesressurs fra serveren
- * <li>Sende innholdet for en allerede opprettet forsendelsesressurs til
- * serveren, og dermed sende brevet til mottakeren
- * <li>Opprette en printforsendelsesressurs på serveren
- * <li>Hente en allerede opprettet printforsendelsesressurs fra serveren
- * <li>Sende innholdet (PDF) for en allerede opprettet printforsendelsesressurs
- * til serveren, og dermed bestille print av brevet.
- * <li>Hente dokument-events, dvs. hendelser knyttet til brev man tidligere har sendt</li>
- *
+ *   <li>Hente søkeforslag (autocomplete)</li>
+ *   <li>Søke etter mottakere</li>
+ *   <li>Opprette en forsendelsesressurs på serveren</li>
+ *   <li>Hente en allerede opprettet forsendelsesressurs fra serveren</li>
+ *   <li>Sende innholdet for en allerede opprettet forsendelsesressurs til
+ *   serveren, og dermed sende brevet til mottakeren</li>
+ *   <li>Opprette en printforsendelsesressurs på serveren</li>
+ *   <li>Hente en allerede opprettet printforsendelsesressurs fra serveren</li>
+ *   <li>Sende innholdet (PDF) for en allerede opprettet printforsendelsesressurs
+ *   til serveren, og dermed bestille print av brevet.</li>
+ *   <li>Hente dokument-events, dvs. hendelser knyttet til brev man tidligere har sendt</li>
  * </ul>
  *
- * For å sende et brev gjennom Digipost er det tilstrekkelig å gjøre disse to
- * kallene:
- *
- * <pre>
- * createMessage(message);
- * addToContentAndSend(createdMessage, content);
- * </pre>
- *
- * Dette kan også gjøres ved å kalle metoden {@code sendMessage} i klassen
- * {@code MessageSender}, som i tillegg gjør en del feilhåndtering.
  */
 public interface ApiService {
-    EntryPoint getEntryPoint();
-
 
     /**
      * Oppretter og sender en multipartforsendelse
@@ -103,7 +96,7 @@ public interface ApiService {
     CloseableHttpResponse send(MessageDelivery createdMessage);
 
     /**
-     * Legger til ytterligere mdata til et dokument.
+     * Legger til ytterligere data til et dokument.
      * Det er en forutsetning at dokumentet har datatype fra tidligere.
      */
     CloseableHttpResponse addData(Document document, AdditionalData data);
@@ -111,12 +104,6 @@ public interface ApiService {
     Recipients search(String searchString);
 
     Autocomplete searchSuggest(String searchString);
-
-    void addFilter(HttpResponseInterceptor interceptor);
-
-    void addFilter(HttpRequestInterceptor interceptor);
-
-    void buildApacheHttpClientBuilder();
 
     CloseableHttpResponse identifyRecipient(Identification identification);
 

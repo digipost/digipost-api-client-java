@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.internal;
 
+import no.digipost.api.client.ApiService;
+import no.digipost.api.client.DigipostClientConfig;
+import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.delivery.DocumentContent;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.AdditionalData;
+import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.FileType;
 import no.digipost.api.client.representations.Identification;
@@ -84,11 +87,6 @@ public class MessageSender {
     private ZonedDateTime printKeyCachedTime = null;
     private DigipostPublicKey cachedPrintKey;
 
-
-
-    public MessageSender(DigipostClientConfig digipostClientConfig, ApiService apiService, EventLogger eventLogger, PdfValidator pdfValidator) {
-        this(digipostClientConfig, apiService, eventLogger, pdfValidator, Clock.systemDefaultZone());
-    }
 
     public MessageSender(DigipostClientConfig digipostClientConfig, ApiService apiService, EventLogger eventLogger, PdfValidator pdfValidator, Clock clock) {
         this.eventLogger = eventLogger.withDebugLogTo(LOG);

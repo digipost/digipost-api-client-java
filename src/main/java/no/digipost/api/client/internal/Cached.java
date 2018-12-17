@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.internal;
 
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.sender.SenderInformation;

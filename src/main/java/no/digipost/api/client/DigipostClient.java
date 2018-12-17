@@ -19,13 +19,10 @@ import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.filters.request.RequestContentHashFilter;
-import no.digipost.api.client.filters.request.RequestDateInterceptor;
-import no.digipost.api.client.filters.request.RequestSignatureInterceptor;
-import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
-import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
-import no.digipost.api.client.filters.response.ResponseDateInterceptor;
-import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
+import no.digipost.api.client.internal.ApiServiceImpl;
+import no.digipost.api.client.internal.DocumentCommunicator;
+import no.digipost.api.client.internal.InboxCommunicator;
+import no.digipost.api.client.internal.MessageSender;
 import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.Document;
@@ -42,7 +39,6 @@ import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
-import no.digipost.api.client.security.Digester;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JAXBContextUtils;
@@ -58,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.Clock;
 import java.time.ZonedDateTime;
 
 import static no.digipost.api.client.EventLogger.NOOP_LOGGER;
@@ -85,10 +82,6 @@ public class DigipostClient {
     private final MessageDeliverer deliverer;
     private final DocumentCommunicator documentCommunicator;
     private final InboxCommunicator inboxCommunicator;
-
-    private final ResponseSignatureInterceptor responseSignatureInterceptor;
-    private final ResponseContentSHA256Interceptor responseHashInterceptor = new ResponseContentSHA256Interceptor();
-    private final ResponseDateInterceptor responseDateInterceptor = new ResponseDateInterceptor();
 
 
     public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
@@ -126,23 +119,12 @@ public class DigipostClient {
         EventLogger logger = defaultIfNull(eventLogger, NOOP_LOGGER);
 
         this.apiService = overriddenApiService == null ?
-                new ApiServiceImpl(httpClientBuilder, brokerId, logger, URI.create(digipostUrl), proxy) : overriddenApiService;
+                new ApiServiceImpl(httpClientBuilder, brokerId, logger, URI.create(digipostUrl), proxy, signer) : overriddenApiService;
 
-        this.messageSender = new MessageSender(config, apiService, logger, new PdfValidator());
+        this.messageSender = new MessageSender(config, apiService, logger, new PdfValidator(), Clock.systemDefaultZone());
         this.deliverer = new MessageDeliverer(messageSender);
         this.documentCommunicator = new DocumentCommunicator(apiService, logger);
         this.inboxCommunicator = new InboxCommunicator(apiService);
-        this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
-
-        apiService.addFilter(new RequestDateInterceptor(logger));
-        apiService.addFilter(new RequestUserAgentInterceptor());
-        apiService.addFilter(new RequestSignatureInterceptor(signer, logger, new RequestContentHashFilter(logger, Digester.sha256, Headers.X_Content_SHA256)));
-        apiService.addFilter(responseDateInterceptor);
-        apiService.addFilter(responseHashInterceptor);
-        apiService.addFilter(responseSignatureInterceptor);
-
-        apiService.buildApacheHttpClientBuilder();
-
         this.eventLogger = eventLogger.withDebugLogTo(LOG);
         this.eventLogger.log("Initialiserte apache-klient mot " + digipostUrl);
     }
