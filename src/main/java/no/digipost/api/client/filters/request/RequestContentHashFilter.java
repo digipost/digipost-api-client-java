@@ -16,42 +16,34 @@
 package no.digipost.api.client.filters.request;
 
 import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.security.Digester;
 import org.apache.http.HttpRequest;
-import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
-
-public abstract class RequestContentHashFilter {
+public class RequestContentHashFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestContentHashFilter.class);
+
     private final EventLogger eventLogger;
-    private final Class<? extends ExtendedDigest> digestClass;
+    private final Digester digester;
     private final String header;
 
-    public RequestContentHashFilter(final EventLogger eventLogger, final Class<? extends ExtendedDigest> digestClass, final String header) {
-        this.eventLogger = (eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER).withDebugLogTo(LOG);
-        this.digestClass = digestClass;
+    public RequestContentHashFilter(EventLogger eventLogger, Digester digester, String header) {
+        this.eventLogger = (eventLogger != null ? eventLogger : EventLogger.NOOP_LOGGER).withDebugLogTo(LOG);
+        this.digester = digester;
         this.header = header;
     }
 
-    public RequestContentHashFilter(final Class<? extends ExtendedDigest> digestClass, final String header) {
-        this(NOOP_EVENT_LOGGER, digestClass, header);
+    public RequestContentHashFilter(Digester digester, final String header) {
+        this(EventLogger.NOOP_LOGGER, digester, header);
     }
 
     public void settContentHashHeader(final byte[] data, final HttpRequest httpRequest) {
-        try {
-            ExtendedDigest instance = digestClass.newInstance();
-            byte[] result = new byte[instance.getDigestSize()];
-            instance.update(data, 0, data.length);
-            instance.doFinal(result, 0);
-            String hash = new String(Base64.encode(result));
-            httpRequest.setHeader(header, hash);
-            eventLogger.log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
-        } catch (InstantiationException | IllegalAccessException e) {
-            eventLogger.log("Feil ved generering av " + header + " : " + e.getMessage());
-        }
+        byte[] result = digester.createDigest(data);
+        String hash = new String(Base64.encode(result));
+        httpRequest.setHeader(header, hash);
+        eventLogger.log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
     }
 }

@@ -17,18 +17,15 @@ package no.digipost.api.client.filters.request;
 
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.util.DateUtils;
-import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.time.Clock;
 import java.time.ZonedDateTime;
 
-import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
 import static org.apache.http.HttpHeaders.DATE;
 
 public class RequestDateInterceptor implements HttpRequestInterceptor {
@@ -42,12 +39,12 @@ public class RequestDateInterceptor implements HttpRequestInterceptor {
     }
 
     public RequestDateInterceptor(EventLogger eventLogger, Clock clock) {
-        this.eventLogger = (eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER).withDebugLogTo(LOG);
+        this.eventLogger = (eventLogger != null ? eventLogger : EventLogger.NOOP_LOGGER).withDebugLogTo(LOG);
         this.clock = clock;
     }
 
     @Override
-    public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+    public void process(HttpRequest httpRequest, HttpContext httpContext) {
         modifyRequest(httpRequest);
     }
 

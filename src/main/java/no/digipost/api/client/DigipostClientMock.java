@@ -17,7 +17,6 @@ package no.digipost.api.client;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.DigipostApiMock;
 import no.digipost.api.client.util.DigipostApiMock.Method;
 import no.digipost.api.client.util.DigipostApiMock.MockRequest;
@@ -77,13 +76,7 @@ public class DigipostClientMock {
 
         apiService = new ApiServiceImpl(httpClientBuilder, port, null, host, null);
         apiService.buildApacheHttpClientBuilder();
-        client = new DigipostClient(newBuilder().build(), "digipostmock-url", 1, new Signer() {
-
-            @Override
-            public byte[] sign(String dataToSign) {
-                return new byte[0];
-            }
-        }, apiService);
+        client = new DigipostClient(newBuilder().build(), "digipostmock-url", 1, dataToSign -> new byte[0], apiService);
     }
 
     public void start(){

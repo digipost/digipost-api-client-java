@@ -22,7 +22,6 @@ import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.protocol.HttpContext;
@@ -35,8 +34,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
 
-import static no.digipost.api.client.DigipostClient.NOOP_EVENT_LOGGER;
-
 public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestSignatureInterceptor.class);
@@ -45,20 +42,22 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
     private final RequestContentHashFilter hashFilter;
     private final EventLogger eventLogger;
 
-    public RequestSignatureInterceptor(final Signer signer, final RequestContentHashFilter hashFilter) {
-        this(signer, NOOP_EVENT_LOGGER, hashFilter);
+    public RequestSignatureInterceptor(Signer signer, RequestContentHashFilter hashFilter) {
+        this(signer, EventLogger.NOOP_LOGGER, hashFilter);
     }
 
-    public RequestSignatureInterceptor(final Signer signer, final EventLogger eventLogger, final RequestContentHashFilter hashFilter){
-        this.eventLogger = eventLogger != null ? eventLogger : NOOP_EVENT_LOGGER;
+    public RequestSignatureInterceptor(Signer signer, EventLogger eventLogger, RequestContentHashFilter hashFilter){
+        this.eventLogger = (eventLogger != null ? eventLogger : EventLogger.NOOP_LOGGER).withDebugLogTo(LOG);
         this.signer = signer;
         this.hashFilter = hashFilter;
     }
 
-    private void setSignatureHeader(final HttpRequest httpRequest) {
+    private void setSignatureHeader(HttpRequest httpRequest) {
         String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ClientRequestToSign(httpRequest));
-        eventLogger.log(getClass().getSimpleName() + " beregnet streng som skal signeres:\n===START SIGNATURSTRENG===\n" + stringToSign
-                + "===SLUTT SIGNATURSTRENG===");
+        eventLogger.log(getClass().getSimpleName() + " beregnet streng som skal signeres:\n" +
+                        "===START SIGNATURSTRENG===\n" +
+                        stringToSign +
+                        "===SLUTT SIGNATURSTRENG===");
 
         byte[] signatureBytes = signer.sign(stringToSign);
         String signature = new String(Base64.encode(signatureBytes));
@@ -67,7 +66,7 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
     }
 
     @Override
-    public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+    public void process(HttpRequest httpRequest, HttpContext httpContext) throws IOException {
 
         if(httpRequest instanceof HttpEntityEnclosingRequest) {
             HttpEntityEnclosingRequest request = (HttpEntityEnclosingRequest) httpRequest;

@@ -19,20 +19,30 @@ import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
+import no.digipost.api.client.filters.request.RequestContentHashFilter;
 import no.digipost.api.client.filters.request.RequestDateInterceptor;
 import no.digipost.api.client.filters.request.RequestSignatureInterceptor;
 import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
 import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.AdditionalData;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.DocumentEvents;
+import no.digipost.api.client.representations.DocumentStatus;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
+import no.digipost.api.client.security.Digester;
 import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JAXBContextUtils;
@@ -50,6 +60,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.time.ZonedDateTime;
 
+import static no.digipost.api.client.EventLogger.NOOP_LOGGER;
 import static no.digipost.api.client.util.HttpClientUtils.checkResponse;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -65,8 +76,6 @@ public class DigipostClient {
     static {
         CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
     }
-
-    public static final EventLogger NOOP_EVENT_LOGGER = eventText -> {};
 
     private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
 
@@ -84,17 +93,17 @@ public class DigipostClient {
 
     public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
                           final long brokerId, final InputStream certificateP12File, final String certificatePassword) {
-        this(config, digipostUrl, brokerId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
+        this(config, digipostUrl, brokerId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_LOGGER, null);
     }
 
     public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
                           final long brokerId, final Signer signer, final ApiService apiService) {
-        this(config, digipostUrl, brokerId, signer, NOOP_EVENT_LOGGER, null, apiService, null);
+        this(config, digipostUrl, brokerId, signer, NOOP_LOGGER, null, apiService, null);
     }
 
     public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
                           final long brokerId, final Signer signer, final HttpClientBuilder clientBuilder) {
-        this(config, digipostUrl, brokerId, signer, NOOP_EVENT_LOGGER, clientBuilder, null, null);
+        this(config, digipostUrl, brokerId, signer, NOOP_LOGGER, clientBuilder, null, null);
     }
 
     public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
@@ -114,7 +123,7 @@ public class DigipostClient {
                           final HttpClientBuilder clientBuilder, final ApiService overriddenApiService, final HttpHost proxy) {
         CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
         HttpClientBuilder httpClientBuilder = clientBuilder == null ? DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT) : clientBuilder;
-        EventLogger logger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
+        EventLogger logger = defaultIfNull(eventLogger, NOOP_LOGGER);
 
         this.apiService = overriddenApiService == null ?
                 new ApiServiceImpl(httpClientBuilder, brokerId, logger, URI.create(digipostUrl), proxy) : overriddenApiService;
@@ -127,7 +136,7 @@ public class DigipostClient {
 
         apiService.addFilter(new RequestDateInterceptor(logger));
         apiService.addFilter(new RequestUserAgentInterceptor());
-        apiService.addFilter(new RequestSignatureInterceptor(signer, logger, new RequestContentSHA256Filter(logger)));
+        apiService.addFilter(new RequestSignatureInterceptor(signer, logger, new RequestContentHashFilter(logger, Digester.sha256, Headers.X_Content_SHA256)));
         apiService.addFilter(responseDateInterceptor);
         apiService.addFilter(responseHashInterceptor);
         apiService.addFilter(responseSignatureInterceptor);
@@ -289,7 +298,7 @@ public class DigipostClient {
         private final Signer signer;
         private final DigipostClientConfig config;
         private HttpClientBuilder clientBuilder = null;
-        private EventLogger eventLogger = NOOP_EVENT_LOGGER;
+        private EventLogger eventLogger = EventLogger.NOOP_LOGGER;
         private ApiService apiService = null;
         private HttpHost proxy = null;
 

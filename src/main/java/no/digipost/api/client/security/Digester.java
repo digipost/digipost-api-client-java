@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters.request;
+package no.digipost.api.client.security;
 
-import no.digipost.api.client.EventLogger;
-import no.digipost.api.client.Headers;
+import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
-public class RequestContentSHA256Filter extends RequestContentHashFilter {
-    public RequestContentSHA256Filter(final EventLogger eventListener) {
-        super(eventListener, SHA256Digest.class, Headers.X_Content_SHA256);
-    }
+@FunctionalInterface
+public interface Digester {
 
-    public RequestContentSHA256Filter() {
-        super(SHA256Digest.class, Headers.X_Content_SHA256);
-    }
+    final static Digester sha256 = data -> {
+        ExtendedDigest instance = new SHA256Digest();
+        byte[] result = new byte[instance.getDigestSize()];
+        instance.update(data, 0, data.length);
+        instance.doFinal(result, 0);
+        return result;
+    };
+
+    byte[] createDigest(byte[] data);
+
 }

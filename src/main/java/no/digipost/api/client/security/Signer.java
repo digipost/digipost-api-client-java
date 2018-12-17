@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.security;
 
+@FunctionalInterface
 public interface Signer {
 
     public byte[] sign(String dataToSign);

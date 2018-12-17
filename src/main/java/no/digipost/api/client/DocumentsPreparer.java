@@ -20,7 +20,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.Channel;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.util.Encrypter;
+import no.digipost.api.client.security.Encrypter;
 import no.digipost.print.validate.PdfValidationResult;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;

@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 
-import static no.digipost.api.client.Headers.*;
+import static no.digipost.api.client.Headers.Content_MD5;
+import static no.digipost.api.client.Headers.X_Content_SHA256;
+import static no.digipost.api.client.Headers.X_Digipost_UserId;
 
 public class RequestMessageSignatureUtil {
 
@@ -30,12 +32,10 @@ public class RequestMessageSignatureUtil {
             X_Digipost_UserId.toLowerCase(), X_Content_SHA256.toLowerCase());
 
     public static String getCanonicalRequestRepresentation(final RequestToSign request) {
-        StringBuilder s = new StringBuilder();
-        s.append(getCanonicalMethodRepresentation(request));
-        s.append(getCanonicalUrlRepresentation(request));
-        s.append(getCanonicalHeaderRepresentation(request));
-        s.append(getCanonicalParameterRepresentation(request));
-        return s.toString();
+        return getCanonicalMethodRepresentation(request) +
+               getCanonicalUrlRepresentation(request) +
+               getCanonicalHeaderRepresentation(request) +
+               getCanonicalParameterRepresentation(request);
     }
 
     private static String getCanonicalMethodRepresentation(final RequestToSign request) {
