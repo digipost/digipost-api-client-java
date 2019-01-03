@@ -105,8 +105,8 @@ public class Document extends Representation {
         this(uuid, subject, fileType, null, null, null, null, null, null, null, (String[]) null);
     }
 
-    public Document(String uuid, String subject, FileType fileType, DataType dataType) {
-        this(uuid, subject, fileType, null, null, null, null, null, null, dataType, (String[]) null);
+    public Document(String uuid, String subject, FileType fileType, DataType data) {
+        this(uuid, subject, fileType, null, null, null, null, null, null, data, (String[]) null);
     }
 
     public Document(String uuid, String subject, FileType fileType, String openingReceipt,
@@ -120,7 +120,7 @@ public class Document extends Representation {
     public Document(String uuid, String subject, FileType fileType, String openingReceipt,
                     SmsNotification smsNotification, EmailNotification emailNotification,
                     AuthenticationLevel authenticationLevel,
-                    SensitivityLevel sensitivityLevel, Boolean opened, DataType dataType, String... technicalType) {
+                    SensitivityLevel sensitivityLevel, Boolean opened, DataType data, String... technicalType) {
         this.uuid = lowerCase(uuid);
         this.subject = subject;
         this.digipostFileType = Objects.toString(fileType, null);
@@ -131,7 +131,7 @@ public class Document extends Representation {
         this.authenticationLevel = authenticationLevel;
         this.sensitivityLevel = sensitivityLevel;
         this.technicalType = parseTechnicalTypes(technicalType);
-        this.dataType = dataType != null ? new DataTypeHolder(dataType) : null;
+        this.dataType = data != null ? new DataTypeHolder(data) : null;
         validate();
     }
 

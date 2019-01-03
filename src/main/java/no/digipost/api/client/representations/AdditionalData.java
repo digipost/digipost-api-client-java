@@ -41,16 +41,16 @@ public class AdditionalData {
     }
 
     public static class Builder {
-        private DataType dataType = null;
+        private DataType data;
         private SenderOrganization senderOrganization = null;
         private Long senderId = null;
 
-        private Builder(DataType dataType) {
-            this.dataType = dataType;
+        private Builder(DataType data) {
+            this.data = data;
         }
 
-        public static Builder newAdditionalData(DataType dataType) {
-            return new Builder(dataType);
+        public static Builder newAdditionalData(DataType data) {
+            return new Builder(data);
         }
 
         public Builder setSenderOrganization(SenderOrganization senderOrganization) {
@@ -67,12 +67,12 @@ public class AdditionalData {
             if (senderId != null && senderOrganization != null) {
                 throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
             }
-            return new AdditionalData(dataType, senderOrganization, senderId);
+            return new AdditionalData(data, senderOrganization, senderId);
         }
     }
 
-    private AdditionalData(DataType dataType, SenderOrganization senderOrganization, Long senderId) {
-        this.dataType = new DataTypeHolder(dataType);
+    private AdditionalData(DataType data, SenderOrganization senderOrganization, Long senderId) {
+        this.dataType = new DataTypeHolder(data);
         this.senderOrganization = senderOrganization;
         this.senderId = senderId;
     }

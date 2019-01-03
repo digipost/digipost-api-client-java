@@ -31,16 +31,16 @@ public class DataTypeHolder {
 
     @XmlAnyElement
     @XmlJavaTypeAdapter(DataTypeXmlAdapter.class)
-    private DataType dataType;
+    private DataType data;
 
-    public DataTypeHolder(DataType dataType) {
-        this.dataType = dataType;
+    public DataTypeHolder(DataType data) {
+        this.data = data;
     }
 
     public DataTypeHolder () {
     }
 
     public DataType get() {
-        return dataType;
+        return data;
     }
 }
