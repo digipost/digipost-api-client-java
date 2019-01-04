@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters.request;
+package no.digipost.api.client.internal.http.request.interceptor;
 
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.util.DateUtils;

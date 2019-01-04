@@ -26,7 +26,7 @@ import javax.xml.bind.JAXBException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static no.digipost.api.client.util.ExceptionUtils.exceptionNameAndMessage;
+import static no.digipost.api.client.internal.ExceptionUtils.exceptionNameAndMessage;
 
 public class JAXBContextUtils {
     public static final JAXBContext jaxbContext = initContext(

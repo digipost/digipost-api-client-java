@@ -58,7 +58,7 @@ import java.time.Clock;
 import java.time.ZonedDateTime;
 
 import static no.digipost.api.client.EventLogger.NOOP_LOGGER;
-import static no.digipost.api.client.util.HttpClientUtils.checkResponse;
+import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 

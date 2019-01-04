@@ -13,18 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters.request;
+package no.digipost.api.client.internal;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.protocol.HttpContext;
+public final class ExceptionUtils {
 
-import static no.digipost.api.client.util.UserAgent.DIGIPOST_USER_AGENT;
-import static org.apache.http.HttpHeaders.USER_AGENT;
+    public static String exceptionNameAndMessage(Throwable t) {
+        return t.getClass().getSimpleName() + ": '" + t.getMessage() + "'";
+    }
 
-public class RequestUserAgentInterceptor implements HttpRequestInterceptor {
-    @Override
-    public void process(HttpRequest httpRequest, HttpContext httpContext) {
-        httpRequest.setHeader(USER_AGENT, DIGIPOST_USER_AGENT);
+    private ExceptionUtils() {
     }
 }

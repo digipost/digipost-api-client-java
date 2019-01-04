@@ -13,31 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.security;
+package no.digipost.api.client.internal.http.request.interceptor;
 
 
+import no.digipost.api.client.internal.http.request.interceptor.ApacheHttpRequestToSign;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class ClientRequestToSignTest {
+public class ApacheHttpRequestToSignTest {
 
     @Test
     public void testStandardQuery(){
-        String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?query=1&query=2");
+        String s = ApacheHttpRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?query=1&query=2");
         assertThat(s, is("query=1&query=2"));
     }
 
     @Test
     public void testStandardNonQuery(){
-        String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com");
+        String s = ApacheHttpRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com");
         assertThat(s, is(""));
     }
 
     @Test
     public void testNonStandardNonQuery(){
-        String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?");
+        String s = ApacheHttpRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?");
         assertThat(s, is(""));
     }
 

@@ -17,17 +17,17 @@ package no.digipost.api.client.internal;
 
 import no.digipost.api.client.ApiService;
 import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.internal.http.response.HttpResponseUtils;
 import no.digipost.api.client.representations.DocumentEvents;
 import no.digipost.api.client.representations.DocumentStatus;
 import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.util.HttpClientUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 
-import static no.digipost.api.client.util.HttpClientUtils.checkResponse;
+import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
@@ -52,7 +52,7 @@ public class DocumentCommunicator  {
     }
 
     public InputStream getContent(String path) {
-        return HttpClientUtils.safelyOfferEntityStreamExternally(apiService.getContent(path), eventLogger);
+        return HttpResponseUtils.safelyOfferEntityStreamExternally(apiService.getContent(path), eventLogger);
     }
 
     public DocumentStatus getDocumentStatus(Link linkToDocumentStatus) {

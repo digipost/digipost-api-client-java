@@ -20,11 +20,12 @@ import org.apache.http.HttpHeaders;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.SortedMap;
 
-import static no.digipost.api.client.Headers.Content_MD5;
-import static no.digipost.api.client.Headers.X_Content_SHA256;
-import static no.digipost.api.client.Headers.X_Digipost_UserId;
+import static no.digipost.api.client.internal.http.Headers.Content_MD5;
+import static no.digipost.api.client.internal.http.Headers.X_Content_SHA256;
+import static no.digipost.api.client.internal.http.Headers.X_Digipost_UserId;
+
+import java.util.SortedMap;
 
 public class RequestMessageSignatureUtil {
 

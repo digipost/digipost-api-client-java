@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.util;
+package no.digipost.api.client.internal.http;
 
-import org.junit.Test;
+public final class Headers {
 
-import static no.digipost.api.client.util.UserAgent.DIGIPOST_USER_AGENT;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+    private static final String X_Digipost_Prefix = "X-Digipost-";
 
-public class UserAgentTest {
+    public static final String X_Digipost_Signature = X_Digipost_Prefix + "Signature";
+    public static final String X_Digipost_UserId = X_Digipost_Prefix + "UserId";
 
-    @Test
-    public void should_return_correct_user_agent() {
-        assertThat(DIGIPOST_USER_AGENT, containsString("no.digipost - digipost-api-client-java"));
-    }
+    public static final String Content_MD5 = "Content-MD5";
+    public static final String X_Content_SHA256 = "X-Content-SHA256";
 
 }

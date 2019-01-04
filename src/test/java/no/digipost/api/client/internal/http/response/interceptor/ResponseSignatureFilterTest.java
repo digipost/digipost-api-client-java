@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters.response;
+package no.digipost.api.client.internal.http.response.interceptor;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.internal.http.response.interceptor.ResponseSignatureInterceptor;
 import no.digipost.api.client.representations.EntryPoint;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;

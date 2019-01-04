@@ -16,7 +16,6 @@
 package no.digipost.api.client.security;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.util.DigipostPublicKey;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedData;

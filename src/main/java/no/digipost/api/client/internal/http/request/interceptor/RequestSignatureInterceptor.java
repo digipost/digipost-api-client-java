@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters.request;
+package no.digipost.api.client.internal.http.request.interceptor;
 
 import no.digipost.api.client.EventLogger;
-import no.digipost.api.client.Headers;
-import no.digipost.api.client.security.ClientRequestToSign;
+import no.digipost.api.client.internal.http.Headers;
 import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
 import org.apache.http.HttpEntity;
@@ -53,7 +52,7 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
     }
 
     private void setSignatureHeader(HttpRequest httpRequest) {
-        String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ClientRequestToSign(httpRequest));
+        String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ApacheHttpRequestToSign(httpRequest));
         eventLogger.log(getClass().getSimpleName() + " beregnet streng som skal signeres:\n" +
                         "===START SIGNATURSTRENG===\n" +
                         stringToSign +

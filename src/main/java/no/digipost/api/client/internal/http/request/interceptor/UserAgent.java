@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.util;
+package no.digipost.api.client.internal.http.request.interceptor;
 
 import java.io.InputStream;
 import java.util.Properties;
 
-public class UserAgent {
+class UserAgent {
 
     private static final String DIGIPOST_USER_AGENT_FALLBACK = "Digipost API Client";
 
@@ -28,7 +28,7 @@ public class UserAgent {
 
         String userAgentTmp;
 
-        try (InputStream in = UserAgent.class.getResourceAsStream("user-agent.properties")) {
+        try (InputStream in = UserAgent.class.getResourceAsStream("/user-agent.properties")) {
             Properties properties = new Properties();
             properties.load(in);
             userAgentTmp = properties.getProperty("user-agent", DIGIPOST_USER_AGENT_FALLBACK);

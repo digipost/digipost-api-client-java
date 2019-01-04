@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters.response;
+package no.digipost.api.client.internal.http.response.interceptor;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.EntryPoint;
-import no.digipost.api.client.security.ClientResponseToVerify;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -34,8 +33,8 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.function.Supplier;
 
-import static no.digipost.api.client.Headers.X_Digipost_Signature;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
+import static no.digipost.api.client.internal.http.Headers.X_Digipost_Signature;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
@@ -58,7 +57,7 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
             String serverSignaturBase64 = getServerSignaturFromResponse(response);
             byte[] serverSignaturBytes = Base64.decode(serverSignaturBase64.getBytes());
 
-            String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ClientResponseToVerify(context, response));
+            String signatureString = ResponseMessageSignatureUtil.getCanonicalResponseRepresentation(new ApacheHttpResponseToVerify(context, response));
 
             Signature instance = Signature.getInstance("SHA256WithRSAEncryption");
             instance.initVerify(lastSertifikat());

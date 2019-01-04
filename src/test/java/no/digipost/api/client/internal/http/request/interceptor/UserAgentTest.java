@@ -13,11 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.util;
+package no.digipost.api.client.internal.http.request.interceptor;
 
-public class ExceptionUtils {
+import org.junit.Test;
 
-    public static String exceptionNameAndMessage(Throwable t) {
-        return t.getClass().getSimpleName() + ": '" + t.getMessage() + "'";
+import static no.digipost.api.client.internal.http.request.interceptor.UserAgent.DIGIPOST_USER_AGENT;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
+
+public class UserAgentTest {
+
+    @Test
+    public void should_return_correct_user_agent() {
+        assertThat(DIGIPOST_USER_AGENT, containsString("no.digipost - digipost-api-client-java"));
     }
+
 }

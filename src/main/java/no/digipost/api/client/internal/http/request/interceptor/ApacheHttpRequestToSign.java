@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.security;
+package no.digipost.api.client.internal.http.request.interceptor;
 
+import no.digipost.api.client.security.RequestToSign;
 import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 
@@ -23,11 +24,11 @@ import java.net.URISyntaxException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class ClientRequestToSign implements RequestToSign {
+final class ApacheHttpRequestToSign implements RequestToSign {
 
     private final HttpRequest clientRequest;
 
-    public ClientRequestToSign(final HttpRequest httpRequest) {
+    public ApacheHttpRequestToSign(final HttpRequest httpRequest) {
         this.clientRequest = httpRequest;
     }
 

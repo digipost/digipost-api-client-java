@@ -27,7 +27,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicStatusLine;
-import org.apache.http.params.HttpParams;
 
 import javax.xml.bind.JAXB;
 
@@ -201,12 +200,12 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 
     @Override
     @SuppressWarnings("deprecation")
-    public HttpParams getParams() {
+    public org.apache.http.params.HttpParams getParams() {
         throw new UnsupportedOperationException("This is a mock");
     }
 
     @Override
-    public void setParams(@SuppressWarnings("deprecation") HttpParams params) {
+    public void setParams(@SuppressWarnings("deprecation") org.apache.http.params.HttpParams params) {
         throw new UnsupportedOperationException("This is a mock");
     }
 

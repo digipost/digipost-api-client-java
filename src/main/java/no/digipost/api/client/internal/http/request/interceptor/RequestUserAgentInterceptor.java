@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.internal.http.request.interceptor;
 
-public final class Headers {
-    public static final String X_Digipost_Prefix = "X-Digipost-";
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.protocol.HttpContext;
 
-    public static final String X_Digipost_Signature = X_Digipost_Prefix + "Signature";
-    public static final String X_Digipost_UserId = X_Digipost_Prefix + "UserId";
+import static no.digipost.api.client.internal.http.request.interceptor.UserAgent.DIGIPOST_USER_AGENT;
+import static org.apache.http.HttpHeaders.USER_AGENT;
 
-    public static final String Content_MD5 = "Content-MD5";
-    public static final String X_Content_SHA256 = "X-Content-SHA256";
-
+public class RequestUserAgentInterceptor implements HttpRequestInterceptor {
+    @Override
+    public void process(HttpRequest httpRequest, HttpContext httpContext) {
+        httpRequest.setHeader(USER_AGENT, DIGIPOST_USER_AGENT);
+    }
 }

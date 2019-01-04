@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.filters.response;
+package no.digipost.api.client.internal.http.response.interceptor;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import org.apache.commons.lang3.StringUtils;
@@ -30,8 +30,8 @@ import org.bouncycastle.util.encoders.Base64;
 import java.io.IOException;
 import java.util.Optional;
 
-import static no.digipost.api.client.Headers.X_Content_SHA256;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
+import static no.digipost.api.client.internal.http.Headers.X_Content_SHA256;
 
 public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor {
 

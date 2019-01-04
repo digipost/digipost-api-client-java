@@ -15,11 +15,11 @@
  */
 package no.digipost.api.client;
 
-public class SenderId {
+public final class SenderId {
 
     private final long id;
 
-    public SenderId(final long id) {
+    public SenderId(long id) {
         this.id = id;
     }
 

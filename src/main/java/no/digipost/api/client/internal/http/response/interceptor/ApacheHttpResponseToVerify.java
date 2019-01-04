@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.security;
+package no.digipost.api.client.internal.http.response.interceptor;
 
+import no.digipost.api.client.security.ResponseToVerify;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
@@ -22,12 +23,12 @@ import org.apache.http.protocol.HttpContext;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class ClientResponseToVerify implements ResponseToVerify{
+final class ApacheHttpResponseToVerify implements ResponseToVerify {
 
     private final HttpContext context;
     private final HttpResponse response;
 
-    public ClientResponseToVerify(final HttpContext context, final HttpResponse response) {
+    public ApacheHttpResponseToVerify(final HttpContext context, final HttpResponse response) {
         this.context = context;
         this.response = response;
     }
@@ -39,11 +40,10 @@ public class ClientResponseToVerify implements ResponseToVerify{
 
     @Override
     public SortedMap<String, String> getHeaders() {
-        TreeMap<String, String> sortedHeaders = new TreeMap<>();
+        SortedMap<String, String> sortedHeaders = new TreeMap<>();
         for(Header header : response.getAllHeaders()){
             sortedHeaders.put(header.getName(), header.getValue());
         }
-
         return sortedHeaders;
     }
 

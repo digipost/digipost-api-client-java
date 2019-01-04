@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.util;
+package no.digipost.api.client.internal.http.response;
 
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.errorhandling.DigipostClientException;
@@ -33,11 +33,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
-import static no.digipost.api.client.util.ExceptionUtils.exceptionNameAndMessage;
+import static no.digipost.api.client.internal.ExceptionUtils.exceptionNameAndMessage;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public final class HttpClientUtils {
+public final class HttpResponseUtils {
 
     /**
      * Do proper resource handling in the case when offering the {@link InputStream stream} from a http response
@@ -52,7 +52,7 @@ public final class HttpClientUtils {
     public static InputStream safelyOfferEntityStreamExternally(CloseableHttpResponse response, EventLogger eventLogger) {
         HttpEntity entity = null;
         try {
-            HttpClientUtils.checkResponse(response, eventLogger);
+            checkResponse(response, eventLogger);
             entity = response.getEntity();
             return entity.getContent();
         } catch (IOException | RuntimeException e) {
@@ -119,5 +119,6 @@ public final class HttpClientUtils {
         }
     }
 
-    private HttpClientUtils() {}
+    private HttpResponseUtils() {
+    }
 }
