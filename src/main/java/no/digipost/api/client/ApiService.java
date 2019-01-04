@@ -99,7 +99,7 @@ public interface ApiService {
      * Legger til ytterligere data til et dokument.
      * Det er en forutsetning at dokumentet har datatype fra tidligere.
      */
-    CloseableHttpResponse addData(Document document, AdditionalData data);
+    CloseableHttpResponse addData(Link document, AdditionalData data);
 
     Recipients search(String searchString);
 

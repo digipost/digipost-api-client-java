@@ -252,9 +252,9 @@ public class MessageSender {
         return deliveredMessage;
     }
 
-    public void addData(Document document, AdditionalData data) {
-        eventLogger.log("*** STARTER INTERAKSJON MED API: LEGGER TIL DATA PÅ DOKUMENT MED ID " + document.uuid + " ***");
-        try (CloseableHttpResponse response = apiService.addData(document, data)) {
+    public void addData(Link addDataLink, AdditionalData data) {
+        eventLogger.log("*** STARTER INTERAKSJON MED API: LEGGER TIL DATA PÅ DOKUMENT ***");
+        try (CloseableHttpResponse response = apiService.addData(addDataLink, data)) {
 
             checkResponse(response, eventLogger);
 

@@ -157,8 +157,8 @@ public class DigipostClient {
         }
     }
 
-    public void addData(Document document, AdditionalData data) {
-        messageSender.addData(document, data);
+    public void addData(Link addDataLink, AdditionalData data) {
+        messageSender.addData(addDataLink, data);
     }
 
     public Recipients search(final String searchString) {

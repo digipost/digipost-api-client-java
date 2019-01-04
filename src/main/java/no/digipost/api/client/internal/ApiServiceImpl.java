@@ -221,9 +221,7 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public CloseableHttpResponse addData(Document document, AdditionalData data) {
-        Link addDataLink = document.getAddDataLink();
-
+    public CloseableHttpResponse addData(Link addDataLink, AdditionalData data) {
         HttpPost httpPost = new HttpPost(digipostUrl.resolve(addDataLink.getUri().getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
