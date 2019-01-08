@@ -15,8 +15,19 @@
  */
 package no.digipost.api.client.security;
 
+import java.io.InputStream;
+import java.security.PrivateKey;
+
 @FunctionalInterface
 public interface Signer {
+
+    static Signer usingKeyFromPKCS12KeyStore(InputStream keystoreStream, String keyStoreAndKeyPassword) {
+        return Signer.using(CryptoUtil.loadKeyFromP12(keystoreStream, keyStoreAndKeyPassword));
+    }
+
+    static Signer using(PrivateKey privateKey) {
+        return new SignerUsingPrivateKey(privateKey);
+    }
 
     public byte[] sign(String dataToSign);
 

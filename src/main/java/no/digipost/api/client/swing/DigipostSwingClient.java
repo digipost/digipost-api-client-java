@@ -16,6 +16,7 @@
 package no.digipost.api.client.swing;
 
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
@@ -31,6 +32,7 @@ import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.security.Signer;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -62,13 +64,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.UUID;
 
 import static java.lang.Integer.parseInt;
 import static java.nio.file.Files.newInputStream;
-import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
@@ -627,9 +630,13 @@ public class DigipostSwingClient {
                 CardLayout layout = (CardLayout) contentPane.getLayout();
                 layout.show(contentPane, BREV);
 
-                try {
-                    client = new DigipostClient(newBuilder().build(), endpointField.getText(), Long.parseLong(senderField.getText()),
-                            newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger, null, null);
+                DigipostClientConfig clientConfig = DigipostClientConfig.newConfiguration()
+                        .eventLogger(eventLogger)
+                        .digipostApiUri(URI.create(endpointField.getText()))
+                        .build();
+                try (InputStream certStream = newInputStream(Paths.get(certField.getText()))) {
+                    client = new DigipostClient(clientConfig, Long.parseLong(senderField.getText()),
+                            Signer.usingKeyFromPKCS12KeyStore(certStream, new String(passwordField.getPassword())));
                 } catch (NumberFormatException e1) {
                     eventLogger.log("FEIL: Avsenders ID må være et tall > 0");
                 } catch (IOException e1) {

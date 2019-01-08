@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client.testing;
 
-import no.digipost.api.client.ApiService;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
@@ -49,7 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
-import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
+import static no.digipost.api.client.DigipostClientConfig.newConfiguration;
 import static no.digipost.api.client.testing.UnusedPortFinder.getNextAvailablePort;
 
 /**
@@ -61,7 +60,7 @@ public class DigipostClientMock {
     public final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
 
     private final DigipostClient client;
-    private final ApiService apiService;
+    private final ApiServiceImpl apiService;
     private final int port;
     private static final DigipostApiMock digipostApiMock = new DigipostApiMock();
     private static final String KEY_STORE_PASSWORD = "Qwer12345";
@@ -72,13 +71,13 @@ public class DigipostClientMock {
     }
 
     public DigipostClientMock(UnaryOperator<DigipostHttpClientSettings> clientCustomizer) {
-        port = getNextAvailablePort(6666, 6676);
+        this.port = getNextAvailablePort(6666, 6676);
         URI host = URI.create("http://localhost:" + port);
 
         HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(clientCustomizer.apply(DigipostHttpClientSettings.DEFAULT));
 
-        apiService = new ApiServiceImpl(httpClientBuilder, port, null, host, null, data -> new byte[0]);
-        client = new DigipostClient(newBuilder().build(), "digipostmock-url", 1, dataToSign -> new byte[0], apiService);
+        this.apiService = new ApiServiceImpl(httpClientBuilder, 1, null, host, data -> new byte[0]);
+        this.client = new DigipostClient(newConfiguration().digipostApiUri(URI.create("digipostmockurl")).build(), apiService, apiService);
     }
 
     public void start(){

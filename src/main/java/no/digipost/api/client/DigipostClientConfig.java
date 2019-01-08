@@ -15,27 +15,61 @@
  */
 package no.digipost.api.client;
 
-public class DigipostClientConfig {
-    public final boolean cachePrintKey;
+import java.net.URI;
+import java.time.Duration;
 
-    private DigipostClientConfig(boolean cachePrintKey){
-        this.cachePrintKey = cachePrintKey;
+import static java.util.Objects.requireNonNull;
+
+public final class DigipostClientConfig {
+
+    public static Builder newConfiguration() {
+        return new Builder();
     }
 
-    public static class DigipostClientConfigBuilder {
-        private boolean cachePrintKey = true;
+    public static class Builder {
+        private Duration printKeyCacheTimeToLive = Duration.ofMinutes(5);
+        private URI digipostApiUri = URI.create("https://api.digipost.no");
+        private EventLogger eventLogger = EventLogger.NOOP_LOGGER;
 
-        public static DigipostClientConfigBuilder newBuilder(){
-            return new DigipostClientConfigBuilder();
+        private Builder() {
         }
 
-        public DigipostClientConfigBuilder cachePrintKey(boolean cachePrintKey){
-            this.cachePrintKey = cachePrintKey;
+        public Builder digipostApiUri(URI uri) {
+            this.digipostApiUri = uri;
             return this;
         }
 
-        public DigipostClientConfig build(){
-            return new DigipostClientConfig(cachePrintKey);
+        public Builder disablePrintKeyCache() {
+            return printKeyCacheTimeToLive(Duration.ZERO);
+        }
+
+        public Builder printKeyCacheTimeToLive(Duration cachePrintKey) {
+            this.printKeyCacheTimeToLive = cachePrintKey;
+            return this;
+        }
+
+        public Builder eventLogger(EventLogger eventLogger) {
+            this.eventLogger = eventLogger;
+            return this;
+        }
+
+        public DigipostClientConfig build() {
+            return new DigipostClientConfig(digipostApiUri, printKeyCacheTimeToLive, eventLogger);
         }
     }
+
+
+
+
+
+    public final URI digipostApiUri;
+    public final Duration printKeyCacheTimeToLive;
+    public final EventLogger eventLogger;
+
+    private DigipostClientConfig(URI digipostApiUri, Duration printKeyCacheTimeToLive, EventLogger eventLogger) {
+        this.digipostApiUri = requireNonNull(digipostApiUri, "digipostApiUri cat not be null");
+        this.printKeyCacheTimeToLive = requireNonNull(printKeyCacheTimeToLive, "printKeyCacheTimeToLive can not be null");
+        this.eventLogger = requireNonNull(eventLogger, "eventLogger can not be null");
+    }
+
 }

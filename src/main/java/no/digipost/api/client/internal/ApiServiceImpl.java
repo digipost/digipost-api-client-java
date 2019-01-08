@@ -17,6 +17,7 @@ package no.digipost.api.client.internal;
 
 import no.digipost.api.client.ApiService;
 import no.digipost.api.client.EventLogger;
+import no.digipost.api.client.InboxApiService;
 import no.digipost.api.client.SenderId;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
@@ -54,9 +55,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -81,7 +80,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
@@ -95,13 +93,12 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public class ApiServiceImpl implements ApiService {
+public class ApiServiceImpl implements ApiService, InboxApiService {
 
     private static final String ENTRY_POINT = "/";
     private final long brokerId;
     private final CloseableHttpClient httpClient;
     private final URI digipostUrl;
-    private final Optional<RequestConfig> config;
 
     private final Cached cached;
     private final EventLogger eventLogger;
@@ -110,11 +107,10 @@ public class ApiServiceImpl implements ApiService {
     // which was the case for the pattern "yyyy-MM-dd'T'HH:mm:ss.SSSZZ". See commit messages for 59caeb5737e45a15 and dcf41785a84f42caf935 for details.
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
-    public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long brokerId, EventLogger logger, URI digipostUrl, HttpHost proxyHost, Signer signer) {
+    public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long brokerId, EventLogger logger, URI digipostUrl, Signer signer) {
         this.brokerId = brokerId;
         this.eventLogger = logger;
         this.digipostUrl = digipostUrl;
-        this.config = Optional.ofNullable(proxyHost).map(host -> RequestConfig.custom().setProxy(host).build());
 
         this.cached = new Cached(this::fetchEntryPoint);
         this.httpClient = httpClientBuilder
@@ -377,7 +373,6 @@ public class ApiServiceImpl implements ApiService {
 
     private CloseableHttpResponse send(HttpRequestBase request, HttpContext context){
         try {
-            config.ifPresent(request::setConfig);
             request.setHeader(X_Digipost_UserId, brokerId + "");
             if (context == null) {
                 return httpClient.execute(request);

@@ -16,6 +16,7 @@
 package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageRecipient;
@@ -24,6 +25,7 @@ import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.security.Signer;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -33,7 +35,6 @@ import java.io.InputStream;
 import java.security.Security;
 import java.util.UUID;
 
-import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
@@ -52,18 +53,21 @@ public class FallbackTilPrintEksempel {
     // Passordet sertifikatfilen er beskyttet med
     private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
 
         // 1. For å kunne kryptere brevet som skal sendes trenger vi
         // BouncyCastle
         Security.addProvider(new BouncyCastleProvider());
 
-        // 2. Vi leser inn sertifikatet du har knyttet til din Digipost-konto (i
-        // .p12-formatet)
-        InputStream sertifikatInputStream = lesInnSertifikat();
+        // 2. Vi lager en Signer ved å lese inn sertifikatet du har knyttet til
+        // din Digipost-konto (i .p12-formatet)
+        Signer signer;
+        try (InputStream sertifikatInputStream = lesInnSertifikat()) {
+            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, SERTIFIKAT_PASSORD);
+        }
 
         // 3. Vi oppretter en DigipostClient
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, signer);
 
         // 4. Vi oppretter et fødselsnummerobjekt som skal brukes til å
         // identifisere mottaker i Digipost

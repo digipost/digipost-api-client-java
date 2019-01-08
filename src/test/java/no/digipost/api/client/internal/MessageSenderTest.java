@@ -16,7 +16,6 @@
 package no.digipost.api.client.internal;
 
 import no.digipost.api.client.ApiService;
-import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.delivery.DocumentContent;
 import no.digipost.api.client.delivery.MessageDeliverer;
 import no.digipost.api.client.delivery.OngoingDelivery.SendableForPrintOnly;
@@ -83,7 +82,7 @@ import static java.time.Duration.ofMinutes;
 import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.stream.Stream.concat;
-import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
+import static no.digipost.api.client.DigipostClientConfig.newConfiguration;
 import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
@@ -161,9 +160,9 @@ public class MessageSenderTest {
                 .entity(new ByteArrayEntity(bao.toByteArray()))
                 .build();
 
-        sender = new MessageSender(newBuilder().cachePrintKey(true).build(), api, EventLogger.NOOP_LOGGER, pdfValidator, clock);
+        sender = new MessageSender(newConfiguration().build(), api, new DocumentsPreparer(pdfValidator), clock);
 
-        cachelessSender = new MessageSender(newBuilder().cachePrintKey(false).build(), api, EventLogger.NOOP_LOGGER, pdfValidator, clock);
+        cachelessSender = new MessageSender(newConfiguration().disablePrintKeyCache().build(), api, new DocumentsPreparer(pdfValidator), clock);
     }
 
 
@@ -307,7 +306,7 @@ public class MessageSenderTest {
 
         Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
 
-        MessageSender messageSender = new MessageSender(newBuilder().build(), api, EventLogger.NOOP_LOGGER, pdfValidator, clock);
+        MessageSender messageSender = new MessageSender(newConfiguration().build(), api, new DocumentsPreparer(pdfValidator), clock);
         Message message = newMessage(messageId, printDocument).attachments(printAttachments)
                 .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress))).build();
 

@@ -54,7 +54,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -62,8 +62,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.Duration.ZERO;
 import static java.time.Duration.between;
-import static java.time.Duration.ofMinutes;
 import static java.util.Optional.empty;
 import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
@@ -81,19 +81,23 @@ public class MessageSender {
 
     private final Clock clock;
     private final DocumentsPreparer documentsPreparer;
-    private final DigipostClientConfig digipostClientConfig;
+    private final DigipostClientConfig config;
     private final ApiService apiService;
     private final EventLogger eventLogger;
 
-    private ZonedDateTime printKeyCachedTime = null;
+    private Instant printKeyCachedTime = Instant.MIN;
     private DigipostPublicKey cachedPrintKey;
 
 
-    public MessageSender(DigipostClientConfig digipostClientConfig, ApiService apiService, EventLogger eventLogger, PdfValidator pdfValidator, Clock clock) {
-        this.eventLogger = eventLogger.withDebugLogTo(LOG);
-        this.digipostClientConfig = digipostClientConfig;
+    public MessageSender(DigipostClientConfig config, ApiService apiService) {
+        this(config, apiService, new DocumentsPreparer(new PdfValidator()), Clock.systemDefaultZone());
+    }
+
+    public MessageSender(DigipostClientConfig config, ApiService apiService, DocumentsPreparer documentsPreparer, Clock clock) {
+        this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
+        this.config = config;
         this.apiService = apiService;
-        this.documentsPreparer = new DocumentsPreparer(pdfValidator);
+        this.documentsPreparer = documentsPreparer;
         this.clock = clock;
     }
 
@@ -305,11 +309,11 @@ public class MessageSender {
     }
 
     public DigipostPublicKey getEncryptionKeyForPrint() {
-        ZonedDateTime now = ZonedDateTime.now(clock);
+        Instant now = clock.instant();
 
-        if (!digipostClientConfig.cachePrintKey || (printKeyCachedTime == null || between(printKeyCachedTime, now).toMillis() > ofMinutes(5).toMillis())) {
+        if (ZERO.equals(config.printKeyCacheTimeToLive) || between(printKeyCachedTime, now).compareTo(config.printKeyCacheTimeToLive) > 0) {
             eventLogger.log("*** STARTER INTERAKSJON MED API: HENT KRYPTERINGSNØKKEL FOR PRINT ***");
-            try(CloseableHttpResponse response = apiService.getEncryptionKeyForPrint()){
+            try(CloseableHttpResponse response = apiService.getEncryptionKeyForPrint()) {
                 checkResponse(response, eventLogger);
                 EncryptionKey encryptionKey = unmarshal(jaxbContext, response.getEntity().getContent(), EncryptionKey.class);
                 cachedPrintKey = new DigipostPublicKey(encryptionKey);

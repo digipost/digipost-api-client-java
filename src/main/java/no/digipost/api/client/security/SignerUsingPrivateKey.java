@@ -15,20 +15,19 @@
  */
 package no.digipost.api.client.security;
 
-import java.io.InputStream;
 import java.security.PrivateKey;
 
 
-public class FileKeystoreSigner implements Signer {
+final class SignerUsingPrivateKey implements Signer {
 
     private final PrivateKey privateKey;
 
-    public FileKeystoreSigner(final InputStream certificate, final String password) {
-        privateKey = CryptoUtil.loadKeyFromP12(certificate, password);
+    public SignerUsingPrivateKey(PrivateKey privateKey) {
+        this.privateKey = privateKey;
     }
 
     @Override
-    public byte[] sign(final String dataToSign) {
+    public byte[] sign(String dataToSign) {
         return CryptoUtil.sign(privateKey, dataToSign);
     }
 

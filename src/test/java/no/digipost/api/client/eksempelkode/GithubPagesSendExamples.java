@@ -17,7 +17,23 @@ package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.AuthenticationLevel;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.FileType;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.Invoice;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.MessageRecipient;
+import no.digipost.api.client.representations.NameAndAddress;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.PrintDetails;
+import no.digipost.api.client.representations.PrintRecipient;
+import no.digipost.api.client.representations.SensitivityLevel;
+import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.security.Signer;
 import no.digipost.api.datatypes.types.Address;
 import no.digipost.api.datatypes.types.Appointment;
 import no.digipost.api.datatypes.types.Info;
@@ -27,14 +43,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 
 public class GithubPagesSendExamples {
 
@@ -47,14 +64,15 @@ public class GithubPagesSendExamples {
 
     private DigipostClient client;
 
-    public void set_up_client() throws FileNotFoundException {
+    public void set_up_client() throws IOException {
         long senderId = 123456;
 
-        DigipostClient client = new DigipostClient(
-                new DigipostClientConfig.DigipostClientConfigBuilder().build(),
-                "https://api.digipost.no",
-                senderId,
-                new FileInputStream("certificate.p12"), "TheSecretPassword");
+        Signer signer;
+        try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certificate.p12"))) {
+            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, "TheSecretPassword");
+        }
+
+        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(), senderId, signer);
     }
 
     public void send_one_letter_to_recipient_via_personal_identification_number() throws IOException {
@@ -196,10 +214,15 @@ public class GithubPagesSendExamples {
 
     public void send_letter_through_norsk_helsenett() throws IOException {
 
-        InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
         // API URL is different when request is sent from NHN
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.nhn.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
+        DigipostClientConfig config = DigipostClientConfig.newConfiguration().digipostApiUri(URI.create("https://api.nhn.digipost.no")).build();
+
+        Signer signer;
+        try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certificate.p12"))) {
+            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, CERTIFICATE_PASSWORD);
+        }
+
+        DigipostClient client = new DigipostClient(config, SENDER_ID, signer);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
