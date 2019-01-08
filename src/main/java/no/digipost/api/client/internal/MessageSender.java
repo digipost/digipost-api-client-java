@@ -21,6 +21,7 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.delivery.DocumentContent;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
+import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.EncryptionKey;
@@ -252,7 +253,7 @@ public class MessageSender {
         return deliveredMessage;
     }
 
-    public void addData(Link addDataLink, AdditionalData data) {
+    public void addData(AddDataLink addDataLink, AdditionalData data) {
         eventLogger.log("*** STARTER INTERAKSJON MED API: LEGGER TIL DATA PÅ DOKUMENT ***");
         try (CloseableHttpResponse response = apiService.addData(addDataLink, data)) {
 

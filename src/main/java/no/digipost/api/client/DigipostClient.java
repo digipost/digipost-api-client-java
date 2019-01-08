@@ -23,6 +23,7 @@ import no.digipost.api.client.internal.ApiServiceImpl;
 import no.digipost.api.client.internal.DocumentCommunicator;
 import no.digipost.api.client.internal.InboxCommunicator;
 import no.digipost.api.client.internal.MessageSender;
+import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.Document;
@@ -157,7 +158,7 @@ public class DigipostClient {
         }
     }
 
-    public void addData(Link addDataLink, AdditionalData data) {
+    public void addData(AddDataLink addDataLink, AdditionalData data) {
         messageSender.addData(addDataLink, data);
     }
 

@@ -19,6 +19,7 @@ import static no.digipost.api.client.representations.Relation.UNSUPPORTED;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

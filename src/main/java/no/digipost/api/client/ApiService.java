@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.Document;
@@ -99,7 +100,7 @@ public interface ApiService {
      * Legger til ytterligere data til et dokument.
      * Det er en forutsetning at dokumentet har datatype fra tidligere.
      */
-    CloseableHttpResponse addData(Link document, AdditionalData data);
+    CloseableHttpResponse addData(AddDataLink document, AdditionalData data);
 
     Recipients search(String searchString);
 

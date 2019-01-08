@@ -29,6 +29,7 @@ import no.digipost.api.client.internal.http.request.interceptor.RequestUserAgent
 import no.digipost.api.client.internal.http.response.interceptor.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseDateInterceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseSignatureInterceptor;
+import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Autocomplete;
 import no.digipost.api.client.representations.Document;
@@ -221,8 +222,8 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public CloseableHttpResponse addData(Link addDataLink, AdditionalData data) {
-        HttpPost httpPost = new HttpPost(digipostUrl.resolve(addDataLink.getUri().getPath()));
+    public CloseableHttpResponse addData(AddDataLink addDataLink, AdditionalData data) {
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(addDataLink.getPath()));
         httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();

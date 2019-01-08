@@ -213,8 +213,8 @@ public class Document extends Representation {
         return getLinkByRelationName(Relation.ADD_CONTENT);
     }
 
-    public Link getAddDataLink() {
-        return getLinkByRelationName(Relation.ADD_DATA);
+    public AddDataLink getAddDataLink() {
+        return new AddDataLink(getLinkByRelationName(Relation.ADD_DATA).getUri().getPath());
     }
 
     public Link getEncryptionKeyLink() {

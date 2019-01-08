@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.util;
+package no.digipost.api.client.representations;
 
-import no.digipost.api.client.representations.DigipostUri;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.Relation;
+public class AddDataLink {
+    
+    private final String path;
 
-import java.net.URI;
+    public AddDataLink(String path) {
+        this.path = path;
+    }
 
-public class LinkFactory {
-
-    public static Link createAddData(String uuid, URI apiRoot) {
-        return new Link(
-                Relation.ADD_DATA
-                , new DigipostUri(apiRoot.resolve(String.format("/documents/%s/data", uuid))
-        ));
+    public String getPath() {
+        return path;
     }
 }
