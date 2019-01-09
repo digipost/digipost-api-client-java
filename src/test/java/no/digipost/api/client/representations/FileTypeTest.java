@@ -15,19 +15,16 @@
  */
 package no.digipost.api.client.representations;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.quicktheories.WithQuickTheories;
 
 import static no.digipost.api.client.representations.FileType.JPEG;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-@RunWith(JUnitQuickcheck.class)
-public class FileTypeTest {
+public class FileTypeTest implements WithQuickTheories {
 
     @Test
     public void correctEqualsAndHashcode() {
@@ -39,9 +36,11 @@ public class FileTypeTest {
         assertThat(new FileType("   PdF  "), is(PDF));
     }
 
-    @Property
-    public void createFileTypeUsingTheExtensionOfAFileName(String basenames) {
-        assertThat(FileType.fromFilename(basenames + ". Jpeg"), is(JPEG));
+    @Test
+    public void resolveFileTypeUsingTheExtensionOfAFileName() {
+        qt()
+            .forAll(strings().allPossible().ofLengthBetween(0, 30))
+            .check(basename -> FileType.fromFilename(basename + ". Jpeg").equals(JPEG));
     }
 
 }
