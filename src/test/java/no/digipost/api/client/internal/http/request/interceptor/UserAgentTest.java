@@ -15,11 +15,11 @@
  */
 package no.digipost.api.client.internal.http.request.interceptor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static no.digipost.api.client.internal.http.request.interceptor.UserAgent.DIGIPOST_USER_AGENT;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class UserAgentTest {
 

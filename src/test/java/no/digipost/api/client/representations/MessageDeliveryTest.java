@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
@@ -24,12 +24,12 @@ import static java.util.stream.Collectors.toList;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.MessageStatus.NOT_COMPLETE;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class MessageDeliveryTest {
 

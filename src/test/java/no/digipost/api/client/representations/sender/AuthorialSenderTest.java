@@ -18,17 +18,13 @@ package no.digipost.api.client.representations.sender;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.SenderOrganization;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AuthorialSenderTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void correctEqualsAndHashCode() {
@@ -39,8 +35,7 @@ public class AuthorialSenderTest {
     public void failsIfOrganizationIsQueriedFromAnIdBasedSender() {
         AuthorialSender sender = AuthorialSender.resolve(42, MayHaveSender.NO_SENDER);
         assertThat(sender.getAccountId(), is(42L));
-        expectedException.expect(IllegalStateException.class);
-        sender.getOrganization();
+        assertThrows(IllegalStateException.class, sender::getOrganization);
     }
 
     @Test
@@ -51,7 +46,6 @@ public class AuthorialSenderTest {
             @Override public Long getSenderId() { return null; }
         });
         assertThat(sender.getOrganization(), is(org));
-        expectedException.expect(IllegalStateException.class);
-        sender.getAccountId();
+        assertThrows(IllegalStateException.class, sender::getAccountId);
     }
 }

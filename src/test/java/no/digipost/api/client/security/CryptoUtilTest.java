@@ -15,22 +15,24 @@
  */
 package no.digipost.api.client.security;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.security.PrivateKey;
 
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CryptoUtilTest {
 
     @Test
     public void shouldLoadPrivateKeyFromPKCS12File() {
         final PrivateKey privateKey = CryptoUtil.loadKeyFromP12(getClass().getResourceAsStream("certificate.p12"), "Qwer12345");
-        assertNotNull(privateKey);
+        assertThat(privateKey, notNullValue());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void shouldThrowRuntimeExceptionWhenBadPassword() {
-        CryptoUtil.loadKeyFromP12(getClass().getResourceAsStream("certificate.p12"), "");
+        assertThrows(RuntimeException.class, () -> CryptoUtil.loadKeyFromP12(getClass().getResourceAsStream("certificate.p12"), ""));
     }
 }

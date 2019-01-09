@@ -55,14 +55,13 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHeader;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,11 +102,11 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.apache.http.HttpStatus.SC_OK;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.then;
@@ -115,10 +114,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class MessageSenderTest {
-
-    @Rule
-    public final MockitoRule mockito = MockitoJUnit.rule();
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageSenderTest.class);
 
@@ -149,7 +146,7 @@ public class MessageSenderTest {
     private MessageSender cachelessSender;
     private EncryptionKey fakeEncryptionKey;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.fakeEncryptionKey = FakeEncryptionKey.createFakeEncryptionKey();
         ByteArrayOutputStream bao = new ByteArrayOutputStream();

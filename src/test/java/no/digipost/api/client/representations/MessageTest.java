@@ -15,9 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
@@ -27,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static co.unruly.matchers.Java8Matchers.where;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
@@ -37,21 +36,20 @@ import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.FileType.ZIP;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class MessageTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void shouldBeDirectPrintWhenMessageContainsOnlyPrintDetails() {
@@ -203,8 +201,7 @@ public class MessageTest {
         Document notInMessage = new Document(UUID.randomUUID().toString(), "a3", HTML);
         Message message = newMessage("id", hoved).attachments(asList(a1, a2)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
 
-        expectedException.expect(Message.CannotSortDocumentsUsingMessageOrder.class);
-        expectedException.expectMessage("ikke sortere Document med uuid '" + notInMessage.uuid);
-        Collections.sort(asList(a2, hoved, notInMessage, a1), message.documentOrder());
+        Message.CannotSortDocumentsUsingMessageOrder thrown = assertThrows(Message.CannotSortDocumentsUsingMessageOrder.class, () -> Collections.sort(asList(a2, hoved, notInMessage, a1), message.documentOrder()));
+        assertThat(thrown, where(Exception::getMessage, containsString("ikke sortere Document med uuid '" + notInMessage.uuid)));
     }
 }

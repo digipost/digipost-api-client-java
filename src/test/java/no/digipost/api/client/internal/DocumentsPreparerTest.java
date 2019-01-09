@@ -16,7 +16,6 @@
 package no.digipost.api.client.internal;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.internal.DocumentsPreparer;
 import no.digipost.api.client.representations.Channel;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.FileType;
@@ -31,9 +30,7 @@ import no.digipost.api.client.security.Encrypter;
 import no.digipost.api.client.security.FakeEncryptionKey;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static co.unruly.matchers.Java8Matchers.where;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
@@ -53,12 +51,13 @@ import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.security.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.io.IOUtils.toInputStream;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Answers.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.withSettings;
@@ -76,9 +75,6 @@ public class DocumentsPreparerTest {
     }
 
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
     private final DocumentsPreparer preparer = new DocumentsPreparer(new PdfValidator());
 
     private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(FakeEncryptionKey.createFakeEncryptionKey()));
@@ -92,18 +88,18 @@ public class DocumentsPreparerTest {
     public void failsIfMessageHasAnyDocumentsRequiringPreEncryptionAndNoEncryptionKeyIsSupplied() throws IOException {
         primaryDocument.encrypt();
 
-        expectedException.expect(DigipostClientException.class);
-        expectedException.expectMessage("no encryption key");
-        preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, () -> PdfValidationSettings.CHECK_ALL);
+        DigipostClientException thrown = assertThrows(DigipostClientException.class,
+                () -> preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, () -> PdfValidationSettings.CHECK_ALL));
+        assertThat(thrown, where(Exception::getMessage, containsString("no encryption key")));
     }
 
     @Test
     public void cannotSendNonPdfFilesToPrint() throws IOException {
         addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter", UTF_8)).encrypt();
 
-        expectedException.expect(DigipostClientException.class);
-        expectedException.expectMessage("filetype gif");
-        preparer.prepare(documents, messageBuilder.build(), encrypter, () -> mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS)));
+        DigipostClientException thrown = assertThrows(DigipostClientException.class,
+                () -> preparer.prepare(documents, messageBuilder.build(), encrypter, () -> mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
+        assertThat(thrown, where(Exception::getMessage, containsString("filetype gif")));
     }
 
     @Test
@@ -123,9 +119,9 @@ public class DocumentsPreparerTest {
     public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
         preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL);
 
-        expectedException.expect(DigipostClientException.class);
-        expectedException.expectMessage("too many pages");
-        preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL);
+        DigipostClientException thrown = assertThrows(DigipostClientException.class,
+                () -> preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL));
+        assertThat(thrown, where(Exception::getMessage, containsString("too many pages")));
     }
 
 

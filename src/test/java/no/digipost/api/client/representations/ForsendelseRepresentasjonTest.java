@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
@@ -23,8 +23,8 @@ import static no.digipost.api.client.representations.AuthenticationLevel.PASSWOR
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ForsendelseRepresentasjonTest {
 

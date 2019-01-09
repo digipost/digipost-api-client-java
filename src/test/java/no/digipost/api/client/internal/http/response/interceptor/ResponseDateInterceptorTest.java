@@ -17,17 +17,15 @@ package no.digipost.api.client.internal.http.response.interceptor;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.internal.MessageSenderTest;
-import no.digipost.api.client.internal.http.response.interceptor.ResponseDateInterceptor;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.time.Clock;
@@ -37,17 +35,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class ResponseDateInterceptorTest {
 
     private static final ZoneId UTC = ZoneId.of("UTC");
     private static final ZonedDateTime NOW = ZonedDateTime.of(2014, 11, 4, 21, 10, 58, 0, UTC);
     private final Clock clock = Clock.fixed(NOW.toInstant(), UTC);
-    @Rule
-    public final MockitoRule mockito = MockitoJUnit.rule();
 
     private ResponseDateInterceptor responseDateInterceptor;
 
@@ -57,7 +54,7 @@ public class ResponseDateInterceptorTest {
     @Mock
     private HttpResponse httpResponseMock;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         responseDateInterceptor = new ResponseDateInterceptor(clock);
     }

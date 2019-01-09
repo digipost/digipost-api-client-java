@@ -15,16 +15,15 @@
  */
 package no.digipost.api.client.representations.print;
 
-import static no.digipost.api.client.representations.ObjectBuilder.newNorwegianRecipient;
-import static no.digipost.api.client.representations.ObjectBuilder.newPrintMessage;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import no.digipost.api.client.representations.PrintRecipient;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import no.digipost.api.client.representations.PrintRecipient;
-
-import org.junit.Test;
+import static no.digipost.api.client.representations.ObjectBuilder.newNorwegianRecipient;
+import static no.digipost.api.client.representations.ObjectBuilder.newPrintMessage;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PrintMessageTest {
 

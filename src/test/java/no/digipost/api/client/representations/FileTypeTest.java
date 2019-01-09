@@ -16,13 +16,13 @@
 package no.digipost.api.client.representations;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 
 import static no.digipost.api.client.representations.FileType.JPEG;
 import static no.digipost.api.client.representations.FileType.PDF;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class FileTypeTest implements WithQuickTheories {
 
