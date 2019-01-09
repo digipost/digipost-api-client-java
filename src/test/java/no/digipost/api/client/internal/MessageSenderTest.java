@@ -160,9 +160,9 @@ public class MessageSenderTest {
                 .entity(new ByteArrayEntity(bao.toByteArray()))
                 .build();
 
-        sender = new MessageSender(newConfiguration().build(), api, new DocumentsPreparer(pdfValidator), clock);
+        sender = new MessageSender(newConfiguration().clock(clock).build(), api, new DocumentsPreparer(pdfValidator));
 
-        cachelessSender = new MessageSender(newConfiguration().disablePrintKeyCache().build(), api, new DocumentsPreparer(pdfValidator), clock);
+        cachelessSender = new MessageSender(newConfiguration().clock(clock).disablePrintKeyCache().build(), api, new DocumentsPreparer(pdfValidator));
     }
 
 
@@ -306,7 +306,7 @@ public class MessageSenderTest {
 
         Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
 
-        MessageSender messageSender = new MessageSender(newConfiguration().build(), api, new DocumentsPreparer(pdfValidator), clock);
+        MessageSender messageSender = new MessageSender(newConfiguration().clock(clock).build(), api, new DocumentsPreparer(pdfValidator));
         Message message = newMessage(messageId, printDocument).attachments(printAttachments)
                 .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress))).build();
 

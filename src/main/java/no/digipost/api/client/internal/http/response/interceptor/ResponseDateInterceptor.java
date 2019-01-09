@@ -39,10 +39,6 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 
     private final Clock clock;
 
-    public ResponseDateInterceptor() {
-        this(Clock.systemDefaultZone());
-    }
-
     public ResponseDateInterceptor(Clock clock) {
         this.clock = clock;
     }

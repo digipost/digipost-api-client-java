@@ -34,10 +34,6 @@ public class RequestDateInterceptor implements HttpRequestInterceptor {
     private final EventLogger eventLogger;
     private final Clock clock;
 
-    public RequestDateInterceptor(EventLogger eventLogger) {
-        this(eventLogger, Clock.systemDefaultZone());
-    }
-
     public RequestDateInterceptor(EventLogger eventLogger, Clock clock) {
         this.eventLogger = (eventLogger != null ? eventLogger : EventLogger.NOOP_LOGGER).withDebugLogTo(LOG);
         this.clock = clock;

@@ -27,7 +27,17 @@ import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.internal.http.Headers;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.representations.Channel;
+import no.digipost.api.client.representations.DigipostUri;
+import no.digipost.api.client.representations.EncryptionKey;
+import no.digipost.api.client.representations.EntryPoint;
+import no.digipost.api.client.representations.ErrorMessage;
+import no.digipost.api.client.representations.ErrorType;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.Relation;
 import no.digipost.api.client.representations.sender.SenderFeature;
 import no.digipost.api.client.representations.sender.SenderFeatureName;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -48,19 +58,36 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.time.Clock;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
-import static io.undertow.util.Headers.*;
+import static io.undertow.util.Headers.CONTENT_DISPOSITION;
+import static io.undertow.util.Headers.CONTENT_TYPE;
+import static io.undertow.util.Headers.extractQuotedValueFromHeader;
 import static java.lang.Integer.parseInt;
 import static java.time.ZonedDateTime.now;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
-import static no.digipost.api.client.util.JAXBContextUtils.*;
+import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
+import static no.digipost.api.client.util.JAXBContextUtils.marshal;
+import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
 import static org.apache.http.HttpStatus.SC_OK;
 
@@ -119,10 +146,6 @@ public class DigipostApiMock implements HttpHandler {
     private Undertow server;
     private Map<Method, RequestsAndResponses> requestsAndResponsesMap;
     private KeyPair keyPair;
-
-    public DigipostApiMock() {
-        this(Clock.systemDefaultZone());
-    }
 
     public DigipostApiMock(Clock clock) {
         this.clock = clock;

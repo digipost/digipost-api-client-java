@@ -90,15 +90,15 @@ public class MessageSender {
 
 
     public MessageSender(DigipostClientConfig config, ApiService apiService) {
-        this(config, apiService, new DocumentsPreparer(new PdfValidator()), Clock.systemDefaultZone());
+        this(config, apiService, new DocumentsPreparer(new PdfValidator()));
     }
 
-    public MessageSender(DigipostClientConfig config, ApiService apiService, DocumentsPreparer documentsPreparer, Clock clock) {
+    public MessageSender(DigipostClientConfig config, ApiService apiService, DocumentsPreparer documentsPreparer) {
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
         this.config = config;
         this.apiService = apiService;
         this.documentsPreparer = documentsPreparer;
-        this.clock = clock;
+        this.clock = config.clock;
     }
 
 

@@ -16,6 +16,7 @@
 package no.digipost.api.client;
 
 import java.net.URI;
+import java.time.Clock;
 import java.time.Duration;
 
 import static java.util.Objects.requireNonNull;
@@ -30,6 +31,7 @@ public final class DigipostClientConfig {
         private Duration printKeyCacheTimeToLive = Duration.ofMinutes(5);
         private URI digipostApiUri = URI.create("https://api.digipost.no");
         private EventLogger eventLogger = EventLogger.NOOP_LOGGER;
+        private Clock clock = Clock.systemDefaultZone();
 
         private Builder() {
         }
@@ -53,8 +55,13 @@ public final class DigipostClientConfig {
             return this;
         }
 
+        public Builder clock(Clock clock) {
+            this.clock = clock;
+            return this;
+        }
+
         public DigipostClientConfig build() {
-            return new DigipostClientConfig(digipostApiUri, printKeyCacheTimeToLive, eventLogger);
+            return new DigipostClientConfig(digipostApiUri, printKeyCacheTimeToLive, eventLogger, clock);
         }
     }
 
@@ -65,11 +72,13 @@ public final class DigipostClientConfig {
     public final URI digipostApiUri;
     public final Duration printKeyCacheTimeToLive;
     public final EventLogger eventLogger;
+    public final Clock clock;
 
-    private DigipostClientConfig(URI digipostApiUri, Duration printKeyCacheTimeToLive, EventLogger eventLogger) {
+    private DigipostClientConfig(URI digipostApiUri, Duration printKeyCacheTimeToLive, EventLogger eventLogger, Clock clock) {
         this.digipostApiUri = requireNonNull(digipostApiUri, "digipostApiUri cat not be null");
         this.printKeyCacheTimeToLive = requireNonNull(printKeyCacheTimeToLive, "printKeyCacheTimeToLive can not be null");
         this.eventLogger = requireNonNull(eventLogger, "eventLogger can not be null");
+        this.clock = clock;
     }
 
 }

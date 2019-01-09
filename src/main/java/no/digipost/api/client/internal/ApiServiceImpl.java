@@ -16,6 +16,7 @@
 package no.digipost.api.client.internal;
 
 import no.digipost.api.client.ApiService;
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.InboxApiService;
 import no.digipost.api.client.SenderId;
@@ -107,17 +108,17 @@ public class ApiServiceImpl implements ApiService, InboxApiService {
     // which was the case for the pattern "yyyy-MM-dd'T'HH:mm:ss.SSSZZ". See commit messages for 59caeb5737e45a15 and dcf41785a84f42caf935 for details.
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
-    public ApiServiceImpl(HttpClientBuilder httpClientBuilder, long brokerId, EventLogger logger, URI digipostUrl, Signer signer) {
+    public ApiServiceImpl(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, long brokerId, Signer signer) {
         this.brokerId = brokerId;
-        this.eventLogger = logger;
-        this.digipostUrl = digipostUrl;
+        this.eventLogger = config.eventLogger;
+        this.digipostUrl = config.digipostApiUri;
 
         this.cached = new Cached(this::fetchEntryPoint);
         this.httpClient = httpClientBuilder
-            .addInterceptorLast(new RequestDateInterceptor(logger))
+            .addInterceptorLast(new RequestDateInterceptor(config.eventLogger, config.clock))
             .addInterceptorLast(new RequestUserAgentInterceptor())
-            .addInterceptorLast(new RequestSignatureInterceptor(signer, logger, new RequestContentHashFilter(logger, Digester.sha256, Headers.X_Content_SHA256)))
-            .addInterceptorLast(new ResponseDateInterceptor())
+            .addInterceptorLast(new RequestSignatureInterceptor(signer, config.eventLogger, new RequestContentHashFilter(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256)))
+            .addInterceptorLast(new ResponseDateInterceptor(config.clock))
             .addInterceptorLast(new ResponseContentSHA256Interceptor())
             .addInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
             .build();

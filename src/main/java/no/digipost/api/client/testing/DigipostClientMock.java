@@ -16,9 +16,9 @@
 package no.digipost.api.client.testing;
 
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.internal.ApiServiceImpl;
 import no.digipost.api.client.testing.DigipostApiMock.Method;
 import no.digipost.api.client.testing.DigipostApiMock.MockRequest;
 import no.digipost.api.client.testing.DigipostApiMock.RequestsAndResponses;
@@ -44,11 +44,11 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
-import static no.digipost.api.client.DigipostClientConfig.newConfiguration;
 import static no.digipost.api.client.testing.UnusedPortFinder.getNextAvailablePort;
 
 /**
@@ -60,9 +60,9 @@ public class DigipostClientMock {
     public final Map<Method, RequestsAndResponses> requestsAndResponsesMap = new HashMap<>();
 
     private final DigipostClient client;
-    private final ApiServiceImpl apiService;
     private final int port;
-    private static final DigipostApiMock digipostApiMock = new DigipostApiMock();
+    private static final Clock clock = Clock.systemDefaultZone();
+    private static final DigipostApiMock digipostApiMock = new DigipostApiMock(clock);
     private static final String KEY_STORE_PASSWORD = "Qwer12345";
     private static final String KEY_STORE_ALIAS = "apiTest";
 
@@ -75,12 +75,11 @@ public class DigipostClientMock {
         URI host = URI.create("http://localhost:" + port);
 
         HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(clientCustomizer.apply(DigipostHttpClientSettings.DEFAULT));
-
-        this.apiService = new ApiServiceImpl(httpClientBuilder, 1, null, host, data -> new byte[0]);
-        this.client = new DigipostClient(newConfiguration().digipostApiUri(URI.create("digipostmockurl")).build(), apiService, apiService);
+        DigipostClientConfig config = DigipostClientConfig.newConfiguration().clock(clock).digipostApiUri(host).build();
+        this.client = new DigipostClient(config, 1, data -> new byte[0], httpClientBuilder);
     }
 
-    public void start(){
+    public void start() {
         KeyPair keyPair = getKeyPair(KEY_STORE_ALIAS, KEY_STORE_PASSWORD);
         digipostApiMock.start(port, requestsAndResponsesMap, keyPair);
     }
@@ -100,7 +99,7 @@ public class DigipostClientMock {
         }
     }
 
-    public void shutdownWebserver(){
+    public void shutdownWebserver() {
         digipostApiMock.stop();
     }
 

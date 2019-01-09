@@ -80,7 +80,7 @@ public class DigipostClient {
     }
 
     public DigipostClient(DigipostClientConfig config, long brokerId, Signer signer, HttpClientBuilder clientBuilder) {
-        this(config, new ApiServiceImpl(clientBuilder, brokerId, config.eventLogger, config.digipostApiUri, signer));
+        this(config, new ApiServiceImpl(config, clientBuilder, brokerId, signer));
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
@@ -88,7 +88,6 @@ public class DigipostClient {
     }
 
     public DigipostClient(DigipostClientConfig config, ApiService apiService, InboxApiService inboxApiService) {
-
         this.apiService = apiService;
         this.inboxCommunicator = inboxApiService;
 
