@@ -13,25 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.internal.http;
 
-public final class SenderId extends LongId {
+import org.apache.http.ProtocolVersion;
+import org.apache.http.StatusLine;
 
-    public static SenderId of(long id) {
-        return new SenderId(id);
+public class StatusLineMock implements StatusLine {
+
+    private final int statusCode;
+    public StatusLineMock(int statusCode){
+        this.statusCode = statusCode;
     }
 
-    private SenderId(long id) {
-        super(id);
+    @Override
+    public ProtocolVersion getProtocolVersion() {
+        return null;
     }
 
-    /**
-     * Convert this ID to a broker ID.
-     *
-     * @return this ID as a broker ID
-     */
-    public BrokerId asBrokerId() {
-        return BrokerId.of(this.value());
+    @Override
+    public int getStatusCode() {
+        return statusCode;
     }
 
+    @Override
+    public String getReasonPhrase() {
+        return null;
+    }
 }

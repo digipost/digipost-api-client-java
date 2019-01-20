@@ -27,16 +27,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+@SuppressWarnings("unused")
 public class GithubPagesReceiveExamples {
 
     private DigipostClient client;
 
     public void set_up_client() throws FileNotFoundException {
-        long senderId = 123456;
+        final SenderId senderId = SenderId.of(10987);
 
         DigipostClient client = new DigipostClient(
                 DigipostClientConfig.newConfiguration().build(),
-                senderId,
+                senderId.asBrokerId(),
                 Signer.usingKeyFromPKCS12KeyStore(new FileInputStream("certificate.p12"), "TheSecretPassword"));
 
     }

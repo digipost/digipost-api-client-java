@@ -13,27 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.delivery;
+package no.digipost.api.client;
 
-import no.digipost.api.client.internal.MessageSender;
-import no.digipost.api.client.representations.Message;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Test;
 
-public class MessageDeliverer {
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-    private final MessageSender sender;
+class SenderIdAndBrokerIdTest {
 
-    public MessageDeliverer(MessageSender sender) {
-        this.sender = sender;
-    }
-
-
-    public OngoingDelivery.WithPrintFallback createMessage(Message message) {
-        return new WithPrintFallback(message, sender);
-
-    }
-
-    public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
-        return new PrintOnlyMessage(printMessage, sender);
+    @Test
+    void correctEqualsAndHashCode() {
+        assertAll(
+            () -> EqualsVerifier.forClass(SenderId.class).withRedefinedSuperclass().withIgnoredFields("stringValue").verify(),
+            () -> EqualsVerifier.forClass(BrokerId.class).withRedefinedSuperclass().withIgnoredFields("stringValue").verify());
     }
 
 }

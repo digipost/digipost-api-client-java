@@ -13,32 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations.accounts;
+package no.digipost.api.client;
 
-import javax.xml.bind.annotation.XmlValue;
+abstract class LongId {
 
-public class EncryptionKey {
+    private final long value;
+    private final String stringValue;
 
-    @XmlValue
-    private final String value;
-
-    public EncryptionKey(String value) {
+    LongId(long value) {
         this.value = value;
+        this.stringValue = String.valueOf(value);
     }
 
-    @SuppressWarnings("unused")
-    private EncryptionKey() {
-        this(null);
-    }
-
-    public String getValuePEMFormatted() {
+    public final long value() {
         return value;
     }
 
+    public final String stringValue() {
+        return stringValue;
+    }
+
     @Override
-    public String toString() {
-        return "EncryptionKey{" +
-                "value='" + value + '\'' +
-                '}';
+    public final String toString() {
+        return getClass().getSimpleName() + ": " + stringValue();
+    }
+
+    @Override
+    public final boolean equals(Object obj) {
+        return getClass().isInstance(obj) && ((LongId) obj).value == this.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(value);
     }
 }

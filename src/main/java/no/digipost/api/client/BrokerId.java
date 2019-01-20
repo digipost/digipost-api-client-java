@@ -15,23 +15,26 @@
  */
 package no.digipost.api.client;
 
-public final class SenderId extends LongId {
+/**
+ * The ID of the organization which has permission to integrate with
+ * Digipost's API.
+ */
+public final class BrokerId extends LongId {
 
-    public static SenderId of(long id) {
-        return new SenderId(id);
+    public static BrokerId of(long id) {
+        return new BrokerId(id);
     }
 
-    private SenderId(long id) {
+    private BrokerId(long id) {
         super(id);
     }
 
     /**
-     * Convert this ID to a broker ID.
-     *
-     * @return this ID as a broker ID
+     * Convert this ID to a sender ID.
+     * @return this ID as a sender ID.
      */
-    public BrokerId asBrokerId() {
-        return BrokerId.of(this.value());
+    public SenderId asSenderId() {
+        return SenderId.of(this.value());
     }
 
 }

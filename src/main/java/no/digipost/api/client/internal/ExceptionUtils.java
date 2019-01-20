@@ -17,6 +17,10 @@ package no.digipost.api.client.internal;
 
 public final class ExceptionUtils {
 
+    public static RuntimeException asUnchecked(Exception e) {
+        return e instanceof RuntimeException ? (RuntimeException) e : new RuntimeException(exceptionNameAndMessage(e), e);
+    }
+
     public static String exceptionNameAndMessage(Throwable t) {
         return t.getClass().getSimpleName() + ": '" + t.getMessage() + "'";
     }

@@ -17,6 +17,7 @@ package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageRecipient;
@@ -48,7 +49,7 @@ import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
  */
 public class FallbackTilPrintEksempel {
     // Din virksomhets Digipost-kontoid
-    private static final long AVSENDERS_KONTOID = 10987;
+    private static final SenderId AVSENDERS_KONTOID = SenderId.of(10987);
 
     // Passordet sertifikatfilen er beskyttet med
     private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
@@ -67,7 +68,8 @@ public class FallbackTilPrintEksempel {
         }
 
         // 3. Vi oppretter en DigipostClient
-        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, signer);
+        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(),
+                                                   AVSENDERS_KONTOID.asBrokerId(), signer);
 
         // 4. Vi oppretter et fødselsnummerobjekt som skal brukes til å
         // identifisere mottaker i Digipost

@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.internal;
+package no.digipost.api.client.internal.delivery;
 
-import no.digipost.api.client.ApiService;
 import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.EventLogger;
-import no.digipost.api.client.delivery.DocumentContent;
+import no.digipost.api.client.delivery.MessageDeliveryApi;
+import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.EncryptionKey;
-import no.digipost.api.client.representations.FileType;
 import no.digipost.api.client.representations.Identification;
 import no.digipost.api.client.representations.IdentificationResultCode;
 import no.digipost.api.client.representations.IdentificationResultWithEncryptionKey;
@@ -33,7 +32,6 @@ import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MediaTypes;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
-import no.digipost.api.client.representations.MessageStatus;
 import no.digipost.api.client.security.DigipostPublicKey;
 import no.digipost.api.client.security.Encrypter;
 import no.digipost.print.validate.PdfValidator;
@@ -48,11 +46,8 @@ import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -65,9 +60,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Duration.ZERO;
 import static java.time.Duration.between;
 import static java.util.Optional.empty;
-import static no.digipost.api.client.errorhandling.ErrorCode.GENERAL_ERROR;
+import static no.digipost.api.client.internal.ExceptionUtils.asUnchecked;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
-import static no.digipost.api.client.internal.http.response.HttpResponseUtils.resourceAlreadyExists;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7;
 import static no.digipost.api.client.security.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
@@ -75,30 +69,38 @@ import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
-public class MessageSender {
+public class MessageDeliverer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MessageSender.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MessageDeliverer.class);
 
     private final Clock clock;
     private final DocumentsPreparer documentsPreparer;
     private final DigipostClientConfig config;
-    private final ApiService apiService;
+    private final MessageDeliveryApi apiService;
     private final EventLogger eventLogger;
 
     private Instant printKeyCachedTime = Instant.MIN;
     private DigipostPublicKey cachedPrintKey;
 
 
-    public MessageSender(DigipostClientConfig config, ApiService apiService) {
+    public MessageDeliverer(DigipostClientConfig config, MessageDeliveryApi apiService) {
         this(config, apiService, new DocumentsPreparer(new PdfValidator()));
     }
 
-    public MessageSender(DigipostClientConfig config, ApiService apiService, DocumentsPreparer documentsPreparer) {
+    public MessageDeliverer(DigipostClientConfig config, MessageDeliveryApi apiService, DocumentsPreparer documentsPreparer) {
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
         this.config = config;
         this.apiService = apiService;
         this.documentsPreparer = documentsPreparer;
         this.clock = config.clock;
+    }
+
+    public OngoingDelivery.WithPrintFallback createMessage(Message message) {
+        return new WithPrintFallback(message, this);
+    }
+
+    public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(Message printMessage) {
+        return new PrintOnlyMessage(printMessage, this);
     }
 
 
@@ -142,7 +144,7 @@ public class MessageSender {
                         .addField("Content-Disposition", "attachment;" + " filename=\"" + document.uuid.toString() + "\"").build());
             }
             eventLogger.log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + singleChannelMessage.messageId + " ***");
-            try(CloseableHttpResponse response = apiService.multipartMessage(multipartEntity.build())) {
+            try (CloseableHttpResponse response = apiService.sendMultipartMessage(multipartEntity.build())) {
                 checkResponse(response, eventLogger);
 
                 eventLogger.log("Brevet ble sendt. Status: [" + response + "]");
@@ -158,104 +160,6 @@ public class MessageSender {
         }
     }
 
-
-    /**
-     * Oppretter en forsendelsesressurs på serveren eller henter en allerede
-     * opprettet forsendelsesressurs.
-     *
-     * Dersom forsendelsen allerede er opprettet, vil denne metoden gjøre en
-     * GET-forespørsel mot serveren for å hente en representasjon av
-     * forsendelsesressursen slik den er på serveren. Dette vil ikke føre til
-     * noen endringer av ressursen.
-     *
-     * Dersom forsendelsen ikke eksisterer fra før, vil denne metoden opprette
-     * en ny forsendelsesressurs på serveren og returnere en representasjon av
-     * ressursen.
-     *
-     */
-    public MessageDelivery createOrFetchMessage(final Message message) {
-        try(CloseableHttpResponse response = apiService.createMessage(message)){
-            if (resourceAlreadyExists(response)) {
-                try(CloseableHttpResponse existingMessageResponse = apiService.fetchExistingMessage(responseToURI(response))) {
-                    checkResponse(existingMessageResponse, eventLogger);
-                    try {
-                        MessageDelivery delivery = unmarshal(jaxbContext, existingMessageResponse.getEntity().getContent(), MessageDelivery.class);
-                        checkThatExistingMessageIsIdenticalToNewMessage(delivery, message);
-                        checkThatMessageHasNotAlreadyBeenDelivered(delivery);
-                        eventLogger.log("Identisk forsendelse fantes fra før. Bruker denne istedenfor å opprette ny. Status: [" + response.toString() + "]");
-                        return delivery;
-                    } catch (IOException e) {
-                        throw new RuntimeException(e.getMessage(), e);
-                    }
-                }
-            } else {
-                try {
-                    checkResponse(response, eventLogger);
-                    eventLogger.log("Forsendelse opprettet. Status: [" + response.getStatusLine().getStatusCode() + "]");
-                    return unmarshal(jaxbContext, response.getEntity().getContent(), MessageDelivery.class);
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e.getMessage(), e);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    private void checkThatExistingMessageIsIdenticalToNewMessage(final MessageDelivery exisitingMessage, final Message message) {
-        if (!exisitingMessage.isSameMessageAs(message)) {
-            String errorMessage = "Forsendelse med id [" + message.messageId + "] finnes fra før med annen spesifikasjon.";
-            eventLogger.log(errorMessage);
-            throw new DigipostClientException(ErrorCode.DUPLICATE_MESSAGE, errorMessage);
-        }
-    }
-
-    /**
-     * Legger til innhold til et dokument. For at denne metoden skal
-     * kunne kalles, må man først ha opprettet forsendelsesressursen på serveren
-     * ved metoden {@code createOrFetchMesssage}.
-     */
-    public MessageDelivery addContent(final MessageDelivery message, final Document document, final InputStream documentContent, final InputStream printDocumentContent) {
-        verifyCorrectStatus(message, MessageStatus.NOT_COMPLETE);
-        final InputStream unencryptetContent;
-        if (message.willBeDeliveredInDigipost()) {
-            unencryptetContent = documentContent;
-        } else {
-            unencryptetContent = printDocumentContent;
-            document.setDigipostFileType(FileType.PDF);
-        }
-
-        MessageDelivery delivery;
-        if (document.willBeEncrypted()) {
-            eventLogger.log("*** DOKUMENTET SKAL PREKRYPTERES. VALIDERES, OG HENTER PUBLIC KEY VIA API ***");
-            byte[] byteContent;
-            try {
-                byteContent = IOUtils.toByteArray(unencryptetContent);
-            } catch (IOException e) {
-                throw new DigipostClientException(GENERAL_ERROR, "Unable to read content of document with uuid " + document.uuid, e);
-            }
-            documentsPreparer.validateAndSetNrOfPages(message.getChannel(), document, byteContent, () -> apiService.getSenderInformation(message).getPdfValidationSettings());
-            InputStream encryptetContent = fetchKeyAndEncrypt(document, new ByteArrayInputStream(byteContent));
-            delivery = uploadContent(document, encryptetContent);
-        } else {
-            delivery = uploadContent(document, unencryptetContent);
-        }
-        return delivery;
-    }
-
-
-    public MessageDelivery sendMessage(final MessageDelivery message) {
-        MessageDelivery deliveredMessage = null;
-        if (message.isAlreadyDeliveredToDigipost()) {
-            eventLogger.log("\n\n---BREVET ER ALLEREDE SENDT");
-        } else if (message.getSendLink() == null) {
-            eventLogger.log("\n\n---BREVET ER IKKE KOMPLETT, KAN IKKE SENDE");
-        } else {
-            deliveredMessage = send(message);
-        }
-        return deliveredMessage;
-    }
 
     public void addData(AddDataLink addDataLink, AdditionalData data) {
         eventLogger.log("*** STARTER INTERAKSJON MED API: LEGGER TIL DATA PÅ DOKUMENT ***");
@@ -284,7 +188,7 @@ public class MessageSender {
             EncryptionKey key = unmarshal(jaxbContext, encryptionKeyResponse.getEntity().getContent(), EncryptionKey.class);
             return Encrypter.using(new DigipostPublicKey(key)).encrypt(content);
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw asUnchecked(e);
         }
 
     }
@@ -294,7 +198,7 @@ public class MessageSender {
             checkResponse(response, eventLogger);
             IdentificationResultWithEncryptionKey result =
                     unmarshal(jaxbContext, response.getEntity().getContent(), IdentificationResultWithEncryptionKey.class);
-            if (result.getResult().getResult() == IdentificationResultCode.DIGIPOST) {
+            if (result.getResultCode() == IdentificationResultCode.DIGIPOST) {
                 if (result.getEncryptionKey() == null) {
                     throw new DigipostClientException(ErrorCode.SERVER_ERROR, "Server identifisert mottaker som Digipost-bruker, men sendte ikke med krypteringsnøkkel. Indikerer en feil hos Digipost.");
                 }
@@ -304,7 +208,7 @@ public class MessageSender {
             }
             return result;
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw asUnchecked(e);
         }
     }
 
@@ -329,62 +233,6 @@ public class MessageSender {
     }
 
 
-    private MessageDelivery uploadContent(Document document, InputStream documentContent) {
-        eventLogger.log("*** STARTER INTERAKSJON MED API: LEGGE TIL FIL ***");
-
-        try(CloseableHttpResponse response = apiService.addContent(document, documentContent)){
-
-            checkResponse(response, eventLogger);
-
-            eventLogger.log("Innhold ble lagt til. Status: [" + response + "]");
-
-            return unmarshal(jaxbContext, response.getEntity().getContent(), MessageDelivery.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-
-
-    /**
-     * Sender en forsendelse. For at denne metoden skal kunne kalles, må man
-     * først ha lagt innhold til forsendelsen med {@code addContent}.
-     */
-    private MessageDelivery send(final MessageDelivery delivery) {
-        eventLogger.log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + delivery.getMessageId() + " ***");
-        try(CloseableHttpResponse response = apiService.send(delivery)){
-
-            checkResponse(response, eventLogger);
-
-            eventLogger.log("Brevet ble sendt. Status: [" + response.toString() + "]");
-
-            MessageDelivery messageDelivery = unmarshal(jaxbContext, response.getEntity().getContent(), MessageDelivery.class);
-            return messageDelivery;
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    private void checkThatMessageHasNotAlreadyBeenDelivered(final MessageDelivery existingMessage) {
-        switch (existingMessage.getStatus()) {
-        case DELIVERED: {
-            String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til mottaker den [%s]. "
-                    + "Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(),
-                    existingMessage.getDeliveryTime());
-            eventLogger.log(errorMessage);
-            throw new DigipostClientException(ErrorCode.DIGIPOST_MESSAGE_ALREADY_DELIVERED, errorMessage);
-        }
-        case DELIVERED_TO_PRINT: {
-            String errorMessage = String.format("En forsendelse med samme id=[%s] er allerede levert til print den [%s]. "
-                    + "Dette skyldes sannsynligvis doble kall til Digipost.", existingMessage.getMessageId(),
-                    existingMessage.getDeliveryTime());
-            eventLogger.log(errorMessage);
-            throw new DigipostClientException(ErrorCode.PRINT_MESSAGE_ALREADY_DELIVERED, errorMessage);
-        }
-        default:
-            break;
-        }
-    }
 
     private void checkThatMessageCanBePreEncrypted(final Document document) {
         Link encryptionKeyLink = document.getEncryptionKeyLink();
@@ -392,13 +240,6 @@ public class MessageSender {
             String errorMessage = "Document med id [" + document.uuid + "] kan ikke prekrypteres.";
             eventLogger.log(errorMessage);
             throw new DigipostClientException(ErrorCode.CANNOT_PREENCRYPT, errorMessage);
-        }
-    }
-
-    private void verifyCorrectStatus(final MessageDelivery createdMessage, final MessageStatus expectedStatus) {
-        if (createdMessage.getStatus() != expectedStatus) {
-            throw new DigipostClientException(ErrorCode.INVALID_TRANSACTION,
-                    "Kan ikke legge til innhold til en forsendelse som ikke er i tilstanden " + expectedStatus + ".");
         }
     }
 
@@ -452,7 +293,7 @@ public class MessageSender {
     }
 
     static Message setMapAndMessageToPrint(Message messageToCopy, Map<String, DocumentContent> documentsAndContent,
-                                           Map<Document, InputStream> documentsAndInputStream){
+                                           Map<Document, InputStream> documentsAndInputStream) {
         Message singleChannelMessage = Message.copyMessageWithOnlyPrintDetails(messageToCopy);
         setPrintContentToUUID(documentsAndContent, documentsAndInputStream, singleChannelMessage.getAllDocuments());
 
@@ -467,27 +308,19 @@ public class MessageSender {
         allDocuments.forEach(doc -> documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getPrintContent()));
     }
 
-    private static URI responseToURI(CloseableHttpResponse response){
-        try {
-            return new URI(response.getFirstHeader("location").getValue());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    private static class EncryptionKeyAndDocsWithInputstream{
+    private static class EncryptionKeyAndDocsWithInputstream {
         public final Optional<DigipostPublicKey> digipostPublicKeys;
         public final Map<Document, InputStream> documentsAndInputstream;
         private final Message singleChannelMessage;
 
         public EncryptionKeyAndDocsWithInputstream(Optional<DigipostPublicKey> digipostPublicKeys,
-                               Map<Document, InputStream> documentsAndInputstream, Message singleChannelMessage){
+                               Map<Document, InputStream> documentsAndInputstream, Message singleChannelMessage) {
             this.digipostPublicKeys = digipostPublicKeys;
             this.documentsAndInputstream = documentsAndInputstream;
             this.singleChannelMessage = singleChannelMessage;
         }
 
-        public Message getSingleChannelMessage(){
+        public Message getSingleChannelMessage() {
             return singleChannelMessage;
         }
     }

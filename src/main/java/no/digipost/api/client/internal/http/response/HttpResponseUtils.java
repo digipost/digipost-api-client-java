@@ -21,6 +21,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.ErrorType;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -69,12 +70,12 @@ public final class HttpResponseUtils {
         return status.getStatusCode() / 100 == 2; //all 2xx is ok
     }
 
-    public static boolean resourceAlreadyExists(CloseableHttpResponse response) {
+    public static boolean resourceAlreadyExists(HttpResponse response) {
         return response.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT;
     }
 
 
-    public static void checkResponse(final CloseableHttpResponse response, EventLogger eventLogger) {
+    public static void checkResponse(HttpResponse response, EventLogger eventLogger) {
         StatusLine status = response.getStatusLine();
         if (!responseOk(status)) {
             ErrorMessage error = fetchErrorMessageString(status, response.getEntity());

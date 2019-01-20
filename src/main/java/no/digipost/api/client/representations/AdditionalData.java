@@ -15,9 +15,14 @@
  */
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.SenderId;
 import no.digipost.api.datatypes.DataType;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -43,7 +48,7 @@ public class AdditionalData {
     public static class Builder {
         private DataType data;
         private SenderOrganization senderOrganization = null;
-        private Long senderId = null;
+        private SenderId senderId = null;
 
         private Builder(DataType data) {
             this.data = data;
@@ -58,7 +63,7 @@ public class AdditionalData {
             return this;
         }
 
-        public Builder setSenderId(Long senderId) {
+        public Builder setSenderId(SenderId senderId) {
             this.senderId = senderId;
             return this;
         }
@@ -71,9 +76,9 @@ public class AdditionalData {
         }
     }
 
-    private AdditionalData(DataType data, SenderOrganization senderOrganization, Long senderId) {
+    private AdditionalData(DataType data, SenderOrganization senderOrganization, SenderId senderId) {
         this.dataType = new DataTypeHolder(data);
         this.senderOrganization = senderOrganization;
-        this.senderId = senderId;
+        this.senderId = senderId.value();
     }
 }

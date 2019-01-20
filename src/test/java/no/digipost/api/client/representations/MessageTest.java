@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.SenderId;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -98,7 +99,7 @@ public class MessageTest {
     public void copyOfMessageIsTheSameAsTheOriginalExceptPrintDetails() {
         Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", HTML))
                 .digipostAddress(new DigipostAddress("Test2"))
-                .senderId(1L).deliveryTime(ZonedDateTime.now()).invoiceReference("Invoice")
+                .senderId(SenderId.of(1L)).deliveryTime(ZonedDateTime.now()).invoiceReference("Invoice")
                 .recipient(new MessageRecipient(new DigipostAddress("TestAdress"), new PrintDetails(
                         new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop")),
                         new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop")),

@@ -15,6 +15,9 @@
  */
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.SenderId;
+
+import java.util.Optional;
 
 /**
  * A type which may or may not have specified a sender, either
@@ -25,18 +28,18 @@ package no.digipost.api.client.representations;
 public interface MayHaveSender {
 
     public static final MayHaveSender NO_SENDER = new MayHaveSender() {
-        @Override public SenderOrganization getSenderOrganization() { return null; }
-        @Override public Long getSenderId() { return null; }
+        @Override public Optional<SenderOrganization> getSenderOrganization() { return Optional.empty(); }
+        @Override public Optional<SenderId> getSenderId() { return Optional.empty(); }
     };
 
     /**
-     * @return the sender ID. May be {@code null}.
+     * @return the sender ID, or {@link Optional#empty()} if it does not exist.
      */
-    Long getSenderId();
+    Optional<SenderId> getSenderId();
 
     /**
-     * @return the sender organization. May be {@code null}.
+     * @return the sender organization, or {@link Optional#empty()} if it does not exist.
      */
-    SenderOrganization getSenderOrganization();
+    Optional<SenderOrganization> getSenderOrganization();
 
 }

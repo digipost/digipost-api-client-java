@@ -34,6 +34,7 @@ public class UserInformation {
         this.emailAddress = emailAddress;
     }
 
+    @SuppressWarnings("unused")
     private UserInformation() {
         this(null, null, null);
     }

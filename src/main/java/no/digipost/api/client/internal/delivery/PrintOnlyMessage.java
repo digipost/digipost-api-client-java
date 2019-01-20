@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.delivery;
+package no.digipost.api.client.internal.delivery;
 
-import no.digipost.api.client.internal.MessageSender;
+import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
@@ -30,12 +30,12 @@ import java.util.Map;
  */
 final class PrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
 
-    private final MessageSender sender;
+    private final MessageDeliverer sender;
     private final Message printMessage;
     private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
 
-    PrintOnlyMessage(Message printMessage, MessageSender sender) {
+    PrintOnlyMessage(Message printMessage, MessageDeliverer sender) {
         if (!printMessage.isDirectPrint()) {
             throw new IllegalArgumentException("Direct print messages must have PrintDetails and "
                     + "cannot have DigipostAddress, PersonalIdentificationNumber or NameAndAddress");

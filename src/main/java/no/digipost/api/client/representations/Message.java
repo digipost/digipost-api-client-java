@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -101,8 +103,8 @@ public class Message implements MayHaveSender {
          * senderId must be the party you are sending on behalf of. Your own user id
          * should be set in the http header X-Digipost-UserId.
          */
-        public MessageBuilder senderId(Long senderId) {
-            this.senderId = senderId;
+        public MessageBuilder senderId(SenderId senderId) {
+            this.senderId = senderId.value();
             return this;
         }
 
@@ -284,13 +286,13 @@ public class Message implements MayHaveSender {
     }
 
     @Override
-    public Long getSenderId() {
-        return senderId;
+    public Optional<SenderId> getSenderId() {
+        return Optional.ofNullable(senderId).map(SenderId::of);
     }
 
     @Override
-    public SenderOrganization getSenderOrganization() {
-        return senderOrganization;
+    public Optional<SenderOrganization> getSenderOrganization() {
+        return Optional.ofNullable(senderOrganization);
     }
 
     @Override

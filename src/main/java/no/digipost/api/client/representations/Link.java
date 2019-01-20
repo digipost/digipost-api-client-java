@@ -15,11 +15,9 @@
  */
 package no.digipost.api.client.representations;
 
-import static no.digipost.api.client.representations.Relation.UNSUPPORTED;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -27,9 +25,10 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import static no.digipost.api.client.representations.Relation.UNSUPPORTED;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "link", propOrder = { "rel", "uri", "mediaType" })

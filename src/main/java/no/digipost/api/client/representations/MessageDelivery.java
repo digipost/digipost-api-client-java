@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -29,6 +30,7 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableList;
@@ -155,16 +157,16 @@ public class MessageDelivery extends Representation implements MayHaveSender {
      * @return always the sender-id, never {@code null}.
      */
     @Override
-    public Long getSenderId() {
-        return senderId;
+    public Optional<SenderId> getSenderId() {
+        return Optional.of(senderId).map(SenderId::of);
     }
 
     /**
-     * @return always {@code null}.
+     * @return always {@link Optional#empty()}
      * @see MessageDelivery#getSenderId()
      */
     @Override
-    public SenderOrganization getSenderOrganization() {
-        return null;
+    public Optional<SenderOrganization> getSenderOrganization() {
+        return Optional.empty();
     }
 }

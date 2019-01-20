@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.inbox;
 
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 
 import java.io.InputStream;
 
-public interface InboxApiService {
+public interface InboxApi {
 
     /**
      * Get documents from the inbox for the organisation represented by senderId.

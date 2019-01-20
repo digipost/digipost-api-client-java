@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.delivery;
+package no.digipost.api.client.internal.delivery;
 
-import no.digipost.api.client.internal.MessageSender;
+import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
@@ -32,11 +32,11 @@ import java.util.Map;
  */
 final class WithPrintFallback implements OngoingDelivery.SendableWithPrintFallback {
 
-    private final MessageSender sender;
+    private final MessageDeliverer sender;
     private final Message message;
     private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
 
-    WithPrintFallback(Message message, MessageSender sender) {
+    WithPrintFallback(Message message, MessageDeliverer sender) {
         this.message = message;
         this.sender = sender;
     }

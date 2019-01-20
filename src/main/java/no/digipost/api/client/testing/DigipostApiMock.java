@@ -25,6 +25,7 @@ import io.undertow.server.handlers.form.FormParserFactory;
 import io.undertow.server.handlers.form.MultiPartParserDefinition;
 import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.internal.http.Headers;
 import no.digipost.api.client.representations.Channel;
@@ -240,7 +241,7 @@ public class DigipostApiMock implements HttpHandler {
             senderFeatures.add(SenderFeatureName.PRINTVALIDATION_FONTS.withNoParam());
             senderFeatures.add(SenderFeatureName.PRINTVALIDATION_PDFVERSION.withNoParam());
             marshal(jaxbContext,
-                    new SenderInformation(9999L, SenderStatus.VALID_SENDER, senderFeatures), bao);
+                    new SenderInformation(SenderId.of(9999), SenderStatus.VALID_SENDER, senderFeatures), bao);
 
             return 200;
         } else {

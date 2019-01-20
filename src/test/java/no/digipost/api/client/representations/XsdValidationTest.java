@@ -16,6 +16,7 @@
 package no.digipost.api.client.representations;
 
 
+import no.digipost.api.client.SenderId;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -103,7 +104,7 @@ public class XsdValidationTest {
         Document primaryDocumentToPreEncrypt = new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL);
         Message messageWithPreEncryptAndSenderId = newMessage(randomUUID().toString(), primaryDocumentToPreEncrypt)
                 .personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
-                .senderId(10L)
+                .senderId(SenderId.of(10))
                 .build();
 
         primaryDocumentToPreEncrypt.encrypt();

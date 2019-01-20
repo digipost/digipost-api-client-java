@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.testing;
 
+import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.errorhandling.DigipostClientException;
@@ -76,7 +77,7 @@ public class DigipostClientMock {
 
         HttpClientBuilder httpClientBuilder = DigipostHttpClientFactory.createBuilder(clientCustomizer.apply(DigipostHttpClientSettings.DEFAULT));
         DigipostClientConfig config = DigipostClientConfig.newConfiguration().clock(clock).digipostApiUri(host).build();
-        this.client = new DigipostClient(config, 1, data -> new byte[0], httpClientBuilder);
+        this.client = new DigipostClient(config, BrokerId.of(1), data -> new byte[0], httpClientBuilder);
     }
 
     public void start() {

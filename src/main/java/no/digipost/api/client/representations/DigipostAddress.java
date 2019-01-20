@@ -21,6 +21,7 @@ public class DigipostAddress extends RecipientIdentifier {
         super(address);
     }
 
+    @SuppressWarnings("unused")
     private DigipostAddress() {
         this(null);
     }

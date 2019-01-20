@@ -16,9 +16,13 @@
 package no.digipost.api.client.representations.sender;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
+import no.digipost.api.client.BrokerId;
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.SenderOrganization;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -33,17 +37,17 @@ public class AuthorialSenderTest {
 
     @Test
     public void failsIfOrganizationIsQueriedFromAnIdBasedSender() {
-        AuthorialSender sender = AuthorialSender.resolve(42, MayHaveSender.NO_SENDER);
-        assertThat(sender.getAccountId(), is(42L));
+        AuthorialSender sender = AuthorialSender.resolve(BrokerId.of(42), MayHaveSender.NO_SENDER);
+        assertThat(sender.getAccountId(), is(SenderId.of(42L)));
         assertThrows(IllegalStateException.class, sender::getOrganization);
     }
 
     @Test
     public void failsIfIdIsQueriedFromAnOrganizationBasedSender() {
-        final SenderOrganization org = new SenderOrganization("10", null);
-        AuthorialSender sender = AuthorialSender.resolve(42, new MayHaveSender() {
-            @Override public SenderOrganization getSenderOrganization() { return org; }
-            @Override public Long getSenderId() { return null; }
+        SenderOrganization org = new SenderOrganization("10", null);
+        AuthorialSender sender = AuthorialSender.resolve(BrokerId.of(42), new MayHaveSender() {
+            @Override public Optional<SenderOrganization> getSenderOrganization() { return Optional.of(org); }
+            @Override public Optional<SenderId> getSenderId() { return Optional.empty(); }
         });
         assertThat(sender.getOrganization(), is(org));
         assertThrows(IllegalStateException.class, sender::getAccountId);

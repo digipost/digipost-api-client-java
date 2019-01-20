@@ -17,6 +17,7 @@ package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.AuthenticationLevel;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.FileType;
@@ -53,9 +54,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings("unused")
 public class GithubPagesSendExamples {
 
-    private static final long SENDER_ID = 1;
+    private static final SenderId SENDER_ID = SenderId.of(1);
     private static final String UUID1 = UUID.randomUUID().toString();
     private static final String UUID2 = UUID.randomUUID().toString();
     private static final String UUID3 = UUID.randomUUID().toString();
@@ -65,14 +67,15 @@ public class GithubPagesSendExamples {
     private DigipostClient client;
 
     public void set_up_client() throws IOException {
-        long senderId = 123456;
+        SenderId senderId = SenderId.of(123456);
 
         Signer signer;
         try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certificate.p12"))) {
             signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, "TheSecretPassword");
         }
 
-        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(), senderId, signer);
+        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(),
+                                                   senderId.asBrokerId(), signer);
     }
 
     public void send_one_letter_to_recipient_via_personal_identification_number() throws IOException {
@@ -163,6 +166,7 @@ public class GithubPagesSendExamples {
 
     }
 
+
     public void send_letter_with_fallback_to_print() throws IOException {
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
@@ -222,7 +226,7 @@ public class GithubPagesSendExamples {
             signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, CERTIFICATE_PASSWORD);
         }
 
-        DigipostClient client = new DigipostClient(config, SENDER_ID, signer);
+        DigipostClient client = new DigipostClient(config, SENDER_ID.asBrokerId(), signer);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 

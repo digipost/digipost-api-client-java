@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client;
+package no.digipost.api.client.delivery;
 
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MayHaveSender;
-import no.digipost.api.client.representations.Message;
-import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
@@ -31,68 +28,28 @@ import no.digipost.api.client.representations.sender.SenderInformation;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
-import java.io.InputStream;
 import java.net.URI;
-import java.time.ZonedDateTime;
 
 /**
- * Klasser som implementerer dette interfacet tar seg av de enkelte HTTP-forespørslene
- * man kan gjøre mot REST-API-et:
+ * Klasser som implementerer dette interfacet tar seg av de enkelte meldingsrelaterte
+ * HTTP-forespørslene man kan gjøre mot Digipost sitt API:
  *
  * <ul>
+ *   <li>Sende meldinger til mottakere i Digipost og/eller print</li>
  *   <li>Hente søkeforslag (autocomplete)</li>
  *   <li>Søke etter mottakere</li>
- *   <li>Opprette en forsendelsesressurs på serveren</li>
- *   <li>Hente en allerede opprettet forsendelsesressurs fra serveren</li>
  *   <li>Sende innholdet for en allerede opprettet forsendelsesressurs til
  *   serveren, og dermed sende brevet til mottakeren</li>
- *   <li>Opprette en printforsendelsesressurs på serveren</li>
- *   <li>Hente en allerede opprettet printforsendelsesressurs fra serveren</li>
- *   <li>Sende innholdet (PDF) for en allerede opprettet printforsendelsesressurs
- *   til serveren, og dermed bestille print av brevet.</li>
  *   <li>Hente dokument-events, dvs. hendelser knyttet til brev man tidligere har sendt</li>
  * </ul>
  *
  */
-public interface ApiService {
+public interface MessageDeliveryApi {
 
     /**
      * Oppretter og sender en multipartforsendelse
      */
-    CloseableHttpResponse multipartMessage(HttpEntity multipart);
-
-    /**
-     * Oppretter en ny forsendelsesressurs på serveren ved å sende en
-     * POST-forespørsel.
-     */
-    CloseableHttpResponse createMessage(Message message);
-
-    /**
-     * Henter en allerede eksisterende forsendelsesressurs fra serveren.
-     */
-    CloseableHttpResponse fetchExistingMessage(URI location);
-
-    CloseableHttpResponse getEncryptionKey(URI location);
-
-    /**
-     * Angir innholdet i en allerede opprettet forsendelse
-     *
-     * Før man kaller denne metoden, må man allerede ha opprettet en
-     * forsendelsesressurs på serveren ved metoden {@code opprettForsendelse}.
-     *
-     */
-    CloseableHttpResponse addContent(Document document, InputStream letterContent);
-
-    /**
-     * Sender innholdet i forsendelsen som en POST-forespørsel til serveren
-     *
-     * OBS! Denne metoden fører til at brevet blir sendt på ordentlig.
-     *
-     * Før man kaller denne metoden, må man ha lagt innhold til forsendelsen ved
-     * metoden {@code addContent}
-     *
-     */
-    CloseableHttpResponse send(MessageDelivery createdMessage);
+    CloseableHttpResponse sendMultipartMessage(HttpEntity multipart);
 
     /**
      * Legger til ytterligere data til et dokument.
@@ -114,25 +71,11 @@ public interface ApiService {
      */
     CloseableHttpResponse identifyAndGetEncryptionKey(Identification identification);
 
-    /**
-     * Henter hendelser knyttet til tidligere sendte brev.
-     *
-     * @param organisation Organisasjonsnummer
-     * @param partId Frivillig organisasjons-enhet, kan være {@code null}
-     *
-     */
-    CloseableHttpResponse getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults);
+
+    CloseableHttpResponse getEncryptionKey(URI location);
 
     /**
-     * Henter status på dokumeter som tidligere blitt sendt i Digipost, både via digital og print-kanal.
-     */
-    CloseableHttpResponse getDocumentStatus(Link linkToDocumentStatus);
-    CloseableHttpResponse getDocumentStatus(long senderId, String uuid);
-
-    CloseableHttpResponse getContent(String path);
-
-    /**
-     * Henter publik krypteringsnøkkel for forsendelser som skal sendes til print.
+     * Henter public krypteringsnøkkel for forsendelser som skal sendes til print.
      */
     CloseableHttpResponse getEncryptionKeyForPrint();
 
@@ -151,7 +94,7 @@ public interface ApiService {
      *
      * @param senderId id-en til avsenderen.
      */
-    SenderInformation getSenderInformation(long senderId);
+    SenderInformation getSenderInformation(SenderId senderId);
 
     /**
      * Henter informasjon om en avsender. Avsender må ha godtatt å identifiseres med

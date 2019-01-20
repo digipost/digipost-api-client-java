@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.delivery;
+package no.digipost.api.client.internal.delivery;
 
 import java.io.InputStream;
 
-public class DocumentContent {
+final class DocumentContent {
     private final InputStream digipostContent;
     private final InputStream printContent;
 

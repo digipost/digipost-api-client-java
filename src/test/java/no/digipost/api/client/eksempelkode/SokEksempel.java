@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.eksempelkode;
 
+import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.representations.Recipient;
@@ -34,7 +35,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class SokEksempel {
     // Din virksomhets Digipost-kontoid
-    private static final long AVSENDERS_KONTOID = 10987;
+    private static final BrokerId AVSENDERS_KONTOID = BrokerId.of(10987);
 
     // Passordet sertifikatfilen er beskyttet med
     private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";

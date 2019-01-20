@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.representations.sender;
 
+import no.digipost.api.client.BrokerId;
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.SenderOrganization;
 
@@ -37,23 +39,26 @@ public final class AuthorialSender {
         ACCOUNT_ID, ORGANIZATION;
     }
 
-    public static AuthorialSender resolve(long brokerId, MayHaveSender mayHaveAuthorialSender) {
-        if (mayHaveAuthorialSender.getSenderId() != null) {
-            return new AuthorialSender(mayHaveAuthorialSender.getSenderId(), null);
-        } else if (mayHaveAuthorialSender.getSenderOrganization() != null) {
-            return new AuthorialSender(null, mayHaveAuthorialSender.getSenderOrganization());
-        } else {
-            return new AuthorialSender(brokerId, null);
-        }
+    public static AuthorialSender resolve(BrokerId brokerId, MayHaveSender mayHaveAuthorialSender) {
+        return mayHaveAuthorialSender
+                .getSenderId().map(AuthorialSender::new)
+                .orElseGet(() -> mayHaveAuthorialSender
+                        .getSenderOrganization().map(AuthorialSender::new)
+                        .orElseGet(() -> new AuthorialSender(brokerId.asSenderId())));
     }
 
 
 
-    private final Long id;
+    private final SenderId id;
     private final SenderOrganization organization;
 
-    private AuthorialSender(Long id, SenderOrganization organization) {
-        this.id = id;
+    private AuthorialSender(SenderId senderId) {
+        this.id = senderId;
+        this.organization = null;
+    }
+
+    private AuthorialSender(SenderOrganization organization) {
+        this.id = null;
         this.organization = organization;
     }
 
@@ -65,7 +70,7 @@ public final class AuthorialSender {
         }
     }
 
-    public long getAccountId() {
+    public SenderId getAccountId() {
         if (!is(Type.ACCOUNT_ID)) throw new IllegalStateException("account id of " + AuthorialSender.class.getSimpleName() + " is null. Actual: " + this);
         return id;
     }
