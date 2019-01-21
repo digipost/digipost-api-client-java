@@ -33,47 +33,46 @@ public class GithubPagesReceiveExamples {
     private DigipostClient client;
 
     public void set_up_client() throws FileNotFoundException {
-        final SenderId senderId = SenderId.of(10987);
+        SenderId senderId = SenderId.of(10987);
 
         DigipostClient client = new DigipostClient(
                 DigipostClientConfig.newConfiguration().build(),
                 senderId.asBrokerId(),
                 Signer.usingKeyFromPKCS12KeyStore(new FileInputStream("certificate.p12"), "TheSecretPassword"));
-
     }
 
     public void get_documents_in_inbox() throws IOException {
         //get first 100 documents
-        final Inbox first100 = client.getInbox(SenderId.of(123456), 0, 100);
+        Inbox first100 = client.getInbox(SenderId.of(123456), 0, 100);
 
         //get next 100 documents
-        final Inbox next100 = client.getInbox(SenderId.of(123456), 100, 100);
+        Inbox next100 = client.getInbox(SenderId.of(123456), 100, 100);
     }
 
     public void download_document_content() throws IOException {
-        final Inbox inbox = client.getInbox(SenderId.of(123456));
+        Inbox inbox = client.getInbox(SenderId.of(123456));
 
-        final InboxDocument documentMetadata = inbox.documents.get(0);
+        InboxDocument documentMetadata = inbox.documents.get(0);
 
         System.out.println("Content type is: " + documentMetadata.getContentType());
-        final InputStream documentContent = client.getInboxDocumentContent(documentMetadata);
+        InputStream documentContent = client.getInboxDocumentContent(documentMetadata);
     }
 
     public void delete_document() throws IOException {
-        final Inbox inbox = client.getInbox(SenderId.of(123456));
+        Inbox inbox = client.getInbox(SenderId.of(123456));
 
-        final InboxDocument documentMetadata = inbox.documents.get(0);
+        InboxDocument documentMetadata = inbox.documents.get(0);
 
         client.deleteInboxDocument(documentMetadata);
     }
 
     public void download_attachment_content() throws IOException {
-        final Inbox inbox = client.getInbox(SenderId.of(123456));
+        Inbox inbox = client.getInbox(SenderId.of(123456));
 
-        final InboxDocument documentMetadata = inbox.documents.get(0);
-        final InboxDocument attachment = documentMetadata.getAttachments().get(0);
+        InboxDocument documentMetadata = inbox.documents.get(0);
+        InboxDocument attachment = documentMetadata.getAttachments().get(0);
 
         System.out.println("Content type is: " + attachment.getContentType());
-        final InputStream attachmentContent = client.getInboxDocumentContent(attachment);
+        InputStream attachmentContent = client.getInboxDocumentContent(attachment);
     }
 }
