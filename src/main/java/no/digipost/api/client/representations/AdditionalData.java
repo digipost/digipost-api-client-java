@@ -79,6 +79,6 @@ public class AdditionalData {
     private AdditionalData(DataType data, SenderOrganization senderOrganization, SenderId senderId) {
         this.dataType = new DataTypeHolder(data);
         this.senderOrganization = senderOrganization;
-        this.senderId = senderId.value();
+        this.senderId = senderId != null ? senderId.value() : null;
     }
 }
