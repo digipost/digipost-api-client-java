@@ -3,8 +3,8 @@ title: Digipost API client library for Java
 # current version of the software
 version: 1.0
 # licence of the software
-license: MIT License
-licenseUrl: http://opensource.org/licenses/MIT
+license: Apache License, version 2.0
+licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
 
 #baseurl: "/sikker-digital-post-net-klient" # the subpath of your site, e.g. /blog/
 baseurl: "/digipost-api-client-java"
