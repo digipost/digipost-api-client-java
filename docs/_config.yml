@@ -35,7 +35,7 @@ collections:
 # list of additional links on the right of the top menu
 headerLinks:
   - title: Download library
-    url: https://github.com/digipost/digipost-api-client-java
+    url: https://search.maven.org/artifact/no.digipost/digipost-api-client-java
   - title: GitHub
     url: https://github.com/digipost/digipost-api-client-java
   - title: Digipost
