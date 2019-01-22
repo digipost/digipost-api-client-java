@@ -74,7 +74,7 @@ import java.util.UUID;
 import static java.lang.Integer.parseInt;
 import static java.nio.file.Files.newInputStream;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
+import static no.digipost.api.client.representations.Message.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 public class DigipostSwingClient {
@@ -417,7 +417,7 @@ public class DigipostSwingClient {
                 try {
                     String subject = attachmentSubjectField.getText();
                     FileType fileType = FileType.fromFilename(attachmentContentField.getText());
-                    Document attachment = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), null, PASSWORD, NORMAL);
+                    Document attachment = new Document(UUID.randomUUID(), subject, fileType, null, new SmsNotification(), null, PASSWORD, NORMAL);
                     delivery.addContent(attachment, newInputStream(Paths.get(attachmentContentField.getText())));
                 } catch (IOException ex) {
                     eventLogger.log(ex.getMessage() + "\n");
@@ -442,20 +442,20 @@ public class DigipostSwingClient {
                     Message message = null;
                     String subject = subjectField.getText();
                     FileType fileType = FileType.fromFilename(contentField.getText());
-                    Document primaryDocument = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), null, PASSWORD, NORMAL);
+                    Document primaryDocument = new Document(UUID.randomUUID(), subject, fileType, null, new SmsNotification(), null, PASSWORD, NORMAL);
                     if (identifyOnDigipostAddress.isSelected()) {
                         String digipostAddress = recipientDigipostAddressField.getText();
-                        message = newMessage(UUID.randomUUID().toString(), primaryDocument)
+                        message = newMessage(UUID.randomUUID(), primaryDocument)
                                 .digipostAddress(new DigipostAddress(digipostAddress))
                                 .build();
                     } else if (identifyOnPersonalIdentificationNumber.isSelected()) {
                         String personalIdentificationNumber = recipientPersonalIdentificationNumberField.getText();
-                        message = newMessage(UUID.randomUUID().toString(), primaryDocument)
+                        message = newMessage(UUID.randomUUID(), primaryDocument)
                                 .personalIdentificationNumber(new PersonalIdentificationNumber(personalIdentificationNumber))
                                 .build();
                     } else if(identifyOnOrganizationNumber.isSelected()){
                         String orgnizationNumber = recipientOrganizationNumberField.getText();
-                        message = newMessage(UUID.randomUUID().toString(),primaryDocument)
+                        message = newMessage(UUID.randomUUID(), primaryDocument)
                                 .organisationNumber(new OrganisationNumber(orgnizationNumber))
                                 .build();
                     } else {
@@ -489,7 +489,7 @@ public class DigipostSwingClient {
                             recipient = new MessageRecipient(nameAndAddress);
                         }
 
-                        message = newMessage(UUID.randomUUID().toString(), primaryDocument)
+                        message = newMessage(UUID.randomUUID(), primaryDocument)
                                 .recipient(recipient)
                                 .build();
                     }

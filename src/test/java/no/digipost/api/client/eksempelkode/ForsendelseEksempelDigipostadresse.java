@@ -33,7 +33,6 @@ import java.util.UUID;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 /**
@@ -64,10 +63,10 @@ public class ForsendelseEksempelDigipostadresse {
         DigipostAddress address = new DigipostAddress("fornavn.etternavn#6789");
 
         // 4. Vi oppretter hoveddokumentet
-        Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
+        Document primaryDocument = new Document(UUID.randomUUID(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
         // 5. Vi oppretter en forsendelse
-        Message message = newMessage(UUID.randomUUID().toString(), primaryDocument)
+        Message message = Message.newMessage(UUID.randomUUID(), primaryDocument)
                 .digipostAddress(address)
                 .build();
 

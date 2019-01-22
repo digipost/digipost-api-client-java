@@ -34,7 +34,6 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 public class VedleggEksempel {
@@ -60,13 +59,13 @@ public class VedleggEksempel {
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
         // 4. Vi oppretter hoveddokumentet
-        Document primaryDocument = new Document(UUID.randomUUID().toString(), "Hoveddokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
+        Document primaryDocument = new Document(UUID.randomUUID(), "Hoveddokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
         // 5. Vi oppretter vedlegget
-        Document attachment = new Document(UUID.randomUUID().toString(), "Vedleggets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
+        Document attachment = new Document(UUID.randomUUID(), "Vedleggets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
         // 6. Vi oppretter en forsendelse
-        Message message = newMessage(UUID.randomUUID().toString(), primaryDocument)
+        Message message = Message.newMessage(UUID.randomUUID(), primaryDocument)
                 .personalIdentificationNumber(pin)
                 .attachments(asList(attachment))
                 .build();

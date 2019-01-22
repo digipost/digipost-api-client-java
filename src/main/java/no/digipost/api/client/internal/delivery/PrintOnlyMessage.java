@@ -23,6 +23,7 @@ import no.digipost.api.client.representations.MessageDelivery;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Sender en forsendelse direkte til print gjennom Digipost i ett kall.
@@ -32,7 +33,7 @@ final class PrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
 
     private final MessageDeliverer sender;
     private final Message printMessage;
-    private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
+    private final Map<UUID, DocumentContent> documents = new LinkedHashMap<>();
 
 
     PrintOnlyMessage(Message printMessage, MessageDeliverer sender) {

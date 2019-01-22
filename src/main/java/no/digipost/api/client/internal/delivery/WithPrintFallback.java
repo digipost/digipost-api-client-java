@@ -23,6 +23,7 @@ import no.digipost.api.client.representations.MessageDelivery;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Sender en forsendelse gjennom Digipost i ett kall. Dersom mottaker ikke er
@@ -34,7 +35,7 @@ final class WithPrintFallback implements OngoingDelivery.SendableWithPrintFallba
 
     private final MessageDeliverer sender;
     private final Message message;
-    private final Map<String, DocumentContent> documents = new LinkedHashMap<>();
+    private final Map<UUID, DocumentContent> documents = new LinkedHashMap<>();
 
     WithPrintFallback(Message message, MessageDeliverer sender) {
         this.message = message;

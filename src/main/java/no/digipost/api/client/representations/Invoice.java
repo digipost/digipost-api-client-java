@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -56,23 +57,23 @@ public class Invoice extends Document
      * Constructor for just the required fields of a document. Non-specified
      * fields will get their respective standard values when sent to Digipost.
      */
-    public Invoice(String uuid, String subject, FileType fileType, String kid, BigDecimal amount, String account, LocalDate dueDate) {
+    public Invoice(UUID uuid, String subject, FileType fileType, String kid, BigDecimal amount, String account, LocalDate dueDate) {
         this(uuid, subject, fileType, null, null, null, null, null, kid, amount, account, dueDate);
     }
 
-    public Invoice(String uuid, String subject, FileType fileType, String kid, BigDecimal amount, String account, LocalDate dueDate,
+    public Invoice(UUID uuid, String subject, FileType fileType, String kid, BigDecimal amount, String account, LocalDate dueDate,
                    Boolean opened, String technicalType, AuthenticationLevel authenticationLevel) {
         this(uuid, subject, fileType, null, null, null, authenticationLevel, null, kid, amount, account, dueDate, opened, technicalType);
     }
 
-    public Invoice(String uuid, String subject, FileType fileType, String openingReceipt, SmsNotification smsNotification,
+    public Invoice(UUID uuid, String subject, FileType fileType, String openingReceipt, SmsNotification smsNotification,
                    EmailNotification emailNotification, AuthenticationLevel authenticationLevel, SensitivityLevel sensitivityLevel,
                    String kid, BigDecimal amount, String account, LocalDate dueDate) {
         this(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel,
                 kid, amount, account, dueDate, null, (String[]) null);
     }
 
-    public Invoice(String uuid, String subject, FileType fileType, String openingReceipt, SmsNotification smsNotification,
+    public Invoice(UUID uuid, String subject, FileType fileType, String openingReceipt, SmsNotification smsNotification,
                    EmailNotification emailNotification, AuthenticationLevel authenticationLevel, SensitivityLevel sensitivityLevel,
                    String kid, BigDecimal amount, String account, LocalDate dueDate, Boolean opened, String... technicalType) {
         super(uuid, subject, fileType, openingReceipt, smsNotification, emailNotification, authenticationLevel, sensitivityLevel,

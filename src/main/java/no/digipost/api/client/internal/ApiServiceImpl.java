@@ -81,6 +81,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static javax.xml.bind.JAXB.unmarshal;
@@ -219,7 +220,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
-    public DocumentStatus getDocumentStatus(SenderId senderId, String uuid) {
+    public DocumentStatus getDocumentStatus(SenderId senderId, UUID uuid) {
         return getDocumentStatus("/documents/" + senderId.stringValue() + "/" + uuid + "/status");
     }
 

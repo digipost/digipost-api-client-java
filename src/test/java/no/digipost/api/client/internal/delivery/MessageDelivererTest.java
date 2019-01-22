@@ -79,7 +79,6 @@ import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
 import static no.digipost.api.client.representations.Channel.PRINT;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.MessageStatus.DELIVERED_TO_PRINT;
 import static no.digipost.api.client.representations.Relation.GET_ENCRYPTION_KEY;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.DELIVERY_DIRECT_TO_PRINT;
@@ -203,16 +202,15 @@ public class MessageDelivererTest {
 
         when(api.sendMultipartMessage(any(HttpEntity.class))).thenReturn(response);
 
-        String messageId = UUID.randomUUID().toString();
-        final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).encrypt();
-        final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).encrypt());
+        final Document printDocument = new Document(UUID.randomUUID(), "subject", FileType.HTML).encrypt();
+        final List<Document> printAttachments = asList(new Document(UUID.randomUUID(), "attachment", FileType.HTML).encrypt());
         PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
         PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-        Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+        Map<UUID, DocumentContent> documentAndContent = new LinkedHashMap<>();
 
         MessageDeliverer deliverer = new MessageDeliverer(newConfiguration().clock(clock).build(), api, new DocumentsPreparer(pdfValidator));
-        Message message = newMessage(messageId, printDocument).attachments(printAttachments)
+        Message message = Message.newMessage(UUID.randomUUID(), printDocument).attachments(printAttachments)
                 .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress))).build();
 
         documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
@@ -227,13 +225,13 @@ public class MessageDelivererTest {
 
     @Test
     public void setDigipostContentToUUIDTest(){
-        Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).encrypt();
-        Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+        Document printDocument = new Document(UUID.randomUUID(), "subject", FileType.HTML).encrypt();
+        Map<UUID, DocumentContent> documentAndContent = new LinkedHashMap<>();
         PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
         PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-        List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).encrypt());
-        Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
+        List<Document> printAttachments = asList(new Document(UUID.randomUUID(), "attachment", FileType.HTML).encrypt());
+        Message message = Message.newMessage(UUID.randomUUID(), printDocument).attachments(printAttachments)
                 .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress))).build();
 
         documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
@@ -256,13 +254,13 @@ public class MessageDelivererTest {
 
     @Test
     public void setPrintContentToUUIDTest(){
-        Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.HTML).encrypt();
-        Map<String, DocumentContent> documentAndContent = new LinkedHashMap<>();
+        Document printDocument = new Document(UUID.randomUUID(), "subject", FileType.HTML).encrypt();
+        Map<UUID, DocumentContent> documentAndContent = new LinkedHashMap<>();
         PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
         PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
-        List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.HTML).encrypt());
-        Message message = newMessage(UUID.randomUUID().toString(), printDocument).attachments(printAttachments)
+        List<Document> printAttachments = asList(new Document(UUID.randomUUID(), "attachment", FileType.HTML).encrypt());
+        Message message = Message.newMessage(UUID.randomUUID(), printDocument).attachments(printAttachments)
                 .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress))).build();
 
         documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf2Pages()));
@@ -285,19 +283,19 @@ public class MessageDelivererTest {
 
     @Test
     public void passes_pdf_validation_for_printonly_message() throws IOException {
-        String messageId = UUID.randomUUID().toString();
+        UUID messageId = UUID.randomUUID();
         when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
         when(api.sendMultipartMessage(any(HttpEntity.class))).thenReturn(mockClientResponse);
         when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 
-        final Document printDocument = new Document(UUID.randomUUID().toString(), "subject", FileType.PDF).encrypt();
-        final List<Document> printAttachments = asList(new Document(UUID.randomUUID().toString(), "attachment", FileType.PDF).encrypt());
+        final Document printDocument = new Document(UUID.randomUUID(), "subject", FileType.PDF).encrypt();
+        final List<Document> printAttachments = asList(new Document(UUID.randomUUID(), "attachment", FileType.PDF).encrypt());
 
         concat(Stream.of(printDocument), printAttachments.stream()).forEach(document -> document.addLink(new Link(GET_ENCRYPTION_KEY, new DigipostUri("/encrypt"))));
 
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         marshal(jaxbContext,
-                new MessageDelivery(messageId, PRINT, DELIVERED_TO_PRINT, now()), bao);
+                new MessageDelivery(messageId.toString(), PRINT, DELIVERED_TO_PRINT, now()), bao);
 
         when(mockClientResponse.getEntity())
                 .thenReturn(new ByteArrayEntity(bao.toByteArray()));
@@ -313,7 +311,7 @@ public class MessageDelivererTest {
         ));
 
         LOG.debug("Tester direkte til print");
-        Message message = newMessage(messageId, printDocument).attachments(printAttachments).printDetails(new PrintDetails(recipient, returnAddress)).build();
+        Message message = Message.newMessage(messageId, printDocument).attachments(printAttachments).printDetails(new PrintDetails(recipient, returnAddress)).build();
 
         SendableForPrintOnly sendable = sender
                 .createPrintOnlyMessage(message)

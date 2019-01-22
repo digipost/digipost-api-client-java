@@ -16,7 +16,6 @@
 package no.digipost.api.client.internal.delivery;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
-import no.digipost.api.client.internal.delivery.DocumentsPreparer;
 import no.digipost.api.client.representations.Channel;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.FileType;
@@ -80,9 +79,9 @@ public class DocumentsPreparerTest {
 
     private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(FakeEncryptionKey.createFakeEncryptionKey()));
 
-    private final Document primaryDocument = new Document(UUID.randomUUID().toString(), "primary", PDF);
+    private final Document primaryDocument = new Document(UUID.randomUUID(), "primary", PDF);
     private final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{ put(primaryDocument, printablePdf1Page()); }};
-    private final MessageBuilder messageBuilder = MessageBuilder.newMessage("m_id", primaryDocument).printDetails(
+    private final MessageBuilder messageBuilder = Message.newMessage(UUID.randomUUID(), primaryDocument).printDetails(
             new PrintDetails(new PrintRecipient("Joe Schmoe", new NorwegianAddress("7845", "Far away")), new PrintRecipient("Dolly Parton", new NorwegianAddress("8942", "Farther away"))));
 
     @Test
@@ -107,7 +106,7 @@ public class DocumentsPreparerTest {
     public void deniesNonValidatingPdfForBothPrintAndWeb() {
         for (Channel deliveryMethod : Channel.values()) {
             try {
-                preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID().toString(), null, PDF), new byte[]{65, 65, 65, 65}, () -> mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS)));
+                preparer.validateAndSetNrOfPages(deliveryMethod, new Document(UUID.randomUUID(), null, PDF), new byte[]{65, 65, 65, 65}, () -> mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS)));
             } catch (DigipostClientException e) {
                 assertThat(e.getMessage(), containsString("Could not parse"));
                 continue;
@@ -118,10 +117,10 @@ public class DocumentsPreparerTest {
 
     @Test
     public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
-        preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL);
+        preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL);
 
         DigipostClientException thrown = assertThrows(DigipostClientException.class,
-                () -> preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID().toString(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL));
+                () -> preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL));
         assertThat(thrown, where(Exception::getMessage, containsString("too many pages")));
     }
 
@@ -145,7 +144,7 @@ public class DocumentsPreparerTest {
     }
 
     private Document addAttachment(String subject, FileType fileType, InputStream content) {
-        Document document = new Document(UUID.randomUUID().toString(), subject, fileType);
+        Document document = new Document(UUID.randomUUID(), subject, fileType);
         documents.put(document, content);
         messageBuilder.attachments(asList(document));
         return document;

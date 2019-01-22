@@ -54,6 +54,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -110,7 +111,7 @@ public class MessageDeliverer {
      * Dersom dokumentene skal direkte til print og skal prekrypteres før sending kan det gjøres en ekstra request for å hente
      * krypteringsnøkkel.
      */
-    public MessageDelivery sendMultipartMessage(Message message, Map<String, DocumentContent> documentsAndContent) {
+    public MessageDelivery sendMultipartMessage(Message message, Map<UUID, DocumentContent> documentsAndContent) {
         EncryptionKeyAndDocsWithInputstream encryptionAndInputStream = fetchEncryptionKeyForRecipientIfNecessaryAndMapContentToInputstream(message, documentsAndContent);
         Encrypter encrypter = encryptionAndInputStream.digipostPublicKeys.map(Encrypter::using).orElse(FAIL_IF_TRYING_TO_ENCRYPT);
         Map<Document, InputStream> documentInputStream = encryptionAndInputStream.documentsAndInputstream;
@@ -245,7 +246,7 @@ public class MessageDeliverer {
 
 
     private EncryptionKeyAndDocsWithInputstream fetchEncryptionKeyForRecipientIfNecessaryAndMapContentToInputstream(Message message,
-                                                                                        Map<String, DocumentContent> documentsAndContent) {
+                                                                                        Map<UUID, DocumentContent> documentsAndContent) {
         final Map<Document, InputStream> documentsAndInputstream = new LinkedHashMap<>();
         Optional<DigipostPublicKey> publicKeys = empty();
         Message singleChannelMessage;
@@ -284,7 +285,7 @@ public class MessageDeliverer {
         return new EncryptionKeyAndDocsWithInputstream(publicKeys, documentsAndInputstream, singleChannelMessage);
     }
 
-    static Message setMapAndMessageToDigipost(Message messageToCopy, Map<String, DocumentContent> documentsAndContent,
+    static Message setMapAndMessageToDigipost(Message messageToCopy, Map<UUID, DocumentContent> documentsAndContent,
                                               Map<Document, InputStream> documentsAndInputStream){
         Message singleChannelMessage = Message.copyMessageWithOnlyDigipostDetails(messageToCopy);
         setDigipostContentToUUID(documentsAndContent, documentsAndInputStream, singleChannelMessage.getAllDocuments());
@@ -292,7 +293,7 @@ public class MessageDeliverer {
         return singleChannelMessage;
     }
 
-    static Message setMapAndMessageToPrint(Message messageToCopy, Map<String, DocumentContent> documentsAndContent,
+    static Message setMapAndMessageToPrint(Message messageToCopy, Map<UUID, DocumentContent> documentsAndContent,
                                            Map<Document, InputStream> documentsAndInputStream) {
         Message singleChannelMessage = Message.copyMessageWithOnlyPrintDetails(messageToCopy);
         setPrintContentToUUID(documentsAndContent, documentsAndInputStream, singleChannelMessage.getAllDocuments());
@@ -300,11 +301,11 @@ public class MessageDeliverer {
         return singleChannelMessage;
     }
 
-    static void setDigipostContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, Stream<Document> allDocuments) {
+    static void setDigipostContentToUUID(Map<UUID, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, Stream<Document> allDocuments) {
         allDocuments.forEach(doc -> documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getDigipostContent()));
     }
 
-    static void setPrintContentToUUID(Map<String, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, Stream<Document> allDocuments) {
+    static void setPrintContentToUUID(Map<UUID, DocumentContent> documentsAndContent, Map<Document, InputStream> documentsAndInputstream, Stream<Document> allDocuments) {
         allDocuments.forEach(doc -> documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getPrintContent()));
     }
 

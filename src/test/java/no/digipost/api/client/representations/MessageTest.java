@@ -35,7 +35,7 @@ import static no.digipost.api.client.representations.FileType.GIF;
 import static no.digipost.api.client.representations.FileType.HTML;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.representations.FileType.ZIP;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
+import static no.digipost.api.client.representations.Message.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -54,7 +54,7 @@ public class MessageTest {
 
     @Test
     public void shouldBeDirectPrintWhenMessageContainsOnlyPrintDetails() {
-        Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF))
+        Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", PDF))
                 .recipient(new MessageRecipient(new PrintDetails()))
                 .build();
         assertTrue(message.isDirectPrint());
@@ -97,7 +97,7 @@ public class MessageTest {
 
     @Test
     public void copyOfMessageIsTheSameAsTheOriginalExceptPrintDetails() {
-        Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", HTML))
+        Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", HTML))
                 .digipostAddress(new DigipostAddress("Test2"))
                 .senderId(SenderId.of(1L)).deliveryTime(ZonedDateTime.now()).invoiceReference("Invoice")
                 .recipient(new MessageRecipient(new DigipostAddress("TestAdress"), new PrintDetails(
@@ -142,21 +142,21 @@ public class MessageTest {
 
     @Test
     public void shouldNotBeDirectPrintWhenMessageContainsDigipostAddress() {
-        Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+        Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
                 .digipostAddress(new DigipostAddress("test.testson#1234"))
                 .build();
         assertFalse(message.isDirectPrint());
     }
     @Test
     public void shouldNotBeDirectPrintWhenMessageContainsNameAndAddress() {
-        Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+        Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
                 .recipient(new MessageRecipient(new NameAndAddress()))
                 .build();
         assertFalse(message.isDirectPrint());
     }
     @Test
     public void shouldNotBeDirectPrintWhenMessageContainsPersonalIdendificationNumber() {
-        Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+        Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
                 .personalIdentificationNumber(new PersonalIdentificationNumber("12125412435"))
                 .build();
         assertFalse(message.isDirectPrint());
@@ -164,7 +164,7 @@ public class MessageTest {
 
     @Test
     public void possibleToPassNullForNoAttachments() {
-        Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF))
+        Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", PDF))
                 .digipostAddress(new DigipostAddress("test.testson#1234"))
                 .build();
         assertThat(message.attachments, hasSize(0));
@@ -172,8 +172,8 @@ public class MessageTest {
 
     @Test
     public void changingThePassedAttachmentListDoesNotChangeTheMessage() {
-        List<Document> attachments = new ArrayList<Document>(asList(new Document(UUID.randomUUID().toString(), "subject", PDF), new Document(UUID.randomUUID().toString(), "subject", PDF)));
-        Message message = newMessage(UUID.randomUUID().toString(), new Document(UUID.randomUUID().toString(), "subject", PDF))
+        List<Document> attachments = new ArrayList<Document>(asList(new Document(UUID.randomUUID(), "subject", PDF), new Document(UUID.randomUUID(), "subject", PDF)));
+        Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", PDF))
                 .digipostAddress(new DigipostAddress("test.testson#1234"))
                 .attachments(attachments)
                 .build();
@@ -185,22 +185,22 @@ public class MessageTest {
 
     @Test
     public void sortsDocumentsByTheSameOrderAsTheyAppearInTheMessage() {
-        Document hoved = new Document(UUID.randomUUID().toString(), "hoved", GIF);
-        Document a1 = new Document(UUID.randomUUID().toString(), "a1", PDF);
+        Document hoved = new Document(UUID.randomUUID(), "hoved", GIF);
+        Document a1 = new Document(UUID.randomUUID(), "a1", PDF);
         Document a2 = technicalAttachment(ZIP, "uhu, så teknisk!");
-        Document a3 = new Document(UUID.randomUUID().toString(), "a3", HTML);
-        Message message = newMessage("id", hoved).attachments(asList(a1, a2, a3)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
+        Document a3 = new Document(UUID.randomUUID(), "a3", HTML);
+        Message message = newMessage(UUID.randomUUID(), hoved).attachments(asList(a1, a2, a3)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
 
         assertThat(Stream.of(a2, hoved, a3, a1).sorted(message.documentOrder()).collect(toList()), contains(hoved, a1, a2, a3));
     }
 
     @Test
     public void sortingDocumentsNotInMessageByOrderInMessageThrowsException() {
-        Document hoved = new Document(UUID.randomUUID().toString(), "hoved", GIF);
-        Document a1 = new Document(UUID.randomUUID().toString(), "a1", PDF);
+        Document hoved = new Document(UUID.randomUUID(), "hoved", GIF);
+        Document a1 = new Document(UUID.randomUUID(), "a1", PDF);
         Document a2 = technicalAttachment(ZIP, "uhu, så teknisk!");
-        Document notInMessage = new Document(UUID.randomUUID().toString(), "a3", HTML);
-        Message message = newMessage("id", hoved).attachments(asList(a1, a2)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
+        Document notInMessage = new Document(UUID.randomUUID(), "a3", HTML);
+        Message message = newMessage(UUID.randomUUID(), hoved).attachments(asList(a1, a2)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
 
         Message.CannotSortDocumentsUsingMessageOrder thrown = assertThrows(Message.CannotSortDocumentsUsingMessageOrder.class, () -> Collections.sort(asList(a2, hoved, notInMessage, a1), message.documentOrder()));
         assertThat(thrown, where(Exception::getMessage, containsString("ikke sortere Document med uuid '" + notInMessage.uuid)));

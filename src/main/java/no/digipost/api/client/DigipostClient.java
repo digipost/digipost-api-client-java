@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
@@ -184,15 +185,15 @@ public class DigipostClient {
         return messageApi.getSenderInformation(orgnr, avsenderenhet);
     }
 
-    public DocumentStatus getDocumentStatus(final Link linkToDocumentStatus) {
+    public DocumentStatus getDocumentStatus(Link linkToDocumentStatus) {
         return documentApi.getDocumentStatus(linkToDocumentStatus);
     }
 
-    public DocumentStatus getDocumentStatus(SenderId senderId, String uuid) {
+    public DocumentStatus getDocumentStatus(SenderId senderId, UUID uuid) {
         return documentApi.getDocumentStatus(senderId, uuid);
     }
 
-    public InputStream getContent(final String path) {
+    public InputStream getContent(String path) {
         return documentApi.getDocumentContent(path);
     }
 

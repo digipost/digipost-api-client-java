@@ -33,8 +33,8 @@ public class PrintMessageTest {
         PrintRecipient recipient2 = newNorwegianRecipient("Name2", "Zip2", "City2");
         PrintRecipient returnAddress = newNorwegianRecipient("SenderName", "SenderZip", "SenderCity");
 
-        String uniqueId = UUID.randomUUID().toString();
-        String otherId = UUID.randomUUID().toString();
+        UUID uniqueId = UUID.randomUUID();
+        UUID otherId = UUID.randomUUID();
 
         assertTrue(newPrintMessage(uniqueId, recipient1, returnAddress).isSameMessageAs(
                 newPrintMessage(uniqueId, recipient1, returnAddress)));

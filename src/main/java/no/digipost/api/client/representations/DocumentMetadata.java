@@ -16,8 +16,14 @@
 
 package no.digipost.api.client.representations;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+
 import java.util.List;
+import java.util.UUID;
 
 import static no.digipost.api.client.representations.Relation.GET_DOCUMENT_CONTENT;
 
@@ -26,7 +32,7 @@ import static no.digipost.api.client.representations.Relation.GET_DOCUMENT_CONTE
 public class DocumentMetadata extends Representation {
 
     @XmlAttribute(name = "uuid", required = true)
-    public final String uuid;
+    public final UUID uuid;
     @XmlAttribute(name = "technical-type")
     public final String technicalType;
 
@@ -39,7 +45,7 @@ public class DocumentMetadata extends Representation {
         this(null, null);
     }
 
-    public DocumentMetadata(String uuid, String technicalType, Link... links) {
+    public DocumentMetadata(UUID uuid, String technicalType, Link... links) {
         super(links);
         this.uuid = uuid;
         this.technicalType = technicalType;

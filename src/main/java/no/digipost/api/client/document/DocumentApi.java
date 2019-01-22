@@ -22,13 +22,14 @@ import no.digipost.api.client.representations.Link;
 
 import java.io.InputStream;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 public interface DocumentApi {
 
     /**
      * Henter status på dokumeter som tidligere blitt sendt i Digipost, både via digital og print-kanal.
      */
-    DocumentStatus getDocumentStatus(SenderId senderId, String uuid);
+    DocumentStatus getDocumentStatus(SenderId senderId, UUID uuid);
 
     /**
      * Henter status på dokumeter som tidligere blitt sendt i Digipost, både via digital og print-kanal.

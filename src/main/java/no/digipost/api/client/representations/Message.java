@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -55,6 +56,15 @@ import static org.apache.commons.lang3.StringUtils.join;
         "attachments" })
 @XmlRootElement(name = "message")
 public class Message implements MayHaveSender {
+
+    public static MessageBuilder newMessage(UUID messageId, Document primaryDocument) {
+        return newMessage(messageId.toString(), primaryDocument);
+    }
+
+    public static MessageBuilder newMessage(String messageId, Document primaryDocument) {
+        return new MessageBuilder(messageId, primaryDocument);
+    }
+
 
     @XmlElement(name = "message-id")
     public final String messageId;
@@ -92,10 +102,6 @@ public class Message implements MayHaveSender {
         private MessageBuilder(String messageId, Document primaryDocument) {
             this.messageId = messageId;
             this.primaryDocument = primaryDocument;
-        }
-
-        public static MessageBuilder newMessage(String messageId, Document primaryDocument) {
-            return new MessageBuilder(messageId, primaryDocument);
         }
 
         /**
@@ -260,7 +266,7 @@ public class Message implements MayHaveSender {
      */
     public Comparator<? super Document> documentOrder() {
         return new Comparator<Document>() {
-            final String[] uuids = getAllDocuments().map(d -> d.uuid).toArray(size -> new String[size]);
+            final UUID[] uuids = getAllDocuments().map(d -> d.uuid).toArray(UUID[]::new);
             @Override
             public int compare(Document d1, Document d2) {
                 int d1Index = indexOf(uuids, d1.uuid);
@@ -277,7 +283,7 @@ public class Message implements MayHaveSender {
     }
 
     public class CannotSortDocumentsUsingMessageOrder extends IllegalStateException {
-        private CannotSortDocumentsUsingMessageOrder(String uuid, String[] validUuids) {
+        private CannotSortDocumentsUsingMessageOrder(UUID uuid, UUID[] validUuids) {
             super(
                     "Kan ikke sortere Document med uuid '" + uuid + "' etter rekkefølgen i Message med id '" + messageId +
                     "' da dokumentet ikke eksisterer i meldingen.\nMeldingen har følgende dokumenter:\n  - " +
@@ -308,4 +314,5 @@ public class Message implements MayHaveSender {
                 ", attachments=" + attachments +
                 '}';
     }
+
 }

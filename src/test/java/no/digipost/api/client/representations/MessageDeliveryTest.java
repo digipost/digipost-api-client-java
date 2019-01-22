@@ -42,9 +42,9 @@ public class MessageDeliveryTest {
 
     @Test
     public void gettingAllDocumentsYieldsListWithPrimaryDocumentFirstFollowedByAttachments() {
-        Document primary = new Document(UUID.randomUUID().toString(), "primary", PDF);
-        Document att1 = new Document(UUID.randomUUID().toString(), "att1", PDF);
-        Document att2 = new Document(UUID.randomUUID().toString(), "att2", PDF);
+        Document primary = new Document(UUID.randomUUID(), "primary", PDF);
+        Document att1 = new Document(UUID.randomUUID(), "att1", PDF);
+        Document att2 = new Document(UUID.randomUUID(), "att2", PDF);
 
         MessageDelivery delivery = new MessageDelivery(null, DIGIPOST, NOT_COMPLETE, null);
         delivery.primaryDocument = primary;
@@ -56,8 +56,8 @@ public class MessageDeliveryTest {
 
     @Test
     public void findingDocumentsByUuid() {
-        Document primary = new Document(UUID.randomUUID().toString(), "primary", PDF);
-        Document att1 = new Document(UUID.randomUUID().toString(), "att1", PDF);
+        Document primary = new Document(UUID.randomUUID(), "primary", PDF);
+        Document att1 = new Document(UUID.randomUUID(), "att1", PDF);
 
         MessageDelivery delivery = new MessageDelivery(null, DIGIPOST, NOT_COMPLETE, null);
         delivery.primaryDocument = primary;
@@ -67,7 +67,7 @@ public class MessageDeliveryTest {
         assertThat(delivery.getDocumentByUuid(att1.uuid), is(att1));
 
         try {
-            delivery.getDocumentByUuid(UUID.randomUUID().toString());
+            delivery.getDocumentByUuid(UUID.randomUUID());
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("not found"));
             return;

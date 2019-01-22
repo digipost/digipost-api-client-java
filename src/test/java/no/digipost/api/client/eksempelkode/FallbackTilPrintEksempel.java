@@ -38,7 +38,6 @@ import java.util.UUID;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.PrintDetails.NondeliverableHandling.RETURN_TO_SENDER;
 import static no.digipost.api.client.representations.PrintDetails.PrintColors.MONOCHROME;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
@@ -77,12 +76,12 @@ public class FallbackTilPrintEksempel {
 
         // 5. Vi oppretter en forsendelse for sending av brevet i Digipost og med adresseinformasjon som vil
         // benyttes dersom mottaker ikke er Digipostbruker
-        Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
+        Document primaryDocument = new Document(UUID.randomUUID(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
         PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer","Mottakers poststed")),
                 new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), MONOCHROME, RETURN_TO_SENDER);
-        String dinForsendelseId = UUID.randomUUID().toString();
-        Message message = newMessage(dinForsendelseId, primaryDocument)
+        UUID dinForsendelseId = UUID.randomUUID();
+        Message message = Message.newMessage(dinForsendelseId, primaryDocument)
                 .recipient(new MessageRecipient(pin, printDetails))
                 .build();
 
