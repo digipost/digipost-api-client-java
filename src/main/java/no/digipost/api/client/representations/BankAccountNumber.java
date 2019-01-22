@@ -15,14 +15,10 @@
  */
 package no.digipost.api.client.representations;
 
-public class BankAccountNumber extends RecipientIdentifier {
+public final class BankAccountNumber extends RecipientIdentifier {
 
     public BankAccountNumber(final String bankAccountNumber) {
         super(bankAccountNumber);
     }
 
-    @Override
-    public boolean isPersonalIdentificationNumber() {
-        return false;
-    }
 }

@@ -84,7 +84,7 @@ public class GithubPagesSendExamples {
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
 
         Message message = Message.newMessage("messageId", primaryDocument)
-                .personalIdentificationNumber(pin)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
@@ -98,7 +98,7 @@ public class GithubPagesSendExamples {
         Document primaryDocument = new Document(UUID1, "Receipt", FileType.PDF);
 
         Message message = Message.newMessage("messageId", primaryDocument)
-                .bankAccountNumber(ban)
+                .recipient(ban)
                 .build();
 
         client.createMessage(message)
@@ -113,7 +113,7 @@ public class GithubPagesSendExamples {
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
 
         Message message = Message.newMessage("messageId", primaryDocument)
-                .nameAndAddress(nameAndAddress)
+                .recipient(nameAndAddress)
                 .build();
 
         client.createMessage(message)
@@ -133,7 +133,7 @@ public class GithubPagesSendExamples {
         Document attachment2 = new Document(UUID3, "Attachment2 subject", FileType.PDF);
 
         Message message = Message.newMessage("messageId", primaryDocument)
-                .personalIdentificationNumber(pin)
+                .recipient(pin)
                 .attachments(Arrays.asList(attachment1, attachment2))
                 .build();
 
@@ -153,7 +153,7 @@ public class GithubPagesSendExamples {
         Invoice invoice = new Invoice(UUID1, "Invoice subject", FileType.PDF, null, null, null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, "704279604", new BigDecimal("1.20"), "82760100435", LocalDate.of(2015, 5, 5));
 
         Message message = Message.newMessage("messageId", invoice)
-                .personalIdentificationNumber(pin)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
@@ -170,7 +170,7 @@ public class GithubPagesSendExamples {
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF, null, new SmsNotification(1), null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
 
         Message message = Message.newMessage("messageId", primaryDocument)
-                .personalIdentificationNumber(pin)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
@@ -210,7 +210,7 @@ public class GithubPagesSendExamples {
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF, null, null, null, AuthenticationLevel.TWO_FACTOR, SensitivityLevel.SENSITIVE);
 
         Message message = Message.newMessage("messageId", primaryDocument)
-                .personalIdentificationNumber(pin)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
@@ -246,7 +246,7 @@ public class GithubPagesSendExamples {
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
 
         Message message = Message.newMessage("messageId", primaryDocument)
-                .personalIdentificationNumber(pin)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
@@ -268,7 +268,7 @@ public class GithubPagesSendExamples {
         Document primaryDocument = new Document(UUID1, "X-Ray appointment", FileType.PDF, appointment);
 
         Message message = Message.newMessage("messageId", primaryDocument)
-                .personalIdentificationNumber(pin)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)

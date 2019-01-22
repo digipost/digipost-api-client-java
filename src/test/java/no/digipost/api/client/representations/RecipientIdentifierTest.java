@@ -16,16 +16,20 @@
 package no.digipost.api.client.representations;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
-public class PersonalIdentificationNumberTest {
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+class RecipientIdentifierTest {
 
     @Test
-    public void verify_equals_and_hashcode() {
-        EqualsVerifier.forClass(PersonalIdentificationNumber.class)
-                .suppress(Warning.STRICT_INHERITANCE)
-                .verify();
+    void correctEqualsAndHashCode() {
+        assertAll(
+                () -> EqualsVerifier.forClass(RecipientIdentifier.class).verify(),
+                () -> EqualsVerifier.forClass(DigipostAddress.class).withRedefinedSuperclass().verify(),
+                () -> EqualsVerifier.forClass(BankAccountNumber.class).withRedefinedSuperclass().verify(),
+                () -> EqualsVerifier.forClass(OrganisationNumber.class).withRedefinedSuperclass().verify(),
+                () -> EqualsVerifier.forClass(PersonalIdentificationNumber.class).withRedefinedSuperclass().verify()
+        );
     }
-
 }

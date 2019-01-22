@@ -98,7 +98,7 @@ public class MessageTest {
     @Test
     public void copyOfMessageIsTheSameAsTheOriginalExceptPrintDetails() {
         Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", HTML))
-                .digipostAddress(new DigipostAddress("Test2"))
+                .recipient(new DigipostAddress("Test2"))
                 .senderId(SenderId.of(1L)).deliveryTime(ZonedDateTime.now()).invoiceReference("Invoice")
                 .recipient(new MessageRecipient(new DigipostAddress("TestAdress"), new PrintDetails(
                         new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop")),
@@ -143,7 +143,7 @@ public class MessageTest {
     @Test
     public void shouldNotBeDirectPrintWhenMessageContainsDigipostAddress() {
         Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-                .digipostAddress(new DigipostAddress("test.testson#1234"))
+                .recipient(new DigipostAddress("test.testson#1234"))
                 .build();
         assertFalse(message.isDirectPrint());
     }
@@ -157,7 +157,7 @@ public class MessageTest {
     @Test
     public void shouldNotBeDirectPrintWhenMessageContainsPersonalIdendificationNumber() {
         Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-                .personalIdentificationNumber(new PersonalIdentificationNumber("12125412435"))
+                .recipient(new PersonalIdentificationNumber("12125412435"))
                 .build();
         assertFalse(message.isDirectPrint());
     }
@@ -165,7 +165,7 @@ public class MessageTest {
     @Test
     public void possibleToPassNullForNoAttachments() {
         Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", PDF))
-                .digipostAddress(new DigipostAddress("test.testson#1234"))
+                .recipient(new DigipostAddress("test.testson#1234"))
                 .build();
         assertThat(message.attachments, hasSize(0));
     }
@@ -174,7 +174,7 @@ public class MessageTest {
     public void changingThePassedAttachmentListDoesNotChangeTheMessage() {
         List<Document> attachments = new ArrayList<Document>(asList(new Document(UUID.randomUUID(), "subject", PDF), new Document(UUID.randomUUID(), "subject", PDF)));
         Message message = newMessage(UUID.randomUUID(), new Document(UUID.randomUUID(), "subject", PDF))
-                .digipostAddress(new DigipostAddress("test.testson#1234"))
+                .recipient(new DigipostAddress("test.testson#1234"))
                 .attachments(attachments)
                 .build();
         attachments.clear();
@@ -189,7 +189,7 @@ public class MessageTest {
         Document a1 = new Document(UUID.randomUUID(), "a1", PDF);
         Document a2 = technicalAttachment(ZIP, "uhu, så teknisk!");
         Document a3 = new Document(UUID.randomUUID(), "a3", HTML);
-        Message message = newMessage(UUID.randomUUID(), hoved).attachments(asList(a1, a2, a3)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
+        Message message = newMessage(UUID.randomUUID(), hoved).attachments(asList(a1, a2, a3)).recipient(new DigipostAddress("blah#ABCD")).build();
 
         assertThat(Stream.of(a2, hoved, a3, a1).sorted(message.documentOrder()).collect(toList()), contains(hoved, a1, a2, a3));
     }
@@ -200,7 +200,7 @@ public class MessageTest {
         Document a1 = new Document(UUID.randomUUID(), "a1", PDF);
         Document a2 = technicalAttachment(ZIP, "uhu, så teknisk!");
         Document notInMessage = new Document(UUID.randomUUID(), "a3", HTML);
-        Message message = newMessage(UUID.randomUUID(), hoved).attachments(asList(a1, a2)).digipostAddress(new DigipostAddress("blah#ABCD")).build();
+        Message message = newMessage(UUID.randomUUID(), hoved).attachments(asList(a1, a2)).recipient(new DigipostAddress("blah#ABCD")).build();
 
         Message.CannotSortDocumentsUsingMessageOrder thrown = assertThrows(Message.CannotSortDocumentsUsingMessageOrder.class, () -> Collections.sort(asList(a2, hoved, notInMessage, a1), message.documentOrder()));
         assertThat(thrown, where(Exception::getMessage, containsString("ikke sortere Document med uuid '" + notInMessage.uuid)));

@@ -446,17 +446,17 @@ public class DigipostSwingClient {
                     if (identifyOnDigipostAddress.isSelected()) {
                         String digipostAddress = recipientDigipostAddressField.getText();
                         message = newMessage(UUID.randomUUID(), primaryDocument)
-                                .digipostAddress(new DigipostAddress(digipostAddress))
+                                .recipient(new DigipostAddress(digipostAddress))
                                 .build();
                     } else if (identifyOnPersonalIdentificationNumber.isSelected()) {
                         String personalIdentificationNumber = recipientPersonalIdentificationNumberField.getText();
                         message = newMessage(UUID.randomUUID(), primaryDocument)
-                                .personalIdentificationNumber(new PersonalIdentificationNumber(personalIdentificationNumber))
+                                .recipient(new PersonalIdentificationNumber(personalIdentificationNumber))
                                 .build();
                     } else if(identifyOnOrganizationNumber.isSelected()){
                         String orgnizationNumber = recipientOrganizationNumberField.getText();
                         message = newMessage(UUID.randomUUID(), primaryDocument)
-                                .organisationNumber(new OrganisationNumber(orgnizationNumber))
+                                .recipient(new OrganisationNumber(orgnizationNumber))
                                 .build();
                     } else {
                         String name = recipientNameField.getText();

@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
-public class DigipostAddress extends RecipientIdentifier {
+public final class DigipostAddress extends RecipientIdentifier {
 
     public DigipostAddress(final String address) {
         super(address);
@@ -26,13 +26,4 @@ public class DigipostAddress extends RecipientIdentifier {
         this(null);
     }
 
-    @Override
-    public String toString() {
-        return String.format("%s(%s)", getClass().getSimpleName(), identifier);
-    }
-
-    @Override
-    public boolean isPersonalIdentificationNumber() {
-        return false;
-    }
 }

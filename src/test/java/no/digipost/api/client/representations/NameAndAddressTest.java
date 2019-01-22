@@ -19,13 +19,12 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
-public class NameAndAddressTest {
+class NameAndAddressTest {
 
     @Test
-    public void verify_equals_and_hashcode() {
+    void verify_equals_and_hashcode() {
         EqualsVerifier.forClass(NameAndAddress.class)
                 .suppress(Warning.NONFINAL_FIELDS)
-                .suppress(Warning.STRICT_INHERITANCE)
                 .verify();
     }
 

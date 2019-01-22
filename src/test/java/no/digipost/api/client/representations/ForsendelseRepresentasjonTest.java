@@ -34,15 +34,15 @@ public class ForsendelseRepresentasjonTest {
         UUID id1 = UUID.randomUUID();
         UUID id2 = UUID.randomUUID();
         Message adresseForsendelse1 = newMessage(id1, new Document(UUID.randomUUID(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-                .digipostAddress(digipostAddress)
+                .recipient(digipostAddress)
                 .build();
 
         Message adresseForsendelse2 = newMessage(id1, new Document(UUID.randomUUID(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-                .digipostAddress(digipostAddress)
+                .recipient(digipostAddress)
                 .build();
 
         Message adresseForsendelse3 = newMessage(id2, new Document(UUID.randomUUID(), "annetemne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-                .digipostAddress(digipostAddress)
+                .recipient(digipostAddress)
                 .build();
 
         assertTrue(adresseForsendelse1.isSameMessageAs(adresseForsendelse2));

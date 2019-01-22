@@ -67,7 +67,7 @@ public class ForsendelseEksempelDigipostadresse {
 
         // 5. Vi oppretter en forsendelse
         Message message = Message.newMessage(UUID.randomUUID(), primaryDocument)
-                .digipostAddress(address)
+                .recipient(address)
                 .build();
 
         // 6. Klientbiblioteket håndterer opprettelse av forsendelse,

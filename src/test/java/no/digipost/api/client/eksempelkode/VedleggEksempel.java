@@ -66,7 +66,7 @@ public class VedleggEksempel {
 
         // 6. Vi oppretter en forsendelse
         Message message = Message.newMessage(UUID.randomUUID(), primaryDocument)
-                .personalIdentificationNumber(pin)
+                .recipient(pin)
                 .attachments(asList(attachment))
                 .build();
 

@@ -70,7 +70,7 @@ public class ForsendelseEksempel {
 
         // 5. Vi opprettet en forsendelse
         Message message = Message.newMessage(UUID.randomUUID(), primaryDocument)
-                .personalIdentificationNumber(pin)
+                .recipient(pin)
                 .build();
 
         // 6. Vi lar klientbiblioteket håndtere opprettelse av forsendelse, legge til innhold,

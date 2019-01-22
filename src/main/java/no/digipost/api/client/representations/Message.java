@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Stream.concat;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
@@ -96,7 +97,7 @@ public class Message implements MayHaveSender {
         private MessageRecipient recipient;
         private ZonedDateTime deliveryTime;
         private Document primaryDocument;
-        private List<Document> attachments = new ArrayList<>();
+        private final List<Document> attachments = new ArrayList<>();
         private String invoiceReference;
 
         private MessageBuilder(String messageId, Document primaryDocument) {
@@ -129,23 +130,23 @@ public class Message implements MayHaveSender {
             return this;
         }
 
-        public MessageBuilder digipostAddress(DigipostAddress digipostAddress) {
+        public MessageBuilder recipient(DigipostAddress digipostAddress) {
             return recipient(new MessageRecipient(digipostAddress));
         }
 
-        public MessageBuilder personalIdentificationNumber(PersonalIdentificationNumber personalIdentificationNumber) {
+        public MessageBuilder recipient(PersonalIdentificationNumber personalIdentificationNumber) {
             return recipient(new MessageRecipient(personalIdentificationNumber));
         }
 
-        public MessageBuilder bankAccountNumber(BankAccountNumber bankAccountNumber) {
+        public MessageBuilder recipient(BankAccountNumber bankAccountNumber) {
             return recipient(new MessageRecipient(bankAccountNumber));
         }
 
-        public MessageBuilder organisationNumber(OrganisationNumber organisationNumber) {
+        public MessageBuilder recipient(OrganisationNumber organisationNumber) {
             return recipient(new MessageRecipient(organisationNumber));
         }
 
-        public MessageBuilder nameAndAddress(NameAndAddress nameAndAddress) {
+        public MessageBuilder recipient(NameAndAddress nameAndAddress) {
             return recipient(new MessageRecipient(nameAndAddress));
         }
 
@@ -163,10 +164,12 @@ public class Message implements MayHaveSender {
             return this;
         }
 
+        public MessageBuilder attachments(Document ... attachments) {
+            return attachments(asList(attachments));
+        }
+
         public MessageBuilder attachments(Iterable<? extends Document> attachments) {
-            for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
-                this.attachments.add(attachment);
-            }
+            defaultIfNull(attachments, Collections.<Document>emptyList()).forEach(this.attachments::add);
             return this;
         }
 

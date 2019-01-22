@@ -94,19 +94,19 @@ public class XsdValidationTest {
         Message messageWithDigipostAddress = newMessage(randomUUID(),
                         new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
                 )
-                .digipostAddress(new DigipostAddress("even.beinlaus#1234"))
+                .recipient(new DigipostAddress("even.beinlaus#1234"))
                 .senderOrganization(new SenderOrganization("1337", "R&D"))
                 .build();
 
         Message messageWithPersonalIdentificationNumber = newMessage(randomUUID(),
                         new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
                 )
-                .personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+                .recipient(new PersonalIdentificationNumber("12345678901"))
                 .build();
 
         Document primaryDocumentToPreEncrypt = new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL);
         Message messageWithPreEncryptAndSenderId = newMessage(randomUUID(), primaryDocumentToPreEncrypt)
-                .personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+                .recipient(new PersonalIdentificationNumber("12345678901"))
                 .senderId(SenderId.of(10))
                 .build();
 
@@ -114,7 +114,7 @@ public class XsdValidationTest {
 
         Message messageWithTechnicalAttachment = newMessage(randomUUID(),
                     new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL))
-                .personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+                .recipient(new PersonalIdentificationNumber("12345678901"))
                 .attachments(Collections.singleton(Document.technicalAttachment(PDF, "tech-type")))
                 .build();
 
@@ -129,7 +129,7 @@ public class XsdValidationTest {
     public void validateMessage_invoicingAccount() {
         Document document = new Document(randomUUID(), "subject", PDF, null, null, null, TWO_FACTOR, NORMAL);
         Message message = newMessage(randomUUID(), document)
-                .digipostAddress(new DigipostAddress("even.beinlaus#1234"))
+                .recipient(new DigipostAddress("even.beinlaus#1234"))
                 .invoiceReference("ACCOUNT01")
                 .deliveryTime(ZonedDateTime.now())
                 .build();

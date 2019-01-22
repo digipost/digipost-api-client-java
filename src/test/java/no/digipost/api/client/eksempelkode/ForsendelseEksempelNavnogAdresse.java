@@ -67,7 +67,7 @@ public class ForsendelseEksempelNavnogAdresse {
 
         // 5. Vi opprettet en forsendelse
         Message message = Message.newMessage(UUID.randomUUID(), primaryDocument)
-                .nameAndAddress(nameAndAddress)
+                .recipient(nameAndAddress)
                 .build();
 
         // 6. Klientbiblioteket håndterer opprettelse av forsendelse,
