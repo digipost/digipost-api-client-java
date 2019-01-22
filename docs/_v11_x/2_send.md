@@ -251,7 +251,7 @@ IdentificationResult identificationResult = client.identifyRecipient(identificat
 Create new or activate existing Digipost user account.
 
 ```java
-SenderId sender = new SenderId(123456);
+SenderId sender = SenderId.of(123456);
 UserInformation user = new UserInformation(
   new NationalIdentityNumber("01013300001"),
   new PhoneNumber("+4799998888"),

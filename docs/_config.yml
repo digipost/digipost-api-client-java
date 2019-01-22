@@ -41,7 +41,7 @@ headerLinks:
   - title: Digipost
     url: https://www.digipost.no
 
-# list if additional links on the footer
+# list of additional links on the footer
 footerLinks:
   - title: GitHub
     url: https://github.com/digipost/digipost-api-client-java
