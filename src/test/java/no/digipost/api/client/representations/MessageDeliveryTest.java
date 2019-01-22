@@ -63,11 +63,11 @@ public class MessageDeliveryTest {
         delivery.primaryDocument = primary;
         delivery.attachments = asList(att1);
 
-        assertThat(delivery.getDocumentByUuid(primary.uuid), is(primary));
-        assertThat(delivery.getDocumentByUuid(att1.uuid), is(att1));
+        assertThat(delivery.getDocument(primary.uuid), is(primary));
+        assertThat(delivery.getDocument(att1.uuid), is(att1));
 
         try {
-            delivery.getDocumentByUuid(UUID.randomUUID());
+            delivery.getDocument(UUID.randomUUID());
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("not found"));
             return;

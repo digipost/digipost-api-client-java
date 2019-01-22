@@ -144,7 +144,7 @@ public class MessageDelivery extends Representation implements MayHaveSender {
         return Stream.concat(ofNullable(primaryDocument).map(Stream::of).orElseGet(Stream::empty), getAttachments().stream());
     }
 
-    public Document getDocumentByUuid(UUID uuid) {
+    public Document getDocument(UUID uuid) {
         return getAllDocuments().filter(doc -> Objects.equals(uuid, doc.uuid)).findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Document with UUID '" + uuid + "' was not found in this " + getClass().getSimpleName() + "."));
     }
