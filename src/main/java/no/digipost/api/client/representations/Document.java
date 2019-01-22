@@ -24,18 +24,19 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.join;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "document", propOrder = {
@@ -56,11 +57,8 @@ import static org.apache.commons.lang3.StringUtils.*;
 @XmlSeeAlso({ Invoice.class })
 public class Document extends Representation {
 
-    private final static Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
-
-
     @XmlElement(name = "uuid", required = true)
-    public final String uuid;
+    public final UUID uuid;
     @XmlElement(name = "subject", required = true)
     public final String subject;
     @XmlElement(name = "file-type", required = true)
@@ -98,15 +96,15 @@ public class Document extends Representation {
     /**
      * Constructor for just the required fields of a document.
      */
-    public Document(String uuid, String subject, FileType fileType) {
+    public Document(UUID uuid, String subject, FileType fileType) {
         this(uuid, subject, fileType, null, null, null, null, null, null, null, (String[]) null);
     }
 
-    public Document(String uuid, String subject, FileType fileType, DataType dataType) {
-        this(uuid, subject, fileType, null, null, null, null, null, null, dataType, (String[]) null);
+    public Document(UUID uuid, String subject, FileType fileType, DataType data) {
+        this(uuid, subject, fileType, null, null, null, null, null, null, data, (String[]) null);
     }
 
-    public Document(String uuid, String subject, FileType fileType, String openingReceipt,
+    public Document(UUID uuid, String subject, FileType fileType, String openingReceipt,
                     SmsNotification smsNotification, EmailNotification emailNotification,
                     AuthenticationLevel authenticationLevel,
                     SensitivityLevel sensitivityLevel) {
@@ -114,11 +112,11 @@ public class Document extends Representation {
     }
 
 
-    public Document(String uuid, String subject, FileType fileType, String openingReceipt,
+    public Document(UUID uuid, String subject, FileType fileType, String openingReceipt,
                     SmsNotification smsNotification, EmailNotification emailNotification,
                     AuthenticationLevel authenticationLevel,
-                    SensitivityLevel sensitivityLevel, Boolean opened, DataType dataType, String... technicalType) {
-        this.uuid = lowerCase(uuid);
+                    SensitivityLevel sensitivityLevel, Boolean opened, DataType data, String... technicalType) {
+        this.uuid = uuid;
         this.subject = subject;
         this.digipostFileType = Objects.toString(fileType, null);
         this.openingReceipt = defaultIfBlank(openingReceipt, null);
@@ -128,8 +126,8 @@ public class Document extends Representation {
         this.authenticationLevel = authenticationLevel;
         this.sensitivityLevel = sensitivityLevel;
         this.technicalType = parseTechnicalTypes(technicalType);
-        this.dataType = dataType != null ? new DataTypeHolder(dataType) : null;
-        validate();
+        this.dataType = data != null ? new DataTypeHolder(data) : null;
+        this.validate();
     }
 
     static String parseTechnicalTypes(String... technicalTypes){
@@ -155,9 +153,6 @@ public class Document extends Representation {
 
     private void validate() {
         List<String> errors = new ArrayList<>();
-        if (uuid != null && !UUID_PATTERN.matcher(this.uuid).matches()) {
-            errors.add("Not a UUID: " + uuid);
-        }
         if (openingReceipt != null && opened != null) {
             errors.add("Both openingReceipt and opened was set");
         }
@@ -169,7 +164,7 @@ public class Document extends Representation {
     }
 
     public static Document technicalAttachment(FileType fileType, String... type) {
-        Document document = new Document(UUID.randomUUID().toString(), null, fileType);
+        Document document = new Document(UUID.randomUUID(), null, fileType);
         document.technicalType = parseTechnicalTypes(type);
         return document;
     }
@@ -208,6 +203,10 @@ public class Document extends Representation {
 
     public Link getAddContentLink() {
         return getLinkByRelationName(Relation.ADD_CONTENT);
+    }
+
+    public AddDataLink getAddDataLink() {
+        return new AddDataLink(getLinkByRelationName(Relation.ADD_DATA).getUri().getPath());
     }
 
     public Link getEncryptionKeyLink() {

@@ -16,7 +16,8 @@
 package no.digipost.api.client.representations;
 
 
-import org.junit.Test;
+import no.digipost.api.client.SenderId;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -27,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static co.unruly.matchers.Java8Matchers.where;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static no.digipost.api.client.representations.AuthenticationLevel.IDPORTEN_3;
@@ -42,14 +44,16 @@ import static no.digipost.api.client.representations.DocumentEventType.SHREDDED;
 import static no.digipost.api.client.representations.DocumentEventType.SMS_NOTIFICATION_FAILED;
 import static no.digipost.api.client.representations.ErrorType.CLIENT_DATA;
 import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
+import static no.digipost.api.client.representations.Message.newMessage;
 import static no.digipost.api.client.representations.MessageStatus.DELIVERED;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 import static no.digipost.api.client.representations.XmlTestHelper.marshallValidateAndUnmarshall;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
 
 public class XsdValidationTest {
 
@@ -87,30 +91,30 @@ public class XsdValidationTest {
 
     @Test
     public void validateMessage() {
-        Message messageWithDigipostAddress = newMessage(randomUUID().toString(),
-                        new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
+        Message messageWithDigipostAddress = newMessage(randomUUID(),
+                        new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
                 )
-                .digipostAddress(new DigipostAddress("even.beinlaus#1234"))
+                .recipient(new DigipostAddress("even.beinlaus#1234"))
                 .senderOrganization(new SenderOrganization("1337", "R&D"))
                 .build();
 
-        Message messageWithPersonalIdentificationNumber = newMessage(randomUUID().toString(),
-                        new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
+        Message messageWithPersonalIdentificationNumber = newMessage(randomUUID(),
+                        new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL)
                 )
-                .personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+                .recipient(new PersonalIdentificationNumber("12345678901"))
                 .build();
 
-        Document primaryDocumentToPreEncrypt = new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL);
-        Message messageWithPreEncryptAndSenderId = newMessage(randomUUID().toString(), primaryDocumentToPreEncrypt)
-                .personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
-                .senderId(10L)
+        Document primaryDocumentToPreEncrypt = new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL);
+        Message messageWithPreEncryptAndSenderId = newMessage(randomUUID(), primaryDocumentToPreEncrypt)
+                .recipient(new PersonalIdentificationNumber("12345678901"))
+                .senderId(SenderId.of(10))
                 .build();
 
         primaryDocumentToPreEncrypt.encrypt();
 
-        Message messageWithTechnicalAttachment = newMessage(randomUUID().toString(),
-                    new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL))
-                .personalIdentificationNumber(new PersonalIdentificationNumber("12345678901"))
+        Message messageWithTechnicalAttachment = newMessage(randomUUID(),
+                    new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, TWO_FACTOR, NORMAL))
+                .recipient(new PersonalIdentificationNumber("12345678901"))
                 .attachments(Collections.singleton(Document.technicalAttachment(PDF, "tech-type")))
                 .build();
 
@@ -123,9 +127,9 @@ public class XsdValidationTest {
 
     @Test
     public void validateMessage_invoicingAccount() {
-        Document document = new Document(randomUUID().toString(), "subject", PDF, null, null, null, TWO_FACTOR, NORMAL);
-        Message message = newMessage(randomUUID().toString(), document)
-                .digipostAddress(new DigipostAddress("even.beinlaus#1234"))
+        Document document = new Document(randomUUID(), "subject", PDF, null, null, null, TWO_FACTOR, NORMAL);
+        Message message = newMessage(randomUUID(), document)
+                .recipient(new DigipostAddress("even.beinlaus#1234"))
                 .invoiceReference("ACCOUNT01")
                 .deliveryTime(ZonedDateTime.now())
                 .build();
@@ -135,8 +139,8 @@ public class XsdValidationTest {
     @Test
     public void validatePrintMessage() {
         PrintRecipient address = new PrintRecipient("name", new NorwegianAddress("1234", "Oslo"));
-        Message message = newMessage(randomUUID().toString(),
-                        new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+        Message message = newMessage(randomUUID(),
+                        new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
                 )
                 .recipient(new MessageRecipient(new PrintDetails(address, address)))
                 .build();
@@ -146,8 +150,8 @@ public class XsdValidationTest {
     @Test
     public void validatePrintMessageWithForeignRecipiantWihtCountry() {
         PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", "Sverige", null));
-        Message message = newMessage(randomUUID().toString(),
-                        new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+        Message message = newMessage(randomUUID(),
+                        new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
                 )
                 .recipient(new MessageRecipient(new PrintDetails(address, address)))
                 .build();
@@ -157,8 +161,8 @@ public class XsdValidationTest {
     @Test
     public void validatePrintMessageWithForeignRecipiantWihtCountryCode() {
         PrintRecipient address = new PrintRecipient("name", new ForeignAddress("adresse", null, "SE"));
-        Message message = newMessage(randomUUID().toString(),
-                        new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+        Message message = newMessage(randomUUID(),
+                        new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
                 )
                 .recipient(new MessageRecipient(new PrintDetails(address, address)))
                 .build();
@@ -172,8 +176,8 @@ public class XsdValidationTest {
         PrintDetails printDetails = new PrintDetails(address, address);
         printDetails.setInstruction(Arrays.asList(new PrintInstruction("returkonvolutt", "true")));
 
-        Message message = newMessage(randomUUID().toString(),
-                new Document(randomUUID().toString(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
+        Message message = newMessage(randomUUID(),
+                new Document(randomUUID(), "subject", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL)
         )
                 .recipient(new MessageRecipient(printDetails))
                 .build();
@@ -182,26 +186,27 @@ public class XsdValidationTest {
 
     @Test
     public void validateDocumentEvents() {
-        DocumentEvent openedEvent = new DocumentEvent(randomUUID().toString(), OPENED, ZonedDateTime.now(), ZonedDateTime.now());
+        ZonedDateTime now = ZonedDateTime.now();
+        DocumentEvent openedEvent = new DocumentEvent(randomUUID(), OPENED, now, now);
 
-        DocumentEvent failedEmailNotificationEvent = new DocumentEvent(randomUUID().toString(), EMAIL_NOTIFICATION_FAILED, ZonedDateTime.now(), ZonedDateTime.now(),
+        DocumentEvent failedEmailNotificationEvent = new DocumentEvent(randomUUID(), EMAIL_NOTIFICATION_FAILED, now, now,
                 new EmailNotificationFailedMetadata("emailAddress", "ERROR_CODE"));
 
-        DocumentEvent failedSmsNotificationEvent = new DocumentEvent(randomUUID().toString(), SMS_NOTIFICATION_FAILED, ZonedDateTime.now(), ZonedDateTime.now(),
+        DocumentEvent failedSmsNotificationEvent = new DocumentEvent(randomUUID(), SMS_NOTIFICATION_FAILED, now, now,
                 new SmsNotificationFailedMetadata("12345678", "ERROR_CODE"));
 
-        DocumentEvent printFailedEvent = new DocumentEvent(randomUUID().toString(), PRINT_FAILED, ZonedDateTime.now(), ZonedDateTime.now(),
+        DocumentEvent printFailedEvent = new DocumentEvent(randomUUID(), PRINT_FAILED, now, now,
                 new FailedPrintMetadata("Feil dimensjoner"));
 
-        DocumentEvent postmarkedEvent = new DocumentEvent(randomUUID().toString(), POSTMARKED, ZonedDateTime.now(), ZonedDateTime.now(),
-                new PostmarkedMetadata(ZonedDateTime.now()));
+        DocumentEvent postmarkedEvent = new DocumentEvent(randomUUID(), POSTMARKED, now, now,
+                new PostmarkedMetadata(now));
 
-        DocumentEvent movedFilesEvent = new DocumentEvent(randomUUID().toString(), MOVE_FILES_FROM_PUBLIC_SECTOR, ZonedDateTime.now(), ZonedDateTime.now(),
-                new MoveFilesFromPublicSectorMetadata(true, ZonedDateTime.now().minusDays(3), "Subject", NORMAL, IDPORTEN_3, "fake-cert",
-                        "dest-mailbox", "dest-mailbox-address", asList(new DocumentMetadata(UUID.randomUUID().toString(), null)))
+        DocumentEvent movedFilesEvent = new DocumentEvent(randomUUID(), MOVE_FILES_FROM_PUBLIC_SECTOR, now, now,
+                new MoveFilesFromPublicSectorMetadata(true, now.minusDays(3), "Subject", NORMAL, IDPORTEN_3, "fake-cert",
+                        "dest-mailbox", "dest-mailbox-address", asList(new DocumentMetadata(UUID.randomUUID(), null)))
         );
 
-        DocumentEvent shreddedEvent = new DocumentEvent(randomUUID().toString(), SHREDDED, ZonedDateTime.now(), ZonedDateTime.now());
+        DocumentEvent shreddedEvent = new DocumentEvent(randomUUID(), SHREDDED, now, now);
 
         DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent,
                 failedSmsNotificationEvent, printFailedEvent, movedFilesEvent, postmarkedEvent, shreddedEvent));
@@ -210,9 +215,10 @@ public class XsdValidationTest {
 
     @Test
     public void validate_document_status_simple() {
-        DocumentStatus primaryDoc = new DocumentStatus(randomUUID().toString(), DeliveryStatus.NOT_DELIVERED, ZonedDateTime.now(), null, null, Channel.DIGIPOST, true,
+        DocumentStatus primaryDoc = new DocumentStatus(randomUUID(), DeliveryStatus.NOT_DELIVERED, ZonedDateTime.now(), null, null, Channel.DIGIPOST, true,
                 null, HashAlgorithm.NONE, null, null);
-        marshallValidateAndUnmarshall(primaryDoc);
+        DocumentStatus unmarshalled = marshallValidateAndUnmarshall(primaryDoc);
+        assertThat(unmarshalled, where(d -> d.uuid, both(is(primaryDoc.uuid)).and(notNullValue())));
     }
 
     @Test
@@ -225,7 +231,7 @@ public class XsdValidationTest {
     }
 
     private DocumentStatus createDocumentStatus(boolean isPrimaryDocument, DocumentStatus ... attachments) {
-        return new DocumentStatus(randomUUID().toString(), DeliveryStatus.DELIVERED, ZonedDateTime.now(), ZonedDateTime.now(), Read.Y, Channel.PRINT, isPrimaryDocument,
+        return new DocumentStatus(randomUUID(), DeliveryStatus.DELIVERED, ZonedDateTime.now(), ZonedDateTime.now(), Read.Y, Channel.PRINT, isPrimaryDocument,
                 "asdf", HashAlgorithm.SHA256, Arrays.asList(attachments), null);
     }
 
@@ -233,7 +239,7 @@ public class XsdValidationTest {
     public void validateMessageDelivery() {
         ZonedDateTime deliveryTime = ZonedDateTime.of(LocalDateTime.of(2017, 1, 30, 12, 45), ZoneId.of("GMT+3"));
         MessageDelivery delivery = new MessageDelivery(randomUUID().toString(), DIGIPOST, DELIVERED, deliveryTime);
-        delivery.primaryDocument = new Document(randomUUID().toString(), "primary", FileType.PDF);
+        delivery.primaryDocument = new Document(randomUUID(), "primary", FileType.PDF);
         MessageDelivery unmarshalled = marshallValidateAndUnmarshall(delivery);
         assertThat(unmarshalled, not(sameInstance(delivery)));
         assertThat(unmarshalled.primaryDocument.uuid, is(delivery.primaryDocument.uuid));

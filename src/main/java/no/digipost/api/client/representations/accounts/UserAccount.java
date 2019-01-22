@@ -33,6 +33,7 @@ public class UserAccount {
         this.encryptionKey = encryptionKey;
     }
 
+    @SuppressWarnings("unused")
     private UserAccount() {
         this(null, null);
     }

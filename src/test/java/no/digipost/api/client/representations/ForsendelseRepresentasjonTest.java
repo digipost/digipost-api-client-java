@@ -15,34 +15,34 @@
  */
 package no.digipost.api.client.representations;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
+import static no.digipost.api.client.representations.Message.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ForsendelseRepresentasjonTest {
 
     @Test
     public void skalHanteraDuplikatForsendelse() {
         DigipostAddress digipostAddress = new DigipostAddress("peter.pan#0000");
-        String id1 = UUID.randomUUID().toString();
-        String id2 = UUID.randomUUID().toString();
-        Message adresseForsendelse1 = newMessage(id1, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-                .digipostAddress(digipostAddress)
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        Message adresseForsendelse1 = newMessage(id1, new Document(UUID.randomUUID(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+                .recipient(digipostAddress)
                 .build();
 
-        Message adresseForsendelse2 = newMessage(id1, new Document(UUID.randomUUID().toString(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-                .digipostAddress(digipostAddress)
+        Message adresseForsendelse2 = newMessage(id1, new Document(UUID.randomUUID(), "emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+                .recipient(digipostAddress)
                 .build();
 
-        Message adresseForsendelse3 = newMessage(id2, new Document(UUID.randomUUID().toString(), "annetemne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
-                .digipostAddress(digipostAddress)
+        Message adresseForsendelse3 = newMessage(id2, new Document(UUID.randomUUID(), "annetemne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL))
+                .recipient(digipostAddress)
                 .build();
 
         assertTrue(adresseForsendelse1.isSameMessageAs(adresseForsendelse2));

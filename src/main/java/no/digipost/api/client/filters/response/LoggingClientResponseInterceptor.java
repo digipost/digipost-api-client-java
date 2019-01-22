@@ -15,7 +15,6 @@
  */
 package no.digipost.api.client.filters.response;
 
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.entity.ByteArrayEntity;
@@ -34,7 +33,7 @@ public class LoggingClientResponseInterceptor implements HttpResponseInterceptor
     private static final Logger LOG = LoggerFactory.getLogger(LoggingClientResponseInterceptor.class);
 
     @Override
-    public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+    public void process(HttpResponse response, HttpContext context) throws IOException {
         byte[] entityBytes = Optional.ofNullable(EntityUtils.toByteArray(response.getEntity())).orElseGet(() -> new byte[0]);
         LOG.info(new String(entityBytes, UTF_8));
         response.setEntity(new ByteArrayEntity(entityBytes));

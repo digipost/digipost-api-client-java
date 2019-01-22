@@ -30,6 +30,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -40,7 +41,7 @@ import java.util.List;
 public class DocumentStatus {
 
     @XmlAttribute(name = "uuid")
-    public String uuid;
+    public UUID uuid;
     @XmlAttribute(name = "status")
     public DeliveryStatus status;
 
@@ -76,7 +77,7 @@ public class DocumentStatus {
         this(null, null, null, null, null, null, true, null, null, null, null);
     }
 
-    public DocumentStatus(String uuid, DeliveryStatus status, ZonedDateTime created, ZonedDateTime delivered, Read read, Channel channel,
+    public DocumentStatus(UUID uuid, DeliveryStatus status, ZonedDateTime created, ZonedDateTime delivered, Read read, Channel channel,
                           boolean isPrimaryDocument, String contentHash, HashAlgorithm contentHashAlgorithm,
                           List<DocumentStatus> attachments, List<Link> links) {
         this.uuid = uuid;

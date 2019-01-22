@@ -15,24 +15,23 @@
  */
 package no.digipost.api.client;
 
-public class SenderId {
+public final class SenderId extends LongId {
 
-    private final long id;
-
-    public SenderId(final long id) {
-        this.id = id;
+    public static SenderId of(long id) {
+        return new SenderId(id);
     }
 
-    public long getId() {
-        return id;
+    private SenderId(long id) {
+        super(id);
     }
 
-    public String asString() {
-        return String.valueOf(id);
+    /**
+     * Convert this ID to a broker ID.
+     *
+     * @return this ID as a broker ID
+     */
+    public BrokerId asBrokerId() {
+        return BrokerId.of(this.value());
     }
 
-    @Override
-    public String toString() {
-        return "SenderId{" + id + "}";
-    }
 }

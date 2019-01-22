@@ -15,12 +15,12 @@
  */
 package no.digipost.api.client.representations.print;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+
 import static no.digipost.api.client.representations.ObjectBuilder.newForeignAddress;
 import static no.digipost.api.client.representations.ObjectBuilder.newNorwegianRecipient;
-import static org.junit.Assert.assertFalse;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PrintRecipientTest {
 

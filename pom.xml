@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>10.12-SNAPSHOT</version>
+    <version>11.1-SNAPSHOT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.4.10</version>
+            <version>4.4.11</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -96,9 +96,33 @@
             <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.4.0-M1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.4.0-M1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.4.0-M1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>2.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>co.unruly</groupId>
+            <artifactId>java-8-matchers</artifactId>
+            <version>1.6</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -108,33 +132,27 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>java-hamcrest</artifactId>
-            <version>2.0.0.0</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.23.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>2.23.0</version>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>2.23.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.0</version>
+            <version>3.1.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.pholser</groupId>
-            <artifactId>junit-quickcheck-core</artifactId>
-            <version>0.8.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.pholser</groupId>
-            <artifactId>junit-quickcheck-generators</artifactId>
-            <version>0.8.1</version>
+            <groupId>org.quicktheories</groupId>
+            <artifactId>quicktheories</artifactId>
+            <version>0.25</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -144,15 +162,20 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!--
+                Used by no.digipost.api.client.testing, which at this point is unsupported and
+                should be considered as unstable. Defining the dependency as optional to avoid
+                it being included as a transitive dependency when depending on the client library.
+             -->
             <groupId>io.undertow</groupId>
             <artifactId>undertow-core</artifactId>
-            <version>2.0.15.Final</version>
+            <version>2.0.17.Final</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-data-types</artifactId>
-            <version>0.13</version>
+            <version>0.17</version>
         </dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
@@ -167,20 +190,6 @@
         </dependency>
 
     </dependencies>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <!--
-                    Used by junit-quickcheck. Override version to an artifact specifying its own license,
-                    or we would need a license-mapping file for the license-maven-plugin.
-                 -->
-                <groupId>org.antlr</groupId>
-                <artifactId>antlr-runtime</artifactId>
-                <version>3.5.2</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <resources>
@@ -234,7 +243,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.1</version>
+                    <version>3.0.0-M3</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
@@ -287,6 +296,9 @@
                             <includes>
                                 <include>no.digipost</include>
                             </includes>
+                            <excludes>
+                                <exclude>no.digipost.api.client.internal</exclude>
+                            </excludes>
                         </parameter>
                     </configuration>
                 </plugin>
@@ -328,7 +340,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.1.1</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -489,7 +501,7 @@
                     </plugin>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.1.1</version>
                         <configuration>
                             <finalName>${project.artifactId}</finalName>
                             <descriptors>

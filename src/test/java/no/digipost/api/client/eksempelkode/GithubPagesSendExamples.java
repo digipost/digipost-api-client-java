@@ -17,16 +17,35 @@ package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
-import no.digipost.api.client.representations.*;
+import no.digipost.api.client.SenderId;
+import no.digipost.api.client.representations.AuthenticationLevel;
+import no.digipost.api.client.representations.BankAccountNumber;
+import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.FileType;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.Invoice;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.MessageDelivery;
+import no.digipost.api.client.representations.MessageRecipient;
+import no.digipost.api.client.representations.NameAndAddress;
+import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
+import no.digipost.api.client.representations.PrintDetails;
+import no.digipost.api.client.representations.PrintRecipient;
+import no.digipost.api.client.representations.SensitivityLevel;
+import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.security.Signer;
 import no.digipost.api.datatypes.types.Address;
 import no.digipost.api.datatypes.types.Appointment;
 import no.digipost.api.datatypes.types.Info;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -34,27 +53,28 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
-
+@SuppressWarnings("unused")
 public class GithubPagesSendExamples {
 
-    private static final long SENDER_ID = 1;
-    private static final String UUID1 = UUID.randomUUID().toString();
-    private static final String UUID2 = UUID.randomUUID().toString();
-    private static final String UUID3 = UUID.randomUUID().toString();
-    private static final String UUID4 = UUID.randomUUID().toString();
+    private static final SenderId SENDER_ID = SenderId.of(1);
+    private static final UUID UUID1 = UUID.randomUUID();
+    private static final UUID UUID2 = UUID.randomUUID();
+    private static final UUID UUID3 = UUID.randomUUID();
+    private static final UUID UUID4 = UUID.randomUUID();
     private static final String CERTIFICATE_PASSWORD = "passord";
 
     private DigipostClient client;
 
-    public void set_up_client() throws FileNotFoundException {
-        long senderId = 123456;
+    public void set_up_client() throws IOException {
+        SenderId senderId = SenderId.of(123456);
+
+        Signer signer;
+        try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certificate.p12"))) {
+            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, "TheSecretPassword");
+        }
 
         DigipostClient client = new DigipostClient(
-                new DigipostClientConfig.DigipostClientConfigBuilder().build(),
-                "https://api.digipost.no",
-                senderId,
-                new FileInputStream("certificate.p12"), "TheSecretPassword");
+                DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), signer);
     }
 
     public void send_one_letter_to_recipient_via_personal_identification_number() throws IOException {
@@ -63,12 +83,26 @@ public class GithubPagesSendExamples {
 
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
 
-        Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
-                .personalIdentificationNumber(pin)
+        Message message = Message.newMessage("messageId", primaryDocument)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
-                .addContent(primaryDocument, new FileInputStream("content.pdf"))
+                .addContent(primaryDocument, Files.newInputStream(Paths.get("content.pdf")))
+                .send();
+    }
+
+    public void send_one_letter_to_recipient_via_bank_account_number() throws IOException {
+        BankAccountNumber ban = new BankAccountNumber("12345123451");
+
+        Document primaryDocument = new Document(UUID1, "Receipt", FileType.PDF);
+
+        Message message = Message.newMessage("messageId", primaryDocument)
+                .recipient(ban)
+                .build();
+
+        client.createMessage(message)
+                .addContent(primaryDocument, Files.newInputStream(Paths.get("content.pdf")))
                 .send();
     }
 
@@ -78,12 +112,12 @@ public class GithubPagesSendExamples {
 
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
 
-        Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
-                .nameAndAddress(nameAndAddress)
+        Message message = Message.newMessage("messageId", primaryDocument)
+                .recipient(nameAndAddress)
                 .build();
 
         client.createMessage(message)
-                .addContent(primaryDocument, new FileInputStream("content.pdf"))
+                .addContent(primaryDocument, Files.newInputStream(Paths.get("content.pdf")))
                 .send();
 
     }
@@ -98,15 +132,15 @@ public class GithubPagesSendExamples {
 
         Document attachment2 = new Document(UUID3, "Attachment2 subject", FileType.PDF);
 
-        Message message = Message.MessageBuilder.newMessage(UUID4, primaryDocument)
-                .personalIdentificationNumber(pin)
+        Message message = Message.newMessage("messageId", primaryDocument)
+                .recipient(pin)
                 .attachments(Arrays.asList(attachment1, attachment2))
                 .build();
 
         client.createMessage(message)
-                .addContent(primaryDocument, new FileInputStream("main_document_content.pdf"))
-                .addContent(attachment1, new FileInputStream("attachment1_content.pdf"))
-                .addContent(attachment2, new FileInputStream("attachment2_content.pdf"))
+                .addContent(primaryDocument, Files.newInputStream(Paths.get("main_document_content.pdf")))
+                .addContent(attachment1, Files.newInputStream(Paths.get("attachment1_content.pdf")))
+                .addContent(attachment2, Files.newInputStream(Paths.get("attachment2_content.pdf")))
                 .send();
 
     }
@@ -118,12 +152,12 @@ public class GithubPagesSendExamples {
         // An invoice requires four extra fields (KID, amount, account and due date). The use of the Invoice class will trigger payment functionality i Digipost.
         Invoice invoice = new Invoice(UUID1, "Invoice subject", FileType.PDF, null, null, null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, "704279604", new BigDecimal("1.20"), "82760100435", LocalDate.of(2015, 5, 5));
 
-        Message message = Message.MessageBuilder.newMessage(UUID2, invoice)
-                .personalIdentificationNumber(pin)
+        Message message = Message.newMessage("messageId", invoice)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
-                .addContent(invoice, new FileInputStream("invoice.pdf"))
+                .addContent(invoice, Files.newInputStream(Paths.get("invoice.pdf")))
                 .send();
 
     }
@@ -135,15 +169,16 @@ public class GithubPagesSendExamples {
         // The time the SMS is sent out can be based on time after letter is delivered or a specific date. This example specifies that the SMS should be sent out one day after the letter i delivered.
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF, null, new SmsNotification(1), null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
 
-        Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
-                .personalIdentificationNumber(pin)
+        Message message = Message.newMessage("messageId", primaryDocument)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
-                .addContent(primaryDocument, new FileInputStream("content.pdf"))
+                .addContent(primaryDocument, Files.newInputStream(Paths.get("content.pdf")))
                 .send();
 
     }
+
 
     public void send_letter_with_fallback_to_print() throws IOException {
 
@@ -155,13 +190,13 @@ public class GithubPagesSendExamples {
                 new PrintRecipient("Ola Nordmann", new NorwegianAddress("Prinsensveien 123", "0460", "Oslo")),
                 new PrintRecipient("Norgesbedriften", new NorwegianAddress("Akers Àle 2", "0400", "Oslo")), PrintDetails.PrintColors.MONOCHROME, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER);
 
-        Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
+        Message message = Message.newMessage("messageId", primaryDocument)
                 .recipient(new MessageRecipient(pin, printDetails))
                 .build();
 
         // addContent can also take a third parameter which is the file/ipnput stream that will be used only for physical mail. The below example uses the same file/input stream in both channels (digital and physical mail)
         MessageDelivery result = client.createMessage(message)
-                .addContent(primaryDocument, new FileInputStream("content.pdf"))
+                .addContent(primaryDocument, Files.newInputStream(Paths.get("content.pdf")))
                 .send();
 
     }
@@ -174,12 +209,12 @@ public class GithubPagesSendExamples {
         // SENSITIVE - Sender information and subject will be hidden until Digipost user is logged in at the appropriate authentication level
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF, null, null, null, AuthenticationLevel.TWO_FACTOR, SensitivityLevel.SENSITIVE);
 
-        Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
-                .personalIdentificationNumber(pin)
+        Message message = Message.newMessage("messageId", primaryDocument)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
-                .addContent(primaryDocument, new FileInputStream("content.pdf"))
+                .addContent(primaryDocument, Files.newInputStream(Paths.get("content.pdf")))
                 .send();
 
     }
@@ -196,26 +231,31 @@ public class GithubPagesSendExamples {
 
     public void send_letter_through_norsk_helsenett() throws IOException {
 
-        InputStream sertifikatInputStream = new FileInputStream("certificate.p12");
-
         // API URL is different when request is sent from NHN
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.nhn.digipost.no", SENDER_ID, sertifikatInputStream, CERTIFICATE_PASSWORD);
+        DigipostClientConfig config = DigipostClientConfig.newConfiguration().digipostApiUri(URI.create("https://api.nhn.digipost.no")).build();
+
+        Signer signer;
+        try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certificate.p12"))) {
+            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, CERTIFICATE_PASSWORD);
+        }
+
+        DigipostClient client = new DigipostClient(config, SENDER_ID.asBrokerId(), signer);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
         Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
 
-        Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
-                .personalIdentificationNumber(pin)
+        Message message = Message.newMessage("messageId", primaryDocument)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
-                .addContent(primaryDocument, new FileInputStream("content.pdf"))
+                .addContent(primaryDocument, Files.newInputStream(Paths.get("content.pdf")))
                 .send();
 
     }
 
-    public void send_appointment() throws FileNotFoundException {
+    public void send_appointment() throws IOException {
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
         ZonedDateTime startTime = ZonedDateTime.of(2017, 10, 23, 10, 0, 0, 0, ZoneId.systemDefault());
@@ -227,12 +267,12 @@ public class GithubPagesSendExamples {
 
         Document primaryDocument = new Document(UUID1, "X-Ray appointment", FileType.PDF, appointment);
 
-        Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
-                .personalIdentificationNumber(pin)
+        Message message = Message.newMessage("messageId", primaryDocument)
+                .recipient(pin)
                 .build();
 
         client.createMessage(message)
-                .addContent(primaryDocument, new FileInputStream("content.pdf"))
+                .addContent(primaryDocument, Files.newInputStream(Paths.get("content.pdf")))
                 .send();
     }
 }

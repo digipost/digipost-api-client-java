@@ -38,25 +38,25 @@ import java.util.Objects;
     "phoneNumber",
     "emailAddress"
 })
-public class NameAndAddress {
+public final class NameAndAddress {
     @XmlElement(required = true)
-    protected String fullname;
+    private String fullname;
     @XmlElement(required = true)
-    protected String addressline1;
+    private String addressline1;
     @XmlElement(nillable = false)
-    protected String addressline2;
+    private String addressline2;
     @XmlElement(required = true)
-    protected String postalcode;
+    private String postalcode;
     @XmlElement(required = true)
-    protected String city;
+    private String city;
     @XmlElement(name = "birth-date", type = String.class, nillable = false)
     @XmlJavaTypeAdapter(DateXmlAdapter.class)
     @XmlSchemaType(name = "date")
-    protected LocalDate birthDate;
+    private LocalDate birthDate;
     @XmlElement(name = "phone-number", nillable = false)
-    protected String phoneNumber;
+    private String phoneNumber;
     @XmlElement(name = "email-address", nillable = false)
-    protected String emailAddress;
+    private String emailAddress;
 
     NameAndAddress() {
     }

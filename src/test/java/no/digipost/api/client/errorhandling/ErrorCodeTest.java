@@ -15,15 +15,15 @@
  */
 package no.digipost.api.client.errorhandling;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.ConnectException;
 import java.nio.file.DirectoryIteratorException;
 import java.rmi.ConnectIOException;
 import java.util.concurrent.CancellationException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class ErrorCodeTest {
 

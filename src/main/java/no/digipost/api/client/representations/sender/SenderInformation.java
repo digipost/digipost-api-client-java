@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.representations.sender;
 
+import no.digipost.api.client.SenderId;
 import no.digipost.print.validate.PdfValidationSettings;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -28,14 +29,14 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_POSITIVE_BLEED;
-import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_NEGATIVE_BLEED;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_FONTS;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_MARGINS_LEFT;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_NEGATIVE_BLEED;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PAGEAMOUNT;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_PDFVERSION;
-import static no.digipost.print.validate.PdfValidationSettings.DEFAULT_POSITIVE_BLEED_MM;
+import static no.digipost.api.client.representations.sender.SenderFeatureName.PRINTVALIDATION_POSITIVE_BLEED;
 import static no.digipost.print.validate.PdfValidationSettings.DEFAULT_NEGATIVE_BLEED_MM;
+import static no.digipost.print.validate.PdfValidationSettings.DEFAULT_POSITIVE_BLEED_MM;
 
 /**
  * Informasjon om en avsender. Bruk
@@ -70,8 +71,8 @@ public class SenderInformation
 
     public SenderInformation() { }
 
-    public SenderInformation(Long senderId, SenderStatus status, List<SenderFeature> supportedFeatures) {
-        this.senderId = senderId;
+    public SenderInformation(SenderId senderId, SenderStatus status, List<SenderFeature> supportedFeatures) {
+        this.senderId = senderId != null ? senderId.value() : null;
         this.status = status;
         this.supportedFeatures = supportedFeatures == null || supportedFeatures.isEmpty() ? null : supportedFeatures;
     }

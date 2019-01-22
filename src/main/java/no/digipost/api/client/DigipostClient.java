@@ -15,31 +15,33 @@
  */
 package no.digipost.api.client;
 
-import no.digipost.api.client.delivery.MessageDeliverer;
+import no.digipost.api.client.delivery.MessageDeliveryApi;
 import no.digipost.api.client.delivery.OngoingDelivery;
+import no.digipost.api.client.document.DocumentApi;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
-import no.digipost.api.client.filters.request.RequestContentSHA256Filter;
-import no.digipost.api.client.filters.request.RequestDateInterceptor;
-import no.digipost.api.client.filters.request.RequestSignatureInterceptor;
-import no.digipost.api.client.filters.request.RequestUserAgentInterceptor;
-import no.digipost.api.client.filters.response.ResponseContentSHA256Interceptor;
-import no.digipost.api.client.filters.response.ResponseDateInterceptor;
-import no.digipost.api.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.*;
-import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.inbox.InboxApi;
+import no.digipost.api.client.internal.ApiServiceImpl;
+import no.digipost.api.client.internal.delivery.MessageDeliverer;
+import no.digipost.api.client.representations.AddDataLink;
+import no.digipost.api.client.representations.AdditionalData;
+import no.digipost.api.client.representations.Autocomplete;
+import no.digipost.api.client.representations.DocumentEvents;
+import no.digipost.api.client.representations.DocumentStatus;
+import no.digipost.api.client.representations.Identification;
+import no.digipost.api.client.representations.IdentificationResult;
+import no.digipost.api.client.representations.Link;
+import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
+import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
-import no.digipost.api.client.security.FileKeystoreSigner;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.util.JAXBContextUtils;
 import no.digipost.http.client3.DigipostHttpClientFactory;
-import no.digipost.http.client3.DigipostHttpClientSettings;
-import no.digipost.print.validate.PdfValidator;
-import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
@@ -47,11 +49,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
+import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 
 /**
@@ -65,76 +67,38 @@ public class DigipostClient {
         CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
     }
 
-    public static final EventLogger NOOP_EVENT_LOGGER = eventText -> {};
-
     private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
 
     private final EventLogger eventLogger;
-    private final ApiService apiService;
-    private final MessageSender messageSender;
-    private final MessageDeliverer deliverer;
-    private final DocumentCommunicator documentCommunicator;
-    private final InboxCommunicator inboxCommunicator;
-
-    private final ResponseSignatureInterceptor responseSignatureInterceptor;
-    private final ResponseContentSHA256Interceptor responseHashInterceptor = new ResponseContentSHA256Interceptor();
-    private final ResponseDateInterceptor responseDateInterceptor = new ResponseDateInterceptor();
+    private final MessageDeliveryApi messageApi;
+    private final MessageDeliverer messageSender;
+    private final InboxApi inboxApiService;
+    private final DocumentApi documentApi;
 
 
-    public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
-                          final long senderAccountId, final InputStream certificateP12File, final String certificatePassword) {
-        this(config, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), NOOP_EVENT_LOGGER, null);
+
+    public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
+        this(config, brokerId, signer, DigipostHttpClientFactory.createDefaultBuilder());
     }
 
-    public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
-                          final long senderAccountId, final Signer signer, final ApiService apiService) {
-        this(config, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, null, apiService, null);
+    public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer, HttpClientBuilder clientBuilder) {
+        this(config, new ApiServiceImpl(config, clientBuilder, brokerId, signer));
     }
 
-    public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
-                          final long senderAccountId, final Signer signer, final HttpClientBuilder clientBuilder) {
-        this(config, digipostUrl, senderAccountId, signer, NOOP_EVENT_LOGGER, clientBuilder, null, null);
+    private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
+        this(config, apiService, apiService, apiService);
     }
 
-    public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
-                          final long senderAccountId, final Signer signer, final EventLogger eventLogger,
-                          final HttpClientBuilder clientBuilder) {
-        this(config, digipostUrl, senderAccountId, signer, eventLogger, clientBuilder, null, null);
+    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi) {
+        this.messageApi = apiService;
+        this.inboxApiService = inboxApiService;
+        this.documentApi = documentApi;
+
+        this.messageSender = new MessageDeliverer(config, apiService);
+
+        this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
     }
 
-    public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
-                          final long senderAccountId, final InputStream certificateP12File, final String certificatePassword,
-                          final EventLogger eventLogger, final HttpClientBuilder clientBuilder, final HttpHost proxy) {
-        this(config, digipostUrl, senderAccountId, new FileKeystoreSigner(certificateP12File, certificatePassword), eventLogger, clientBuilder, null, proxy);
-    }
-
-    public DigipostClient(final DigipostClientConfig config, final String digipostUrl,
-                          final long senderAccountId, final Signer signer, final EventLogger eventLogger,
-                          final HttpClientBuilder clientBuilder, final ApiService overriddenApiService, final HttpHost proxy) {
-        CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
-        HttpClientBuilder httpClientBuilder = clientBuilder == null ? DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT) : clientBuilder;
-        this.eventLogger = defaultIfNull(eventLogger, NOOP_EVENT_LOGGER);
-
-        this.apiService = overriddenApiService == null ?
-                new ApiServiceImpl(httpClientBuilder, senderAccountId, this.eventLogger, URI.create(digipostUrl), proxy) : overriddenApiService;
-
-        this.messageSender = new MessageSender(config, apiService, this.eventLogger, new PdfValidator());
-        this.deliverer = new MessageDeliverer(messageSender);
-        this.documentCommunicator = new DocumentCommunicator(apiService, this.eventLogger);
-        this.inboxCommunicator = new InboxCommunicator(apiService, this.eventLogger);
-        this.responseSignatureInterceptor = new ResponseSignatureInterceptor(apiService);
-
-        apiService.addFilter(new RequestDateInterceptor(this.eventLogger));
-        apiService.addFilter(new RequestUserAgentInterceptor());
-        apiService.addFilter(new RequestSignatureInterceptor(signer, this.eventLogger, new RequestContentSHA256Filter(this.eventLogger)));
-        apiService.addFilter(responseDateInterceptor);
-        apiService.addFilter(responseHashInterceptor);
-        apiService.addFilter(responseSignatureInterceptor);
-
-        apiService.buildApacheHttpClientBuilder();
-
-        log("Initialiserte apache-klient mot " + digipostUrl);
-    }
 
     /**
      * Oppretter en forsendelse for sending gjennom Digipost. Dersom mottaker ikke er
@@ -143,7 +107,7 @@ public class DigipostClient {
      * til print.)
      */
     public OngoingDelivery.WithPrintFallback createMessage(final Message message) {
-        return deliverer.createMessage(message);
+        return messageSender.createMessage(message);
     }
 
     /**
@@ -152,24 +116,28 @@ public class DigipostClient {
      * til print.
      */
     public OngoingDelivery.ForPrintOnly createPrintOnlyMessage(final Message printMessage) {
-        return deliverer.createPrintOnlyMessage(printMessage);
+        return messageSender.createPrintOnlyMessage(printMessage);
     }
 
     public IdentificationResult identifyRecipient(final Identification identification) {
-        try (CloseableHttpResponse response = apiService.identifyRecipient(identification)) {
-            Communicator.checkResponse(response, eventLogger);
+        try (CloseableHttpResponse response = messageApi.identifyRecipient(identification)) {
+            checkResponse(response, eventLogger);
             return JAXBContextUtils.unmarshal(jaxbContext, response.getEntity().getContent(), IdentificationResult.class);
         } catch (IOException e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
         }
     }
 
+    public void addData(AddDataLink addDataLink, AdditionalData data) {
+        messageSender.addData(addDataLink, data);
+    }
+
     public Recipients search(final String searchString) {
-        return apiService.search(searchString);
+        return messageApi.search(searchString);
     }
 
     public Autocomplete getAutocompleteSuggestions(final String searchString) {
-        return apiService.searchSuggest(searchString);
+        return messageApi.searchSuggest(searchString);
     }
 
     public DocumentEvents getDocumentEvents(ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
@@ -177,7 +145,7 @@ public class DigipostClient {
     }
 
     public DocumentEvents getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
-        return documentCommunicator.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
+        return documentApi.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
     }
 
     /**
@@ -193,8 +161,8 @@ public class DigipostClient {
      *
      * @see SenderInformation
      */
-    public SenderInformation getSenderInformation(long senderId) {
-        return apiService.getSenderInformation(senderId);
+    public SenderInformation getSenderInformation(SenderId senderId) {
+        return messageApi.getSenderInformation(senderId);
     }
 
     /**
@@ -214,19 +182,19 @@ public class DigipostClient {
      * @see SenderInformation
      */
     public SenderInformation getSenderInformation(String orgnr, String avsenderenhet) {
-        return apiService.getSenderInformation(orgnr, avsenderenhet);
+        return messageApi.getSenderInformation(orgnr, avsenderenhet);
     }
 
-    public DocumentStatus getDocumentStatus(final Link linkToDocumentStatus) {
-        return documentCommunicator.getDocumentStatus(linkToDocumentStatus);
+    public DocumentStatus getDocumentStatus(Link linkToDocumentStatus) {
+        return documentApi.getDocumentStatus(linkToDocumentStatus);
     }
 
-    public DocumentStatus getDocumentStatus(long senderId, String uuid) {
-        return documentCommunicator.getDocumentStatus(senderId, uuid);
+    public DocumentStatus getDocumentStatus(SenderId senderId, UUID uuid) {
+        return documentApi.getDocumentStatus(senderId, uuid);
     }
 
-    public InputStream getContent(final String path) {
-        return documentCommunicator.getContent(path);
+    public InputStream getContent(String path) {
+        return documentApi.getDocumentContent(path);
     }
 
     /**
@@ -248,7 +216,7 @@ public class DigipostClient {
      * @return Inbox element with the n=limit first documents
      */
     public Inbox getInbox(SenderId senderId, int offset, int limit) {
-        return inboxCommunicator.getInbox(senderId, offset, limit);
+        return inboxApiService.getInbox(senderId, offset, limit);
     }
 
     /**
@@ -259,7 +227,7 @@ public class DigipostClient {
      * @return Entire content of the document as a stream
      */
     public InputStream getInboxDocumentContent(InboxDocument inboxDocument) {
-        return inboxCommunicator.getInboxDocumentContentStream(inboxDocument);
+        return inboxApiService.getInboxDocumentContentStream(inboxDocument);
     }
 
     /**
@@ -268,73 +236,11 @@ public class DigipostClient {
      * @param inboxDocument The document to delete
      */
     public void deleteInboxDocument(InboxDocument inboxDocument) {
-        inboxCommunicator.deleteInboxDocument(inboxDocument);
+        inboxApiService.deleteInboxDocument(inboxDocument);
     }
 
     public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user) {
-        return apiService.createOrActivateUserAccount(senderId, user);
+        return messageApi.createOrActivateUserAccount(senderId, user);
     }
 
-    private void log(final String stringToSignMsg) {
-        LOG.debug(stringToSignMsg);
-        eventLogger.log(stringToSignMsg);
-    }
-
-    public static class DigipostClientBuilder{
-        private  final String digipostURL;
-        private final long senderAccountId;
-        private final InputStream certificateP12File;
-        private final String certificatePassword;
-        private final Signer signer;
-        private final DigipostClientConfig config;
-        private HttpClientBuilder clientBuilder = null;
-        private EventLogger eventLogger = NOOP_EVENT_LOGGER;
-        private ApiService apiService = null;
-        private HttpHost proxy = null;
-
-        public DigipostClientBuilder(String digipostURL, long senderAccountId, InputStream certificateP12File,
-                                     String certificatePassword, DigipostClientConfig config){
-            this.digipostURL = digipostURL;
-            this.senderAccountId = senderAccountId;
-            this.certificateP12File = certificateP12File;
-            this.certificatePassword = certificatePassword;
-            this.signer = null;
-            this.config = config;
-        }
-
-        public DigipostClientBuilder(String digipostURL, long senderAccountId, Signer signer, DigipostClientConfig config){
-            this.digipostURL = digipostURL;
-            this.senderAccountId = senderAccountId;
-            this.certificateP12File = null;
-            this.certificatePassword = null;
-            this.signer = signer;
-            this.config = config;
-        }
-
-        public DigipostClientBuilder proxy(HttpHost proxy){
-            this.proxy = proxy;
-            return this;
-        }
-
-        public DigipostClientBuilder clientBuilder(HttpClientBuilder clientBuilder){
-            this.clientBuilder = clientBuilder;
-            return this;
-        }
-
-        public DigipostClientBuilder eventLogger(EventLogger eventLogger){
-            this.eventLogger = eventLogger;
-            return this;
-        }
-
-        public DigipostClientBuilder apiService(ApiService apiService){
-            this.apiService = apiService;
-            return this;
-        }
-
-        public DigipostClient build(){
-            return signer == null ? new DigipostClient(config, digipostURL, senderAccountId, certificateP12File, certificatePassword, eventLogger, clientBuilder, proxy)
-                    : new DigipostClient(config, digipostURL, senderAccountId, signer, eventLogger, clientBuilder, apiService, proxy);
-        }
-
-    }
 }

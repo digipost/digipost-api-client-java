@@ -15,7 +15,9 @@
  */
 package no.digipost.api.client.swing;
 
+import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.errorhandling.DigipostClientException;
@@ -31,6 +33,7 @@ import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.security.Signer;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -62,15 +65,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.UUID;
 
 import static java.lang.Integer.parseInt;
 import static java.nio.file.Files.newInputStream;
-import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
+import static no.digipost.api.client.representations.Message.newMessage;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
 
 public class DigipostSwingClient {
@@ -105,13 +109,7 @@ public class DigipostSwingClient {
     private JTextArea logTextArea;
 
     private DigipostClient client;
-    private final EventLogger eventLogger = new EventLogger() {
-
-        @Override
-        public void log(final String logMesssage) {
-            logTextArea.append(logMesssage + "\n");
-        }
-    };
+    private final EventLogger eventLogger = logMesssage -> logTextArea.append(logMesssage + "\n");
     private JTextField endpointField;
 
     /**
@@ -419,7 +417,7 @@ public class DigipostSwingClient {
                 try {
                     String subject = attachmentSubjectField.getText();
                     FileType fileType = FileType.fromFilename(attachmentContentField.getText());
-                    Document attachment = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), null, PASSWORD, NORMAL);
+                    Document attachment = new Document(UUID.randomUUID(), subject, fileType, null, new SmsNotification(), null, PASSWORD, NORMAL);
                     delivery.addContent(attachment, newInputStream(Paths.get(attachmentContentField.getText())));
                 } catch (IOException ex) {
                     eventLogger.log(ex.getMessage() + "\n");
@@ -444,21 +442,21 @@ public class DigipostSwingClient {
                     Message message = null;
                     String subject = subjectField.getText();
                     FileType fileType = FileType.fromFilename(contentField.getText());
-                    Document primaryDocument = new Document(UUID.randomUUID().toString(), subject, fileType, null, new SmsNotification(), null, PASSWORD, NORMAL);
+                    Document primaryDocument = new Document(UUID.randomUUID(), subject, fileType, null, new SmsNotification(), null, PASSWORD, NORMAL);
                     if (identifyOnDigipostAddress.isSelected()) {
                         String digipostAddress = recipientDigipostAddressField.getText();
-                        message = newMessage(UUID.randomUUID().toString(), primaryDocument)
-                                .digipostAddress(new DigipostAddress(digipostAddress))
+                        message = newMessage(UUID.randomUUID(), primaryDocument)
+                                .recipient(new DigipostAddress(digipostAddress))
                                 .build();
                     } else if (identifyOnPersonalIdentificationNumber.isSelected()) {
                         String personalIdentificationNumber = recipientPersonalIdentificationNumberField.getText();
-                        message = newMessage(UUID.randomUUID().toString(), primaryDocument)
-                                .personalIdentificationNumber(new PersonalIdentificationNumber(personalIdentificationNumber))
+                        message = newMessage(UUID.randomUUID(), primaryDocument)
+                                .recipient(new PersonalIdentificationNumber(personalIdentificationNumber))
                                 .build();
                     } else if(identifyOnOrganizationNumber.isSelected()){
                         String orgnizationNumber = recipientOrganizationNumberField.getText();
-                        message = newMessage(UUID.randomUUID().toString(),primaryDocument)
-                                .organisationNumber(new OrganisationNumber(orgnizationNumber))
+                        message = newMessage(UUID.randomUUID(), primaryDocument)
+                                .recipient(new OrganisationNumber(orgnizationNumber))
                                 .build();
                     } else {
                         String name = recipientNameField.getText();
@@ -491,7 +489,7 @@ public class DigipostSwingClient {
                             recipient = new MessageRecipient(nameAndAddress);
                         }
 
-                        message = newMessage(UUID.randomUUID().toString(), primaryDocument)
+                        message = newMessage(UUID.randomUUID(), primaryDocument)
                                 .recipient(recipient)
                                 .build();
                     }
@@ -633,9 +631,13 @@ public class DigipostSwingClient {
                 CardLayout layout = (CardLayout) contentPane.getLayout();
                 layout.show(contentPane, BREV);
 
-                try {
-                    client = new DigipostClient(newBuilder().build(), endpointField.getText(), Long.parseLong(senderField.getText()),
-                            newInputStream(Paths.get(certField.getText())), new String(passwordField.getPassword()), eventLogger, null, null);
+                DigipostClientConfig clientConfig = DigipostClientConfig.newConfiguration()
+                        .eventLogger(eventLogger)
+                        .digipostApiUri(URI.create(endpointField.getText()))
+                        .build();
+                try (InputStream certStream = newInputStream(Paths.get(certField.getText()))) {
+                    client = new DigipostClient(clientConfig, BrokerId.of(Long.parseLong(senderField.getText())),
+                            Signer.usingKeyFromPKCS12KeyStore(certStream, new String(passwordField.getPassword())));
                 } catch (NumberFormatException e1) {
                     eventLogger.log("FEIL: Avsenders ID må være et tall > 0");
                 } catch (IOException e1) {

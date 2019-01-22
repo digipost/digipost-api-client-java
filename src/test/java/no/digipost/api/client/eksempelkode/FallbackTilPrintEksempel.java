@@ -16,6 +16,8 @@
 package no.digipost.api.client.eksempelkode;
 
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientConfig;
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageRecipient;
@@ -24,6 +26,7 @@ import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.SmsNotification;
+import no.digipost.api.client.security.Signer;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -33,10 +36,8 @@ import java.io.InputStream;
 import java.security.Security;
 import java.util.UUID;
 
-import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
-import static no.digipost.api.client.representations.Message.MessageBuilder.newMessage;
 import static no.digipost.api.client.representations.PrintDetails.NondeliverableHandling.RETURN_TO_SENDER;
 import static no.digipost.api.client.representations.PrintDetails.PrintColors.MONOCHROME;
 import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
@@ -47,23 +48,27 @@ import static no.digipost.api.client.representations.SensitivityLevel.NORMAL;
  */
 public class FallbackTilPrintEksempel {
     // Din virksomhets Digipost-kontoid
-    private static final long AVSENDERS_KONTOID = 10987;
+    private static final SenderId AVSENDERS_KONTOID = SenderId.of(10987);
 
     // Passordet sertifikatfilen er beskyttet med
     private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
 
         // 1. For å kunne kryptere brevet som skal sendes trenger vi
         // BouncyCastle
         Security.addProvider(new BouncyCastleProvider());
 
-        // 2. Vi leser inn sertifikatet du har knyttet til din Digipost-konto (i
-        // .p12-formatet)
-        InputStream sertifikatInputStream = lesInnSertifikat();
+        // 2. Vi lager en Signer ved å lese inn sertifikatet du har knyttet til
+        // din Digipost-konto (i .p12-formatet)
+        Signer signer;
+        try (InputStream sertifikatInputStream = lesInnSertifikat()) {
+            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, SERTIFIKAT_PASSORD);
+        }
 
         // 3. Vi oppretter en DigipostClient
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(),
+                                                   AVSENDERS_KONTOID.asBrokerId(), signer);
 
         // 4. Vi oppretter et fødselsnummerobjekt som skal brukes til å
         // identifisere mottaker i Digipost
@@ -71,12 +76,12 @@ public class FallbackTilPrintEksempel {
 
         // 5. Vi oppretter en forsendelse for sending av brevet i Digipost og med adresseinformasjon som vil
         // benyttes dersom mottaker ikke er Digipostbruker
-        Document primaryDocument = new Document(UUID.randomUUID().toString(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
+        Document primaryDocument = new Document(UUID.randomUUID(), "Dokumentets emne", PDF, null, new SmsNotification(), null, PASSWORD, NORMAL);
 
         PrintDetails printDetails = new PrintDetails(new PrintRecipient("Mottakers navn", new NorwegianAddress("postnummer","Mottakers poststed")),
                 new PrintRecipient("Avsenders navn", new NorwegianAddress("postnummer", "Avsenders poststed")), MONOCHROME, RETURN_TO_SENDER);
-        String dinForsendelseId = UUID.randomUUID().toString();
-        Message message = newMessage(dinForsendelseId, primaryDocument)
+        UUID dinForsendelseId = UUID.randomUUID();
+        Message message = Message.newMessage(dinForsendelseId, primaryDocument)
                 .recipient(new MessageRecipient(pin, printDetails))
                 .build();
 

@@ -15,6 +15,18 @@
  */
 package no.digipost.api.client;
 
+import org.slf4j.Logger;
+
 public interface EventLogger {
+    EventLogger NOOP_LOGGER = eventText -> {};
+
     void log(String logMessage);
+
+    default EventLogger withDebugLogTo(Logger slf4jLogger) {
+        EventLogger nested = EventLogger.this;
+        return logMessage -> {
+            slf4jLogger.debug(logMessage);
+            nested.log(logMessage);
+        };
+    }
 }

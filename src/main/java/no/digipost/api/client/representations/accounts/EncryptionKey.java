@@ -26,6 +26,7 @@ public class EncryptionKey {
         this.value = value;
     }
 
+    @SuppressWarnings("unused")
     private EncryptionKey() {
         this(null);
     }

@@ -26,12 +26,13 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "event")
 public class DocumentEvent {
     @XmlAttribute(name = "uuid", required = true)
-    private String uuid;
+    private UUID uuid;
     @XmlAttribute(name = "type", required = true)
     private DocumentEventType type;
     @XmlAttribute(name = "created", required = true)
@@ -48,11 +49,11 @@ public class DocumentEvent {
     public DocumentEvent() {
     }
 
-    public DocumentEvent(String uuid, DocumentEventType type, ZonedDateTime created, ZonedDateTime documentCreated) {
+    public DocumentEvent(UUID uuid, DocumentEventType type, ZonedDateTime created, ZonedDateTime documentCreated) {
         this(uuid, type, created, documentCreated, null);
     }
 
-    public DocumentEvent(String uuid, DocumentEventType type, ZonedDateTime created, ZonedDateTime documentCreated, EventMetadata metadata) {
+    public DocumentEvent(UUID uuid, DocumentEventType type, ZonedDateTime created, ZonedDateTime documentCreated, EventMetadata metadata) {
         this.uuid = uuid;
         this.type = type;
         this.created = created;
@@ -60,7 +61,7 @@ public class DocumentEvent {
         this.metadata = metadata;
     }
 
-    public String getUuid() {
+    public UUID getUuid() {
         return uuid;
     }
 

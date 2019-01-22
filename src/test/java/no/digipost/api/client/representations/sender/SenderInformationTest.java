@@ -15,7 +15,8 @@
  */
 package no.digipost.api.client.representations.sender;
 
-import org.junit.Test;
+import no.digipost.api.client.SenderId;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
@@ -25,7 +26,7 @@ import static no.digipost.api.client.representations.sender.SenderFeatureName.DI
 import static no.digipost.api.client.representations.sender.SenderStatus.NO_INFO_AVAILABLE;
 import static no.digipost.api.client.representations.sender.SenderStatus.VALID_SENDER;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SenderInformationTest {
 
@@ -35,7 +36,7 @@ public class SenderInformationTest {
         SenderInformation unmarshalled = marshallValidateAndUnmarshall(senderInformation);
         assertTrue(reflectionEquals(senderInformation, unmarshalled));
 
-        senderInformation = new SenderInformation(1L, VALID_SENDER, asList(DIGIPOST_DELIVERY.withNoParam(), SenderFeatureName.from("no.digipost.feature.delivery.pizza").withNoParam()));
+        senderInformation = new SenderInformation(SenderId.of(1L), VALID_SENDER, asList(DIGIPOST_DELIVERY.withNoParam(), SenderFeatureName.from("no.digipost.feature.delivery.pizza").withNoParam()));
         unmarshalled = marshallValidateAndUnmarshall(senderInformation);
         assertTrue(reflectionEquals(senderInformation, unmarshalled));
     }

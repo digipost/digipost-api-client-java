@@ -30,7 +30,7 @@ import java.security.Signature;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.util.Enumeration;
 
-public class CryptoUtil {
+public final class CryptoUtil {
     private static final Logger LOG = LoggerFactory.getLogger(CryptoUtil.class);
 
     public static PrivateKey loadKeyFromP12(final InputStream certificateStream, final String passord) {
@@ -76,5 +76,8 @@ public class CryptoUtil {
         } catch (CMSException e) {
             throw new RuntimeException("Feil under initialisering av algoritmer. Er Java Cryptographic Excetsions (JCE) installert?", e);
         }
+    }
+
+    private CryptoUtil() {
     }
 }

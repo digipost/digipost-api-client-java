@@ -17,7 +17,7 @@ package no.digipost.api.client.representations.sender;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import no.digipost.api.client.representations.SenderOrganization;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SenderOrganizationTest {
 

@@ -15,18 +15,19 @@
  */
 package no.digipost.api.client.representations;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertTrue;
 import static no.digipost.api.client.representations.FileType.HTML;
 import static no.digipost.api.client.representations.FileType.PDF;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DocumentTest {
 
@@ -47,15 +48,15 @@ public class DocumentTest {
     @Test
     public void assertThatDocumentClassHaveNotBeenChangedWithoutChangingDocumentCopyMethod() {
         Field[] messageFields = Document.class.getDeclaredFields();
-        assertThat(messageFields.length, is(14));
+        assertThat(messageFields, arrayWithSize(13));
 
-        String[] allFieldsThatAreUsedForCopyInMessage = new String[]{"UUID_PATTERN", "uuid", "subject", "digipostFileType",
+        String[] allFieldsThatAreUsedForCopyInMessage = new String[]{"uuid", "subject", "digipostFileType",
                 "opened", "openingReceipt", "smsNotification", "emailNotification", "authenticationLevel", "sensitivityLevel",
                 "encrypted", "contentHash", "dataType", "technicalType"};
 
-        for(int i = 0; i < messageFields.length; i++){
-            for(int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++){
-                if(messageFields[i].getName().equals(allFieldsThatAreUsedForCopyInMessage[n])){
+        for (int i = 0; i < messageFields.length; i++) {
+            for (int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++) {
+                if (messageFields[i].getName().equals(allFieldsThatAreUsedForCopyInMessage[n])) {
                     allFieldsThatAreUsedForCopyInMessage[n] = "";
                 }
             }
@@ -68,7 +69,7 @@ public class DocumentTest {
 
     @Test
     public void copyOfMessageIsTheSameAsTheOriginalExceptPrintDetails() {
-        Document originalDoc = new Document(UUID.randomUUID().toString(), "ThisIsASubject", HTML, "OpeningReceipt", new SmsNotification(1),
+        Document originalDoc = new Document(UUID.randomUUID(), "ThisIsASubject", HTML, "OpeningReceipt", new SmsNotification(1),
                 new EmailNotification("ny@gmail.com", "Detta", "Er", new ArrayList<ListedTime>()), AuthenticationLevel.IDPORTEN_3,
                 SensitivityLevel.NORMAL, false, null, "technicalType");
 

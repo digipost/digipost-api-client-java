@@ -15,16 +15,18 @@
  */
 package no.digipost.api.client.eksempelkode;
 
+import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.DigipostClient;
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.representations.Recipient;
+import no.digipost.api.client.security.Signer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
-import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBuilder.newBuilder;
 
 /**
  * Kode som brukes i dokumentasjonen for klientbiblioteket.
@@ -33,19 +35,22 @@ import static no.digipost.api.client.DigipostClientConfig.DigipostClientConfigBu
 @SuppressWarnings("unused")
 public class SokEksempel {
     // Din virksomhets Digipost-kontoid
-    private static final long AVSENDERS_KONTOID = 10987;
+    private static final BrokerId AVSENDERS_KONTOID = BrokerId.of(10987);
 
     // Passordet sertifikatfilen er beskyttet med
     private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
 
-        // 1. Vi leser inn sertifikatet du har knyttet til din Digipost-konto (i
-        // .p12-formatet)
-        InputStream sertifikatInputStream = lesInnSertifikat();
+        // 1. Vi lager en Signer ved å lese inn sertifikatet du har knyttet til
+        // din Digipost-konto (i .p12-formatet)
+        Signer signer;
+        try (InputStream sertifikatInputStream = lesInnSertifikat()) {
+            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, SERTIFIKAT_PASSORD);
+        }
 
         // 2. Vi oppretter en DigipostClient
-        DigipostClient client = new DigipostClient(newBuilder().build(), "https://api.digipost.no", AVSENDERS_KONTOID, sertifikatInputStream, SERTIFIKAT_PASSORD);
+        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, signer);
 
         // 3. Vi søker etter personer med matchende navn eller adresse
         List<Recipient> recipients = client.search("Ole Nilsen Stavanger").getRecipients();

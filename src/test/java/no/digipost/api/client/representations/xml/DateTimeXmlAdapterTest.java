@@ -15,14 +15,14 @@
  */
 package no.digipost.api.client.representations.xml;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class DateTimeXmlAdapterTest {
 
