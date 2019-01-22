@@ -20,11 +20,11 @@ The actual API communication will happen when you invoke the `.send()` method.
 
 ```java
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+UUID documentUuid = UUID.randomUUID();
+Document primaryDocument = new Document(documentUuid, "Document subject", FileType.PDF);
 
-Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF);
-
-Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
-        .personalIdentificationNumber(recipient)
+Message message = Message.newMessage("messageId", primaryDocument)
+        .recipient(pin)
         .build();
 
 client.createMessage(message)
@@ -61,9 +61,9 @@ Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF)
 Document attachment1 = new Document(UUID2, "Attachment1 subject", FileType.PDF);
 Document attachment2 = new Document(UUID3, "Attachment2 subject", FileType.PDF);
 
-Message message = Message.MessageBuilder.newMessage(UUID4, primaryDocument)
-        .personalIdentificationNumber(pin)
-        .attachments(Arrays.asList(attachment1, attachment2))
+Message message = Message.newMessage("messageId", primaryDocument)
+        .recipient(pin)
+        .attachments(attachment1, attachment2)
         .build();
 
 client.createMessage(message)
@@ -86,8 +86,8 @@ Invoice invoice = new Invoice(UUID1, "Invoice subject", FileType.PDF, null, null
                               AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, "704279604",
                               new BigDecimal("1.20"), "82760100435", LocalDate.of(2015, 5, 5));
 
-Message message = Message.MessageBuilder.newMessage(UUID2, invoice)
-        .personalIdentificationNumber(pin)
+Message message = Message.newMessage("messageId", invoice)
+        .recipient(pin)
         .build();
 
 client.createMessage(message)
@@ -108,8 +108,8 @@ Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF,
                                         new SmsNotification(1), null,
                                         AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
 
-Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
-        .personalIdentificationNumber(pin)
+Message message = Message.newMessage(UUID2, primaryDocument)
+        .recipient(pin)
         .build();
 
 client.createMessage(message)
@@ -130,7 +130,7 @@ PrintDetails printDetails = new PrintDetails(
         new PrintRecipient("Norgesbedriften", new NorwegianAddress("Akers Àle 2", "0400", "Oslo")),
         PrintDetails.PrintColors.MONOCHROME, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER);
 
-Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
+Message message = Message.newMessage(UUID2, primaryDocument)
         .recipient(new MessageRecipient(pin, printDetails))
         .build();
 
@@ -153,8 +153,8 @@ PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787
 Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF, null, null, null,
                                         AuthenticationLevel.TWO_FACTOR, SensitivityLevel.SENSITIVE);
 
-Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
-        .personalIdentificationNumber(pin)
+Message message = Message.newMessage(UUID2, primaryDocument)
+        .recipient(pin)
         .build();
 
 client.createMessage(message)
@@ -196,8 +196,8 @@ Appointment appointment = new Appointment(startTime, startTime.plusMinutes(30), 
 
 Document primaryDocument = new Document(messageUUID, "X-Ray appointment", FileType.PDF, appointment);
 
-Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
-        .personalIdentificationNumber(pin)
+Message message = Message.newMessage("messageId", primaryDocument)
+        .recipient(pin)
         .build();
 
 client.createMessage(message)
@@ -223,8 +223,8 @@ ExternalLink externalLink = new ExternalLink(externalLinkTarget, deadline,
 
 Document primaryDocument = new Document(messageUUID, "Housing loan application", FileType.PDF, externalLink);
 
-Message message = Message.MessageBuilder.newMessage("messageId", primaryDocument)
-        .personalIdentificationNumber(pin)
+Message message = Message.newMessage("messageId", primaryDocument)
+        .recipient(pin)
         .build();
 
 client.createMessage(message)
