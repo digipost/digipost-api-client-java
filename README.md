@@ -13,3 +13,7 @@ The library is available in
 * Update the documentation
 * Update docs/_config.yml to reflect the latest version (in `currentVersion`, `versions`, and `collections`)
 * Update the previous version's `index.html` - removing the forward-slash after "redirect_from" (-> `redirect_from:` within the old index-file, and `redirect_from: /` within the new).
+
+## Releasing (Digipost organization members only)
+
+See docs/systemer/open-source-biblioteker.md
