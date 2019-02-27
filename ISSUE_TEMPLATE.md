@@ -7,7 +7,7 @@ Have you read our [brilliant documentation](https://signering-docs.readthedocs.i
 
 Please give a descriptive title for the issue in the field above. 
 
-A good example is: `Unable to create a portal job with multiple senders`.
+A good example is: `Unable to create letter with one attachement `.
 A bad example is: `Please help. Important for integration`
 
 > Delete this chapter after you have created your issue title.
