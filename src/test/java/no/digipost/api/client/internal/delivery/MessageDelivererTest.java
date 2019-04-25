@@ -24,6 +24,7 @@ import no.digipost.api.client.representations.Channel;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.DigipostUri;
 import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.EncryptionCertificate;
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.FileType;
 import no.digipost.api.client.representations.Identification;
@@ -41,6 +42,7 @@ import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.FakeEncryptionKey;
+import no.digipost.api.client.security.FakeEncryptionX509Certificate;
 import no.digipost.api.client.testing.MockfriendlyResponse;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
@@ -119,7 +121,7 @@ public class MessageDelivererTest {
     @Mock
     private IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey;
 
-    private MockfriendlyResponse encryptionKeyResponse;
+    private MockfriendlyResponse encryptionCertificateResponse;
 
     private final ControllableClock clock = ControllableClock.freezedAt(Instant.now());
 
@@ -129,14 +131,17 @@ public class MessageDelivererTest {
     private MessageDeliverer sender;
     private MessageDeliverer cachelessSender;
     private EncryptionKey fakeEncryptionKey;
+    private EncryptionCertificate fakeEncryptionCertificate;
 
     @BeforeEach
     public void setup() {
         this.fakeEncryptionKey = FakeEncryptionKey.createFakeEncryptionKey();
-        ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(jaxbContext, fakeEncryptionKey, bao);
+        this.fakeEncryptionCertificate = FakeEncryptionX509Certificate.createFakeEncryptionCertificate();
 
-        encryptionKeyResponse = MockfriendlyResponse.MockedResponseBuilder.create()
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(jaxbContext, fakeEncryptionCertificate, bao);
+
+        encryptionCertificateResponse = MockfriendlyResponse.MockedResponseBuilder.create()
                 .status(SC_OK)
                 .entity(new ByteArrayEntity(bao.toByteArray()))
                 .build();
@@ -148,33 +153,33 @@ public class MessageDelivererTest {
 
     @Test
     public void skal_bruke_cached_print_encryption_key() {
-        when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
+        when(api.getEncryptionCertificateForPrint()).thenReturn(encryptionCertificateResponse);
 
-        sender.getEncryptionKeyForPrint();
-        then(api).should(times(1)).getEncryptionKeyForPrint();
+        sender.getEncryptionCertificateForPrint();
+        then(api).should(times(1)).getEncryptionCertificateForPrint();
 
         clock.timePasses(ofMinutes(5));
-        sender.getEncryptionKeyForPrint();
-        then(api).should(times(1)).getEncryptionKeyForPrint();
+        sender.getEncryptionCertificateForPrint();
+        then(api).should(times(1)).getEncryptionCertificateForPrint();
 
         clock.timePasses(ofMillis(1));
-        sender.getEncryptionKeyForPrint();
-        then(api).should(times(2)).getEncryptionKeyForPrint();
+        sender.getEncryptionCertificateForPrint();
+        then(api).should(times(2)).getEncryptionCertificateForPrint();
     }
 
     @Test
     public void skal_ikke_bruke_cached_print_encryption_key_da_encryption_er_avskrudd() {
-        when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
+        when(api.getEncryptionCertificateForPrint()).thenReturn(encryptionCertificateResponse);
 
-        cachelessSender.getEncryptionKeyForPrint();
-        then(api).should(times(1)).getEncryptionKeyForPrint();
+        cachelessSender.getEncryptionCertificateForPrint();
+        then(api).should(times(1)).getEncryptionCertificateForPrint();
 
-        cachelessSender.getEncryptionKeyForPrint();
-        then(api).should(times(2)).getEncryptionKeyForPrint();
+        cachelessSender.getEncryptionCertificateForPrint();
+        then(api).should(times(2)).getEncryptionCertificateForPrint();
 
         clock.timePasses(ofMinutes(10));
-        cachelessSender.getEncryptionKeyForPrint();
-        then(api).should(times(3)).getEncryptionKeyForPrint();
+        cachelessSender.getEncryptionCertificateForPrint();
+        then(api).should(times(3)).getEncryptionCertificateForPrint();
     }
 
 
@@ -284,7 +289,7 @@ public class MessageDelivererTest {
     @Test
     public void passes_pdf_validation_for_printonly_message() throws IOException {
         UUID messageId = UUID.randomUUID();
-        when(api.getEncryptionKeyForPrint()).thenReturn(encryptionKeyResponse);
+        when(api.getEncryptionCertificateForPrint()).thenReturn(encryptionCertificateResponse);
         when(api.sendMultipartMessage(any(HttpEntity.class))).thenReturn(mockClientResponse);
         when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
 

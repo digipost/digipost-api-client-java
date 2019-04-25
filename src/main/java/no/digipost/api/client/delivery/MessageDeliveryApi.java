@@ -75,10 +75,9 @@ public interface MessageDeliveryApi {
     CloseableHttpResponse getEncryptionKey(URI location);
 
     /**
-     * Henter public krypteringsnøkkel for forsendelser som skal sendes til print.
+     * Henter public krypteringsnøkkel i x509 format for forsendelser som skal sendes til print.
      */
-    CloseableHttpResponse getEncryptionKeyForPrint();
-
+    CloseableHttpResponse getEncryptionCertificateForPrint();
 
     /**
      * Henter informasjon om en faktisk avsender av en melding, altså

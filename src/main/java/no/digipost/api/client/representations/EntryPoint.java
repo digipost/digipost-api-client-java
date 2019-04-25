@@ -44,8 +44,8 @@ public class EntryPoint extends Representation {
         return getLinkByRelationName(CREATE_MESSAGE).getUri();
     }
 
-    public URI getPrintEncryptionKey() {
-        return getLinkByRelationName(GET_PRINT_ENCRYPTION_KEY).getUri();
+    public URI getPrintEncryptionCertificate() {
+        return getLinkByRelationName(GET_PRINT_ENCRYPTION_CERTIFICATE).getUri();
     }
 
     public URI getSearchUri() {

@@ -164,10 +164,10 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
-    public CloseableHttpResponse getEncryptionKeyForPrint() {
+    public CloseableHttpResponse getEncryptionCertificateForPrint() {
         EntryPoint entryPoint = getEntryPoint();
 
-        HttpGet httpGet = new HttpGet(digipostUrl.resolve(entryPoint.getPrintEncryptionKey().getPath()));
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(entryPoint.getPrintEncryptionCertificate().getPath()));
         httpGet.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
         return send(httpGet);
     }
