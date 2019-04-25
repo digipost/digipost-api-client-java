@@ -153,14 +153,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     @Override
     public CloseableHttpResponse identifyAndGetEncryptionKey(Identification identification) {
         EntryPoint entryPoint = getEntryPoint();
-
-        HttpPost httpPost = new HttpPost(digipostUrl.resolve(entryPoint.getIdentificationWithEncryptionKeyUri().getPath()));
-        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
-        httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V7);
-        ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(jaxbContext, identification, bao);
-        httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
-        return send(httpPost);
+        return sendDigipostMedia(identification, entryPoint.getIdentificationWithEncryptionKeyUri().getPath());
     }
 
     @Override
@@ -181,13 +174,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     @Override
     public CloseableHttpResponse addData(AddDataLink addDataLink, AdditionalData data) {
-        HttpPost httpPost = new HttpPost(digipostUrl.resolve(addDataLink.getPath()));
-        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
-        httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V7);
-        ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(jaxbContext, data, bao);
-        httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
-        return send(httpPost);
+        return sendDigipostMedia(data, addDataLink.getPath());
     }
 
 
@@ -250,15 +237,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     @Override
     public CloseableHttpResponse identifyRecipient(Identification identification) {
-
-        HttpPost httpPost = new HttpPost(digipostUrl.resolve(getEntryPoint().getIdentificationUri().getPath()));
-        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
-        httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V7);
-        ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        marshal(jaxbContext, identification, bao);
-        httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
-
-        return send(httpPost);
+        return sendDigipostMedia(identification, getEntryPoint().getIdentificationUri().getPath());
     }
 
     private EntryPoint fetchEntryPoint() throws IOException {
@@ -400,5 +379,15 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         } catch (IOException e) {
             throw asUnchecked(e);
         }
+    }
+
+    private CloseableHttpResponse sendDigipostMedia(Object data, String uri) {
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(uri));
+        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
+        httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V7);
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(jaxbContext, data, bao);
+        httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
+        return send(httpPost);
     }
 }
