@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 import static no.digipost.api.client.errorhandling.ErrorCode.ENCRYPTION_KEY_NOT_FOUND;
@@ -44,35 +45,27 @@ public final class Encrypter {
      */
     public static final Encrypter FAIL_IF_TRYING_TO_ENCRYPT = new Encrypter();
 
-    public static Encrypter using(DigipostPublicKey digipostPublicKey) {
-        return new Encrypter(digipostPublicKey);
+    private final JceKeyTransRecipientInfoGenerator keyInfoGenerator;
+    private static final JceCMSContentEncryptorBuilder encryptorBuilder = new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME);
+
+    public static Encrypter using(DigipostPublicKey key) {
+        return new Encrypter(new JceKeyTransRecipientInfoGenerator(key.publicKeyHash.getBytes(), key.publicKey));
     }
 
     public static Encrypter using(X509Certificate certificate) {
-        return new Encrypter(certificate);
+        try {
+            return new Encrypter(new JceKeyTransRecipientInfoGenerator(certificate));
+        } catch (CertificateEncodingException e) {
+            throw new DigipostClientException(FAILED_PREENCRYPTION, "Feil ved kryptering av innhold: " + e.getClass().getSimpleName() + " '" + e.getMessage() + "'", e);
+        }
     }
 
-
-
-
-
-    private final DigipostPublicKey key;
-    private final X509Certificate certificate;
-    private final JceCMSContentEncryptorBuilder encryptorBuilder = new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME);
+    private Encrypter(JceKeyTransRecipientInfoGenerator keyInfoGenerator) {
+        this.keyInfoGenerator = keyInfoGenerator;
+    }
 
     private Encrypter() {
-        this.key = null;
-        this.certificate = null;
-    }
-
-    private Encrypter(DigipostPublicKey key) {
-        this.key = key;
-        this.certificate = null;
-    }
-
-    private Encrypter(X509Certificate certificate) {
-        this.key = null;
-        this.certificate = certificate;
+        keyInfoGenerator = null;
     }
 
     public InputStream encrypt(InputStream content) {
@@ -86,16 +79,13 @@ public final class Encrypter {
     }
 
     public InputStream encrypt(byte[] content) {
+        if (keyInfoGenerator == null) {
+            throw new DigipostClientException(ENCRYPTION_KEY_NOT_FOUND, "Trying to preencrypt but have no encryption key.");
+        }
+
         try {
             CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
-
-            if(key != null) {
-                gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(key.publicKeyHash.getBytes(), key.publicKey));
-            } else if(certificate != null) {
-                gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(certificate));
-            } else {
-                throw new DigipostClientException(ENCRYPTION_KEY_NOT_FOUND, "Trying to preencrypt but have no encryption key.");
-            }
+            gen.addRecipientInfoGenerator(keyInfoGenerator);
 
             CMSEnvelopedData d = gen.generate(new CMSProcessableByteArray(content), encryptorBuilder.build());
             return new ByteArrayInputStream(d.getEncoded());
@@ -111,7 +101,4 @@ public final class Encrypter {
             }
         }
     }
-
-
-
 }
