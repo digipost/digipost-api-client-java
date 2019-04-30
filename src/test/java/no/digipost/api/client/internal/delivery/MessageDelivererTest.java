@@ -130,14 +130,11 @@ public class MessageDelivererTest {
 
     private MessageDeliverer sender;
     private MessageDeliverer cachelessSender;
-    private EncryptionKey fakeEncryptionKey;
-    private EncryptionCertificate fakeEncryptionCertificate;
+    private EncryptionKey fakeEncryptionKey = FakeEncryptionKey.createFakeEncryptionKey();
+    private EncryptionCertificate fakeEncryptionCertificate = FakeEncryptionX509Certificate.createFakeEncryptionCertificate();
 
     @BeforeEach
     public void setup() {
-        this.fakeEncryptionKey = FakeEncryptionKey.createFakeEncryptionKey();
-        this.fakeEncryptionCertificate = FakeEncryptionX509Certificate.createFakeEncryptionCertificate();
-
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         marshal(jaxbContext, fakeEncryptionCertificate, bao);
 
