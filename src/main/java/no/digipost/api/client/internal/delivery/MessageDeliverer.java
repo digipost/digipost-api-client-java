@@ -36,7 +36,6 @@ import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.security.DigipostPublicKey;
 import no.digipost.api.client.security.Encrypter;
 import no.digipost.print.validate.PdfValidator;
-import no.digipost.security.DigipostSecurity;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -218,10 +217,10 @@ public class MessageDeliverer {
 
         if (ZERO.equals(config.printKeyCacheTimeToLive) || between(printKeyCachedTime, now).compareTo(config.printKeyCacheTimeToLive) > 0) {
             eventLogger.log("*** STARTER INTERAKSJON MED API: HENT KRYPTERINGSNØKKEL FOR PRINT ***");
-            try(CloseableHttpResponse response = apiService.getEncryptionCertificateForPrint()) {
+            try (CloseableHttpResponse response = apiService.getEncryptionCertificateForPrint()) {
                 checkResponse(response, eventLogger);
                 EncryptionCertificate encryptionCertificate = unmarshal(jaxbContext, response.getEntity().getContent(), EncryptionCertificate.class);
-                cachedPrintCertificate = DigipostSecurity.readCertificate(encryptionCertificate.getValue().getBytes());
+                cachedPrintCertificate = encryptionCertificate.getX509Certificate();
                 printKeyCachedTime = now;
                 return cachedPrintCertificate;
             } catch (IOException e) {
