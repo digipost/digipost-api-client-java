@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>11.1-SNAPSHOT</version>
+    <version>11.2-SNAPSHOT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 
@@ -452,6 +452,7 @@
                                         <include>com.sun.istack:istack-commons-runtime</include>
                                         <include>com.sun.xml.fastinfoset:FastInfoset</include>
                                         <include>org.jvnet.staxex:stax-ex</include>
+                                        <include>no.digipost:certificate-validator</include>
                                     </includes>
                                     <searchTransitive>true</searchTransitive>
                                     <message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før distribusjon. Husk også å oppdatere fila «NOTICE».</message>

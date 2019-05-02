@@ -24,6 +24,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Document;
+import no.digipost.api.client.representations.EncryptionCertificate;
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.Identification;
 import no.digipost.api.client.representations.IdentificationResultCode;
@@ -48,19 +49,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Duration.ZERO;
 import static java.time.Duration.between;
-import static java.util.Optional.empty;
 import static no.digipost.api.client.internal.ExceptionUtils.asUnchecked;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7;
@@ -81,7 +81,7 @@ public class MessageDeliverer {
     private final EventLogger eventLogger;
 
     private Instant printKeyCachedTime = Instant.MIN;
-    private DigipostPublicKey cachedPrintKey;
+    private X509Certificate cachedPrintCertificate;
 
 
     public MessageDeliverer(DigipostClientConfig config, MessageDeliveryApi apiService) {
@@ -112,14 +112,13 @@ public class MessageDeliverer {
      * krypteringsnøkkel.
      */
     public MessageDelivery sendMultipartMessage(Message message, Map<UUID, DocumentContent> documentsAndContent) {
-        EncryptionKeyAndDocsWithInputstream encryptionAndInputStream = fetchEncryptionKeyForRecipientIfNecessaryAndMapContentToInputstream(message, documentsAndContent);
-        Encrypter encrypter = encryptionAndInputStream.digipostPublicKeys.map(Encrypter::using).orElse(FAIL_IF_TRYING_TO_ENCRYPT);
+        EncrypterAndDocsWithInputstream encryptionAndInputStream = createEncrypterIfNecessaryAndMapContentToInputstream(message, documentsAndContent);
         Map<Document, InputStream> documentInputStream = encryptionAndInputStream.documentsAndInputstream;
         Message singleChannelMessage = encryptionAndInputStream.getSingleChannelMessage();
 
         try {
             Map<Document, InputStream> preparedDocuments = documentsPreparer.prepare(
-                    documentInputStream, singleChannelMessage, encrypter, () -> apiService.getSenderInformation(message).getPdfValidationSettings());
+                    documentInputStream, singleChannelMessage, encryptionAndInputStream.encrypter, () -> apiService.getSenderInformation(message).getPdfValidationSettings());
 
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
             marshal(jaxbContext, singleChannelMessage, bao);
@@ -213,23 +212,23 @@ public class MessageDeliverer {
         }
     }
 
-    public DigipostPublicKey getEncryptionKeyForPrint() {
+    public X509Certificate getEncryptionCertificateForPrint() {
         Instant now = clock.instant();
 
         if (ZERO.equals(config.printKeyCacheTimeToLive) || between(printKeyCachedTime, now).compareTo(config.printKeyCacheTimeToLive) > 0) {
             eventLogger.log("*** STARTER INTERAKSJON MED API: HENT KRYPTERINGSNØKKEL FOR PRINT ***");
-            try(CloseableHttpResponse response = apiService.getEncryptionKeyForPrint()) {
+            try (CloseableHttpResponse response = apiService.getEncryptionCertificateForPrint()) {
                 checkResponse(response, eventLogger);
-                EncryptionKey encryptionKey = unmarshal(jaxbContext, response.getEntity().getContent(), EncryptionKey.class);
-                cachedPrintKey = new DigipostPublicKey(encryptionKey);
+                EncryptionCertificate encryptionCertificate = unmarshal(jaxbContext, response.getEntity().getContent(), EncryptionCertificate.class);
+                cachedPrintCertificate = encryptionCertificate.getX509Certificate();
                 printKeyCachedTime = now;
-                return cachedPrintKey;
+                return cachedPrintCertificate;
             } catch (IOException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
         } else {
             eventLogger.log("Bruker cachet krypteringsnøkkel for print");
-            return cachedPrintKey;
+            return cachedPrintCertificate;
         }
     }
 
@@ -245,10 +244,10 @@ public class MessageDeliverer {
     }
 
 
-    private EncryptionKeyAndDocsWithInputstream fetchEncryptionKeyForRecipientIfNecessaryAndMapContentToInputstream(Message message,
-                                                                                        Map<UUID, DocumentContent> documentsAndContent) {
+    private EncrypterAndDocsWithInputstream createEncrypterIfNecessaryAndMapContentToInputstream(Message message,
+                                                                                                 Map<UUID, DocumentContent> documentsAndContent) {
         final Map<Document, InputStream> documentsAndInputstream = new LinkedHashMap<>();
-        Optional<DigipostPublicKey> publicKeys = empty();
+        Encrypter encrypter = FAIL_IF_TRYING_TO_ENCRYPT;
         Message singleChannelMessage;
 
             if (message.isDirectPrint()) {
@@ -256,7 +255,7 @@ public class MessageDeliverer {
 
                 if (singleChannelMessage.hasAnyDocumentRequiringEncryption()) {
                     eventLogger.log("Direkte print. Bruker krypteringsnøkkel for print.");
-                    publicKeys = Optional.ofNullable(getEncryptionKeyForPrint());
+                    encrypter = Encrypter.using(getEncryptionCertificateForPrint());
                 }
 
             } else if (!message.recipient.hasPrintDetails() && !message.hasAnyDocumentRequiringEncryption()) {
@@ -269,20 +268,20 @@ public class MessageDeliverer {
 
                     if (singleChannelMessage.hasAnyDocumentRequiringEncryption()) {
                         eventLogger.log("Mottaker er Digipost-bruker. Bruker brukers krypteringsnøkkel.");
-                        publicKeys = Optional.of(new DigipostPublicKey(result.getEncryptionKey()));
+                        encrypter = Encrypter.using(new DigipostPublicKey(result.getEncryptionKey()));
                     }
                 } else if (message.recipient.hasPrintDetails()) {
                     singleChannelMessage = setMapAndMessageToPrint(message, documentsAndContent, documentsAndInputstream);
 
                     if (singleChannelMessage.hasAnyDocumentRequiringEncryption()) {
                         eventLogger.log("Mottaker er ikke Digipost-bruker. Bruker krypteringsnøkkel for print.");
-                        publicKeys = Optional.of(getEncryptionKeyForPrint());
+                        encrypter = Encrypter.using(getEncryptionCertificateForPrint());
                     }
                 } else {
                     throw new DigipostClientException(ErrorCode.UNKNOWN_RECIPIENT, "Mottaker er ikke Digipost-bruker og forsendelse mangler print-fallback.");
                 }
             }
-        return new EncryptionKeyAndDocsWithInputstream(publicKeys, documentsAndInputstream, singleChannelMessage);
+        return new EncrypterAndDocsWithInputstream(encrypter, documentsAndInputstream, singleChannelMessage);
     }
 
     static Message setMapAndMessageToDigipost(Message messageToCopy, Map<UUID, DocumentContent> documentsAndContent,
@@ -309,14 +308,14 @@ public class MessageDeliverer {
         allDocuments.forEach(doc -> documentsAndInputstream.put(doc, documentsAndContent.get(doc.uuid).getPrintContent()));
     }
 
-    private static class EncryptionKeyAndDocsWithInputstream {
-        public final Optional<DigipostPublicKey> digipostPublicKeys;
+    private static class EncrypterAndDocsWithInputstream {
+        public final Encrypter encrypter;
         public final Map<Document, InputStream> documentsAndInputstream;
         private final Message singleChannelMessage;
 
-        public EncryptionKeyAndDocsWithInputstream(Optional<DigipostPublicKey> digipostPublicKeys,
-                               Map<Document, InputStream> documentsAndInputstream, Message singleChannelMessage) {
-            this.digipostPublicKeys = digipostPublicKeys;
+        public EncrypterAndDocsWithInputstream(Encrypter encrypter,
+                                               Map<Document, InputStream> documentsAndInputstream, Message singleChannelMessage) {
+            this.encrypter = encrypter;
             this.documentsAndInputstream = documentsAndInputstream;
             this.singleChannelMessage = singleChannelMessage;
         }

@@ -30,6 +30,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.internal.http.Headers;
 import no.digipost.api.client.representations.Channel;
 import no.digipost.api.client.representations.DigipostUri;
+import no.digipost.api.client.representations.EncryptionCertificate;
 import no.digipost.api.client.representations.EncryptionKey;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
@@ -96,7 +97,7 @@ public class DigipostApiMock implements HttpHandler {
 
     public enum Method {
         SEND_MULTIPART_MESSAGE,
-        GET_PRINT_KEY,
+        GET_PRINT_CERTIFICATE,
         GET_SENDER_INFORMATION,
         GET_CONTENT,
         MULTIPART_MESSAGE,
@@ -106,18 +107,6 @@ public class DigipostApiMock implements HttpHandler {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(DigipostApiMock.class);
-
-    private static final String PRINT_KEY = "-----BEGIN PUBLIC KEY-----\n" +
-            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+kcLpddPWKYlmIPZSDtw\n" +
-            "9B/k+PFcCqnjh2xdhSkmYh+FQsYts0U1WCA8s7NPDUM7qwa97jlQ+la5AAxprfJQ\n" +
-            "YOAp6NI5yLRuiah3EdnbPOyTQJ/C7hiw0P1lK0301BEMB2oHIxGYjUTpGeLLm2tH\n" +
-            "z9VfJzkefCq1W/KV63AIDWDopwnw8UdhOgtB3BY+fVWVsv8WtG3kbfVn7t+7A5M9\n" +
-            "ueE0BGGzL7XHCwBHJDq8+D0qNNvKIjp6KSgb+ZaREQEgCujuL77Qtm+6zKCpJXi2\n" +
-            "yF+7mEaHj5k4pSnzI/N7CyDK1s24CeRpfDT0o8dz2O0VmV1ukA7wAqVJk2tKlhqE\n" +
-            "IwIDAQAB\n" +
-            "-----END PUBLIC KEY-----\n";
-
-    private static final String PRINT_ID = "81bc03451048fba4d31f8";
 
     private static final String certificate = "-----BEGIN CERTIFICATE-----\n" +
             "MIIDczCCAlugAwIBAgIEfMS/vzANBgkqhkiG9w0BAQsFADBqMQswCQYDVQQGEwJO\n" +
@@ -139,6 +128,26 @@ public class DigipostApiMock implements HttpHandler {
             "QaXy0670ViiULi3vmQNAtD28DZcOHbbplVXKSyVifnALTrCQBYMqQF8GpKs2NcId\n" +
             "0XUU7HFKXmYESXGY4sW77+l8mRXLcpD/ofAszblUPpPCFFWozH4/WoY7tDRDhwkz\n" +
             "6vYEpI930hzj81irYEPyRvoDAaEv2Zc=\n" +
+            "-----END CERTIFICATE-----";
+
+    private static final String PRINT_CERTIFICATE = "-----BEGIN CERTIFICATE-----\n" +
+            "MIIDIjCCAgqgAwIBAgIGAU3b9jC0MA0GCSqGSIb3DQEBBQUAMGExCzAJBgNVBAYT\n" +
+            "Ak5PMSIwIAYDVQQKExlQT1NURU4gTk9SR0UgQVMtOTg0NjYxMTg1MREwDwYDVQQL\n" +
+            "EwhESUdJUE9TVDEbMBkGA1UEAxMSRElHSVBPU1QgQVBJIENBIFFBMB4XDTE1MDYx\n" +
+            "MDA1MzQxM1oXDTE4MDYxMDA1MzQxM1owITEfMB0GA1UEAwwWdmlya3NvbWhldGlk\n" +
+            "LTEwNjc4ODgxMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALnb99ef\n" +
+            "PvrHseQRkkxR6TbJ/Ckgw2T5w1BuazGr39s+uee5jRWWixgVE7AwyQGaSl8s8RlC\n" +
+            "lsV4mcokkPT4WyUl1KSNl7xQdArlXtd5AR4dlqOPd1r0Gzl5A980m50VBjSE4ojP\n" +
+            "BR78/rSp9cMBbzYwkoDXBcDpfcsAotawA1J9ryzVo9rlD4TYdobO84sqlyX4wiYS\n" +
+            "NAV27TjbkbgxU8Gxv/kHC+TJTgG6Ukul9Df/wdG1MowWr+er1DXAQrGReaukUVYT\n" +
+            "yhqxuYkxnZcV314X7QENynbdajHZyj16Odpve0Blh8upTo3mXc6BVf76sRgbUbbb\n" +
+            "B8ITqWkT1Z7UQ6MCAwEAAaMgMB4wDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMC\n" +
+            "BPAwDQYJKoZIhvcNAQEFBQADggEBAEN2q1x+sKWKYL+VAdjBDHy29AgyiGTd1v9y\n" +
+            "HQt8zBTGfLwvy9kRWjW0YOJwdygFcfjLm5yfWvy6tQEHCZz9GQarwMEstpNMlp/o\n" +
+            "bsXwVKKquaN4EkEoKjmw8Fh2tkv9XPkehEN4+kxq+E21yZze5aOSwDWubOmw4J69\n" +
+            "IJDz6gqEtCUVTXpxbY6+fHrrJdRuiwr08WGyCiNdx/nVZyJABQU6DgQP5Kww0VK5\n" +
+            "usI9Gqj7qQEdA0U2VkHzpRZIycqfC2AEscp/vX5okiut4AW4wenSBUu1SGFrUpyL\n" +
+            "Xs4gF0Z5jaX379JNt5ra+w8uYWc48R2Zs6UryrT6Tjy2v413Zd0=\n" +
             "-----END CERTIFICATE-----";
 
     private final Clock clock;
@@ -167,8 +176,8 @@ public class DigipostApiMock implements HttpHandler {
         } else if (method.equals(new HttpString("POST"))){
             httpResponse = serviceMultipartrequest(httpContext, bao);
 
-        } else if(requestPath.equals("/printkey")) {
-            httpResponse = servicePrintKey(httpContext, bao);
+        } else if(requestPath.equals("/printcertificate")) {
+            httpResponse = servicePrintCertificate(httpContext, bao);
 
         } else if(requestPath.equals("/getsenderinformation")) {
             serviceSenderInformation(httpContext, bao);
@@ -189,7 +198,7 @@ public class DigipostApiMock implements HttpHandler {
             }
         } else if(requestPath.equals("/")){
             marshal(jaxbContext, new EntryPoint(certificate, new Link(Relation.CREATE_MESSAGE, new DigipostUri("http://localhost:9999/create")),
-                    new Link(Relation.GET_PRINT_ENCRYPTION_KEY, new DigipostUri("http://localhost:9999/printkey")),
+                    new Link(Relation.GET_PRINT_ENCRYPTION_CERTIFICATE, new DigipostUri("http://localhost:9999/printcertificate")),
                     new Link(Relation.GET_SENDER_INFORMATION, new DigipostUri("http://localhost:9999/getsenderinformation")),
                     new Link(Relation.DOCUMENT_EVENTS, new DigipostUri("http://localhost:9999/getdocumentevents")),
                     new Link(Relation.IDENTIFY_RECIPIENT, new DigipostUri("http://localhost:9999/identification"))), bao);
@@ -250,12 +259,9 @@ public class DigipostApiMock implements HttpHandler {
         }
     }
 
-    private int servicePrintKey(HttpServerExchange httpContext, ByteArrayOutputStream bao){
-        requestsAndResponsesMap.get(Method.GET_PRINT_KEY).getResponse(httpContext.getRequestPath());
-        EncryptionKey encryptionKey = new EncryptionKey();
-        encryptionKey.setKeyId(PRINT_ID);
-        encryptionKey.setValue(PRINT_KEY);
-        marshal(jaxbContext, encryptionKey, bao);
+    private int servicePrintCertificate(HttpServerExchange httpContext, ByteArrayOutputStream bao){
+        requestsAndResponsesMap.get(Method.GET_PRINT_CERTIFICATE).getResponse(httpContext.getRequestPath());
+        marshal(jaxbContext, new EncryptionCertificate(PRINT_CERTIFICATE), bao);
 
         return 200;
     }
@@ -341,7 +347,7 @@ public class DigipostApiMock implements HttpHandler {
         requestsAndResponsesMap.put(Method.GET_CONTENT, new RequestsAndResponses());
         requestsAndResponsesMap.put(Method.GET_DOCUMENTS_EVENTS, new RequestsAndResponses());
         requestsAndResponsesMap.put(Method.GET_DOCUMENT_STATUS, new RequestsAndResponses());
-        requestsAndResponsesMap.put(Method.GET_PRINT_KEY, new RequestsAndResponses());
+        requestsAndResponsesMap.put(Method.GET_PRINT_CERTIFICATE, new RequestsAndResponses());
         requestsAndResponsesMap.put(Method.GET_SENDER_INFORMATION, new RequestsAndResponses());
         requestsAndResponsesMap.put(Method.SEND_MULTIPART_MESSAGE, new RequestsAndResponses());
         requestsAndResponsesMap.put(Method.MULTIPART_MESSAGE, new RequestsAndResponses(new MultipartRequestMatcher()));
