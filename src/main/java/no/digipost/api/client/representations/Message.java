@@ -217,7 +217,7 @@ public class Message implements MayHaveSender {
                 messageToCopy.recipient.nameAndAddress, messageToCopy.recipient.digipostAddress,
                 messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber,
                 messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
-                messageToCopy.attachments, null, messageToCopy.recipient.bankAccountNumber);
+                messageToCopy.attachments, messageToCopy.recipient.printDetails, messageToCopy.recipient.bankAccountNumber);
     }
 
     private Message(final String messageId, final Long senderId, final SenderOrganization senderOrganization,
