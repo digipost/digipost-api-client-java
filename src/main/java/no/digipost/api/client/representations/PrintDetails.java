@@ -26,7 +26,6 @@ import java.util.List;
 @XmlType(name = "print-details", propOrder = {
     "recipient",
     "returnAddress",
-    "postType",
     "printColors",
     "nondeliverableHandling",
     "printInstructions"
@@ -47,13 +46,6 @@ public class PrintDetails {
     protected NondeliverableHandling nondeliverableHandling;
     @XmlElement(name = "print-instructions")
     protected PrintInstructions printInstructions;
-
-    /**
-     * As of 2018, Posten is no longer separating between A and B priority. PostType will eventually be removed from the API.
-     * Until then, it is hardcoded to "A" to pass XSD validation, but is ignored by Digipost.
-     */
-    @XmlElement(name = "post-type", required = true)
-    private final String postType = "A";
 
     PrintDetails() {}
 
