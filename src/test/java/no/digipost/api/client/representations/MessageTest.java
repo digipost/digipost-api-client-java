@@ -63,10 +63,10 @@ public class MessageTest {
     @Test
     public void assertThatClassesHaveNotBeenChangedWithoutChangingMessageCopyMethod() {
         Field[] messageFields = Message.class.getDeclaredFields();
-        assertThat(messageFields.length, is(8));
+        assertThat(messageFields.length, is(9));
 
         String[] allFieldsThatAreUsedForCopyInMessage = new String[]{"messageId", "senderId", "senderOrganization",
-        "recipient", "deliveryTime", "invoiceReference", "primaryDocument", "attachments"};
+        "recipient", "deliveryTime", "invoiceReference", "primaryDocument", "attachments", "printFallbackDeadline"};
 
         for(int i = 0; i < messageFields.length; i++){
             for(int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++){

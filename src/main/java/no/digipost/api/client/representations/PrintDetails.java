@@ -28,7 +28,7 @@ import java.util.List;
     "returnAddress",
     "printColors",
     "nondeliverableHandling",
-    "printInstructions"
+    "printInstructions",
 })
 public class PrintDetails {
 
@@ -53,7 +53,7 @@ public class PrintDetails {
         this(recipient, returnAddress, null, null);
     }
 
-    public PrintDetails(final PrintRecipient recipient, final PrintRecipient returnAddress, final PrintColors colors, final NondeliverableHandling nondeliverableHandling) {
+    public PrintDetails(PrintRecipient recipient, PrintRecipient returnAddress, PrintColors colors, NondeliverableHandling nondeliverableHandling) {
         this.recipient = recipient;
         this.returnAddress = returnAddress;
         this.printColors = colors;
