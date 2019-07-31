@@ -55,7 +55,7 @@ import static org.apache.commons.lang3.StringUtils.join;
         "invoiceReference",
         "primaryDocument",
         "attachments",
-        "printFallbackDeadline"})
+        "printIfUnread"})
 @XmlRootElement(name = "message")
 public class Message implements MayHaveSender {
 
@@ -86,8 +86,8 @@ public class Message implements MayHaveSender {
     public final Document primaryDocument;
     @XmlElement(name = "attachment")
     public final List<Document> attachments;
-    @XmlElement(name = "print-fallback-deadline")
-    public final PrintFallbackDeadline printFallbackDeadline;
+    @XmlElement(name = "print-if-unread")
+    public final PrintIfUnread printIfUnread;
 
     Message() {
         this(null, null, null, null, null, null, null, null, null);
@@ -102,7 +102,7 @@ public class Message implements MayHaveSender {
         private Document primaryDocument;
         private final List<Document> attachments = new ArrayList<>();
         private String invoiceReference;
-        private PrintFallbackDeadline printFallbackDeadline;
+        private PrintIfUnread printIfUnread;
 
         private MessageBuilder(String messageId, Document primaryDocument) {
             this.messageId = messageId;
@@ -168,8 +168,8 @@ public class Message implements MayHaveSender {
             return this;
         }
 
-        public MessageBuilder printFallbackDeadline(PrintFallbackDeadline deadline) {
-            this.printFallbackDeadline = deadline;
+        public MessageBuilder printIfUnread(PrintIfUnread printIfUnread) {
+            this.printIfUnread = printIfUnread;
             return this;
         }
 
@@ -189,14 +189,14 @@ public class Message implements MayHaveSender {
             if (senderId != null && senderOrganization != null) {
                 throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
             }
-            return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryTime, invoiceReference, printFallbackDeadline);
+            return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryTime, invoiceReference, printIfUnread);
         }
 
     }
 
     private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
                     Document primaryDocument, Iterable<? extends Document> attachments, ZonedDateTime deliveryTime,
-                    String invoiceReference, PrintFallbackDeadline printFallbackDeadline) {
+                    String invoiceReference, PrintIfUnread printIfUnread) {
         this.messageId = messageId;
         this.senderId = senderId;
         this.senderOrganization = senderOrganization;
@@ -208,7 +208,7 @@ public class Message implements MayHaveSender {
         for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
             this.attachments.add(attachment);
         }
-        this.printFallbackDeadline = printFallbackDeadline;
+        this.printIfUnread = printIfUnread;
     }
 
     public static Message copyMessageWithOnlyPrintDetails(Message messageToCopy){
@@ -227,13 +227,13 @@ public class Message implements MayHaveSender {
                 messageToCopy.recipient.nameAndAddress, messageToCopy.recipient.digipostAddress,
                 messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber,
                 messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
-                messageToCopy.attachments, null, messageToCopy.recipient.bankAccountNumber, messageToCopy.printFallbackDeadline);
+                messageToCopy.attachments, null, messageToCopy.recipient.bankAccountNumber, messageToCopy.printIfUnread);
     }
 
     private Message(final String messageId, final Long senderId, final SenderOrganization senderOrganization,
                     final NameAndAddress nameAndAddress, final String digipostAddress, String personalIdentificationNumber,
                     final String organisationNumber, final ZonedDateTime deliveryTime, final String invoiceReference,
-                    final Document primaryDocument, final List<Document> attachments, final PrintDetails printDetails, final String bankAccountNumber, PrintFallbackDeadline printFallbackDeadline){
+                    final Document primaryDocument, final List<Document> attachments, final PrintDetails printDetails, final String bankAccountNumber, PrintIfUnread printIfUnread){
         this.messageId = messageId;
         this.senderId = senderId;
         this.senderOrganization = senderOrganization;
@@ -244,7 +244,7 @@ public class Message implements MayHaveSender {
         this.invoiceReference = invoiceReference;
         this.primaryDocument = primaryDocument;
         this.attachments = attachments;
-        this.printFallbackDeadline = printFallbackDeadline;
+        this.printIfUnread = printIfUnread;
     }
 
 

@@ -27,23 +27,23 @@ import java.time.ZonedDateTime;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "print-fallback-deadline", propOrder = {
-        "deadline",
+@XmlType(name = "print-if-unread", propOrder = {
+        "printIfUnreadAfter",
         "printDetails"
 })
-public class PrintFallbackDeadline {
+public class PrintIfUnread {
 
-    @XmlElement(name = "deadline", type = String.class)
+    @XmlElement(name = "print-if-unread-after", type = String.class)
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    protected ZonedDateTime deadline;
+    protected ZonedDateTime printIfUnreadAfter;
     @XmlElement(name = "print-details", required = true)
     protected PrintDetails printDetails;
 
-    PrintFallbackDeadline() {}
+    PrintIfUnread() {}
 
-    public PrintFallbackDeadline(ZonedDateTime deadline, PrintDetails printDetails) {
-        this.deadline = deadline;
+    public PrintIfUnread(ZonedDateTime printIfUnreadAfter, PrintDetails printDetails) {
+        this.printIfUnreadAfter = printIfUnreadAfter;
         this.printDetails = printDetails;
     }
 }
