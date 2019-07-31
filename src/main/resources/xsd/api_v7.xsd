@@ -225,6 +225,20 @@
 
     <xsd:element name="encryption-key" type="encryption-key"/>
 
+    <xsd:simpleType name="PEM-type">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="-+ *BEGIN [^-]* *-+[A-Za-z0-9+/\n]*={0,2}\n-+ *END [^-]* *-+\n?"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="encryption-certificate">
+        <xsd:simpleContent>
+            <xsd:extension base="PEM-type" />
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:element name="encryption-certificate" type="encryption-certificate"/>
+
     <xsd:simpleType name="message-status">
         <xsd:annotation>
             <xsd:appinfo>
@@ -697,6 +711,7 @@
             </xsd:element>
             <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
             <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="201" nillable="false"/>
+            <xsd:element name="print-fallback-deadline" type="print-fallback-deadline" minOccurs="0" />
         </xsd:sequence>
     </xsd:complexType>
 
@@ -1169,4 +1184,40 @@
             <xsd:any namespace="http://api.digipost.no/schema/datatypes" minOccurs="1" maxOccurs="1" />
         </xsd:sequence>
     </xsd:complexType>
+
+    <xsd:element name="additional-data" type="additional-data" />
+
+    <xsd:complexType name="additional-data">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <annox:annotate target="class">
+                    <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="additional-data"/>
+                </annox:annotate>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="data-type" type="data-type"/>
+
+            <xsd:choice minOccurs="0" maxOccurs="1">
+                <xsd:element name="sender-id" type="xsd:long">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The actual sender of the message. This is used in scenarios where one party, the broker, is creating a message
+                            on behalf of another, the sender. It is only possible if the sender has granted the broker the right to send
+                            on its behalf.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="sender-organization" type="sender-organization" />
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="print-fallback-deadline">
+        <xsd:sequence>
+            <xsd:element name="deadline" type="xsd:dateTime"/>
+            <xsd:element name="print-details" type="print-details"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
 </xsd:schema>
