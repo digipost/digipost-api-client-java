@@ -42,7 +42,4 @@ This software includes third party software subject to the following licenses:
   JCL 1.2 implemented over SLF4J under MIT License
   SLF4J API Module under MIT License
   TXW2 Runtime under CDDL+GPL License
-  Undertow Core under Apache License Version 2.0
-  XNIO API under Public Domain
-  XNIO NIO Implementation under Public Domain
 

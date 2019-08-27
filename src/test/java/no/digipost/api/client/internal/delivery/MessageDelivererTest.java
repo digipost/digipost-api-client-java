@@ -43,7 +43,6 @@ import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.FakeEncryptionKey;
 import no.digipost.api.client.security.FakeEncryptionX509Certificate;
-import no.digipost.api.client.testing.MockfriendlyResponse;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import no.digipost.time.ControllableClock;
