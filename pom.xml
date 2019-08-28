@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>11.4-SNAPSHOT</version>
+    <version>12.1-SNAPSHOT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 
@@ -157,17 +157,6 @@
             <artifactId>digg</artifactId>
             <version>0.19</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!--
-                Used by no.digipost.api.client.testing, which at this point is unsupported and
-                should be considered as unstable. Defining the dependency as optional to avoid
-                it being included as a transitive dependency when depending on the client library.
-             -->
-            <groupId>io.undertow</groupId>
-            <artifactId>undertow-core</artifactId>
-            <version>2.0.23.Final</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
@@ -440,7 +429,6 @@
                                         <include>org.apache.httpcomponents:httpclient</include>
                                         <include>org.apache.httpcomponents:httpcore</include>
                                         <include>org.apache.httpcomponents:httpmime</include>
-                                        <include>io.undertow:undertow-core</include>
                                         <include>org.jboss.logging:jboss-logging</include>
                                         <include>org.jboss.xnio:xnio-api</include>
                                         <include>org.jboss.xnio:xnio-nio</include>

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.testing;
+package no.digipost.api.client.internal.delivery;
 
 import no.digipost.api.client.representations.MessageDelivery;
 import org.apache.commons.io.IOUtils;
