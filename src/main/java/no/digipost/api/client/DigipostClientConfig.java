@@ -32,6 +32,7 @@ public final class DigipostClientConfig {
         private URI digipostApiUri = URI.create("https://api.digipost.no");
         private EventLogger eventLogger = EventLogger.NOOP_LOGGER;
         private Clock clock = Clock.systemDefaultZone();
+        private boolean failOnHtmlDiff = false;
 
         private Builder() {
         }
@@ -49,6 +50,11 @@ public final class DigipostClientConfig {
             this.printKeyCacheTimeToLive = cachePrintKey;
             return this;
         }
+        
+        public Builder failOnHtmlSanitationDiff(){
+            this.failOnHtmlDiff = true;
+            return this;
+        }
 
         public Builder eventLogger(EventLogger eventLogger) {
             this.eventLogger = eventLogger;
@@ -61,7 +67,7 @@ public final class DigipostClientConfig {
         }
 
         public DigipostClientConfig build() {
-            return new DigipostClientConfig(digipostApiUri, printKeyCacheTimeToLive, eventLogger, clock);
+            return new DigipostClientConfig(digipostApiUri, printKeyCacheTimeToLive, eventLogger, clock, failOnHtmlDiff);
         }
     }
 
@@ -73,12 +79,14 @@ public final class DigipostClientConfig {
     public final Duration printKeyCacheTimeToLive;
     public final EventLogger eventLogger;
     public final Clock clock;
+    public final boolean failOnHtmlDiff;
 
-    private DigipostClientConfig(URI digipostApiUri, Duration printKeyCacheTimeToLive, EventLogger eventLogger, Clock clock) {
+    private DigipostClientConfig(URI digipostApiUri, Duration printKeyCacheTimeToLive, EventLogger eventLogger, Clock clock, boolean failOnHtmlDiff) {
         this.digipostApiUri = requireNonNull(digipostApiUri, "digipostApiUri cat not be null");
         this.printKeyCacheTimeToLive = requireNonNull(printKeyCacheTimeToLive, "printKeyCacheTimeToLive can not be null");
         this.eventLogger = requireNonNull(eventLogger, "eventLogger can not be null");
         this.clock = clock;
+        this.failOnHtmlDiff = failOnHtmlDiff;
     }
 
 }

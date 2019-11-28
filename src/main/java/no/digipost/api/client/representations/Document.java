@@ -24,7 +24,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -194,7 +193,7 @@ public class Document extends Representation {
     }
 
     public boolean willBeEncrypted() {
-        return  encrypted != null;
+        return encrypted != null;
     }
 
     public EncryptionInfo getEncrypted() {

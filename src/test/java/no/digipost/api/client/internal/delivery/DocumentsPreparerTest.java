@@ -15,8 +15,11 @@
  */
 package no.digipost.api.client.internal.delivery;
 
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.api.client.html.EksempelHtml;
 import no.digipost.api.client.representations.Channel;
+import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.FileType;
 import no.digipost.api.client.representations.Message;
@@ -30,6 +33,7 @@ import no.digipost.api.client.security.Encrypter;
 import no.digipost.api.client.security.FakeEncryptionKey;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
+import no.digipost.sanitizing.HtmlValidator;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -40,18 +44,20 @@ import java.util.UUID;
 
 import static co.unruly.matchers.Java8Matchers.where;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.Channel.PRINT;
 import static no.digipost.api.client.representations.FileType.GIF;
+import static no.digipost.api.client.representations.FileType.HTML;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.security.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -74,8 +80,7 @@ public class DocumentsPreparerTest {
         }
     }
 
-
-    private final DocumentsPreparer preparer = new DocumentsPreparer(new PdfValidator());
+    private final DocumentsPreparer preparer = new DocumentsPreparer(new PdfValidator(), new HtmlValidator());
 
     private final Encrypter encrypter = Encrypter.using(new DigipostPublicKey(FakeEncryptionKey.createFakeEncryptionKey()));
 
@@ -89,7 +94,7 @@ public class DocumentsPreparerTest {
         primaryDocument.encrypt();
 
         DigipostClientException thrown = assertThrows(DigipostClientException.class,
-                () -> preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, () -> PdfValidationSettings.CHECK_ALL));
+                () -> preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, () -> PdfValidationSettings.CHECK_ALL, DigipostClientConfig.newConfiguration().build()));
         assertThat(thrown, where(Exception::getMessage, containsString("no encryption key")));
     }
 
@@ -98,7 +103,7 @@ public class DocumentsPreparerTest {
         addAttachment("funny animated gif", GIF, toInputStream("content doesn't matter", UTF_8)).encrypt();
 
         DigipostClientException thrown = assertThrows(DigipostClientException.class,
-                () -> preparer.prepare(documents, messageBuilder.build(), encrypter, () -> mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS))));
+                () -> preparer.prepare(documents, messageBuilder.build(), encrypter, () -> mock(PdfValidationSettings.class, withSettings().defaultAnswer(RETURNS_SMART_NULLS)), DigipostClientConfig.newConfiguration().build()));
         assertThat(thrown, where(Exception::getMessage, containsString("filetype gif")));
     }
 
@@ -124,10 +129,58 @@ public class DocumentsPreparerTest {
         assertThat(thrown, where(Exception::getMessage, containsString("too many pages")));
     }
 
+    @Test
+    public void passesHtmlDocumentDefaultConfig() throws IOException {
+        final Document primary = new Document(UUID.randomUUID(), "primary", HTML);
+        primary.encrypt();
+        final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{
+            put(primary, EksempelHtml.validHtml());
+        }};
+        final MessageBuilder messageBuilder = Message.newMessage(UUID.randomUUID(), primaryDocument).recipient(new DigipostAddress("test.testson#1234"));
+
+        final DigipostClientConfig config = DigipostClientConfig.newConfiguration().build();
+
+        preparer.prepare(documents, messageBuilder.build(), encrypter, () -> PdfValidationSettings.CHECK_ALL, config);
+    }
+
+    @Test
+    public void failesDocumentWithFailOnSanitize() throws IOException {
+        final Document primary = new Document(UUID.randomUUID(), "primary", HTML);
+        primary.encrypt();
+        final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{
+            put(primary, EksempelHtml.validNotSanitizedHtml());
+        }};
+        final MessageBuilder messageBuilder = Message.newMessage(UUID.randomUUID(), primaryDocument).recipient(new DigipostAddress("test.testson#1234"));
+
+        final DigipostClientConfig config = DigipostClientConfig.newConfiguration()
+                .failOnHtmlSanitationDiff()
+                .build();
+
+        DigipostClientException thrown = assertThrows(DigipostClientException.class,
+                () -> preparer.prepare(documents, messageBuilder.build(), encrypter, () -> PdfValidationSettings.CHECK_ALL, config));
+        assertThat(thrown, where(Exception::getMessage, containsString("HTML_CONTENT_SANITIZED")));
+    }
+
+    @Test
+    public void failesDocumentWithValidation() throws IOException {
+        final Document primary = new Document(UUID.randomUUID(), "primary", HTML);
+        primary.encrypt();
+        final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{
+            put(primary, EksempelHtml.illegalTags());
+        }};
+        final MessageBuilder messageBuilder = Message.newMessage(UUID.randomUUID(), primaryDocument).recipient(new DigipostAddress("test.testson#1234"));
+
+        final DigipostClientConfig config = DigipostClientConfig.newConfiguration()
+                .build();
+
+        DigipostClientException thrown = assertThrows(DigipostClientException.class,
+                () -> preparer.prepare(documents, messageBuilder.build(), encrypter, () -> PdfValidationSettings.CHECK_ALL, config));
+        assertThat(thrown, where(Exception::getMessage, allOf(containsString("INVALID_HTML_CONTENT"), containsString("Tag name: script"))));
+    }
 
     @Test
     public void doesNothingForNonPreEncryptedDocuments() throws IOException {
-        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, () -> PdfValidationSettings.CHECK_ALL);
+        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, messageBuilder.build(), FAIL_IF_TRYING_TO_ENCRYPT, () -> PdfValidationSettings.CHECK_ALL, DigipostClientConfig.newConfiguration().build());
 
         assertThat(documents.keySet(), contains(primaryDocument));
         assertThat(documents.get(primaryDocument), sameInstance(preparedDocuments.get(primaryDocument)));
@@ -138,7 +191,7 @@ public class DocumentsPreparerTest {
         primaryDocument.encrypt();
         addAttachment("attachment", PDF, printablePdf2Pages()).encrypt();
         Message message = messageBuilder.build();
-        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, () -> PdfValidationSettings.CHECK_ALL);
+        Map<Document, InputStream> preparedDocuments = preparer.prepare(documents, message, encrypter, () -> PdfValidationSettings.CHECK_ALL, DigipostClientConfig.newConfiguration().build());
 
         assertThat(preparedDocuments.size(), is(2));
     }
@@ -146,7 +199,7 @@ public class DocumentsPreparerTest {
     private Document addAttachment(String subject, FileType fileType, InputStream content) {
         Document document = new Document(UUID.randomUUID(), subject, fileType);
         documents.put(document, content);
-        messageBuilder.attachments(asList(document));
+        messageBuilder.attachments(singletonList(document));
         return document;
     }
 

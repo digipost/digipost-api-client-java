@@ -5,7 +5,7 @@
     <parent>
         <groupId>no.digipost</groupId>
         <artifactId>digipost-open-super-pom</artifactId>
-        <version>2</version>
+        <version>4</version>
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
@@ -26,6 +26,11 @@
             <groupId>no.digipost</groupId>
             <artifactId>printability-validator</artifactId>
             <version>3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>no.digipost</groupId>
+            <artifactId>digipost-html-validator</artifactId>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
@@ -161,7 +166,7 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-data-types</artifactId>
-            <version>0.18.1</version>
+            <version>0.26</version>
         </dependency>
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
@@ -315,6 +320,7 @@
                         <exclude>**/NOTICE.template</exclude>
                         <exclude>LICENSE*</exclude>
                         <exclude>**/*.pdf</exclude>
+                        <exclude>**/*.html</exclude>
                         <exclude>**/*.p12</exclude>
                         <exclude>**/*.txt</exclude>
                         <exclude>**/*.xml</exclude>
@@ -424,6 +430,7 @@
                                         <include>com.github.ben-manes.caffeine:caffeine</include>
                                         <include>no.digipost:http-client-builder3</include>
                                         <include>commons-io:commons-io</include>
+                                        <include>com.google.guava:failureaccess</include>
                                         <include>commons-codec:commons-codec</include>
                                         <include>org.apache.commons:commons-lang3</include>
                                         <include>org.apache.httpcomponents:httpclient</include>
@@ -439,8 +446,12 @@
                                         <include>com.fasterxml.jackson.module:jackson-module-jaxb-annotations</include>
                                         <include>org.hibernate:hibernate-validator</include>
                                         <include>com.fasterxml:classmate</include>
-                                        <include>org.glassfish:javax.el</include>
-                                        <include>javax.validation:validation-api</include>
+                                        <include>org.glassfish:jakarta.el</include>
+                                        <include>jakarta.validation:jakarta.validation-api</include>
+                                        <include>com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer</include>
+                                        <include>com.google.guava:listenablefuture</include>
+                                        <include>org.hibernate.validator:hibernate-validator</include>
+                                        <include>com.google.guava:guava</include>
                                         <include>com.fasterxml.jackson.core:jackson-core</include>
                                         <include>jakarta.xml.bind:jakarta.xml.bind-api</include>
                                         <include>jakarta.activation:jakarta.activation-api</include>
@@ -449,7 +460,9 @@
                                         <include>com.sun.istack:istack-commons-runtime</include>
                                         <include>com.sun.xml.fastinfoset:FastInfoset</include>
                                         <include>org.jvnet.staxex:stax-ex</include>
+                                        <include>org.checkerframework:checker-qual</include>
                                         <include>no.digipost:certificate-validator</include>
+                                        <include>no.digipost:digipost-html-validator</include>
                                     </includes>
                                     <searchTransitive>true</searchTransitive>
                                     <message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før distribusjon. Husk også å oppdatere fila «NOTICE».</message>
