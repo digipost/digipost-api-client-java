@@ -9,8 +9,8 @@ licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
 #baseurl: "/sikker-digital-post-net-klient" # the subpath of your site, e.g. /blog/
 baseurl: "/digipost-api-client-java"
 
-currentVersion: "11.x"
-versions: ["11.x", "10.x", "9.0", "8.0", "6.1", "6.0"]
+currentVersion: "13.x"
+versions: ["13.x", "11.x", "10.x", "9.0", "8.0", "6.1", "6.0"]
 
 collections:
   v6_0:  
@@ -31,6 +31,9 @@ collections:
   v11_x:
     output: true
     permalink: /v11.x/
+  v13_x:
+    output: true
+    permalink: /v13.x/
 
 # list of additional links on the right of the top menu
 headerLinks:
