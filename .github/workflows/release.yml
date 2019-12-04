@@ -14,7 +14,7 @@ jobs:
       - name: Set release version
         run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
       - name: Release to Central Repository
-        uses: digipost/action-maven-publish@1.0.0
+        uses: digipost/action-maven-publish@1.1.0
         with:
           sonatype_secrets: ${{ secrets.sonatype_secrets }}
           release_version: ${{ env.RELEASE_VERSION }}

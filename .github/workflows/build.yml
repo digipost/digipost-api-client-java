@@ -30,7 +30,7 @@ jobs:
       - name: Set release version
         run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:11}"-SNAPSHOT")
       - name: Build and deploy to Sonatype snapshot
-        uses: digipost/action-maven-publish@master
+        uses: digipost/action-maven-publish@1.1.0
         with:
           sonatype_secrets: ${{ secrets.sonatype_secrets }}
           release_version: ${{ env.RELEASE_VERSION }}
