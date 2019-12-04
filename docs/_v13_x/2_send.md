@@ -142,6 +142,33 @@ MessageDelivery result = client.createMessage(message)
 ```
 
 
+
+## Send letter with html
+
+If you want to be able to send HTML-documents you first need to contact Digipost to activate
+the feature for your broker/sender. Then it is just matter of specifing HTML as the filetype
+and serve an html-file as content. 
+Bevare that there are strict rules to what is allowed. These rules are quite verbose. But 
+we have open sourced the html validator and santizer software we use to make sure that
+html conforms to these rules. Check out [https://github.com/digipost/digipost-html-validator](digipost-html-validator).
+If you preencrypt your document, this validation will be performed in the client instead of the
+server so that you can be confident that you recipient will be able to open the document.
+
+```java
+PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+UUID documentUuid = UUID.randomUUID();
+Document primaryDocument = new Document(documentUuid, "Document subject", FileType.HTML);
+
+Message message = Message.newMessage("messageId", primaryDocument)
+        .recipient(pin)
+        .build();
+
+client.createMessage(message)
+        .addContent(primaryDocument, Files.newInputStream(Paths.get("content.html")))
+        .send();
+```
+
+
 ## Send letter with higher security level
 
 ```java
