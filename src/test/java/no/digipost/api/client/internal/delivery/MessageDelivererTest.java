@@ -45,6 +45,7 @@ import no.digipost.api.client.security.FakeEncryptionKey;
 import no.digipost.api.client.security.FakeEncryptionX509Certificate;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
+import no.digipost.sanitizing.HtmlValidator;
 import no.digipost.time.ControllableClock;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
@@ -126,6 +127,8 @@ public class MessageDelivererTest {
 
     @Spy
     private PdfValidator pdfValidator;
+    @Spy
+    private HtmlValidator htmlValidator;
 
     private MessageDeliverer sender;
     private MessageDeliverer cachelessSender;
@@ -142,9 +145,9 @@ public class MessageDelivererTest {
                 .entity(new ByteArrayEntity(bao.toByteArray()))
                 .build();
 
-        sender = new MessageDeliverer(newConfiguration().clock(clock).build(), api, new DocumentsPreparer(pdfValidator));
+        sender = new MessageDeliverer(newConfiguration().clock(clock).build(), api, new DocumentsPreparer(pdfValidator, htmlValidator));
 
-        cachelessSender = new MessageDeliverer(newConfiguration().clock(clock).disablePrintKeyCache().build(), api, new DocumentsPreparer(pdfValidator));
+        cachelessSender = new MessageDeliverer(newConfiguration().clock(clock).disablePrintKeyCache().build(), api, new DocumentsPreparer(pdfValidator, htmlValidator));
     }
 
     @Test
@@ -203,14 +206,14 @@ public class MessageDelivererTest {
 
         when(api.sendMultipartMessage(any(HttpEntity.class))).thenReturn(response);
 
-        final Document printDocument = new Document(UUID.randomUUID(), "subject", FileType.HTML).encrypt();
-        final List<Document> printAttachments = asList(new Document(UUID.randomUUID(), "attachment", FileType.HTML).encrypt());
+        final Document printDocument = new Document(UUID.randomUUID(), "subject", FileType.HTML);
+        final List<Document> printAttachments = asList(new Document(UUID.randomUUID(), "attachment", FileType.HTML));
         PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
         PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
 
         Map<UUID, DocumentContent> documentAndContent = new LinkedHashMap<>();
 
-        MessageDeliverer deliverer = new MessageDeliverer(newConfiguration().clock(clock).build(), api, new DocumentsPreparer(pdfValidator));
+        MessageDeliverer deliverer = new MessageDeliverer(newConfiguration().clock(clock).build(), api, new DocumentsPreparer(pdfValidator, htmlValidator));
         Message message = Message.newMessage(UUID.randomUUID(), printDocument).attachments(printAttachments)
                 .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress))).build();
 

@@ -36,6 +36,7 @@ import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.security.DigipostPublicKey;
 import no.digipost.api.client.security.Encrypter;
 import no.digipost.print.validate.PdfValidator;
+import no.digipost.sanitizing.HtmlValidator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -85,7 +86,7 @@ public class MessageDeliverer {
 
 
     public MessageDeliverer(DigipostClientConfig config, MessageDeliveryApi apiService) {
-        this(config, apiService, new DocumentsPreparer(new PdfValidator()));
+        this(config, apiService, new DocumentsPreparer(new PdfValidator(), new HtmlValidator()));
     }
 
     public MessageDeliverer(DigipostClientConfig config, MessageDeliveryApi apiService, DocumentsPreparer documentsPreparer) {
@@ -118,7 +119,7 @@ public class MessageDeliverer {
 
         try {
             Map<Document, InputStream> preparedDocuments = documentsPreparer.prepare(
-                    documentInputStream, singleChannelMessage, encryptionAndInputStream.encrypter, () -> apiService.getSenderInformation(message).getPdfValidationSettings());
+                    documentInputStream, singleChannelMessage, encryptionAndInputStream.encrypter, () -> apiService.getSenderInformation(message).getPdfValidationSettings(), config);
 
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
             marshal(jaxbContext, singleChannelMessage, bao);

@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.internal.delivery;
 
+import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.Channel;
@@ -24,6 +25,8 @@ import no.digipost.api.client.security.Encrypter;
 import no.digipost.print.validate.PdfValidationResult;
 import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
+import no.digipost.sanitizing.HtmlValidationResult;
+import no.digipost.sanitizing.HtmlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +39,11 @@ import java.util.function.Supplier;
 
 import static java.util.Optional.empty;
 import static no.digipost.api.client.representations.Channel.PRINT;
+import static no.digipost.api.client.representations.FileType.HTM;
+import static no.digipost.api.client.representations.FileType.HTML;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.print.validate.PdfValidationResult.EVERYTHING_OK;
+import static no.digipost.sanitizing.HtmlValidationResult.HTML_EVERYTHING_OK;
 import static org.apache.commons.io.IOUtils.toByteArray;
 
 class DocumentsPreparer {
@@ -45,16 +51,16 @@ class DocumentsPreparer {
     private static final Logger LOG = LoggerFactory.getLogger(DocumentsPreparer.class);
 
     private final PdfValidator pdfValidator;
+    private final HtmlValidator htmlValidator;
 
-    DocumentsPreparer(PdfValidator pdfValidator) {
+    DocumentsPreparer(PdfValidator pdfValidator, HtmlValidator htmlValidator) {
         this.pdfValidator = pdfValidator;
+        this.htmlValidator = htmlValidator;
     }
-
-
 
     Map<Document, InputStream> prepare(
             Map<Document, InputStream> documentsAndContent, Message message,
-            Encrypter encrypter, Supplier<PdfValidationSettings> pdfValidationSettings) throws IOException {
+            Encrypter encrypter, Supplier<PdfValidationSettings> pdfValidationSettings, DigipostClientConfig config) throws IOException {
 
         final Map<Document, InputStream> prepared = new LinkedHashMap<>();
 
@@ -67,9 +73,9 @@ class DocumentsPreparer {
                 byte[] byteContent = toByteArray(documentsAndContent.get(document));
                 LOG.debug("Validerer dokument med uuid '{}' før kryptering", document.uuid);
                 validateAndSetNrOfPages(message.getChannel(), document, byteContent, pdfValidationSettings);
+                validateHtml(document, byteContent, config);
                 LOG.debug("Krypterer innhold for dokument med uuid '{}'", document.uuid);
                 prepared.put(document, encrypter.encrypt(byteContent));
-
             } else {
                 prepared.put(document, documentsAndContent.get(document));
             }
@@ -77,7 +83,23 @@ class DocumentsPreparer {
         return prepared;
     }
 
+    void validateHtml(Document document, byte[] content, DigipostClientConfig config) {
+        HtmlValidationResult htmlValidation = HTML_EVERYTHING_OK;
+        if (document.is(HTML) || document.is(HTM)) {
+            htmlValidation = htmlValidator.valider(content);
+        }
 
+        if (!htmlValidation.okForWeb) {
+            throw new DigipostClientException(ErrorCode.INVALID_HTML_CONTENT, htmlValidation.toString());
+        }
+        if (htmlValidation.hasDiffAfterSanitizing) {
+            if (config.failOnHtmlDiff) {
+                throw new DigipostClientException(ErrorCode.HTML_CONTENT_SANITIZED, htmlValidation.toString());
+            } else {
+                LOG.warn("Din html vil forandre seg i Digipost fordi du har elementer som bir lagt til eller fjernet.\n {}", htmlValidation.toString());
+            }
+        }
+    }
 
     Optional<PdfInfo> validateAndSetNrOfPages(Channel channel, Document document, byte[] content, Supplier<PdfValidationSettings> pdfValidationSettings) {
         if (channel == PRINT && !document.is(PDF)) {
