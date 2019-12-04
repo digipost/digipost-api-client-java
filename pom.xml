@@ -326,6 +326,7 @@
                         <exclude>**/*.xml</exclude>
                         <exclude>**/*.xsd</exclude>
                         <exclude>**/*.jks</exclude>
+                        <exclude>.github/**/*.yml</exclude>
                         <exclude>**/user-agent.properties</exclude>
                         <exclude>docs/**</exclude>
                         <exclude>.java-version</exclude>
