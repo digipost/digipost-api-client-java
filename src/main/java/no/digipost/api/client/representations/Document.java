@@ -119,7 +119,7 @@ public class Document extends Representation {
         this.subject = subject;
         this.digipostFileType = Objects.toString(fileType, null);
         this.openingReceipt = defaultIfBlank(openingReceipt, null);
-        this.opened = opened == Boolean.TRUE ? true : null;
+        this.opened = Boolean.TRUE.equals(opened) ? true : null;
         this.smsNotification = smsNotification;
         this.emailNotification = emailNotification;
         this.authenticationLevel = authenticationLevel;
