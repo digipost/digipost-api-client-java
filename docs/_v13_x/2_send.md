@@ -147,8 +147,8 @@ MessageDelivery result = client.createMessage(message)
 
 If you want to be able to send HTML-documents you first need to contact Digipost to activate
 the feature for your broker/sender. Then it is just matter of specifing HTML as the filetype
-and serve an html-file as content. 
-Bevare that there are strict rules to what is allowed. These rules are quite verbose. But 
+and serve an html-file as content.
+Bevare that there are strict rules to what is allowed. These rules are quite verbose. But
 we have open sourced the html validator and santizer software we use to make sure that
 html conforms to these rules. Check out [https://github.com/digipost/digipost-html-validator](digipost-html-validator).
 If you preencrypt your document, this validation will be performed in the client instead of the
@@ -219,7 +219,9 @@ Info preparation = new Info("Preparation", "Please do not eat or drink 6 hours p
 Info about = new Info("About Oslo X-Ray center", "Oslo X-Ray center is specialized in advanced image diagnostics...");
 List<Info> info = Arrays.asList(preparation, about);
 
-Appointment appointment = new Appointment(startTime, startTime.plusMinutes(30), "Please arrive 15 minutes early", "Oslo X-Ray center", address, "Lower back examination", info);
+Appointment appointment = new Appointment(
+        startTime, startTime.plusMinutes(30), "Please arrive 15 minutes early",
+        "Oslo X-Ray center", address, "Lower back examination", info, Language.EN);
 
 Document primaryDocument = new Document(messageUUID, "X-Ray appointment", FileType.PDF, appointment);
 
@@ -228,7 +230,7 @@ Message message = Message.newMessage("messageId", primaryDocument)
         .build();
 
 client.createMessage(message)
-        .addContent(primaryDocument, Files.newInputStream("content.pdf")))
+        .addContent(primaryDocument, Files.newInputStream(Paths.get("content.pdf")))
         .send();
 ```
 

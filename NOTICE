@@ -29,8 +29,6 @@ This software includes third party software subject to the following licenses:
   Digipost Printability Validator under The Apache Software License, Version 2.0
   digipost-html-validator under Apache License, Version 2.0
   error-prone annotations under Apache 2.0
-  Extended StAX API under Eclipse Distribution License - v 1.0
-  fastinfoset under Apache License, Version 2.0 or Eclipse Distribution License - v 1.0
   FindBugs-jsr305 under The Apache Software License, Version 2.0
   Guava InternalFutureFailureAccess and InternalFutures under The Apache Software License, Version 2.0
   Guava ListenableFuture only under The Apache Software License, Version 2.0
@@ -42,13 +40,14 @@ This software includes third party software subject to the following licenses:
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
+  Jakarta Activation under EDL 1.0
+  Jakarta Activation API jar under EDL 1.0
   Jakarta Bean Validation API under Apache License 2.0
   Jakarta Expression Language 3.0 under EPL 2.0 or GPL2 w/ CPE
-  jakarta.xml.bind-api under Eclipse Distribution License - v 1.0
-  JavaBeans Activation Framework API jar under EDL 1.0
+  Jakarta XML Binding API under Eclipse Distribution License - v 1.0
   JAXB Runtime under Eclipse Distribution License - v 1.0
   JBoss Logging 3 under Apache License, version 2.0
-  JCL 1.2 implemented over SLF4J under MIT License
+  JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
   OWASP Java HTML Sanitizer under Apache License, Version 2.0
   SLF4J API Module under MIT License
   TXW2 Runtime under Eclipse Distribution License - v 1.0
