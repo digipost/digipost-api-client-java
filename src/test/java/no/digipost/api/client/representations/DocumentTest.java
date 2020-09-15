@@ -90,4 +90,34 @@ public class DocumentTest {
         assertThat(originalDoc.uuid, is(copyOfDoc.uuid));
         assertThat(originalDoc.links, is(copyOfDoc.links));
     }
+
+    @Test
+    public void constructorDoesNotThrowNpeWhenNullIsPassedAsOpenedParameter() {
+        Document testDoc = new Document(null, null, null, null, null, null, null, null, null, null, "");
+        assertThat(testDoc.opened, is(nullValue()));
+    }
+
+    @Test
+    public void openedIsNullWhenFalseIsPassed() {
+        Document primitiveFalseDoc = new Document(null, null, null, null, null, null, null, null, false, null, "");
+        assertThat(primitiveFalseDoc.opened, is(nullValue()));
+        Document boxedFalseDoc = new Document(null, null, null, null, null, null, null, null, Boolean.valueOf(false), null, "");
+        assertThat(boxedFalseDoc.opened, is(nullValue()));
+    }
+
+    @Test
+    public void isOpenedWhenTrueIsPassed() {
+        Document primitiveTrueDoc = new Document(null, null, null, null, null, null, null, null, true, null, "");
+        assertThat(primitiveTrueDoc.opened, is(true));
+        Document boxedTrueDoc = new Document(null, null, null, null, null, null, null, null, Boolean.valueOf(true), null, "");
+        assertThat(boxedTrueDoc.opened, is(true));
+    }
+
+    @Test
+    public void isOpenedWhenTrueBuiltWithDeprecatedConstructorsIsPassed() {
+        Document boolConstructorTrueDoc = new Document(null, null, null, null, null, null, null, null, new Boolean(true), null, "");
+        assertThat(boolConstructorTrueDoc.opened, is(true));
+        Document stringConstructorTrueDoc = new Document(null, null, null, null, null, null, null, null, new Boolean("true"), null, "");
+        assertThat(stringConstructorTrueDoc.opened, is(true));
+    }
 }
