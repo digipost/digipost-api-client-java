@@ -577,7 +577,6 @@
         </xsd:restriction>
     </xsd:simpleType>
 
-
     <xsd:complexType name="content-hash">
         <xsd:simpleContent>
             <xsd:extension base="xsd:string">
@@ -876,7 +875,6 @@
     <xsd:complexType name="listed-time">
         <xsd:attribute name="time" type="xsd:dateTime" />
     </xsd:complexType>
-
 
     <xsd:simpleType name="after-hours">
         <xsd:restriction base="xsd:int">
@@ -1217,6 +1215,72 @@
         <xsd:sequence>
             <xsd:element name="print-if-unread-after" type="xsd:dateTime"/>
             <xsd:element name="print-details" type="print-details"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="archives" type="archives" />
+
+    <xsd:complexType name="archives">
+        <xsd:sequence>
+            <xsd:element name="archive" type="archive" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="archive" type="archive" />
+
+    <xsd:complexType name="archive">
+        <xsd:sequence>
+            <xsd:choice minOccurs="0" maxOccurs="1">
+                <xsd:element name="sender-id" type="xsd:long">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The actual sender of the message. This is used in scenarios where one party, the broker, is creating a message
+                            on behalf of another, the sender. It is only possible if the sender has granted the broker the right to send
+                            on its behalf.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="sender-organization" type="sender-organization" />
+            </xsd:choice>
+            <xsd:element name="uuid" type="uuid" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="name" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="documents" type="archive-document" minOccurs="0" maxOccurs="201"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name="archive-document" type="archive-document" />
+
+    <xsd:complexType name="archive-document">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <annox:annotate target="class">
+                    <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="archive-document"/>
+                </annox:annotate>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="uuid" type="uuid" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="file-name" nillable="false" minOccurs="0" maxOccurs="1">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:maxLength value="255"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="file-type" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <xsd:element name="referenceid" minOccurs="0" maxOccurs="1">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:maxLength value="255"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="content-type" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="content-hash" type="content-hash" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="archived-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
 
