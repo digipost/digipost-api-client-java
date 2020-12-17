@@ -29,6 +29,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -45,7 +46,7 @@ import java.util.List;
 public class ArchiveDocument extends Representation {
 
     @XmlElement(required = true)
-    protected String uuid;
+    public final UUID uuid;
     @XmlElement(name = "file-name", nillable = false)
     protected String fileName;
     @XmlElement(name = "file-type", required = true)
@@ -62,29 +63,32 @@ public class ArchiveDocument extends Representation {
     protected ZonedDateTime archivedTime;
 
     public ArchiveDocument() {
-        super();
+        this(null, null, null, null, null);
     }
 
-    public ArchiveDocument(final String uuid, final String fileName, final String fileType, final String referenceid, final String contentType, final ContentHash contentHash, final ZonedDateTime archivedTime, final List<Link> links) {
+    public ArchiveDocument(final UUID uuid, final String fileName, final String fileType, final String contentType) {
         this.uuid = uuid;
         this.fileName = fileName;
         this.fileType = fileType;
         this.referenceid = referenceid;
         this.contentType = contentType;
-        this.contentHash = contentHash;
-        this.archivedTime = archivedTime;
-        this.links = links;
     }
 
-    public String getUuid() {
+    public ArchiveDocument(final UUID uuid, final String fileName, final String fileType, final String contentType, final String referenceid) {
+        this.uuid = uuid;
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.referenceid = referenceid;
+        this.contentType = contentType;
+    }
+
+    public UUID getUuid() {
         return uuid;
     }
-
 
     public String getFileName() {
         return fileName;
     }
-
 
     public String getFileType() {
         return fileType;
