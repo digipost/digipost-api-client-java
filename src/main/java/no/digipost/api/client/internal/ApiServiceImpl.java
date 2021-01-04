@@ -19,6 +19,7 @@ import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.SenderId;
+import no.digipost.api.client.archive.ArchiveApi;
 import no.digipost.api.client.delivery.MessageDeliveryApi;
 import no.digipost.api.client.document.DocumentApi;
 import no.digipost.api.client.errorhandling.DigipostClientException;
@@ -97,7 +98,7 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi {
+public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
 
@@ -142,6 +143,21 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         EntryPoint entryPoint = getEntryPoint();
 
         HttpPost httpPost = new HttpPost(digipostUrl.resolve(entryPoint.getCreateMessageUri().getPath()));
+        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
+        httpPost.setHeader("MIME-Version", "1.0");
+        httpPost.removeHeaders("Accept-Encoding");
+        httpPost.setEntity(multipartLengthCheckHttpEntity);
+        return send(httpPost);
+
+    }
+
+    @Override
+    public CloseableHttpResponse sendMultipartArchive(HttpEntity multipart) {
+        MultipartNoLengthCheckHttpEntity multipartLengthCheckHttpEntity = new MultipartNoLengthCheckHttpEntity(multipart);
+
+        EntryPoint entryPoint = getEntryPoint();
+
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(entryPoint.archiveDocumentsUri().getPath()));
         httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
         httpPost.setHeader("MIME-Version", "1.0");
         httpPost.removeHeaders("Accept-Encoding");

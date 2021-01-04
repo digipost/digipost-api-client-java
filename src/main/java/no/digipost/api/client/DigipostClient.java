@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.archive.ArchiveApi;
 import no.digipost.api.client.delivery.MessageDeliveryApi;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.document.DocumentApi;
@@ -22,6 +23,7 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.inbox.InboxApi;
 import no.digipost.api.client.internal.ApiServiceImpl;
+import no.digipost.api.client.internal.delivery.ArchiveDeliverer;
 import no.digipost.api.client.internal.delivery.MessageDeliverer;
 import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
@@ -35,6 +37,7 @@ import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -72,9 +75,10 @@ public class DigipostClient {
     private final EventLogger eventLogger;
     private final MessageDeliveryApi messageApi;
     private final MessageDeliverer messageSender;
+    private final ArchiveDeliverer archiveSender;
     private final InboxApi inboxApiService;
     private final DocumentApi documentApi;
-
+    private final ArchiveApi archiveApi;
 
 
     public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
@@ -86,15 +90,17 @@ public class DigipostClient {
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
-        this(config, apiService, apiService, apiService);
+        this(config, apiService, apiService, apiService, apiService);
     }
 
-    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi) {
+    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi) {
         this.messageApi = apiService;
         this.inboxApiService = inboxApiService;
         this.documentApi = documentApi;
+        this.archiveApi = archiveApi;
 
         this.messageSender = new MessageDeliverer(config, apiService);
+        this.archiveSender = new ArchiveDeliverer(config, archiveApi);
 
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
     }
@@ -241,6 +247,10 @@ public class DigipostClient {
 
     public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user) {
         return messageApi.createOrActivateUserAccount(senderId, user);
+    }
+
+    public ArchiveApi.ArchivingDocuments archiveDocuments(final Archive archive){
+        return archiveSender.createArchive(archive);
     }
 
 }
