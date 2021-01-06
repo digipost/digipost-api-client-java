@@ -1,7 +1,7 @@
 # Java client library for Digipost API
 
 Online documentation:
-http://digipost.github.io/digipost-api-client-java/
+https://digipost.github.io/digipost-api-client-java/
 
 The library is available in
 ![Maven Central](https://maven-badges.herokuapp.com/maven-central/no.digipost/digipost-api-client-java/badge.svg).
