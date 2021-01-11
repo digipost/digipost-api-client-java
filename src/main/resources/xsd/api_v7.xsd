@@ -1243,7 +1243,6 @@
                 </xsd:element>
                 <xsd:element name="sender-organization" type="sender-organization" />
             </xsd:choice>
-            <xsd:element name="uuid" type="uuid" nillable="false" minOccurs="0" maxOccurs="1" />
             <xsd:element name="name" type="xsd:string" nillable="false" minOccurs="0" maxOccurs="1" />
             <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="documents" type="archive-document" minOccurs="0" maxOccurs="201"/>

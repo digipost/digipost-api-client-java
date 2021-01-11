@@ -36,7 +36,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 @XmlType(name = "archive", propOrder = {
     "senderOrganization",
     "senderId",
-    "uuid",
     "name",
     "documents"
 })
@@ -47,8 +46,6 @@ public class Archive extends Representation {
     protected SenderOrganization senderOrganization;
     @XmlElement(name = "sender-id", nillable = false)
     protected Long senderId;
-    @XmlElement(nillable = false)
-    protected String uuid;
     @XmlElement(nillable = false)
     protected String name;
     @XmlElement(nillable = false)
@@ -63,10 +60,9 @@ public class Archive extends Representation {
         this.documents = new ArrayList<>();
     }
 
-    public Archive(final SenderOrganization senderOrganization, final Long senderId, final String uuid, final String name, final List<Link> links, final List<ArchiveDocument> documents) {
+    public Archive(final SenderOrganization senderOrganization, final Long senderId, final String name, final List<Link> links, final List<ArchiveDocument> documents) {
         this.senderOrganization = senderOrganization;
         this.senderId = senderId;
-        this.uuid = uuid;
         this.name = name;
         this.links = links;
         this.documents = documents;
@@ -82,10 +78,6 @@ public class Archive extends Representation {
 
     public Long getSenderId() {
         return senderId;
-    }
-
-    public String getUuid() {
-        return uuid;
     }
 
     public String getName() {
@@ -143,7 +135,7 @@ public class Archive extends Representation {
                 throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
             }
 
-            return new Archive(this.senderOrganization, this.senderId, null, null, null, this.documents);
+            return new Archive(this.senderOrganization, this.senderId, null, null, this.documents);
         }
     }
 
