@@ -10,7 +10,7 @@ archives, and the files belongs to the sender organisation.
 
 ## Archive documents to an archive
 
-Let's say you want to arhive two documents eg. an invoice and an attachment and
+Let's say you want to archive two documents eg. an invoice and an attachment and
 you want to have som kind of reference to both documents. You can do that 
 by describing the two documents with `ArchiveDocument`. Then you need to create an archive 
 and add the documents to the archive. In the following example we use a default archive.
@@ -44,5 +44,46 @@ client.archiveDocuments(archive)
     .addFile(invoice, readFileFromDisk("invoice_123123.pdf"))
     .addFile(attachment, readFileFromDisk("attachment_123123.pdf"))
     .send();
+```
+
+## Get a list of archives
+
+An organisation can have many archives, or just the default unnamed archive. That is up to 
+your design wishes. To get a list of the archives for a give Sender, you can do this:
+
+```java
+//get a list of the archives
+Archives archives = client.getArchives(SenderId.of(123456));
+```
+
+The class `Archives` holds a list of `Archive` where you can se the name of the archive.
+
+## Iterate documents in an archive
+
+You _can_ get content of an archive with paged requests. Under is an example of how to iterate
+an archive. However it's use is strongly discouraged because it leads to the idea that 
+an archive can be itereated. We expect an archive to possibly reach many million rows so the iteration 
+will possibly give huge loads. On the other hand being able to dump all data is a nessary feature of any archive.
+
+_Please use fetch document by UUID or referenceID instead to create functionality on top of the archive._
+You should on your side know where and how to get a document from an archive. You do this by knowing where 
+you put a file you want to retrieve.
+
+```java
+final Archives archives = client.getArchives(SenderId.of(123456));
+
+Archive current = archives.getArchives().get(0);
+final List<ArchiveDocument> documents = new ArrayList<>();
+
+while (current.getNextDocuments().isPresent()) {
+current = current.getNextDocuments()
+.map(client::getArchiveDocuments)
+.orElse(new Archive());
+
+documents.addAll(current.getDocuments());
+}
+
+// This prints to total content of the list of documents
+System.out.println(documents);
 ```
 

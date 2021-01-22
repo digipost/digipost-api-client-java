@@ -24,7 +24,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -98,6 +97,11 @@ public class Link {
         }
     }
 
+    public String asPathWithQuery() {
+        final URI uri = getUri();
+        return uri.getPath() + ((uri.getQuery() != null) ? "?" + uri.getQuery() : "");
+    }
+    
     public String getMediaType() {
         return mediaType;
     }

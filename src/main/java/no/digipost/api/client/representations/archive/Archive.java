@@ -25,11 +25,14 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static no.digipost.api.client.representations.Relation.NEXT_DOCUMENTS;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -37,7 +40,8 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
     "senderOrganization",
     "senderId",
     "name",
-    "documents"
+    "documents", 
+    "links"
 })
 @XmlRootElement(name = "archive")
 public class Archive extends Representation {
@@ -83,15 +87,23 @@ public class Archive extends Representation {
     public String getName() {
         return name;
     }
-
+    
+    @XmlElement(name = "link")
     public List<Link> getLinks() {
         return this.links;
     }
-
+    protected void setLink(final List<Link> links) {
+        this.links = links;
+    }
+    
     public List<ArchiveDocument> getDocuments() {
         return this.documents;
     }
-
+    
+    public Optional<URI> getNextDocuments(){
+        return Optional.ofNullable(getLinkByRelationName(NEXT_DOCUMENTS)).map(Link::getUri);
+    }
+    
     public static class ArchiveBuilder {
 
         private Long senderId;

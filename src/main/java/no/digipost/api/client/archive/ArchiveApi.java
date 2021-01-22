@@ -15,18 +15,24 @@
  */
 package no.digipost.api.client.archive;
 
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
+import no.digipost.api.client.representations.archive.Archives;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URI;
 
 public interface ArchiveApi {
 
-
+    Archives getArchives(SenderId senderId);
+    
     CloseableHttpResponse sendMultipartArchive(HttpEntity build);
+
+    Archive getArchiveDocuments(URI uri);
 
     public static interface ArchivingDocuments {
 

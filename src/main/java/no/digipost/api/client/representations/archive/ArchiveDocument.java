@@ -118,4 +118,16 @@ public class ArchiveDocument extends Representation {
         return this.links;
     }
 
+    @Override
+    public String toString() {
+        return "ArchiveDocument{" +
+                "uuid=" + uuid +
+                ", fileName='" + fileName + '\'' +
+                ", fileType='" + fileType + '\'' +
+                ", referenceid='" + referenceid + '\'' +
+                ", contentType='" + contentType + '\'' +
+                ", contentHash=" + contentHash.getHashAlgorithm() + ":" + contentHash.getHash() +
+                ", archivedTime=" + archivedTime +
+                '}';
+    }
 }

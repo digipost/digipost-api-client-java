@@ -47,6 +47,8 @@ import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.representations.archive.Archive;
+import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
@@ -303,6 +305,16 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
+    public Archives getArchives(SenderId senderId) {
+        return getEntity(Archives.class, "/" + senderId.stringValue() + "/archive");
+    }
+
+    @Override
+    public Archive getArchiveDocuments(URI uri) {
+        return getEntity(Archive.class, pathWithQuery(uri));
+    }
+
+    @Override
     public Inbox getInbox(SenderId senderId, int offset, int limit) {
         Map<String, String> queryParams = new HashMap<>();
         queryParams.put("offset", String.valueOf(offset));
@@ -334,7 +346,10 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         return requestEntity(httpPost, UserAccount.class);
     }
 
-
+    private static String pathWithQuery(URI uri){
+        return uri.getPath() + ((uri.getQuery() != null) ? "?" + uri.getQuery() : "");
+    } 
+    
     private static URI createEncodedURIPath(String path) {
         try {
             return new URI(null, null, path, null);

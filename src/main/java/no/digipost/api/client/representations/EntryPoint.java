@@ -40,6 +40,10 @@ public class EntryPoint extends Representation {
     public EntryPoint() {
     }
 
+    public URI getInboxUri(){
+        return getLinkByRelationName(GET_INBOX).getUri();
+    }
+    
     public URI getCreateMessageUri() {
         return getLinkByRelationName(CREATE_MESSAGE).getUri();
     }
