@@ -34,20 +34,12 @@ import no.digipost.api.client.internal.http.request.interceptor.RequestUserAgent
 import no.digipost.api.client.internal.http.response.interceptor.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseDateInterceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseSignatureInterceptor;
-import no.digipost.api.client.representations.AddDataLink;
-import no.digipost.api.client.representations.AdditionalData;
-import no.digipost.api.client.representations.Autocomplete;
-import no.digipost.api.client.representations.DocumentEvents;
-import no.digipost.api.client.representations.DocumentStatus;
-import no.digipost.api.client.representations.EntryPoint;
-import no.digipost.api.client.representations.ErrorMessage;
-import no.digipost.api.client.representations.Identification;
-import no.digipost.api.client.representations.Link;
-import no.digipost.api.client.representations.MayHaveSender;
-import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.archive.Archive;
+import no.digipost.api.client.representations.archive.ArchiveDocument;
+import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
 import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
@@ -166,6 +158,21 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         httpPost.setEntity(multipartLengthCheckHttpEntity);
         return send(httpPost);
 
+    }
+
+    @Override
+    public Archives getArchiveDocumentsByReferenceId(SenderId senderId, String referenceId) {
+        return getEntity(Archives.class, "/" + senderId.stringValue() + "/archive/documents/referenceid/" + referenceId);
+    }
+
+    @Override
+    public Archive getArchiveDocument(URI uri) {
+        return getEntity(Archive.class, uri.getPath());
+    }
+
+    @Override
+    public ArchiveDocumentContent getArchiveDocumentContent(URI uri) {
+        return getEntity(ArchiveDocumentContent.class, uri.getPath());
     }
 
     @Override
@@ -348,8 +355,8 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     private static String pathWithQuery(URI uri){
         return uri.getPath() + ((uri.getQuery() != null) ? "?" + uri.getQuery() : "");
-    } 
-    
+    }
+
     private static URI createEncodedURIPath(String path) {
         try {
             return new URI(null, null, path, null);

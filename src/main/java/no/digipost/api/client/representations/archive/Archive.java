@@ -37,11 +37,11 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "archive", propOrder = {
-    "senderOrganization",
-    "senderId",
-    "name",
-    "documents", 
-    "links"
+        "senderOrganization",
+        "senderId",
+        "name",
+        "documents",
+        "links"
 })
 @XmlRootElement(name = "archive")
 public class Archive extends Representation {
@@ -87,7 +87,7 @@ public class Archive extends Representation {
     public String getName() {
         return name;
     }
-    
+
     @XmlElement(name = "link")
     public List<Link> getLinks() {
         return this.links;
@@ -95,15 +95,15 @@ public class Archive extends Representation {
     protected void setLink(final List<Link> links) {
         this.links = links;
     }
-    
+
     public List<ArchiveDocument> getDocuments() {
         return this.documents;
     }
-    
+
     public Optional<URI> getNextDocuments(){
         return Optional.ofNullable(getLinkByRelationName(NEXT_DOCUMENTS)).map(Link::getUri);
     }
-    
+
     public static class ArchiveBuilder {
 
         private Long senderId;

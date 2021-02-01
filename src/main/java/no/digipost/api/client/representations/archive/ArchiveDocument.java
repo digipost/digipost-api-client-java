@@ -27,20 +27,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+
+import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_BY_UUID;
+import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_CONTENT;
+
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "archive-document", propOrder = {
-    "uuid",
-    "fileName",
-    "fileType",
-    "referenceid",
-    "contentType",
-    "contentHash",
-    "archivedTime",
+        "uuid",
+        "fileName",
+        "fileType",
+        "referenceid",
+        "contentType",
+        "contentHash",
+        "archivedTime",
+        "links"
 })
 @XmlRootElement(name = "archive-document")
 public class ArchiveDocument extends Representation {
@@ -114,8 +121,17 @@ public class ArchiveDocument extends Representation {
         return archivedTime;
     }
 
+    @XmlElement(name = "link")
     public List<Link> getLinks() {
-        return this.links;
+        return links;
+    }
+
+    public Optional<URI> getDocumentByUUID() {
+        return Optional.ofNullable(getLinkByRelationName(GET_ARCHIVE_DOCUMENT_BY_UUID)).map(Link::getUri);
+    }
+
+    public Optional<URI> getDocumentContent() {
+        return Optional.ofNullable(getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT)).map(Link::getUri);
     }
 
     @Override

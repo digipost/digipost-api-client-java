@@ -5,13 +5,13 @@ layout: default
 ---
 
 The archive API makes it possible for an organisation to manage documents in archives. These files are kept in separate 
-archives, and the files belongs to the sender organisation.
+archives, and the files belong to the sender organisation.
 
 
 ## Archive documents to an archive
 
 Let's say you want to archive two documents eg. an invoice and an attachment and
-you want to have som kind of reference to both documents. You can do that 
+you want to have some kind of reference to both documents. You can do that 
 by describing the two documents with `ArchiveDocument`. Then you need to create an archive 
 and add the documents to the archive. In the following example we use a default archive.
 You then need to send this archive and attach the actual files to the request by linking
@@ -49,14 +49,14 @@ client.archiveDocuments(archive)
 ## Get a list of archives
 
 An organisation can have many archives, or just the default unnamed archive. That is up to 
-your design wishes. To get a list of the archives for a give Sender, you can do this:
+your design wishes. To get a list of the archives for a given Sender, you can do this:
 
 ```java
 //get a list of the archives
 Archives archives = client.getArchives(SenderId.of(123456));
 ```
 
-The class `Archives` holds a list of `Archive` where you can se the name of the archive.
+The class `Archives` holds a list of `Archive` where you can see the name of the archive.
 
 ## Iterate documents in an archive
 
@@ -85,5 +85,28 @@ documents.addAll(current.getDocuments());
 
 // This prints to total content of the list of documents
 System.out.println(documents);
+```
+
+## Get documents by referenceID
+
+You can retrieve a set of documents by a given referenceID. You will then get the documents listed in their respective
+archives in return.
+
+```java
+final Archives archives = client.getArchiveDocumentsByReferenceId(SenderId.of(123456), "REFERENCE_ID");
+```
+
+## Get content of a document as a single-use link
+
+You can get the actual content of a document after you have retrieved the archive document. Below is an example of how
+you can achieve this with a given `ArchiveDocument`. In the resulting `ArchiveDocumentContent`, you will get a url to
+the content which expires after 30 seconds. 
+
+```java
+// This ArchiveDocument must be retrieved beforehand using one of the methods described above
+final ArchiveDocument archiveDocument;
+
+URI getDocumentContentURI = archiveDocument.getDocumentContent().orElseThrow();
+ArchiveDocumentContent content = client.getArchiveDocumentContent(getDocumentContentURI);
 ```
 

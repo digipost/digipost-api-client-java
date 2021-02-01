@@ -20,6 +20,7 @@ import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
+import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
 import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
@@ -29,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -78,6 +80,18 @@ public class GithubPagesArchiveExamples {
         }
 
         System.out.println(documents);
+    }
+
+    public void get_documents_by_referenceid_with_content() {
+        final String referenceId = "REFERENCE_ID";
+        Archives archives = client.getArchiveDocumentsByReferenceId(SenderId.of(123456), referenceId);
+        Archive firstArchive = archives.getArchives().get(0);
+
+        ArchiveDocument firstDocument = firstArchive.getDocuments().get(0);
+        URI getDocumentContentURI = firstDocument.getDocumentContent()
+                .orElseThrow(() -> new RuntimeException("No GET_DOCUMENT_CONTENT relation exists for this document"));
+
+        ArchiveDocumentContent content = client.getArchiveDocumentContent(getDocumentContentURI);
     }
     
 }

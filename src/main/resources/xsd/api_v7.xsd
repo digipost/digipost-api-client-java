@@ -1283,4 +1283,13 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:element name="archive-document-content" type="archive-document-content" />
+
+    <xsd:complexType name="archive-document-content">
+        <xsd:sequence>
+            <xsd:element name="content-type" type="xsd:string" minOccurs="1" maxOccurs="1"  nillable="false" />
+            <xsd:element name="uri" type="xsd:string" minOccurs="1" maxOccurs="1"  nillable="false" />
+        </xsd:sequence>
+    </xsd:complexType>
+
 </xsd:schema>

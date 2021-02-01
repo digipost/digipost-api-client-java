@@ -38,6 +38,8 @@ import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.archive.Archive;
+import no.digipost.api.client.representations.archive.ArchiveDocument;
+import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
 import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
@@ -54,7 +56,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.UUID;
 
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
@@ -216,17 +220,17 @@ public class DigipostClient {
     }
 
     /**
-     * An Archive has an optional URL to fetch documents paged 100 at a time. 
+     * An Archive has an optional URL to fetch documents paged 100 at a time.
      * Eg.: `archive.getNextDocuments()`
-     * 
+     *
      * This Optional URI cat be put into this method to fetch that page of documents. We supply this fuctionality
-     * so that senders can use it to get an idea of the content of an archive. However it's use is strongly 
+     * so that senders can use it to get an idea of the content of an archive. However it's use is strongly
      * discouraged because it leads to the idea that an archive can be itereated. We expect an archive to possibly
      * reach many million rows so the iteration will possibly give huge loads. On the other hand being able to
      * dump all data is a nessary feature of any archive.
-     * 
+     *
      * Please use fetch document by UUID or referenceID instead to create functionality on top of the archive.
-     * 
+     *
      * @param uri URI supplied by the api with Relation NEXT_DOCUMENTS
      * @return An archive with documents.
      */
@@ -280,7 +284,21 @@ public class DigipostClient {
         return messageApi.createOrActivateUserAccount(senderId, user);
     }
 
-    public ArchiveApi.ArchivingDocuments archiveDocuments(final Archive archive){
+    public ArchiveApi.ArchivingDocuments archiveDocuments(final Archive archive) {
         return archiveSender.createArchive(archive);
     }
+
+    public Archive getArchiveDocumentByUuid(URI uri) {
+        return archiveApi.getArchiveDocument(uri);
+    }
+
+    public Archives getArchiveDocumentsByReferenceId(SenderId senderId, String referenceId) {
+        final String referenceIdBase64 = Base64.getEncoder().encodeToString(referenceId.getBytes(StandardCharsets.UTF_8));
+        return archiveApi.getArchiveDocumentsByReferenceId(senderId, referenceIdBase64);
+    }
+
+    public ArchiveDocumentContent getArchiveDocumentContent(URI uri) {
+        return archiveApi.getArchiveDocumentContent(uri);
+    }
+
 }

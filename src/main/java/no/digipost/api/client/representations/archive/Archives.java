@@ -29,6 +29,7 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "archives", propOrder = {
         "archives",
+        "links"
 })
 @XmlRootElement(name = "archives")
 public class Archives extends Representation {
@@ -36,13 +37,18 @@ public class Archives extends Representation {
     @XmlElement(name = "archive", nillable = false)
     protected List<Archive> archives;
 
+    @XmlElement(name = "links")
+    protected List<Link> getLinks() {
+        return links;
+    }
+
     public Archives() {
         super();
     }
 
     public Archives(final List<Archive> archives, final List<Link> links) {
         this.archives = archives;
-        this.links    = links;
+        this.links = links;
     }
 
     public List<Archive> getArchives() {
@@ -50,10 +56,6 @@ public class Archives extends Representation {
             archives = new ArrayList<>();
         }
         return this.archives;
-    }
-
-    public List<Link> getLinks() {
-        return this.links;
     }
 
 }
