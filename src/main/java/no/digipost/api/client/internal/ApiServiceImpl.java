@@ -38,7 +38,6 @@ import no.digipost.api.client.representations.*;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.archive.Archive;
-import no.digipost.api.client.representations.archive.ArchiveDocument;
 import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
 import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.inbox.Inbox;
@@ -173,6 +172,15 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     @Override
     public ArchiveDocumentContent getArchiveDocumentContent(URI uri) {
         return getEntity(ArchiveDocumentContent.class, uri.getPath());
+    }
+
+    @Override
+    public InputStream getArchiveDocumentContentStream(URI uri) {
+        HttpGet httpGet = new HttpGet(uri);
+        httpGet.setHeader(HttpHeaders.ACCEPT, ContentType.WILDCARD.toString());
+        final HttpCoreContext httpCoreContext = HttpCoreContext.create();
+        httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
+        return requestStream(httpGet);
     }
 
     @Override

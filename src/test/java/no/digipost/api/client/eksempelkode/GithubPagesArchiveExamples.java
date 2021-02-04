@@ -22,8 +22,6 @@ import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
 import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
 import no.digipost.api.client.representations.archive.Archives;
-import no.digipost.api.client.representations.inbox.Inbox;
-import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.security.Signer;
 
 import java.io.FileInputStream;
@@ -34,7 +32,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class GithubPagesArchiveExamples {
@@ -90,8 +87,11 @@ public class GithubPagesArchiveExamples {
         ArchiveDocument firstDocument = firstArchive.getDocuments().get(0);
         URI getDocumentContentURI = firstDocument.getDocumentContent()
                 .orElseThrow(() -> new RuntimeException("No GET_DOCUMENT_CONTENT relation exists for this document"));
+        URI getDocumentContentStreamURI = firstDocument.getDocumentContentStream()
+                .orElseThrow(() -> new RuntimeException("No GET_DOCUMENT_CONTENT_STREAM relation exists for this document"));
 
         ArchiveDocumentContent content = client.getArchiveDocumentContent(getDocumentContentURI);
+        InputStream contentStream = client.getArchiveDocumentContentStream(getDocumentContentStreamURI);
     }
     
 }

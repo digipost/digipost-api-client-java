@@ -1,6 +1,6 @@
 ---
 title: Archive functionality
-identifier: arhive
+identifier: archive
 layout: default
 ---
 
@@ -108,5 +108,18 @@ final ArchiveDocument archiveDocument;
 
 URI getDocumentContentURI = archiveDocument.getDocumentContent().orElseThrow();
 ArchiveDocumentContent content = client.getArchiveDocumentContent(getDocumentContentURI);
+```
+
+## Get content of a document as a stream
+
+In addition to a single-use link, you also have the option to retrieve the content of a document directly as a
+byte stream. 
+
+```java
+// This ArchiveDocument must be retrieved beforehand using one of the methods described above
+final ArchiveDocument archiveDocument;
+
+URI getDocumentContentStreamURI = archiveDocument.getDocumentContentStream().orElseThrow();
+InputStream content = client.getArchiveDocumentContentStream(getDocumentContentStreamURI);
 ```
 

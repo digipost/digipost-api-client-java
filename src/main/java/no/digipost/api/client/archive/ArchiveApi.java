@@ -68,4 +68,6 @@ public interface ArchiveApi {
     Archive getArchiveDocument(URI uri);
 
     ArchiveDocumentContent getArchiveDocumentContent(URI uri);
+
+    InputStream getArchiveDocumentContentStream(URI uri);
 }
