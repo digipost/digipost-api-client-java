@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class ArkiverDokumenterEksempel {
@@ -50,13 +51,15 @@ public class ArkiverDokumenterEksempel {
         DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(),
                 AVSENDERS_KONTOID.asBrokerId(), signer);
 
-        // 3. Vi beskriver to dokumenter du ønsker å arkivere i ditt arkiv
+        // 3. Vi beskriver to dokumenter du ønsker å arkivere i ditt arkiv.
+        // Merk at det settes et slettetidspunkt på vedleggsdokumentet, men ikke fakturadokumentet.
         final ArchiveDocument faktura = new ArchiveDocument(
                 UUID.randomUUID()
                 , "faktura_123123.pdf"
                 , "pdf"
                 , "application/pdf"
                 , "234234235234235"
+                , null
         );
         final ArchiveDocument vedlegg = new ArchiveDocument(
                 UUID.randomUUID()
@@ -64,6 +67,7 @@ public class ArkiverDokumenterEksempel {
                 , "pdf"
                 , "application/pdf"
                 , "234234235234235"
+                , ZonedDateTime.now().plusMonths(6)
         );
 
         // 4. Vi oppretter arkivmeldingen med dokumentene

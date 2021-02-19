@@ -18,6 +18,7 @@ package no.digipost.api.client.representations.archive;
 import co.unruly.matchers.Java8Matchers;
 import org.junit.jupiter.api.Test;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,13 +39,14 @@ class ArchiveDocumentTest {
     }
 
     @Test
-    void you_can_also_use_reference_id_and_random_UUID() {
+    void you_can_also_use_reference_id_and_random_UUID_and_deletion_time() {
         final ArchiveDocument document = new ArchiveDocument(
                 UUID.randomUUID()
                 , "minfil.pdf"
                 , "pdf"
                 , "application/pdf"
                 , "ref:1213"
+                , ZonedDateTime.now().plusMonths(6)
         );
 
         assertThat(document, Java8Matchers.where(ArchiveDocument::getReferenceid, equalTo("ref:1213")));

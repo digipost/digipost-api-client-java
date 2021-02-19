@@ -47,6 +47,7 @@ import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUME
         "contentType",
         "contentHash",
         "archivedTime",
+        "deletionTime",
         "links"
 })
 @XmlRootElement(name = "archive-document")
@@ -68,9 +69,13 @@ public class ArchiveDocument extends Representation {
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
     protected ZonedDateTime archivedTime;
+    @XmlElement(name = "deletion-time", type = String.class, nillable = false)
+    @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+    @XmlSchemaType(name = "dateTime")
+    protected ZonedDateTime deletionTime;
 
     public ArchiveDocument() {
-        this(null, null, null, null, null);
+        this(null, null, null, null, null, null);
     }
 
     public ArchiveDocument(final UUID uuid, final String fileName, final String fileType, final String contentType) {
@@ -81,12 +86,13 @@ public class ArchiveDocument extends Representation {
         this.contentType = contentType;
     }
 
-    public ArchiveDocument(final UUID uuid, final String fileName, final String fileType, final String contentType, final String referenceid) {
+    public ArchiveDocument(final UUID uuid, final String fileName, final String fileType, final String contentType, final String referenceid, final ZonedDateTime deletionTime) {
         this.uuid = uuid;
         this.fileName = fileName;
         this.fileType = fileType;
         this.referenceid = referenceid;
         this.contentType = contentType;
+        this.deletionTime = deletionTime;
     }
 
     public UUID getUuid() {
@@ -121,6 +127,10 @@ public class ArchiveDocument extends Representation {
         return archivedTime;
     }
 
+    public ZonedDateTime getDeletionTime() {
+        return deletionTime;
+    }
+
     @XmlElement(name = "link")
     public List<Link> getLinks() {
         return links;
@@ -148,6 +158,7 @@ public class ArchiveDocument extends Representation {
                 ", contentType='" + contentType + '\'' +
                 ", contentHash=" + contentHash.getHashAlgorithm() + ":" + contentHash.getHash() +
                 ", archivedTime=" + archivedTime +
+                ", deletionTime=" + deletionTime +
                 '}';
     }
 }

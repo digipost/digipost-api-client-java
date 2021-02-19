@@ -25,6 +25,7 @@ final ArchiveDocument invoice = new ArchiveDocument(
     , "pdf"
     , "application/pdf"
     , "123123"
+    , null
 );
 final ArchiveDocument attachment = new ArchiveDocument(
     UUID.randomUUID()
@@ -32,6 +33,7 @@ final ArchiveDocument attachment = new ArchiveDocument(
     , "pdf"
     , "application/pdf"
     , "123123"
+    , ZonedDateTime.now().plusMonths(6)
 );
 
 // 2. We create an archive and add the documents to it

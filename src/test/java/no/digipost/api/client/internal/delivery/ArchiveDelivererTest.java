@@ -32,6 +32,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static no.digipost.api.client.DigipostClientConfig.newConfiguration;
@@ -61,6 +62,7 @@ class ArchiveDelivererTest {
                 , "pdf"
                 , "application/pdf"
                 , "234234235234235"
+                , ZonedDateTime.now(clock).plusMonths(6)
         );
 
         final Archive archive = Archive.defaultArchive()
