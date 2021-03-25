@@ -39,6 +39,14 @@ public class ArchiveDocumentContent {
         this.uri = uri;
     }
 
+    public String getContentType() {
+        return contentType;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
     @Override
     public String toString() {
         return "ArchiveDocumentContent{" +
