@@ -24,16 +24,12 @@ final ArchiveDocument invoice = new ArchiveDocument(
     , "invoice_123123.pdf"
     , "pdf"
     , "application/pdf"
-    , "123123"
-    , null
 );
 final ArchiveDocument attachment = new ArchiveDocument(
     UUID.randomUUID()
     , "attachment_123123.pdf"
     , "pdf"
     , "application/pdf"
-    , "123123"
-    , ZonedDateTime.now().plusMonths(6)
 );
 
 // 2. We create an archive and add the documents to it
@@ -72,7 +68,7 @@ You should on your side know where and how to get a document from an archive. Yo
 you put a file you want to retrieve.
 
 ```java
-final Archives archives = client.getArchives(SenderId.of(123456));
+final Archives archives = client.getArchives();
 
 Archive current = archives.getArchives().get(0);
 final List<ArchiveDocument> documents = new ArrayList<>();
@@ -95,7 +91,22 @@ You can retrieve a set of documents by a given referenceID. You will then get th
 archives in return.
 
 ```java
-final Archives archives = client.getArchiveDocumentsByReferenceId(SenderId.of(123456), "REFERENCE_ID");
+final Archives archives = client.getArchiveDocumentsByReferenceId("REFERENCE_ID");
+```
+
+## Get documents by uuid
+
+You can retrieve a set of documents by the UUID that you give the document when you achive it. In the example above
+we use `UUID.randomUUID()` to generate an uuid. You can either store that random uuid inyour database for
+retrieval later, or you can generate a deterministic uuid based on your convensions for later retrieval.
+
+You will get in return an instance of `Archive` which contains information on the archive the document is contained in
+and the actual document. From this you can fetch the actual document.
+
+```java
+final UUID myConvensionUUID = UUID.fromString("vedlegg:123123:txt");
+
+final Archive archiveWithDocument = client.getArchiveDocumentByUuid(myConvensionUUID);
 ```
 
 ## Get content of a document as a single-use link
@@ -125,3 +136,20 @@ URI getDocumentContentStreamURI = archiveDocument.getDocumentContentStream().orE
 InputStream content = client.getArchiveDocumentContentStream(getDocumentContentStreamURI);
 ```
 
+## Using archive as a broker
+
+It is possible to be a broker for an actual sender. Most of the api described above also support 
+the use of SenderId to specify who you are archiving for.  
+
+eg.:
+```java
+client.getArchives(SenderId.of(123456))
+client.getArchiveDocumentsByReferenceId(SenderId.of(123456), "REFERENCE_ID");
+client.getArchiveDocumentByUuid(SenderId.of(123456), myConvensionUUID);
+
+
+Archive archive = Archive.defaultArchive()
+                .documents(faktura)
+                .senderId(SenderId.of(123456))
+                .build();
+```

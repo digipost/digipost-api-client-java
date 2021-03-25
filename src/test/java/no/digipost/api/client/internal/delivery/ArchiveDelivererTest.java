@@ -61,9 +61,8 @@ class ArchiveDelivererTest {
                 , "vedlegg_123123.pdf"
                 , "pdf"
                 , "application/pdf"
-                , "234234235234235"
-                , ZonedDateTime.now(clock).plusMonths(6)
-        );
+        ).withReferenceId("234234235234235")
+                .withDeletionTime(ZonedDateTime.now(clock).plusMonths(6));
 
         final Archive archive = Archive.defaultArchive()
                 .documents(vedlegg)

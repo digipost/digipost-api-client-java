@@ -26,6 +26,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.UUID;
 
 public interface ArchiveApi {
 
@@ -34,6 +35,10 @@ public interface ArchiveApi {
     CloseableHttpResponse sendMultipartArchive(HttpEntity build);
 
     Archive getArchiveDocuments(URI uri);
+
+    Archive getArchiveDocumentByUUID(SenderId senderId, UUID uuid);
+
+    Archive addUniqueUUIDToArchiveDocument(SenderId senderId, UUID uuid, UUID newuuid);
 
     public static interface ArchivingDocuments {
 

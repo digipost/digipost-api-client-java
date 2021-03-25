@@ -45,9 +45,7 @@ class ArchiveDocumentTest {
                 , "minfil.pdf"
                 , "pdf"
                 , "application/pdf"
-                , "ref:1213"
-                , ZonedDateTime.now().plusMonths(6)
-        );
+        ).withReferenceId("ref:1213").withDeletionTime(ZonedDateTime.now().plusMonths(6));
 
         assertThat(document, Java8Matchers.where(ArchiveDocument::getReferenceid, equalTo("ref:1213")));
     }

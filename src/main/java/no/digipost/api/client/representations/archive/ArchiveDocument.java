@@ -28,11 +28,14 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.net.URI;
+import java.time.Clock;
+import java.time.Period;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static no.digipost.api.client.representations.Relation.ADD_UNIQUE_UUID;
 import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_BY_UUID;
 import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_CONTENT;
 import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_CONTENT_STREAM;
@@ -75,26 +78,31 @@ public class ArchiveDocument extends Representation {
     protected ZonedDateTime deletionTime;
 
     public ArchiveDocument() {
-        this(null, null, null, null, null, null);
+        this(null, null, null, null);
     }
 
     public ArchiveDocument(final UUID uuid, final String fileName, final String fileType, final String contentType) {
         this.uuid = uuid;
         this.fileName = fileName;
         this.fileType = fileType;
-        this.referenceid = referenceid;
         this.contentType = contentType;
     }
 
-    public ArchiveDocument(final UUID uuid, final String fileName, final String fileType, final String contentType, final String referenceid, final ZonedDateTime deletionTime) {
-        this.uuid = uuid;
-        this.fileName = fileName;
-        this.fileType = fileType;
+    public ArchiveDocument withReferenceId(final String referenceid){
         this.referenceid = referenceid;
-        this.contentType = contentType;
+        return this;
+    }
+    
+    public ArchiveDocument withDeletionTime(final ZonedDateTime deletionTime){
         this.deletionTime = deletionTime;
+        return this;
     }
-
+    
+    public ArchiveDocument withDeleteAfter(Period duration, Clock clock){
+        this.deletionTime = ZonedDateTime.now(clock).plus(duration);
+        return this;
+    }
+    
     public UUID getUuid() {
         return uuid;
     }
@@ -142,6 +150,10 @@ public class ArchiveDocument extends Representation {
 
     public Optional<URI> getDocumentContent() {
         return Optional.ofNullable(getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT)).map(Link::getUri);
+    }
+
+    public Optional<URI> getAddUniqueUUID() {
+        return Optional.ofNullable(getLinkByRelationName(ADD_UNIQUE_UUID)).map(Link::getUri);
     }
 
     public Optional<URI> getDocumentContentStream() {

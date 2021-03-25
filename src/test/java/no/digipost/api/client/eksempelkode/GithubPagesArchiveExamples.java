@@ -29,9 +29,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.Clock;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 public class GithubPagesArchiveExamples {
@@ -52,7 +56,7 @@ public class GithubPagesArchiveExamples {
         Archives archives = client.getArchives(SenderId.of(123456));
     }
     
-    public void get_document_from_archive(){
+    public void get_documents_from_archive(){
         Archives archives = client.getArchives(SenderId.of(123456));
         Archive defaultArchive = archives.getArchives().get(0);
 
@@ -92,6 +96,38 @@ public class GithubPagesArchiveExamples {
 
         ArchiveDocumentContent content = client.getArchiveDocumentContent(getDocumentContentURI);
         InputStream contentStream = client.getArchiveDocumentContentStream(getDocumentContentStreamURI);
+    }
+    
+    public void get_documents_by_uuid() {
+        // Send in file
+        final UUID uuidForUniqueDocument = UUID.fromString("vedlegg:123123:txt");
+        
+        final ArchiveDocument vedlegg = new ArchiveDocument(
+                uuidForUniqueDocument
+                , "vedlegg_123123.txt"
+                , "txt"
+                , "text/plain"
+        ).withDeleteAfter(Period.ofYears(3), Clock.system(ZoneId.of("Europe/Oslo")));
+
+        Archive archive = Archive.defaultArchive()
+                .documents(vedlegg, vedlegg)
+                .build();
+
+        client.archiveDocuments(archive)
+                .addFile(vedlegg, "filecontent in .txt".getBytes())
+                .send();
+        
+        //retrieve file
+        client.getArchiveDocumentByUuid(uuidForUniqueDocument);
+        // also as broker:
+        client.getArchiveDocumentByUuid(SenderId.of(123456), uuidForUniqueDocument);
+    }
+    
+    public void add_unique_uuid_to_document(){
+        final UUID uuidForUniqueDocument = UUID.fromString("vedlegg_filen:txt");
+        final UUID alsoKnownAs = UUID.fromString("id:123123");
+        
+        client.addUniqueUUIDToArchiveDocument(SenderId.of(123456), uuidForUniqueDocument, alsoKnownAs);
     }
     
 }

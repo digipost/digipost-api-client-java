@@ -58,17 +58,14 @@ public class ArkiverDokumenterEksempel {
                 , "faktura_123123.pdf"
                 , "pdf"
                 , "application/pdf"
-                , "234234235234235"
-                , null
-        );
+        ).withReferenceId("234234235234235");
+        
         final ArchiveDocument vedlegg = new ArchiveDocument(
                 UUID.randomUUID()
                 , "vedlegg_123123.pdf"
                 , "pdf"
                 , "application/pdf"
-                , "234234235234235"
-                , ZonedDateTime.now().plusMonths(6)
-        );
+        ).withReferenceId("234234235234235").withDeletionTime(ZonedDateTime.now().plusMonths(6));
 
         // 4. Vi oppretter arkivmeldingen med dokumentene
         Archive archive = Archive.defaultArchive()

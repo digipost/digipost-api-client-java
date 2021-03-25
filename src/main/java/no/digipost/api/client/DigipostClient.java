@@ -55,9 +55,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.UUID;
 
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
@@ -209,10 +207,17 @@ public class DigipostClient {
     }
 
     /**
+     * Get a list of all the archives
+     * @return An Archives contains a list of archives
+     */
+    public Archives getArchives() {
+        return archiveApi.getArchives(null);
+    }
+    /**
      * Get a list of all the archives for the organisation represented by senderId.
      *
      * @param senderId Either an organisation that you operate on behalf of or your brokerId
-     * @return An Archive contains a list of archives
+     * @return An Archives contains a list of archives
      */
     public Archives getArchives(SenderId senderId) {
         return archiveApi.getArchives(senderId);
@@ -287,13 +292,24 @@ public class DigipostClient {
         return archiveSender.createArchive(archive);
     }
 
-    public Archive getArchiveDocumentByUuid(URI uri) {
-        return archiveApi.getArchiveDocument(uri);
+    public Archive getArchiveDocumentByUuid(UUID uri) {
+        return archiveApi.getArchiveDocumentByUUID(null, uri);
+    }
+
+    public Archive getArchiveDocumentByUuid(SenderId senderId, UUID uuid) {
+        return archiveApi.getArchiveDocumentByUUID(senderId, uuid);
+    }
+
+    public Archive addUniqueUUIDToArchiveDocument(UUID uuid, UUID newuuid) {
+        return archiveApi.addUniqueUUIDToArchiveDocument(null, uuid, newuuid);
+    }
+
+    public Archive addUniqueUUIDToArchiveDocument(SenderId senderId, UUID uuid, UUID newuuid) {
+        return archiveApi.addUniqueUUIDToArchiveDocument(senderId, uuid, newuuid);
     }
 
     public Archives getArchiveDocumentsByReferenceId(SenderId senderId, String referenceId) {
-        final String referenceIdBase64 = Base64.getEncoder().encodeToString(referenceId.getBytes(StandardCharsets.UTF_8));
-        return archiveApi.getArchiveDocumentsByReferenceId(senderId, referenceIdBase64);
+        return archiveApi.getArchiveDocumentsByReferenceId(senderId, referenceId);
     }
 
     public ArchiveDocumentContent getArchiveDocumentContent(URI uri) {

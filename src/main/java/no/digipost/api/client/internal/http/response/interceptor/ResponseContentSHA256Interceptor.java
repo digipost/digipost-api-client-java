@@ -21,6 +21,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.NameValuePair;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -40,7 +41,7 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
         final HttpEntity entity = response.getEntity();
         if (entity != null && entity.getContent() != null && entity.getContentLength() > 0) {
             String hashHeaderValue = Optional.ofNullable(response.getFirstHeader(X_Content_SHA256))
-                    .map(h -> h.getValue())
+                    .map(NameValuePair::getValue)
                     .filter(StringUtils::isNoneBlank)
                     .orElseThrow(() -> new DigipostClientException(SERVER_SIGNATURE_ERROR,
                             String.format("Missing %s header in response. This header is expected when a response body is present. Http response was %s",
