@@ -58,6 +58,9 @@ public class Archive extends Representation {
     public static ArchiveBuilder defaultArchive(){
         return new ArchiveBuilder();
     }
+    public static ArchiveBuilder namedArchive(String archiveName) {
+        return new ArchiveBuilder(archiveName);
+    }
 
     public Archive() {
         super();
@@ -105,12 +108,16 @@ public class Archive extends Representation {
     }
 
     public static class ArchiveBuilder {
-
+        private String name;
         private Long senderId;
         private SenderOrganization senderOrganization;
         private final List<ArchiveDocument> documents = new ArrayList<>();
 
         private ArchiveBuilder() {
+        }
+
+        private ArchiveBuilder(String name) {
+            this.name = name;
         }
 
         /**
@@ -147,7 +154,7 @@ public class Archive extends Representation {
                 throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
             }
 
-            return new Archive(this.senderOrganization, this.senderId, null, null, this.documents);
+            return new Archive(this.senderOrganization, this.senderId, this.name, null, this.documents);
         }
     }
 
