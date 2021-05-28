@@ -63,10 +63,6 @@ public class EntryPoint extends Representation {
         return getLinkByRelationName(GET_ARCHIVE_DOCUMENT_BY_UUID).getUri().resolve(uuid.toString());
     }
 
-    public URI deleteArchiveDocumentByUUIDUri(UUID uuid) {
-        return getLinkByRelationName(DELETE_ARCHIVE_DOCUMENT_BY_UUID).getUri().resolve(uuid.toString());
-    }
-
     public URI getArchiveDocumentByReferenceUri(String referenceid) {
         final String referenceIdBase64 = Base64.getEncoder().encodeToString(referenceid.getBytes(StandardCharsets.UTF_8));
         return getLinkByRelationName(GET_ARCHIVE_DOCUMENTS_BY_REFERENCEID).getUri().resolve(referenceIdBase64);

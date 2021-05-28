@@ -35,10 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static no.digipost.api.client.representations.Relation.ADD_UNIQUE_UUID;
-import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_BY_UUID;
-import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_CONTENT;
-import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_CONTENT_STREAM;
+import static no.digipost.api.client.representations.Relation.*;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -158,6 +155,10 @@ public class ArchiveDocument extends Representation {
 
     public Optional<URI> getDocumentContentStream() {
         return Optional.ofNullable(getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT_STREAM)).map(Link::getUri);
+    }
+
+    public Optional<URI> deleteArchiveDocumentUri() {
+        return Optional.ofNullable(getLinkByRelationName(DELETE_ARCHIVE_DOCUMENT_BY_UUID)).map(Link::getUri);
     }
 
     @Override
