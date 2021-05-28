@@ -370,7 +370,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
         // Det er alltid en unik referanse
         final ArchiveDocument document = archive.getDocuments().get(0);
-        final URI addUniqeUUIDUri = document.getAddUniqueUUID().get();
+        final URI addUniqeUUIDUri = document.getAddUniqueUUID();
 
         final ArchiveDocument nyttDokument = new ArchiveDocument(
                 newuuid, document.getFileName(), document.getFileType(), document.getContentType()

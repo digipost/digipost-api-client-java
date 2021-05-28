@@ -141,20 +141,20 @@ public class ArchiveDocument extends Representation {
         return links;
     }
 
-    public Optional<URI> getDocumentByUUID() {
-        return Optional.ofNullable(getLinkByRelationName(GET_ARCHIVE_DOCUMENT_BY_UUID)).map(Link::getUri);
+    public URI getDocumentByUUID() {
+        return getLinkByRelationName(GET_ARCHIVE_DOCUMENT_BY_UUID).getUri();
     }
 
-    public Optional<URI> getDocumentContent() {
-        return Optional.ofNullable(getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT)).map(Link::getUri);
+    public URI getDocumentContent() {
+        return getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT).getUri();
     }
 
-    public Optional<URI> getAddUniqueUUID() {
-        return Optional.ofNullable(getLinkByRelationName(ADD_UNIQUE_UUID)).map(Link::getUri);
+    public URI getAddUniqueUUID() {
+        return getLinkByRelationName(ADD_UNIQUE_UUID).getUri();
     }
 
-    public Optional<URI> getDocumentContentStream() {
-        return Optional.ofNullable(getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT_STREAM)).map(Link::getUri);
+    public URI getDocumentContentStream() {
+        return getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT_STREAM).getUri();
     }
 
     public Optional<URI> deleteArchiveDocumentUri() {
