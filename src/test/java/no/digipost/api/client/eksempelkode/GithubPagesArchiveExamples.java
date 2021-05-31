@@ -89,10 +89,8 @@ public class GithubPagesArchiveExamples {
         Archive firstArchive = archives.getArchives().get(0);
 
         ArchiveDocument firstDocument = firstArchive.getDocuments().get(0);
-        URI getDocumentContentURI = firstDocument.getDocumentContent()
-                .orElseThrow(() -> new RuntimeException("No GET_DOCUMENT_CONTENT relation exists for this document"));
-        URI getDocumentContentStreamURI = firstDocument.getDocumentContentStream()
-                .orElseThrow(() -> new RuntimeException("No GET_DOCUMENT_CONTENT_STREAM relation exists for this document"));
+        URI getDocumentContentURI = firstDocument.getDocumentContent();
+        URI getDocumentContentStreamURI = firstDocument.getDocumentContentStream();
 
         ArchiveDocumentContent content = client.getArchiveDocumentContent(getDocumentContentURI);
         InputStream contentStream = client.getArchiveDocumentContentStream(getDocumentContentStreamURI);

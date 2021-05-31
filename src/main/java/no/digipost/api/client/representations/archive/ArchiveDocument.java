@@ -32,10 +32,10 @@ import java.time.Clock;
 import java.time.Period;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static no.digipost.api.client.representations.Relation.ADD_UNIQUE_UUID;
+import static no.digipost.api.client.representations.Relation.DELETE_ARCHIVE_DOCUMENT_BY_UUID;
 import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_BY_UUID;
 import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_CONTENT;
 import static no.digipost.api.client.representations.Relation.GET_ARCHIVE_DOCUMENT_CONTENT_STREAM;
@@ -144,20 +144,24 @@ public class ArchiveDocument extends Representation {
         return links;
     }
 
-    public Optional<URI> getDocumentByUUID() {
-        return Optional.ofNullable(getLinkByRelationName(GET_ARCHIVE_DOCUMENT_BY_UUID)).map(Link::getUri);
+    public URI getDocumentByUUID() {
+        return getLinkByRelationName(GET_ARCHIVE_DOCUMENT_BY_UUID).getUri();
     }
 
-    public Optional<URI> getDocumentContent() {
-        return Optional.ofNullable(getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT)).map(Link::getUri);
+    public URI getDocumentContent() {
+        return getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT).getUri();
     }
 
-    public Optional<URI> getAddUniqueUUID() {
-        return Optional.ofNullable(getLinkByRelationName(ADD_UNIQUE_UUID)).map(Link::getUri);
+    public URI getAddUniqueUUID() {
+        return getLinkByRelationName(ADD_UNIQUE_UUID).getUri();
     }
 
-    public Optional<URI> getDocumentContentStream() {
-        return Optional.ofNullable(getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT_STREAM)).map(Link::getUri);
+    public URI getDocumentContentStream() {
+        return getLinkByRelationName(GET_ARCHIVE_DOCUMENT_CONTENT_STREAM).getUri();
+    }
+
+    public URI deleteArchiveDocumentUri() {
+        return getLinkByRelationName(DELETE_ARCHIVE_DOCUMENT_BY_UUID).getUri();
     }
 
     @Override
