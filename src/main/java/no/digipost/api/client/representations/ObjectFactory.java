@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.representations;
 
+import no.digipost.api.client.representations.archive.Archive;
+
 import javax.xml.bind.annotation.XmlRegistry;
 
 @XmlRegistry
@@ -49,6 +51,10 @@ public class ObjectFactory {
 
     public Invoice createInvoice() {
         return new Invoice();
+    }
+
+    public Archive createArchive() {
+        return new Archive();
     }
 
     public DocumentEvents createDocumentEvents() {

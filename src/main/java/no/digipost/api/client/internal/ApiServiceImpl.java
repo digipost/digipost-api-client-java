@@ -19,6 +19,7 @@ import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.SenderId;
+import no.digipost.api.client.archive.ArchiveApi;
 import no.digipost.api.client.delivery.MessageDeliveryApi;
 import no.digipost.api.client.document.DocumentApi;
 import no.digipost.api.client.errorhandling.DigipostClientException;
@@ -46,6 +47,10 @@ import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.representations.archive.Archive;
+import no.digipost.api.client.representations.archive.ArchiveDocument;
+import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
+import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
@@ -81,6 +86,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
@@ -97,7 +103,7 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi {
+public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
 
@@ -118,7 +124,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
         this.digipostUrl = config.digipostApiUri;
 
-        this.cached = new Cached(this::fetchEntryPoint);
+        this.cached = new Cached(() -> fetchEntryPoint(Optional.empty()));
         this.httpClient = httpClientBuilder
             .addInterceptorLast(new RequestDateInterceptor(config.eventLogger, config.clock))
             .addInterceptorLast(new RequestUserAgentInterceptor())
@@ -130,6 +136,13 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         this.eventLogger.log("Initialiserte apache-klient mot " + config.digipostApiUri);
     }
 
+    //Kan sende inn null. Man får da det samme som getEntryPoint()
+    public EntryPoint getEntryPoint(SenderId senderId){
+        return Optional.ofNullable(senderId)
+                .map(specifiedSender -> this.cached.senderEntryPoint.get(specifiedSender, () -> this.fetchEntryPoint(Optional.of(specifiedSender))))
+                .orElse(getEntryPoint());
+    }
+    
     public EntryPoint getEntryPoint() {
         return cached.entryPoint.get();
     }
@@ -148,6 +161,40 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         httpPost.setEntity(multipartLengthCheckHttpEntity);
         return send(httpPost);
 
+    }
+
+    @Override
+    public CloseableHttpResponse sendMultipartArchive(HttpEntity multipart) {
+        MultipartNoLengthCheckHttpEntity multipartLengthCheckHttpEntity = new MultipartNoLengthCheckHttpEntity(multipart);
+
+        EntryPoint entryPoint = getEntryPoint();
+
+        HttpPost httpPost = new HttpPost(digipostUrl.resolve(entryPoint.getArchiveDocumentsUri().getPath()));
+        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
+        httpPost.setHeader("MIME-Version", "1.0");
+        httpPost.removeHeaders("Accept-Encoding");
+        httpPost.setEntity(multipartLengthCheckHttpEntity);
+        return send(httpPost);
+
+    }
+
+    @Override
+    public Archive getArchiveDocument(URI uri) {
+        return getEntity(Archive.class, uri.getPath());
+    }
+
+    @Override
+    public ArchiveDocumentContent getArchiveDocumentContent(URI uri) {
+        return getEntity(ArchiveDocumentContent.class, uri.getPath());
+    }
+
+    @Override
+    public InputStream getArchiveDocumentContentStream(URI uri) {
+        HttpGet httpGet = new HttpGet(uri);
+        httpGet.setHeader(HttpHeaders.ACCEPT, ContentType.WILDCARD.toString());
+        final HttpCoreContext httpCoreContext = HttpCoreContext.create();
+        httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
+        return requestStream(httpGet);
     }
 
     @Override
@@ -240,8 +287,8 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         return sendDigipostMedia(identification, getEntryPoint().getIdentificationUri().getPath());
     }
 
-    private EntryPoint fetchEntryPoint() throws IOException {
-        HttpGet httpGet = new HttpGet(digipostUrl.resolve(ENTRY_POINT));
+    private EntryPoint fetchEntryPoint(Optional<SenderId> senderId) throws IOException {
+        HttpGet httpGet = new HttpGet(digipostUrl.resolve(senderId.map(s -> ENTRY_POINT + s.stringValue()).orElse(ENTRY_POINT)));
         httpGet.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
         final HttpCoreContext httpCoreContext = HttpCoreContext.create();
         httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
@@ -287,11 +334,66 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
+    public Archives getArchives(SenderId senderId) {
+        final URI uri = getEntryPoint(senderId).getArchivesUri();
+        return getEntity(Archives.class, uri.getPath());
+    }
+
+    @Override
+    public Archive getArchiveDocuments(URI uri) {
+        return getEntity(Archive.class, pathWithQuery(uri));
+    }
+    
+    @Override
+    public Archives getArchiveDocumentsByReferenceId(SenderId senderId, String referenceId) {
+        final URI uri = getEntryPoint(senderId).getArchiveDocumentByReferenceUri(referenceId);
+        return getEntity(Archives.class, uri.getPath());
+    }
+    
+    @Override
+    public Archive getArchiveDocumentByUUID(SenderId senderId, UUID uuid) {
+        final URI uri = getEntryPoint(senderId).getArchiveDocumentByUUIDUri(uuid);
+        return getEntity(Archive.class, uri.getPath());
+    }
+
+    @Override
+    public void deleteArchiveDocumentByUUID(ArchiveDocument archiveDocument) {
+        final URI uri = archiveDocument.deleteArchiveDocumentUri();
+        send(new HttpDelete(uri));
+    }
+
+
+    @Override
+    public Archive addUniqueUUIDToArchiveDocument(SenderId senderId, UUID uuid, UUID newuuid) {
+        final URI uri = getEntryPoint(senderId).getArchiveDocumentByUUIDUri(uuid);
+        final Archive archive = getEntity(Archive.class, uri.getPath());
+
+        // Det er alltid en unik referanse
+        final ArchiveDocument document = archive.getDocuments().get(0);
+        final URI addUniqeUUIDUri = document.getAddUniqueUUID();
+
+        final ArchiveDocument nyttDokument = new ArchiveDocument(
+                newuuid, document.getFileName(), document.getFileType(), document.getContentType()
+        );
+
+        try (CloseableHttpResponse response = sendDigipostMedia(nyttDokument, addUniqeUUIDUri.getPath())) {
+            checkResponse(response, eventLogger);
+            
+            archive.getDocuments().addAll(unmarshal(jaxbContext, response.getEntity().getContent(), Archive.class).getDocuments());
+            
+            return archive;
+        } catch (IOException e) {
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
+        }
+    }
+
+    @Override
     public Inbox getInbox(SenderId senderId, int offset, int limit) {
         Map<String, String> queryParams = new HashMap<>();
         queryParams.put("offset", String.valueOf(offset));
         queryParams.put("limit", String.valueOf(limit));
-        return getEntity(Inbox.class, "/" + senderId.stringValue() + "/inbox", queryParams);
+        
+        return getEntity(Inbox.class, getEntryPoint(senderId).getInboxUri().getPath(), queryParams);
     }
 
     @Override
@@ -318,6 +420,9 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         return requestEntity(httpPost, UserAccount.class);
     }
 
+    private static String pathWithQuery(URI uri){
+        return uri.getPath() + ((uri.getQuery() != null) ? "?" + uri.getQuery() : "");
+    }
 
     private static URI createEncodedURIPath(String path) {
         try {

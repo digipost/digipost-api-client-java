@@ -21,7 +21,10 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 import static no.digipost.api.client.representations.Relation.*;
 
@@ -40,8 +43,29 @@ public class EntryPoint extends Representation {
     public EntryPoint() {
     }
 
+    public URI getInboxUri(){
+        return getLinkByRelationName(GET_INBOX).getUri();
+    }
+    
     public URI getCreateMessageUri() {
         return getLinkByRelationName(CREATE_MESSAGE).getUri();
+    }
+
+    public URI getArchiveDocumentsUri() {
+        return getLinkByRelationName(ARCHIVE_DOCUMENTS).getUri();
+    }
+    
+    public URI getArchivesUri() {
+        return getLinkByRelationName(GET_ARCHIVES).getUri();
+    }
+    
+    public URI getArchiveDocumentByUUIDUri(UUID uuid) {
+        return getLinkByRelationName(GET_ARCHIVE_DOCUMENT_BY_UUID).getUri().resolve(uuid.toString());
+    }
+
+    public URI getArchiveDocumentByReferenceUri(String referenceid) {
+        final String referenceIdBase64 = Base64.getEncoder().encodeToString(referenceid.getBytes(StandardCharsets.UTF_8));
+        return getLinkByRelationName(GET_ARCHIVE_DOCUMENTS_BY_REFERENCEID).getUri().resolve(referenceIdBase64);
     }
 
     public URI getPrintEncryptionCertificate() {

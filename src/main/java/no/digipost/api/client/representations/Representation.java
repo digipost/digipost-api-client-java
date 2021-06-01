@@ -28,11 +28,11 @@ public abstract class Representation {
     protected List<Link> links;
 
     public Representation(final Link... linker) {
-        links = new ArrayList<Link>(Arrays.asList(linker));
+        links = new ArrayList<>(Arrays.asList(linker));
     }
 
     Representation() {
-        links = new ArrayList<Link>();
+        links = new ArrayList<>();
     }
 
     public void addLink(final Link link) {

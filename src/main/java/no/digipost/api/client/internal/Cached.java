@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.internal;
 
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.cache2.inmemory.Cache;
@@ -29,11 +30,13 @@ import static no.digipost.cache2.inmemory.CacheConfig.useSoftValues;
 final class Cached {
 
     final SingleCached<EntryPoint> entryPoint;
+    final Cache<SenderId, EntryPoint> senderEntryPoint;
     final Cache<String, SenderInformation> senderInformation;
 
     Cached(Callable<EntryPoint> entryPointFetcher) {
         this.entryPoint = new SingleCached<>("digipost-entrypoint", entryPointFetcher, expireAfterAccess(Duration.ofMinutes(5)), useSoftValues);
         this.senderInformation = Cache.create("sender-information", expireAfterAccess(Duration.ofMinutes(5)), useSoftValues);
+        this.senderEntryPoint = Cache.create("digipost-sender-information", expireAfterAccess(Duration.ofMinutes(5)), useSoftValues);
     }
 
 }

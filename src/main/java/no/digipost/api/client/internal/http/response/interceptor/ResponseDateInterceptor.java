@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.NameValuePair;
 import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
     @Override
     public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
         final String dateHeader = Optional.ofNullable(response.getFirstHeader(DATE))
-                .map(h -> h.getValue())
+                .map(NameValuePair::getValue)
                 .filter(StringUtils::isNoneBlank)
                 .orElseThrow(() -> new DigipostClientException(SERVER_SIGNATURE_ERROR,
                     String.format("Missing %s header in response. This header is expected in all response. Http status was %s",

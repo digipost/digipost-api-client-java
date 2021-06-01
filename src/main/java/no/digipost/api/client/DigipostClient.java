@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.archive.ArchiveApi;
 import no.digipost.api.client.delivery.MessageDeliveryApi;
 import no.digipost.api.client.delivery.OngoingDelivery;
 import no.digipost.api.client.document.DocumentApi;
@@ -22,6 +23,7 @@ import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.inbox.InboxApi;
 import no.digipost.api.client.internal.ApiServiceImpl;
+import no.digipost.api.client.internal.delivery.ArchiveDeliverer;
 import no.digipost.api.client.internal.delivery.MessageDeliverer;
 import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
@@ -35,6 +37,9 @@ import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
+import no.digipost.api.client.representations.archive.Archive;
+import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
+import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -49,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -72,9 +78,10 @@ public class DigipostClient {
     private final EventLogger eventLogger;
     private final MessageDeliveryApi messageApi;
     private final MessageDeliverer messageSender;
+    private final ArchiveDeliverer archiveSender;
     private final InboxApi inboxApiService;
     private final DocumentApi documentApi;
-
+    private final ArchiveApi archiveApi;
 
 
     public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
@@ -86,15 +93,17 @@ public class DigipostClient {
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
-        this(config, apiService, apiService, apiService);
+        this(config, apiService, apiService, apiService, apiService);
     }
 
-    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi) {
+    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi) {
         this.messageApi = apiService;
         this.inboxApiService = inboxApiService;
         this.documentApi = documentApi;
+        this.archiveApi = archiveApi;
 
         this.messageSender = new MessageDeliverer(config, apiService);
+        this.archiveSender = new ArchiveDeliverer(config, archiveApi);
 
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
     }
@@ -198,6 +207,42 @@ public class DigipostClient {
     }
 
     /**
+     * Get a list of all the archives
+     * @return An Archives contains a list of archives
+     */
+    public Archives getArchives() {
+        return archiveApi.getArchives(null);
+    }
+    /**
+     * Get a list of all the archives for the organisation represented by senderId.
+     *
+     * @param senderId Either an organisation that you operate on behalf of or your brokerId
+     * @return An Archives contains a list of archives
+     */
+    public Archives getArchives(SenderId senderId) {
+        return archiveApi.getArchives(senderId);
+    }
+
+    /**
+     * An Archive has an optional URL to fetch documents paged 100 at a time.
+     * Eg.: `archive.getNextDocuments()`
+     *
+     * This Optional URI cat be put into this method to fetch that page of documents. We supply this fuctionality
+     * so that senders can use it to get an idea of the content of an archive. However it's use is strongly
+     * discouraged because it leads to the idea that an archive can be itereated. We expect an archive to possibly
+     * reach many million rows so the iteration will possibly give huge loads. On the other hand being able to
+     * dump all data is a nessary feature of any archive.
+     *
+     * Please use fetch document by UUID or referenceID instead to create functionality on top of the archive.
+     *
+     * @param uri URI supplied by the api with Relation NEXT_DOCUMENTS
+     * @return An archive with documents.
+     */
+    public Archive getArchiveDocuments(URI uri) {
+        return archiveApi.getArchiveDocuments(uri);
+    }
+
+    /**
      * Get the first 100 documents in the inbox for the organisation represented by senderId.
      *
      * @param senderId Either an organisation that you operate on behalf of or your brokerId
@@ -241,6 +286,38 @@ public class DigipostClient {
 
     public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user) {
         return messageApi.createOrActivateUserAccount(senderId, user);
+    }
+
+    public ArchiveApi.ArchivingDocuments archiveDocuments(final Archive archive) {
+        return archiveSender.createArchive(archive);
+    }
+
+    public Archive getArchiveDocumentByUuid(UUID uri) {
+        return archiveApi.getArchiveDocumentByUUID(null, uri);
+    }
+
+    public Archive getArchiveDocumentByUuid(SenderId senderId, UUID uuid) {
+        return archiveApi.getArchiveDocumentByUUID(senderId, uuid);
+    }
+
+    public Archive addUniqueUUIDToArchiveDocument(UUID uuid, UUID newuuid) {
+        return archiveApi.addUniqueUUIDToArchiveDocument(null, uuid, newuuid);
+    }
+
+    public Archive addUniqueUUIDToArchiveDocument(SenderId senderId, UUID uuid, UUID newuuid) {
+        return archiveApi.addUniqueUUIDToArchiveDocument(senderId, uuid, newuuid);
+    }
+
+    public Archives getArchiveDocumentsByReferenceId(SenderId senderId, String referenceId) {
+        return archiveApi.getArchiveDocumentsByReferenceId(senderId, referenceId);
+    }
+
+    public ArchiveDocumentContent getArchiveDocumentContent(URI uri) {
+        return archiveApi.getArchiveDocumentContent(uri);
+    }
+
+    public InputStream getArchiveDocumentContentStream(URI uri) {
+        return archiveApi.getArchiveDocumentContentStream(uri);
     }
 
 }
