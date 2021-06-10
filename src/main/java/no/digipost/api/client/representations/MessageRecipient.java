@@ -30,7 +30,8 @@ import javax.xml.bind.annotation.XmlType;
         "personalIdentificationNumber",
         "organisationNumber",
         "printDetails",
-        "bankAccountNumber"
+        "bankAccountNumber",
+        "emailDetails"
 })
 public class MessageRecipient {
 
@@ -46,6 +47,8 @@ public class MessageRecipient {
     protected PrintDetails printDetails;
     @XmlElement(name = "bank-account-number", nillable = false)
     protected String bankAccountNumber;
+    @XmlElement(name = "email-details", nillable = false)
+    protected EmailDetails emailDetails;
 
     public MessageRecipient() {
     }
@@ -98,6 +101,10 @@ public class MessageRecipient {
     public MessageRecipient(final OrganisationNumber organisationNumber, final PrintDetails printDetails) {
         this(organisationNumber);
         this.printDetails = printDetails;
+    }
+
+    public MessageRecipient(final EmailDetails emailDetails) {
+        this.emailDetails = emailDetails;
     }
 
     public MessageRecipient(final PrintDetails printDetails) {
