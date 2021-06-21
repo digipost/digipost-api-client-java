@@ -23,28 +23,19 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "email-details", propOrder = {
-    "emailAddress",
-    "content",
-    "subject"
+    "emailAddress"
 })
 public class EmailDetails
 {
 
     @XmlElement(name = "email-address", required = true)
     protected String emailAddress;
-    @XmlElement(required = true)
-    protected String content;
-    @XmlElement(required = true)
-    protected String subject;
 
     public EmailDetails() {
-
     }
 
-    public EmailDetails(final String emailAddress, final String content, final String subject) {
+    public EmailDetails(final String emailAddress) {
         this.emailAddress = emailAddress;
-        this.content = content;
-        this.subject = subject;
     }
 
     public String getEmailAddress() {
@@ -54,26 +45,6 @@ public class EmailDetails
 
     public void setEmailAddress(String value) {
         this.emailAddress = value;
-    }
-
-
-    public String getContent() {
-        return content;
-    }
-
-
-    public void setContent(String value) {
-        this.content = value;
-    }
-
-
-    public String getSubject() {
-        return subject;
-    }
-
-
-    public void setSubject(String value) {
-        this.subject = value;
     }
 
 }
