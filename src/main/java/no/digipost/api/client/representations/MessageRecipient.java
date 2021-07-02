@@ -54,13 +54,14 @@ public class MessageRecipient {
     }
 
     MessageRecipient(NameAndAddress nameAndAddress, String digipostAddress, String personalIdentificationNumber,
-                            String organisationNumber, PrintDetails printDetails, String bankAccountNumber){
+                            String organisationNumber, PrintDetails printDetails, String bankAccountNumber, EmailDetails emailDetails){
         this.nameAndAddress = nameAndAddress;
         this.digipostAddress = digipostAddress;
         this.personalIdentificationNumber = personalIdentificationNumber;
         this.organisationNumber = organisationNumber;
         this.printDetails = printDetails;
         this.bankAccountNumber = bankAccountNumber;
+        this.emailDetails = emailDetails;
     }
 
     public MessageRecipient(final PersonalIdentificationNumber id) {
