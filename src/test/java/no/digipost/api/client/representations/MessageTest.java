@@ -81,7 +81,7 @@ public class MessageTest {
         }
 
         Field[] recipientFields = MessageRecipient.class.getDeclaredFields();
-        assertThat(recipientFields.length, is(6));
+        assertThat(recipientFields.length, is(7));
 
         String[] allFieldsThatAreUsedForCopyInMessageRecipient = new String[]{"nameAndAddress", "digipostAddress", "personalIdentificationNumber",
                 "organisationNumber", "printDetails"};

@@ -1293,4 +1293,10 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:complexType name="email-details">
+        <xsd:sequence>
+            <xsd:element name="email-address" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
 </xsd:schema>
