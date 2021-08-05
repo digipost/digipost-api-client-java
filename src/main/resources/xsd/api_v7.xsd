@@ -1013,6 +1013,7 @@
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="DELIVERED" />
             <xsd:enumeration value="NOT_DELIVERED" />
+            <xsd:enumeration value="FAILED" />
         </xsd:restriction>
     </xsd:simpleType>
 

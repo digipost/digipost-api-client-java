@@ -22,5 +22,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum DeliveryStatus {
     DELIVERED,
-    NOT_DELIVERED;
+    NOT_DELIVERED,
+    FAILED;
 }

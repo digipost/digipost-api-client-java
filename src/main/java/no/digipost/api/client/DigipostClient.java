@@ -202,6 +202,10 @@ public class DigipostClient {
         return documentApi.getDocumentStatus(senderId, uuid);
     }
 
+    public DocumentStatus getPeppolStatus(SenderId senderId, UUID uuid) {
+        return  documentApi.getPeppolStatus(senderId, uuid);
+    }
+
     public InputStream getContent(String path) {
         return documentApi.getDocumentContent(path);
     }

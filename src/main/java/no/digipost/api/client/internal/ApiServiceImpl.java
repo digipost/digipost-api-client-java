@@ -270,6 +270,11 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
+    public DocumentStatus getPeppolStatus(SenderId senderId, UUID uuid) {
+        return getDocumentStatus("documents/peppol/"+ senderId.stringValue() + "/" + uuid);
+    }
+
+    @Override
     public Recipients search(String searchString) {
         HttpGet httpGet = new HttpGet(digipostUrl.resolve(createEncodedURIPath(getEntryPoint().getSearchUri().getPath() + "/" + searchString)));
         return requestEntity(httpGet, Recipients.class);

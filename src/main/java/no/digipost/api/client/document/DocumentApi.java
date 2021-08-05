@@ -51,6 +51,12 @@ public interface DocumentApi {
      * @param partId Frivillig organisasjons-enhet, kan være {@code null}
      *
      */
+
+    /**
+     * Henter status på peppol melding.
+     */
+    DocumentStatus getPeppolStatus(SenderId senderId, UUID uuid);
+
     DocumentEvents getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults);
 
 }
