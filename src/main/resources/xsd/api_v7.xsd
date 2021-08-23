@@ -1127,6 +1127,8 @@
             <xsd:enumeration value="POSTMARKED" />
             <xsd:enumeration value="PRINT_FAILED" />
             <xsd:enumeration value="SHREDDED" />
+            <xsd:enumeration value="PEPPOL_DELIVERED" />
+            <xsd:enumeration value="PEPPOL_FAILED" />
         </xsd:restriction>
     </xsd:simpleType>
 
