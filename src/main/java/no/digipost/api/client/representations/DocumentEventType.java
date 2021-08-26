@@ -28,6 +28,8 @@ public enum DocumentEventType {
     MOVE_FILES_FROM_PUBLIC_SECTOR,
     POSTMARKED,
     PRINT_FAILED,
+    PEPPOL_FAILED,
+    PEPPOL_DELIVERED,
     SHREDDED;
 
 }
