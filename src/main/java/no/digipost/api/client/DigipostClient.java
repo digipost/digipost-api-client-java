@@ -38,6 +38,7 @@ import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.archive.Archive;
+import no.digipost.api.client.representations.archive.ArchiveDocument;
 import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
 import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.inbox.Inbox;
@@ -320,4 +321,8 @@ public class DigipostClient {
         return archiveApi.getArchiveDocumentContentStream(uri);
     }
 
+    public void deleteArchiveDocument(ArchiveDocument archiveDocument) {
+        archiveApi.deleteArchiveDocumentByUUID(archiveDocument);
+    }
+    
 }
