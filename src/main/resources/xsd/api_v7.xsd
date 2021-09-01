@@ -165,6 +165,21 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+    <xsd:complexType name="peppol-addresses">
+        <xsd:sequence>
+            <xsd:element name="receiver" minOccurs="1" maxOccurs="1" type="peppol-address"/>
+            <xsd:element name="sender" minOccurs="1" maxOccurs="1" type="peppol-address"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="peppol-address">
+        <xsd:sequence>
+            <xsd:element name="schemeID" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="endpointID" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
     <xsd:complexType name="print-recipient">
         <xsd:sequence>
             <xsd:element name="name" type="name" minOccurs="1" maxOccurs="1" />
@@ -494,6 +509,7 @@
                     </xsd:simpleType>
                 </xsd:element>
                 <xsd:element name="digipost-address" minOccurs="0" maxOccurs="1" type="xsd:string" nillable="false" />
+                <xsd:element name="peppol-addresses" minOccurs="0" maxOccurs="1" type="peppol-addresses" nillable="false" />
                 <xsd:element name="name-and-address" minOccurs="0" maxOccurs="1" type="name-and-address" nillable="false" />
                 <xsd:element name="bank-account-number" minOccurs="0" maxOccurs="1" nillable="false">
                     <xsd:annotation>
@@ -529,9 +545,9 @@
 
     <xsd:complexType name="print-details">
         <xsd:sequence>
-            <xsd:element name="recipient" type="print-recipient"  minOccurs="1" maxOccurs="1"  />
-            <xsd:element name="return-address" type="print-recipient"  minOccurs="1" maxOccurs="1"  />
-            <xsd:element name="post-type" type="post-type" minOccurs="0" maxOccurs="1" default="A" />
+            <xsd:element name="recipient" type="print-recipient" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="return-address" type="print-recipient" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="post-type" type="post-type" minOccurs="0" maxOccurs="1" default="A"/>
             <xsd:element name="color" type="print-colors" minOccurs="0" maxOccurs="1" default="MONOCHROME"/>
             <xsd:element name="nondeliverable-handling" type="nondeliverable-handling" minOccurs="0" maxOccurs="1" default="RETURN_TO_SENDER"/>
             <xsd:element name="print-instructions" type="print-instructions" minOccurs="0" maxOccurs="1"/>
@@ -989,6 +1005,7 @@
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="PRINT" />
             <xsd:enumeration value="DIGIPOST" />
+            <xsd:enumeration value="PEPPOL" />
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -1110,6 +1127,8 @@
             <xsd:enumeration value="POSTMARKED" />
             <xsd:enumeration value="PRINT_FAILED" />
             <xsd:enumeration value="SHREDDED" />
+            <xsd:enumeration value="PEPPOL_DELIVERED" />
+            <xsd:enumeration value="PEPPOL_FAILED" />
         </xsd:restriction>
     </xsd:simpleType>
 

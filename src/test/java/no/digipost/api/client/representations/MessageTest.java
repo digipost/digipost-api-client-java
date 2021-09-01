@@ -81,18 +81,7 @@ public class MessageTest {
         }
 
         Field[] recipientFields = MessageRecipient.class.getDeclaredFields();
-        assertThat(recipientFields.length, is(7));
-
-        String[] allFieldsThatAreUsedForCopyInMessageRecipient = new String[]{"nameAndAddress", "digipostAddress", "personalIdentificationNumber",
-                "organisationNumber", "printDetails"};
-
-        for(int i = 0; i < recipientFields.length; i++){
-            for(int n = 0; n < allFieldsThatAreUsedForCopyInMessageRecipient.length; n++){
-                if(recipientFields[i].getName().equals(allFieldsThatAreUsedForCopyInMessageRecipient[n])){
-                    allFieldsThatAreUsedForCopyInMessageRecipient[n] = "";
-                }
-            }
-        }
+        assertThat(recipientFields.length, is(8));
     }
 
     @Test

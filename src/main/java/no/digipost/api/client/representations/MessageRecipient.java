@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "message-recipient", propOrder = {
         "nameAndAddress",
         "digipostAddress",
+        "peppolAddresses",
         "personalIdentificationNumber",
         "organisationNumber",
         "printDetails",
@@ -39,6 +40,8 @@ public class MessageRecipient {
     protected NameAndAddress nameAndAddress;
     @XmlElement(name = "digipost-address", nillable = false)
     protected String digipostAddress;
+    @XmlElement(name = "peppol-addresses", nillable = false)
+    protected PeppolAddresses peppolAddresses;
     @XmlElement(name = "personal-identification-number", nillable = false)
     protected String personalIdentificationNumber;
     @XmlElement(name = "organisation-number", nillable = false)
@@ -53,10 +56,19 @@ public class MessageRecipient {
     public MessageRecipient() {
     }
 
-    MessageRecipient(NameAndAddress nameAndAddress, String digipostAddress, String personalIdentificationNumber,
-                            String organisationNumber, PrintDetails printDetails, String bankAccountNumber, EmailDetails emailDetails){
+    MessageRecipient(
+            NameAndAddress nameAndAddress
+            , String digipostAddress
+            , PeppolAddresses peppolAddresses
+            , String personalIdentificationNumber
+            , String organisationNumber
+            , PrintDetails printDetails
+            , String bankAccountNumber
+            , EmailDetails emailDetails
+    ) {
         this.nameAndAddress = nameAndAddress;
         this.digipostAddress = digipostAddress;
+        this.peppolAddresses = peppolAddresses;
         this.personalIdentificationNumber = personalIdentificationNumber;
         this.organisationNumber = organisationNumber;
         this.printDetails = printDetails;
@@ -74,6 +86,10 @@ public class MessageRecipient {
 
     public MessageRecipient(final DigipostAddress digipostAddress) {
         this.digipostAddress = digipostAddress.asString();
+    }
+
+    public MessageRecipient(final PeppolAddresses peppolAddresses) {
+        this.peppolAddresses = peppolAddresses;
     }
 
     public MessageRecipient(final OrganisationNumber organisationNumber) {
@@ -122,6 +138,14 @@ public class MessageRecipient {
 
     public String getPersonalIdentificationNumber() {
         return personalIdentificationNumber;
+    }
+
+    public PeppolAddresses getPeppolAddresses() {
+        return peppolAddresses;
+    }
+
+    public String getBankAccountNumber() {
+        return bankAccountNumber;
     }
 
     public String getOrganisationNumber() {
