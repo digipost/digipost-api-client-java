@@ -153,7 +153,7 @@ public class Message implements MayHaveSender {
         public MessageBuilder recipient(NameAndAddress nameAndAddress) {
             return recipient(new MessageRecipient(nameAndAddress));
         }
-        
+
         public MessageBuilder recipient(PeppolAddresses peppolAddresses) {
             return recipient(new MessageRecipient(peppolAddresses));
         }
@@ -223,7 +223,7 @@ public class Message implements MayHaveSender {
 
         return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
                 null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference,
-                messageToCopy.primaryDocument.copyDocumentAndSetDigipostFileTypeToPdf(), tmpAttachments, messageToCopy.recipient.getPrintDetails(), null, null, null);
+                messageToCopy.primaryDocument.copyDocumentAndSetDigipostFileTypeToPdf(), tmpAttachments, messageToCopy.recipient.getPrintDetails(), null, null, null, null);
     }
 
     public static Message copyMessageWithOnlyDigipostDetails(Message messageToCopy){
@@ -231,21 +231,21 @@ public class Message implements MayHaveSender {
                 messageToCopy.recipient.nameAndAddress, messageToCopy.recipient.digipostAddress,
                 messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber,
                 messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
-                messageToCopy.attachments, null, messageToCopy.recipient.bankAccountNumber, 
-                messageToCopy.printIfUnread, messageToCopy.recipient.peppolAddresses);
+                messageToCopy.attachments, null, messageToCopy.recipient.bankAccountNumber,
+                messageToCopy.printIfUnread, messageToCopy.recipient.peppolAddresses, messageToCopy.recipient.emailDetails);
     }
 
     private Message(final String messageId, final Long senderId, final SenderOrganization senderOrganization,
                     final NameAndAddress nameAndAddress, final String digipostAddress, String personalIdentificationNumber,
                     final String organisationNumber, final ZonedDateTime deliveryTime, final String invoiceReference,
                     final Document primaryDocument, final List<Document> attachments, final PrintDetails printDetails, final String bankAccountNumber,
-                    final PrintIfUnread printIfUnread, final PeppolAddresses peppolAddresses
+                    final PrintIfUnread printIfUnread, final PeppolAddresses peppolAddresses, final EmailDetails emailDetails
     ){
         this.messageId = messageId;
         this.senderId = senderId;
         this.senderOrganization = senderOrganization;
         MessageRecipient recipient = new MessageRecipient(nameAndAddress, digipostAddress,
-                peppolAddresses, personalIdentificationNumber, organisationNumber, printDetails, bankAccountNumber);
+                peppolAddresses, personalIdentificationNumber, organisationNumber, printDetails, bankAccountNumber, emailDetails);
         this.recipient = recipient;
         this.deliveryTime = deliveryTime;
         this.invoiceReference = invoiceReference;

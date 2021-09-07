@@ -81,7 +81,7 @@ public class MessageTest {
         }
 
         Field[] recipientFields = MessageRecipient.class.getDeclaredFields();
-        assertThat(recipientFields.length, is(7));
+        assertThat(recipientFields.length, is(8));
     }
 
     @Test
