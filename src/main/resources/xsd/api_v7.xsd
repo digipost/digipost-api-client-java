@@ -180,6 +180,12 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:complexType name="email-details">
+        <xsd:sequence>
+            <xsd:element name="email-address" minOccurs="1" maxOccurs="1" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
     <xsd:complexType name="print-recipient">
         <xsd:sequence>
             <xsd:element name="name" type="name" minOccurs="1" maxOccurs="1" />
@@ -509,6 +515,7 @@
                     </xsd:simpleType>
                 </xsd:element>
                 <xsd:element name="digipost-address" minOccurs="0" maxOccurs="1" type="xsd:string" nillable="false" />
+                <xsd:element name="email-details" minOccurs="0" maxOccurs="1" type="email-details" nillable="false" />
                 <xsd:element name="peppol-addresses" minOccurs="0" maxOccurs="1" type="peppol-addresses" nillable="false" />
                 <xsd:element name="name-and-address" minOccurs="0" maxOccurs="1" type="name-and-address" nillable="false" />
                 <xsd:element name="bank-account-number" minOccurs="0" maxOccurs="1" nillable="false">
@@ -1006,6 +1013,7 @@
             <xsd:enumeration value="PRINT" />
             <xsd:enumeration value="DIGIPOST" />
             <xsd:enumeration value="PEPPOL" />
+            <xsd:enumeration value="EPOST" />
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -1121,6 +1129,8 @@
     <xsd:simpleType name="event-type">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="EMAIL_NOTIFICATION_FAILED" />
+            <xsd:enumeration value="EMAIL_MESSAGE_SENT" />
+            <xsd:enumeration value="EMAIL_MESSAGE_FAILED" />
             <xsd:enumeration value="SMS_NOTIFICATION_FAILED" />
             <xsd:enumeration value="OPENED" />
             <xsd:enumeration value="MOVE_FILES_FROM_PUBLIC_SECTOR" />
@@ -1309,12 +1319,6 @@
         <xsd:sequence>
             <xsd:element name="content-type" type="xsd:string" minOccurs="1" maxOccurs="1"  nillable="false" />
             <xsd:element name="uri" type="xsd:string" minOccurs="1" maxOccurs="1"  nillable="false" />
-        </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:complexType name="email-details">
-        <xsd:sequence>
-            <xsd:element name="email-address" minOccurs="1" maxOccurs="1" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
 

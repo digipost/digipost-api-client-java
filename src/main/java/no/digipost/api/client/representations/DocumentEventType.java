@@ -22,6 +22,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum DocumentEventType {
 
+    EMAIL_MESSAGE_FAILED,
+    EMAIL_MESSAGE_SENT,
     EMAIL_NOTIFICATION_FAILED,
     SMS_NOTIFICATION_FAILED,
     OPENED,
