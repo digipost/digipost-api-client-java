@@ -1110,6 +1110,14 @@
         </xsd:complexContent>
     </xsd:complexType>
 
+    <xsd:complexType name="failed-peppol-metadata">
+        <xsd:complexContent>
+            <xsd:extension base="event-metadata">
+                <xsd:attribute name="error-code" type="xsd:string" use="required" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
     <xsd:complexType name="postmarked-metadata">
         <xsd:complexContent>
             <xsd:extension base="event-metadata">
