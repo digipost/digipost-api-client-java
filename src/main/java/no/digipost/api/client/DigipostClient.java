@@ -151,11 +151,16 @@ public class DigipostClient {
     }
 
     public DocumentEvents getDocumentEvents(ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
-        return getDocumentEvents(null, null, from, to, offset, maxResults);
+        return getDocumentEvents(null, from, to, offset, maxResults);
     }
 
+    public DocumentEvents getDocumentEvents(SenderId senderId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
+        return documentApi.getDocumentEvents(null, null, senderId,  from, to, offset, maxResults);
+    }
+
+
     public DocumentEvents getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
-        return documentApi.getDocumentEvents(organisation, partId, from, to, offset, maxResults);
+        return documentApi.getDocumentEvents(organisation, partId, null, from, to, offset, maxResults);
     }
 
     /**
