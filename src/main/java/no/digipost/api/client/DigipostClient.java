@@ -301,6 +301,10 @@ public class DigipostClient {
         return archiveApi.getArchiveDocumentByUUID(senderId, uuid);
     }
 
+    public Archive getArchiveDocumentByUuidFromNamedArchive(SenderId senderId, String name, UUID uuid) {
+        return archiveApi.getArchiveDocumentByUUIDFromNamedArchive(senderId, name, uuid);
+    }
+
     public Archive addUniqueUUIDToArchiveDocument(UUID uuid, UUID newuuid) {
         return archiveApi.addUniqueUUIDToArchiveDocument(null, uuid, newuuid);
     }

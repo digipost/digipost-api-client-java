@@ -357,6 +357,14 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
+    public Archive getArchiveDocumentByUUIDFromNamedArchive(SenderId senderId, String name,  UUID uuid) {
+        final URI uri = getEntryPoint(senderId).getArchiveDocumentByUUIDFromNamedArchiveUri(uuid);
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("name", name);
+        return getEntity(Archive.class, uri.getPath(), queryParams);
+    }
+
+    @Override
     public void deleteArchiveDocumentByUUID(ArchiveDocument archiveDocument) {
         final URI uri = archiveDocument.deleteArchiveDocumentUri();
         send(new HttpDelete(uri));
