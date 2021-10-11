@@ -19,32 +19,43 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "email-details", propOrder = {
-    "emailAddress"
+    "emailAddresses"
 })
 public class EmailDetails
 {
 
     @XmlElement(name = "email-address", required = true)
-    protected String emailAddress;
+    protected List<String> emailAddresses;
 
     public EmailDetails() {
     }
 
-    public EmailDetails(final String emailAddress) {
-        this.emailAddress = emailAddress;
+    public EmailDetails(String... emailAddresses) {
+       this(Arrays.asList(emailAddresses));
     }
 
-    public String getEmailAddress() {
-        return emailAddress;
+    public EmailDetails(List<String> emailAddresses) {
+        this.emailAddresses = emailAddresses;
+    }
+
+    public List<String> getEmailAddress() {
+        return emailAddresses;
     }
 
 
     public void setEmailAddress(String value) {
-        this.emailAddress = value;
+        this.emailAddresses = Collections.singletonList(value);
+    }
+
+    public void setEmailAddress(List<String> value) {
+        this.emailAddresses = value;
     }
 
 }
