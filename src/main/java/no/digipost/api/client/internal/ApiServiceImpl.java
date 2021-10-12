@@ -226,7 +226,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
 
     @Override
-    public DocumentEvents getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
+    public DocumentEvents getDocumentEvents(String organisation, String partId, SenderId senderId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults) {
         URIBuilder builder = new URIBuilder(digipostUrl.resolve(getEntryPoint().getDocumentEventsUri().getPath()))
                 .setParameter("from", DATE_TIME_FORMAT.format(from))
                 .setParameter("to", DATE_TIME_FORMAT.format(to))
@@ -238,6 +238,9 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         }
         if (partId != null) {
             builder = builder.setParameter("part", partId);
+        }
+        if (senderId != null) {
+            builder = builder.setParameter("sender", senderId.stringValue());
         }
 
         try {

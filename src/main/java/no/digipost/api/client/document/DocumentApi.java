@@ -51,6 +51,6 @@ public interface DocumentApi {
      * @param partId Frivillig organisasjons-enhet, kan være {@code null}
      *
      */
-    DocumentEvents getDocumentEvents(String organisation, String partId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults);
+    DocumentEvents getDocumentEvents(String organisation, String partId, SenderId senderId, ZonedDateTime from, ZonedDateTime to, int offset, int maxResults);
 
 }
