@@ -15,6 +15,11 @@
  */
 package no.digipost.api.client.errorhandling;
 
+import java.net.ConnectException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.errorhandling.ErrorType.CLIENT_DATA;
 import static no.digipost.api.client.errorhandling.ErrorType.CLIENT_TECHNICAL;
@@ -22,11 +27,6 @@ import static no.digipost.api.client.errorhandling.ErrorType.CONFIGURATION;
 import static no.digipost.api.client.errorhandling.ErrorType.SERVER;
 import static no.digipost.api.client.errorhandling.ErrorType.UNKNOWN;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getRootCause;
-
-import java.net.ConnectException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public enum ErrorCode {
 
@@ -120,7 +120,8 @@ public enum ErrorCode {
     INVALID_MONETARY_AMOUNT(CLIENT_DATA),
     AUTHENTICATION_LEVEL_TOO_LOW(CLIENT_DATA),
     PEPPOL_ERROR(CLIENT_DATA),
-    PEPPOL_FILE_MUST_BE_XML(CLIENT_DATA)
+    PEPPOL_FILE_MUST_BE_XML(CLIENT_DATA),
+    UNKNOWN_PEPPOL_RECIPIENT(CLIENT_DATA),
     ;
 
     private static final Map<String, ErrorCode> errorByName = new HashMap<>(); static {
