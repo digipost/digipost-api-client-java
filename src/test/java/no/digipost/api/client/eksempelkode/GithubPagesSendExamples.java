@@ -38,6 +38,7 @@ import no.digipost.api.client.representations.SmsNotification;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.datatypes.types.Address;
 import no.digipost.api.datatypes.types.Appointment;
+import no.digipost.api.datatypes.types.ExternalLink;
 import no.digipost.api.datatypes.types.Info;
 import no.digipost.api.datatypes.types.Language;
 
@@ -266,7 +267,7 @@ public class GithubPagesSendExamples {
         List<Info> info = Arrays.asList(preparation, about);
         Appointment appointment = new Appointment(
                 startTime, startTime.plusMinutes(30), "Please arrive 15 minutes early",
-                "Oslo X-Ray center", address, "Lower back examination", info, Language.EN);
+                "Oslo X-Ray center", address, "Lower back examination", info, Language.EN, ExternalLink.EXAMPLE_NO_DEADLINE);
 
         Document primaryDocument = new Document(UUID1, "X-Ray appointment", FileType.PDF, appointment);
 
