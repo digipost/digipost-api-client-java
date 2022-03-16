@@ -6,11 +6,11 @@ version: 1.0
 license: Apache License, version 2.0
 licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
 
-#baseurl: "/sikker-digital-post-net-klient" # the subpath of your site, e.g. /blog/
 baseurl: "/digipost-api-client-java"
 
-currentVersion: "13.x"
-versions: ["13.x", "11.x", "10.x", "9.0", "8.0", "6.1", "6.0"]
+currentVersion: "15.x"
+versions: ["15.x", "13.x", "11.x", "10.x", "9.0", "8.0", "6.1", "6.0"]
+deprecatedVersions: ["6.1", "6.0"]
 
 collections:
   v6_0:  
@@ -34,6 +34,9 @@ collections:
   v13_x:
     output: true
     permalink: /v13.x/
+  v15_x:
+    output: true
+    permalink: /v15.x/
 
 # list of additional links on the right of the top menu
 headerLinks:

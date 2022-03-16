@@ -82,7 +82,14 @@
           <div class="alert alert-info">
             You are viewing the documentation for Digipost API Client {{ page.url | replace: '/', '' | replace: 'v', ''}}, which is not the most recently released version. The newest version is {{ site.currentVersion}} and can be browsed <a href="{{ site.baseurl }}/">here</a>.
           </div>
-        {% endif %}
+          {% endif %}
+            {% for depr in site.deprecatedVersions %}
+            {% if page.url contains depr %}
+            <div class="alert alert-danger">
+                  This version is deprecated and will stop working as of Spring 2022. Do not use or upgrade to newest client.
+            </div>
+            {% endif %}
+          {% endfor %}
         {{content}}
       </div>
       

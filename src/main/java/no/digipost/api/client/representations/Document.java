@@ -22,7 +22,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +52,6 @@ import static org.apache.commons.lang3.StringUtils.join;
         "links",
         "dataType"
 })
-@XmlSeeAlso({ Invoice.class })
 public class Document extends Representation {
 
     @XmlElement(name = "uuid", required = true)

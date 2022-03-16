@@ -64,7 +64,7 @@ import static java.time.Duration.ZERO;
 import static java.time.Duration.between;
 import static no.digipost.api.client.internal.ExceptionUtils.asUnchecked;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
-import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V8;
 import static no.digipost.api.client.security.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
@@ -124,11 +124,11 @@ public class MessageDeliverer {
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
             marshal(jaxbContext, singleChannelMessage, bao);
             ByteArrayBody attachment = new ByteArrayBody(bao.toByteArray(),
-                    ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V7, UTF_8), "message");
+                    ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V8, UTF_8), "message");
 
             MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create()
                     .setMode(HttpMultipartMode.STRICT)
-                    .setMimeSubtype(DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7)
+                    .setMimeSubtype(DIGIPOST_MULTI_MEDIA_SUB_TYPE_V8)
                     .addPart(FormBodyPartBuilder.create("message", attachment)
                             .addField("Content-Disposition", "attachment;" + " filename=\"message\"")
                             .build());
