@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.util.concurrent.Callable;
 
 import static no.digipost.cache2.inmemory.CacheConfig.expireAfterAccess;
+import static no.digipost.cache2.inmemory.CacheConfig.expireAfterWrite;
 import static no.digipost.cache2.inmemory.CacheConfig.useSoftValues;
 
 final class Cached {
@@ -34,9 +35,9 @@ final class Cached {
     final Cache<String, SenderInformation> senderInformation;
 
     Cached(Callable<EntryPoint> entryPointFetcher) {
-        this.entryPoint = new SingleCached<>("digipost-entrypoint", entryPointFetcher, expireAfterAccess(Duration.ofMinutes(5)), useSoftValues);
-        this.senderInformation = Cache.create("sender-information", expireAfterAccess(Duration.ofMinutes(5)), useSoftValues);
-        this.senderEntryPoint = Cache.create("digipost-sender-information", expireAfterAccess(Duration.ofMinutes(5)), useSoftValues);
+        this.entryPoint = new SingleCached<>("digipost-entrypoint", entryPointFetcher, expireAfterAccess(Duration.ofMinutes(5)), expireAfterWrite(Duration.ofHours(1)), useSoftValues);
+        this.senderInformation = Cache.create("sender-information", expireAfterAccess(Duration.ofMinutes(5)), expireAfterWrite(Duration.ofHours(1)), useSoftValues);
+        this.senderEntryPoint = Cache.create("digipost-sender-information", expireAfterAccess(Duration.ofMinutes(5)), expireAfterWrite(Duration.ofHours(1)), useSoftValues);
     }
 
 }
