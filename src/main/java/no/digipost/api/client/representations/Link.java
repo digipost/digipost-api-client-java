@@ -52,7 +52,7 @@ public class Link {
     }
 
     public Link(final Relation relation, final DigipostUri uri) {
-        this(relation, uri, MediaTypes.DIGIPOST_MEDIA_TYPE_V7);
+        this(relation, uri, MediaTypes.DIGIPOST_MEDIA_TYPE_V8);
     }
 
     Link() {

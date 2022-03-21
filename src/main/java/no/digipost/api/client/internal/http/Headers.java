@@ -18,7 +18,7 @@ package no.digipost.api.client.internal.http;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 
-import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V7;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V8;
 import static org.apache.http.HttpHeaders.ACCEPT;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 
@@ -32,7 +32,7 @@ public final class Headers {
     public static final String Content_MD5 = "Content-MD5";
     public static final String X_Content_SHA256 = "X-Content-SHA256";
 
-    public static final Header Accept_DIGIPOST_MEDIA_TYPE_V7 = new BasicHeader(ACCEPT, DIGIPOST_MEDIA_TYPE_V7);
-    public static final Header Content_Type_DIGIPOST_MEDIA_TYPE_V7 = new BasicHeader(CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V7);
+    public static final Header Accept_DIGIPOST_MEDIA_TYPE_V7 = new BasicHeader(ACCEPT, DIGIPOST_MEDIA_TYPE_V8);
+    public static final Header Content_Type_DIGIPOST_MEDIA_TYPE_V7 = new BasicHeader(CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V8);
 
 }

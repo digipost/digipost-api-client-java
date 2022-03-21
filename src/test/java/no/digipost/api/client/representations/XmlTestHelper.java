@@ -76,7 +76,7 @@ public class XmlTestHelper {
         static {
             SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             try {
-                schema = schemaFactory.newSchema(XmlTestHelper.class.getResource("/xsd/api_v7.xsd"));
+                schema = schemaFactory.newSchema(XmlTestHelper.class.getResource("/xsd/api_v8.xsd"));
                 jaxbContext = JAXBContext.newInstance("no.digipost.api.client.representations:no.digipost.api.client.representations.sender");
             } catch (SAXException | JAXBException e) {
                 throw new RuntimeException(e.getMessage(), e);

@@ -44,7 +44,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
-import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V8;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
@@ -78,11 +78,11 @@ public class ArchiveDeliverer {
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
             marshal(jaxbContext, archive, bao);
             ByteArrayBody attachment = new ByteArrayBody(bao.toByteArray(),
-                    ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V7, UTF_8), "archive");
+                    ContentType.create(MediaTypes.DIGIPOST_MEDIA_TYPE_V8, UTF_8), "archive");
 
             MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create()
                     .setMode(HttpMultipartMode.STRICT)
-                    .setMimeSubtype(DIGIPOST_MULTI_MEDIA_SUB_TYPE_V7)
+                    .setMimeSubtype(DIGIPOST_MULTI_MEDIA_SUB_TYPE_V8)
                     .addPart(FormBodyPartBuilder.create("archive", attachment)
                             .addField("Content-Disposition", "attachment;" + " filename=\"archive\"")
                             .build());

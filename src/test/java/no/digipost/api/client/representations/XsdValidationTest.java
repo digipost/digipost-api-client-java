@@ -58,7 +58,7 @@ import static org.hamcrest.Matchers.sameInstance;
 public class XsdValidationTest {
 
 
-    private Link link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V7);
+    private Link link = new Link(Relation.SELF, new DigipostUri("http://localhost/self"), MediaTypes.DIGIPOST_MEDIA_TYPE_V8);
 
 
     @Test

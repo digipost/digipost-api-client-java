@@ -24,7 +24,6 @@ import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.FileType;
 import no.digipost.api.client.representations.Identification;
 import no.digipost.api.client.representations.IdentificationResult;
-import no.digipost.api.client.representations.Invoice;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.MessageRecipient;
@@ -41,6 +40,7 @@ import no.digipost.api.datatypes.types.Appointment;
 import no.digipost.api.datatypes.types.ExternalLink;
 import no.digipost.api.datatypes.types.Info;
 import no.digipost.api.datatypes.types.Language;
+import no.digipost.api.datatypes.types.invoice.Invoice;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +48,6 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -151,8 +150,14 @@ public class GithubPagesSendExamples {
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
-        // An invoice requires four extra fields (KID, amount, account and due date). The use of the Invoice class will trigger payment functionality i Digipost.
-        Invoice invoice = new Invoice(UUID1, "Invoice subject", FileType.PDF, null, null, null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL, "704279604", new BigDecimal("1.20"), "82760100435", LocalDate.of(2015, 5, 5));
+        //Previous versions of the client uses what is called an Invoice Document. With the release of v15 this has been 
+        //removed. Now we use digipost data types instead.
+        Document invoice = new Document(
+                UUID1
+                , "Invoice subject"
+                , FileType.PDF
+                , new Invoice(null, ZonedDateTime.of(2022, 5, 5, 0, 0, 0, 0, ZoneId.of("Europe/Oslo")), new BigDecimal("1.20"), "704279604", "82760100435")
+        );
 
         Message message = Message.newMessage("messageId", invoice)
                 .recipient(pin)
