@@ -33,6 +33,7 @@ public final class DigipostClientConfig {
         private EventLogger eventLogger = EventLogger.NOOP_LOGGER;
         private Clock clock = Clock.systemDefaultZone();
         private boolean failOnHtmlDiff = false;
+        private boolean dumpHtmlPayload = false;
 
         private Builder() {
         }
@@ -56,6 +57,11 @@ public final class DigipostClientConfig {
             return this;
         }
 
+        public Builder dumpHtmlPayload(){
+            this.dumpHtmlPayload = true;
+            return this;
+        }
+
         public Builder eventLogger(EventLogger eventLogger) {
             this.eventLogger = eventLogger;
             return this;
@@ -67,7 +73,7 @@ public final class DigipostClientConfig {
         }
 
         public DigipostClientConfig build() {
-            return new DigipostClientConfig(digipostApiUri, printKeyCacheTimeToLive, eventLogger, clock, failOnHtmlDiff);
+            return new DigipostClientConfig(digipostApiUri, printKeyCacheTimeToLive, eventLogger, clock, failOnHtmlDiff, dumpHtmlPayload);
         }
     }
 
@@ -80,13 +86,16 @@ public final class DigipostClientConfig {
     public final EventLogger eventLogger;
     public final Clock clock;
     public final boolean failOnHtmlDiff;
+    public final boolean dumpHtmlPayload;
 
-    private DigipostClientConfig(URI digipostApiUri, Duration printKeyCacheTimeToLive, EventLogger eventLogger, Clock clock, boolean failOnHtmlDiff) {
-        this.digipostApiUri = requireNonNull(digipostApiUri, "digipostApiUri cat not be null");
+    private DigipostClientConfig(URI digipostApiUri, Duration printKeyCacheTimeToLive, EventLogger eventLogger,
+            Clock clock, boolean failOnHtmlDiff, boolean dumpHtmlPayload) {
+        this.digipostApiUri = requireNonNull(digipostApiUri, "digipostApiUri can not be null");
         this.printKeyCacheTimeToLive = requireNonNull(printKeyCacheTimeToLive, "printKeyCacheTimeToLive can not be null");
         this.eventLogger = requireNonNull(eventLogger, "eventLogger can not be null");
         this.clock = clock;
         this.failOnHtmlDiff = failOnHtmlDiff;
+        this.dumpHtmlPayload = dumpHtmlPayload;
     }
 
 }

@@ -30,7 +30,7 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-html-validator</artifactId>
-            <version>1.0.5</version>
+            <version>disable-sanitized-html-in-validation-result-by-default-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
@@ -540,5 +540,18 @@
         <url>scm:git:git@github.com:digipost/digipost-api-client-java</url>
         <tag>HEAD</tag>
     </scm>
+
+    <repositories>
+        <repository>
+            <id>oss.sonatype.org-snapshot</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>

@@ -86,7 +86,7 @@ class DocumentsPreparer {
     void validateHtml(Document document, byte[] content, DigipostClientConfig config) {
         HtmlValidationResult htmlValidation = HTML_EVERYTHING_OK;
         if (document.is(HTML) || document.is(HTM)) {
-            htmlValidation = htmlValidator.valider(content);
+            htmlValidation = htmlValidator.valider(content, config.dumpHtmlPayload);
         }
 
         if (!htmlValidation.okForWeb) {
