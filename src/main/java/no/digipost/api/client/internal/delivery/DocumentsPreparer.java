@@ -27,6 +27,7 @@ import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import no.digipost.sanitizing.HtmlValidationResult;
 import no.digipost.sanitizing.HtmlValidator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,7 @@ import static org.apache.commons.io.IOUtils.toByteArray;
 class DocumentsPreparer {
 
     private static final Logger LOG = LoggerFactory.getLogger(DocumentsPreparer.class);
+    static final String SANITATION_DIFF_ADVICE = "Kjør DigipostValidatingHtmlSanitizer for å se sanitert html.";
 
     private final PdfValidator pdfValidator;
     private final HtmlValidator htmlValidator;
@@ -94,9 +96,9 @@ class DocumentsPreparer {
         }
         if (htmlValidation.hasDiffAfterSanitizing) {
             if (config.failOnHtmlDiff) {
-                throw new DigipostClientException(ErrorCode.HTML_CONTENT_SANITIZED, htmlValidation.toString());
+                throw new DigipostClientException(ErrorCode.HTML_CONTENT_SANITIZED, SANITATION_DIFF_ADVICE);
             } else {
-                LOG.warn("Din html vil forandre seg i Digipost fordi du har elementer som bir lagt til eller fjernet.\n {}", htmlValidation.toString());
+                LOG.warn("Din html vil forandre seg i Digipost fordi du har elementer som blir lagt til eller fjernet.\n{}", SANITATION_DIFF_ADVICE);
             }
         }
     }

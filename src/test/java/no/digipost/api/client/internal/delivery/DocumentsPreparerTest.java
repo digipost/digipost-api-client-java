@@ -36,8 +36,11 @@ import no.digipost.print.validate.PdfValidator;
 import no.digipost.sanitizing.HtmlValidator;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -61,6 +64,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -144,21 +148,50 @@ public class DocumentsPreparerTest {
     }
 
     @Test
-    public void failesDocumentWithFailOnSanitize() throws IOException {
-        final Document primary = new Document(UUID.randomUUID(), "primary", HTML);
-        primary.encrypt();
-        final Map<Document, InputStream> documents = new HashMap<Document, InputStream>() {{
-            put(primary, EksempelHtml.validNotSanitizedHtml());
-        }};
-        final MessageBuilder messageBuilder = Message.newMessage(UUID.randomUUID(), primaryDocument).recipient(new DigipostAddress("test.testson#1234"));
-
+    void failsDocumentWithFailOnSanitize() {
+        final Map<Document, InputStream> documents = createDocumentMap();
+        Message message = createMessage();
         final DigipostClientConfig config = DigipostClientConfig.newConfiguration()
                 .failOnHtmlSanitationDiff()
                 .build();
 
         DigipostClientException thrown = assertThrows(DigipostClientException.class,
-                () -> preparer.prepare(documents, messageBuilder.build(), encrypter, () -> PdfValidationSettings.CHECK_ALL, config));
-        assertThat(thrown, where(Exception::getMessage, containsString("HTML_CONTENT_SANITIZED")));
+                () -> preparer.prepare(documents, message, encrypter, () -> PdfValidationSettings.CHECK_ALL, config)
+        );
+        assertThat(thrown, where(Exception::getMessage, containsString("HTML_CONTENT_SANITIZED: Kjør DigipostValidatingHtmlSanitizer")));
+    }
+
+    @Test
+    void sanitationDiffGeneratesWarning() throws IOException {
+        final Map<Document, InputStream> documents = createDocumentMap();
+        Message message = createMessage();
+        final DigipostClientConfig config = DigipostClientConfig.newConfiguration()
+                .build();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream stdOut = System.err;
+        try {
+            System.setErr(new PrintStream(baos));
+            preparer.prepare(documents, message, encrypter, () -> PdfValidationSettings.CHECK_ALL, config);
+            System.err.flush();
+        } finally {
+            System.setErr(stdOut);
+        }
+        assertThat(baos.toString(),
+                matchesPattern("(?s).* Din html vil forandre seg .*\\nKjør DigipostValidatingHtmlSanitizer.*"));
+    }
+
+    private Map<Document, InputStream> createDocumentMap() {
+        final Document primary = new Document(UUID.randomUUID(), "primary", HTML);
+        primary.encrypt();
+        final Map<Document, InputStream> documents =
+                Collections.singletonMap(primary, EksempelHtml.validNotSanitizedHtml());
+        return documents;
+    }
+
+    private Message createMessage() {
+        final MessageBuilder messageBuilder = Message.newMessage(UUID.randomUUID(), primaryDocument).recipient(new DigipostAddress("test.testson#1234"));
+        Message message = messageBuilder.build();
+        return message;
     }
 
     @Test
