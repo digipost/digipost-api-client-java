@@ -32,7 +32,7 @@ public final class Headers {
     public static final String Content_MD5 = "Content-MD5";
     public static final String X_Content_SHA256 = "X-Content-SHA256";
 
-    public static final Header Accept_DIGIPOST_MEDIA_TYPE_V7 = new BasicHeader(ACCEPT, DIGIPOST_MEDIA_TYPE_V8);
-    public static final Header Content_Type_DIGIPOST_MEDIA_TYPE_V7 = new BasicHeader(CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V8);
+    public static final Header Accept_DIGIPOST_MEDIA_TYPE_V8 = new BasicHeader(ACCEPT, DIGIPOST_MEDIA_TYPE_V8);
+    public static final Header Content_Type_DIGIPOST_MEDIA_TYPE_V8 = new BasicHeader(CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_V8);
 
 }
