@@ -16,6 +16,7 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.SenderId;
+import no.digipost.api.client.representations.batch.Batch;
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -25,7 +26,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,7 +55,8 @@ import static org.apache.commons.lang3.StringUtils.join;
         "invoiceReference",
         "primaryDocument",
         "attachments",
-        "printIfUnread"})
+        "printIfUnread", 
+        "batch"})
 @XmlRootElement(name = "message")
 public class Message implements MayHaveSender {
 
@@ -88,9 +89,11 @@ public class Message implements MayHaveSender {
     public final List<Document> attachments;
     @XmlElement(name = "print-if-unread")
     public final PrintIfUnread printIfUnread;
+    @XmlElement(name="batch")
+    public final Batch batch;
 
     Message() {
-        this(null, null, null, null, null, null, null, null, null);
+        this(null, null, null, null, null, null, null, null, null, null);
     }
 
     public static class MessageBuilder {
@@ -103,6 +106,7 @@ public class Message implements MayHaveSender {
         private final List<Document> attachments = new ArrayList<>();
         private String invoiceReference;
         private PrintIfUnread printIfUnread;
+        private Batch batch;
 
         private MessageBuilder(String messageId, Document primaryDocument) {
             this.messageId = messageId;
@@ -186,6 +190,11 @@ public class Message implements MayHaveSender {
             return this;
         }
 
+        public MessageBuilder batch(UUID batchUUID) {
+            this.batch = new Batch(batchUUID.toString());
+            return this;
+        }
+        
         public Message build() {
             if (recipient == null) {
                 throw new IllegalStateException("You must specify a recipient.");
@@ -193,14 +202,14 @@ public class Message implements MayHaveSender {
             if (senderId != null && senderOrganization != null) {
                 throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
             }
-            return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryTime, invoiceReference, printIfUnread);
+            return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryTime, invoiceReference, printIfUnread, batch);
         }
 
     }
 
     private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
                     Document primaryDocument, Iterable<? extends Document> attachments, ZonedDateTime deliveryTime,
-                    String invoiceReference, PrintIfUnread printIfUnread) {
+                    String invoiceReference, PrintIfUnread printIfUnread, Batch batch) {
         this.messageId = messageId;
         this.senderId = senderId;
         this.senderOrganization = senderOrganization;
@@ -213,6 +222,7 @@ public class Message implements MayHaveSender {
             this.attachments.add(attachment);
         }
         this.printIfUnread = printIfUnread;
+        this.batch = batch;
     }
 
     public static Message copyMessageWithOnlyPrintDetails(Message messageToCopy){
@@ -223,7 +233,8 @@ public class Message implements MayHaveSender {
 
         return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
                 null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference,
-                messageToCopy.primaryDocument.copyDocumentAndSetDigipostFileTypeToPdf(), tmpAttachments, messageToCopy.recipient.getPrintDetails(), null, null, null, null);
+                messageToCopy.primaryDocument.copyDocumentAndSetDigipostFileTypeToPdf(), tmpAttachments, messageToCopy.recipient.getPrintDetails(), 
+                null, null, null, null, messageToCopy.batch);
     }
 
     public static Message copyMessageWithOnlyDigipostDetails(Message messageToCopy){
@@ -232,14 +243,16 @@ public class Message implements MayHaveSender {
                 messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber,
                 messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
                 messageToCopy.attachments, null, messageToCopy.recipient.bankAccountNumber,
-                messageToCopy.printIfUnread, messageToCopy.recipient.peppolAddresses, messageToCopy.recipient.emailDetails);
+                messageToCopy.printIfUnread, messageToCopy.recipient.peppolAddresses, messageToCopy.recipient.emailDetails, 
+                messageToCopy.batch);
     }
 
     private Message(final String messageId, final Long senderId, final SenderOrganization senderOrganization,
                     final NameAndAddress nameAndAddress, final String digipostAddress, String personalIdentificationNumber,
                     final String organisationNumber, final ZonedDateTime deliveryTime, final String invoiceReference,
                     final Document primaryDocument, final List<Document> attachments, final PrintDetails printDetails, final String bankAccountNumber,
-                    final PrintIfUnread printIfUnread, final PeppolAddresses peppolAddresses, final EmailDetails emailDetails
+                    final PrintIfUnread printIfUnread, final PeppolAddresses peppolAddresses, final EmailDetails emailDetails,
+                    final Batch batch
     ){
         this.messageId = messageId;
         this.senderId = senderId;
@@ -252,6 +265,7 @@ public class Message implements MayHaveSender {
         this.primaryDocument = primaryDocument;
         this.attachments = attachments;
         this.printIfUnread = printIfUnread;
+        this.batch = batch;
     }
 
 

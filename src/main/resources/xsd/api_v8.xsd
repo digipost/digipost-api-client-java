@@ -719,9 +719,10 @@
                     </xsd:restriction>
                 </xsd:simpleType>
             </xsd:element>
-            <xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
-            <xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="201" nillable="false"/>
-			<xsd:element name="print-if-unread" type="print-if-unread" minOccurs="0" />
+			<xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
+			<xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="201" nillable="false"/>
+			<xsd:element name="print-if-unread" type="print-if-unread" minOccurs="0"/>
+			<xsd:element name="batch" type="batch" minOccurs="0" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -1279,4 +1280,58 @@
 		</xsd:sequence>
 	</xsd:complexType>
 
+	<xsd:element name="batch" type="batch" />
+	
+	<xsd:complexType name="batch">
+		<xsd:sequence>
+			<xsd:element name="uuid" type="uuid" minOccurs="1" maxOccurs="1" nillable="false" />
+			<xsd:element name="status" type="batch-status" minOccurs="0" maxOccurs="1" nillable="false" />
+			<xsd:element name="count-digipost" type="xsd:int" minOccurs="0" maxOccurs="1" nillable="false" />
+			<xsd:element name="count-print" type="xsd:int" minOccurs="0" maxOccurs="1" nillable="false" />
+			<xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:simpleType name="batch-status">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:typesafeEnumClass />
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="CREATED">
+                <xsd:annotation>
+                    <xsd:documentation>The batch is created and is ready to receive documents.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="CREATED" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="NOT_COMMITTED">
+                <xsd:annotation>
+                    <xsd:documentation>The batch has received documents and can receive more documents.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="NOT_COMMITTED" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="COMMITTED">
+                <xsd:annotation>
+                    <xsd:documentation>The batch has been committed and documents are being processed. The batch can not receive any more documents.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="COMMITTED" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="DONE">
+                <xsd:annotation>
+                    <xsd:documentation>The batch has finished processing. Final statistics can now be fetched.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="DONE" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+	
 </xsd:schema>

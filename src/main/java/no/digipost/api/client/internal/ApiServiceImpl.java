@@ -20,6 +20,7 @@ import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.SenderId;
 import no.digipost.api.client.archive.ArchiveApi;
+import no.digipost.api.client.batch.BatchApi;
 import no.digipost.api.client.delivery.MessageDeliveryApi;
 import no.digipost.api.client.document.DocumentApi;
 import no.digipost.api.client.errorhandling.DigipostClientException;
@@ -51,6 +52,7 @@ import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
 import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
 import no.digipost.api.client.representations.archive.Archives;
+import no.digipost.api.client.representations.batch.Batch;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
@@ -58,6 +60,7 @@ import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.Digester;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.util.JAXBContextUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -93,8 +96,8 @@ import static java.util.Optional.ofNullable;
 import static javax.xml.bind.JAXB.unmarshal;
 import static no.digipost.api.client.internal.ExceptionUtils.asUnchecked;
 import static no.digipost.api.client.internal.ExceptionUtils.exceptionNameAndMessage;
-import static no.digipost.api.client.internal.http.Headers.Accept_DIGIPOST_MEDIA_TYPE_V7;
-import static no.digipost.api.client.internal.http.Headers.Content_Type_DIGIPOST_MEDIA_TYPE_V7;
+import static no.digipost.api.client.internal.http.Headers.Accept_DIGIPOST_MEDIA_TYPE_V8;
+import static no.digipost.api.client.internal.http.Headers.Content_Type_DIGIPOST_MEDIA_TYPE_V8;
 import static no.digipost.api.client.internal.http.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.internal.http.UriUtils.withQueryParams;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
@@ -103,7 +106,7 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi {
+public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
 
@@ -155,7 +158,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         EntryPoint entryPoint = getEntryPoint();
 
         HttpPost httpPost = new HttpPost(digipostUrl.resolve(entryPoint.getCreateMessageUri().getPath()));
-        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
+        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V8);
         httpPost.setHeader("MIME-Version", "1.0");
         httpPost.removeHeaders("Accept-Encoding");
         httpPost.setEntity(multipartLengthCheckHttpEntity);
@@ -170,7 +173,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         EntryPoint entryPoint = getEntryPoint();
 
         HttpPost httpPost = new HttpPost(digipostUrl.resolve(entryPoint.getArchiveDocumentsUri().getPath()));
-        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
+        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V8);
         httpPost.setHeader("MIME-Version", "1.0");
         httpPost.removeHeaders("Accept-Encoding");
         httpPost.setEntity(multipartLengthCheckHttpEntity);
@@ -206,7 +209,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     @Override
     public CloseableHttpResponse getEncryptionKey(URI location) {
         HttpGet httpGet = new HttpGet(location);
-        httpGet.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
+        httpGet.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V8);
         return send(httpGet);
     }
 
@@ -215,7 +218,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         EntryPoint entryPoint = getEntryPoint();
 
         HttpGet httpGet = new HttpGet(digipostUrl.resolve(entryPoint.getPrintEncryptionCertificate().getPath()));
-        httpGet.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
+        httpGet.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V8);
         return send(httpGet);
     }
 
@@ -292,7 +295,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     private EntryPoint fetchEntryPoint(Optional<SenderId> senderId) throws IOException {
         HttpGet httpGet = new HttpGet(digipostUrl.resolve(senderId.map(s -> ENTRY_POINT + s.stringValue()).orElse(ENTRY_POINT)));
-        httpGet.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
+        httpGet.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V8);
         final HttpCoreContext httpCoreContext = HttpCoreContext.create();
         httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
         try (CloseableHttpResponse response = send(httpGet, httpCoreContext)) {
@@ -416,13 +419,41 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     @Override
     public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user) {
         HttpPost httpPost = new HttpPost(digipostUrl.resolve("/" + senderId.stringValue() + "/user-accounts"));
-        httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V7);
+        httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V8);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         marshal(jaxbContext, user, bao);
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
         return requestEntity(httpPost, UserAccount.class);
     }
+    
+    @Override
+    public Batch createBatch(UUID batchUUID) {
+        final URI createBatch = getEntryPoint().getCreateBatch();
+        try (CloseableHttpResponse response = sendDigipostMedia(new Batch(batchUUID.toString()), createBatch.toString())) {
+            checkResponse(response, eventLogger);
+            return JAXBContextUtils.unmarshal(jaxbContext, response.getEntity().getContent(), Batch.class);
+        } catch (IOException e) {
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
+        }
+    }
 
+    @Override
+    public Batch getBatchInformation(UUID batchUUID) {
+        final URI uri = getEntryPoint().getBatchByUUID(batchUUID);
+        return getEntity(Batch.class, uri.getPath());
+    }
+
+    @Override
+    public Batch completeBatch(Batch batch) {
+        final URI completeBatch = batch.getCompleteBatch();
+        return requestEntity(new HttpPost(completeBatch), Batch.class);
+    }
+
+    @Override
+    public void cancelBatch(Batch batch) {
+        send(new HttpDelete(batch.getCancelBatch()));
+    }
+    
     private static String pathWithQuery(URI uri){
         return uri.getPath() + ((uri.getQuery() != null) ? "?" + uri.getQuery() : "");
     }
@@ -449,7 +480,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     private <R> R requestEntity(HttpRequestBase request, Class<R> entityType) {
-        return request(request, entityType, Accept_DIGIPOST_MEDIA_TYPE_V7);
+        return request(request, entityType, Accept_DIGIPOST_MEDIA_TYPE_V8);
     }
 
     private <R> R request(HttpRequestBase request, Class<R> entityType, Header ... headers) {
@@ -491,8 +522,8 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     private CloseableHttpResponse sendDigipostMedia(Object data, String uri) {
         HttpPost httpPost = new HttpPost(digipostUrl.resolve(uri));
-        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V7);
-        httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V7);
+        httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V8);
+        httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V8);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         marshal(jaxbContext, data, bao);
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));

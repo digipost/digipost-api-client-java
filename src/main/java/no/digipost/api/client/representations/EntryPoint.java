@@ -59,6 +59,14 @@ public class EntryPoint extends Representation {
         return getLinkByRelationName(GET_ARCHIVES).getUri();
     }
     
+    public URI getCreateBatch() {
+        return getLinkByRelationName(CREATE_BATCH).getUri();
+    }
+    
+    public URI getBatchByUUID(UUID uuid) {
+        return getLinkByRelationName(GET_BATCH).getUri().resolve(uuid.toString());
+    }
+    
     public URI getArchiveDocumentByUUIDUri(UUID uuid) {
         return getLinkByRelationName(GET_ARCHIVE_DOCUMENT_BY_UUID).getUri().resolve(uuid.toString());
     }

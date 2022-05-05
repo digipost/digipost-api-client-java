@@ -17,6 +17,7 @@ package no.digipost.api.client.representations;
 
 public enum Relation {
     SELF,
+    SELF_DELETE,
     ADD_CONTENT,
     SEND,
     SEARCH,
@@ -43,4 +44,7 @@ public enum Relation {
     GET_ARCHIVE_DOCUMENT_CONTENT,
     GET_ARCHIVE_DOCUMENT_CONTENT_STREAM,
     ADD_UNIQUE_UUID,
+    CREATE_BATCH,
+	GET_BATCH,
+	COMPLETE_BATCH,
 }
