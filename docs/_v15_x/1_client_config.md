@@ -4,6 +4,19 @@ identifier: client_config
 layout: default
 ---
 
+### Install
+
+The client library is available on the [Maven Central Repository](https://search.maven.org/artifact/no.digipost/digipost-api-client-java).
+Add the following to your `pom.xml`. Make sure to use the latest version available.
+
+```xml
+<dependency>
+  <groupId>no.digipost</groupId>
+  <artifactId>digipost-api-client-java</artifactId>
+  <version>15.3</version>
+</dependency>
+```
+
 ### Configure for production use
 
 To instantiate the client instance you need to supply your assigned _broker ID_, which
