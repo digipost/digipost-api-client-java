@@ -590,11 +590,4 @@
         <tag>HEAD</tag>
     </scm>
 
-    <repositories>
-        <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/service/local/repositories/releases/content</url>
-        </repository>
-    </repositories>
-
 </project>
