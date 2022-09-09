@@ -30,7 +30,7 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-html-validator</artifactId>
-            <version>1.0.5</version>
+            <version>1.0.6</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
@@ -180,7 +180,7 @@
                 <version>2.13.2.1</version>
                 <scope>import</scope>
                 <type>pom</type>
-            </dependency>               
+            </dependency>
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
@@ -496,6 +496,18 @@
                             <rules>
                                 <banVulnerable
                                     implementation="org.sonatype.ossindex.maven.enforcer.BanVulnerableDependencies">
+                                    <excludeVulnerabilityIds>
+                                        <!-- Exclude reported vulnerability in com.guava.guava:guava.
+                                             https://github.com/google/guava/issues/4011
+                                             https://ossindex.sonatype.org/vulnerability/sonatype-2020-0926?component-type=maven&component-name=com.google.guava/guava
+
+                                             Google has resolved the issue and stated it is "intended functionality".
+                                             The vulnerability concerns usage of deprecated Files::createTempDir, which creates a temp directory with read access for all users.
+
+                                             If you wish, you can eliminate this vulnerability by explicitly setting the 'java.io.tmpdir' system property in the JVM to a safe directory.
+                                         -->
+                                        <exclude>sonatype-2020-0926</exclude>
+                                    </excludeVulnerabilityIds>
                                 </banVulnerable>
                             </rules>
                         </configuration>
