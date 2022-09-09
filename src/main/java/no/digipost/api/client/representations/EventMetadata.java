@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "event-metadata")
 @XmlSeeAlso({
         MoveFilesFromPublicSectorMetadata.class,
+        EmailDeliveredMetadata.class,
         EmailNotificationFailedMetadata.class,
         SmsNotificationFailedMetadata.class,
         FailedPrintMetadata.class,

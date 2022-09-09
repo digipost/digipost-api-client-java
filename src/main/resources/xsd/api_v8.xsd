@@ -1034,14 +1034,22 @@
         </xsd:complexContent>
     </xsd:complexType>
 
-    <xsd:complexType name="email-notification-failed-metadata">
-        <xsd:complexContent>
-            <xsd:extension base="event-metadata">
-                <xsd:attribute name="email-address" type="xsd:string" use="required" />
-                <xsd:attribute name="error-code" type="xsd:string" use="required" />
-            </xsd:extension>
-        </xsd:complexContent>
-    </xsd:complexType>
+	<xsd:complexType name="email-delivered-metadata">
+		<xsd:complexContent>
+			<xsd:extension base="event-metadata">
+				<xsd:attribute name="email-address" type="xsd:string" use="required" />
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="email-notification-failed-metadata">
+		<xsd:complexContent>
+			<xsd:extension base="event-metadata">
+				<xsd:attribute name="email-address" type="xsd:string" use="required" />
+				<xsd:attribute name="error-code" type="xsd:string" use="required" />
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
 
     <xsd:complexType name="sms-notification-failed-metadata">
         <xsd:complexContent>
@@ -1281,7 +1289,7 @@
 	</xsd:complexType>
 
 	<xsd:element name="batch" type="batch" />
-	
+
 	<xsd:complexType name="batch">
 		<xsd:sequence>
 			<xsd:element name="uuid" type="uuid" minOccurs="1" maxOccurs="1" nillable="false" />
@@ -1333,5 +1341,5 @@
             </xsd:enumeration>
         </xsd:restriction>
     </xsd:simpleType>
-	
+
 </xsd:schema>
