@@ -35,6 +35,7 @@ import static no.digipost.api.client.representations.AuthenticationLevel.IDPORTE
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.AuthenticationLevel.TWO_FACTOR;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
+import static no.digipost.api.client.representations.DocumentEventType.EMAIL_MESSAGE_SENT;
 import static no.digipost.api.client.representations.DocumentEventType.EMAIL_NOTIFICATION_FAILED;
 import static no.digipost.api.client.representations.DocumentEventType.MOVE_FILES_FROM_PUBLIC_SECTOR;
 import static no.digipost.api.client.representations.DocumentEventType.OPENED;
@@ -189,6 +190,11 @@ public class XsdValidationTest {
         ZonedDateTime now = ZonedDateTime.now();
         DocumentEvent openedEvent = new DocumentEvent(randomUUID(), OPENED, now, now);
 
+        DocumentEvent emailDeliveredEvent = new DocumentEvent(randomUUID(), EMAIL_MESSAGE_SENT, now, now, null);
+
+        DocumentEvent emailDeliveredEventWithMetadata = new DocumentEvent(randomUUID(), EMAIL_MESSAGE_SENT, now, now,
+                new EmailDeliveredMetadata("example@test.com"));
+
         DocumentEvent failedEmailNotificationEvent = new DocumentEvent(randomUUID(), EMAIL_NOTIFICATION_FAILED, now, now,
                 new EmailNotificationFailedMetadata("emailAddress", "ERROR_CODE"));
 
@@ -208,8 +214,9 @@ public class XsdValidationTest {
 
         DocumentEvent shreddedEvent = new DocumentEvent(randomUUID(), SHREDDED, now, now);
 
-        DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, failedEmailNotificationEvent,
-                failedSmsNotificationEvent, printFailedEvent, movedFilesEvent, postmarkedEvent, shreddedEvent));
+        DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, emailDeliveredEvent,
+                emailDeliveredEventWithMetadata, failedEmailNotificationEvent, failedSmsNotificationEvent,
+                printFailedEvent, movedFilesEvent, postmarkedEvent, shreddedEvent));
         marshallValidateAndUnmarshall(documentEvents);
     }
 
