@@ -70,6 +70,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
@@ -363,11 +364,9 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
-    public void deleteArchiveDocumentByUUID(ArchiveDocument archiveDocument) {
-        final URI uri = archiveDocument.deleteArchiveDocumentUri();
-        send(new HttpDelete(uri));
+    public void deleteArchiveDocumentByUUID(URI deleteArchiveDocumentUri) {
+        send(new HttpDelete(digipostUrl.resolve(deleteArchiveDocumentUri.getPath())));
     }
-
 
     @Override
     public Archive addUniqueUUIDToArchiveDocument(SenderId senderId, UUID uuid, UUID newuuid) {
@@ -391,6 +390,17 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         } catch (IOException e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
         }
+    }
+
+    @Override
+    public ArchiveDocument saveArchiveDocument(ArchiveDocument archiveDocument, URI uri) {
+        final HttpPut httpPut = new HttpPut(digipostUrl.resolve(uri.getPath()));
+        httpPut.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V8);
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(jaxbContext, archiveDocument, bao);
+        httpPut.setEntity(new ByteArrayEntity(bao.toByteArray()));
+        
+        return requestEntity(httpPut, ArchiveDocument.class);
     }
 
     @Override
