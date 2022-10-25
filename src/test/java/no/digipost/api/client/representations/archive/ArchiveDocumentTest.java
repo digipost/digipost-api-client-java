@@ -15,13 +15,16 @@
  */
 package no.digipost.api.client.representations.archive;
 
-import co.unruly.matchers.Java8Matchers;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.UUID;
 
+import static co.unruly.matchers.Java8Matchers.where;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 class ArchiveDocumentTest {
@@ -35,7 +38,7 @@ class ArchiveDocumentTest {
                 , "application/pdf"
         );
 
-        assertThat(document, Java8Matchers.where(ArchiveDocument::getUuid, equalTo(UUID.fromString("aaf94188-49ba-3e02-ad14-4cdd83b1814b"))));
+        assertThat(document, where(ArchiveDocument::getUuid, equalTo(UUID.fromString("aaf94188-49ba-3e02-ad14-4cdd83b1814b"))));
     }
 
     @Test
@@ -47,6 +50,22 @@ class ArchiveDocumentTest {
                 , "application/pdf"
         ).withReferenceId("ref:1213").withDeletionTime(ZonedDateTime.now().plusMonths(6));
 
-        assertThat(document, Java8Matchers.where(ArchiveDocument::getReferenceid, equalTo("ref:1213")));
+        assertThat(document, where(ArchiveDocument::getReferenceid, equalTo("ref:1213")));
+    }
+
+    @Test
+    void add_attributes_to_a_archive_document() {
+        final ArchiveDocument document = new ArchiveDocument(
+                UUID.randomUUID()
+                , "minfil.pdf"
+                , "pdf"
+                , "application/pdf"
+        ).withAttributes(new HashMap<String, String>(){{put("ID", "1234");}});
+        assertThat(document, where(ArchiveDocument::getAttributes, contains(
+                allOf(
+                        where(ArchiveDocumentAttribute::getKey, equalTo("ID")),
+                        where(ArchiveDocumentAttribute::getKey, equalTo("ID"))
+                )
+        )));
     }
 }

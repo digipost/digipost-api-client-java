@@ -19,6 +19,7 @@ import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Representation;
 import no.digipost.api.client.representations.SenderOrganization;
+import org.apache.http.client.utils.URIBuilder;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -26,10 +27,16 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.representations.Relation.NEXT_DOCUMENTS;
@@ -55,9 +62,10 @@ public class Archive extends Representation {
     @XmlElement(nillable = false)
     protected List<ArchiveDocument> documents;
 
-    public static ArchiveBuilder defaultArchive(){
+    public static ArchiveBuilder defaultArchive() {
         return new ArchiveBuilder();
     }
+
     public static ArchiveBuilder namedArchive(String archiveName) {
         return new ArchiveBuilder(archiveName);
     }
@@ -95,6 +103,7 @@ public class Archive extends Representation {
     public List<Link> getLinks() {
         return this.links;
     }
+
     protected void setLink(final List<Link> links) {
         this.links = links;
     }
@@ -103,8 +112,21 @@ public class Archive extends Representation {
         return this.documents;
     }
 
-    public Optional<URI> getNextDocuments(){
+    public Optional<URI> getNextDocuments() {
         return Optional.ofNullable(getLinkByRelationName(NEXT_DOCUMENTS)).map(Link::getUri);
+    }
+
+    public Optional<URI> getNextDocumentsWithAttributes(Map<String, String> attributes) {
+        final String attributesCommaSeparated = attributes.entrySet().stream().flatMap(en -> Stream.of(en.getKey(), en.getValue())).collect(Collectors.joining(","));
+
+        return Optional.ofNullable(getLinkByRelationName(NEXT_DOCUMENTS)).map(Link::getUri)
+                .map(uri -> {
+                    try {
+                        return new URIBuilder(uri).addParameter("attributes", Base64.getEncoder().encodeToString(attributesCommaSeparated.getBytes(StandardCharsets.UTF_8))).build();
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     public static class ArchiveBuilder {

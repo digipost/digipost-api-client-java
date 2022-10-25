@@ -38,9 +38,11 @@ public interface ArchiveApi {
 
     Archive getArchiveDocumentByUUID(SenderId senderId, UUID uuid);
 
-    void deleteArchiveDocumentByUUID(ArchiveDocument archiveDocument);
+    void deleteArchiveDocumentByUUID(URI deleteArchiveDocumentUri);
 
     Archive addUniqueUUIDToArchiveDocument(SenderId senderId, UUID uuid, UUID newuuid);
+
+    ArchiveDocument saveArchiveDocument(ArchiveDocument archiveDocument, URI uri);
 
     public static interface ArchivingDocuments {
 

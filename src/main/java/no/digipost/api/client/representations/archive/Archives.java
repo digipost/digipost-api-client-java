@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "archives", propOrder = {
@@ -57,5 +58,7 @@ public class Archives extends Representation {
         }
         return this.archives;
     }
-
+    public Optional<Archive> findDefault(){
+        return this.getArchives().stream().filter(a -> a.name == null).findAny();
+    }
 }

@@ -74,11 +74,59 @@ Archive current = archives.getArchives().get(0);
 final List<ArchiveDocument> documents = new ArrayList<>();
 
 while (current.getNextDocuments().isPresent()) {
-current = current.getNextDocuments()
-.map(client::getArchiveDocuments)
-.orElse(new Archive());
+    current = current.getNextDocuments()
+    .map(client::getArchiveDocuments)
+    .orElse(new Archive());
 
-documents.addAll(current.getDocuments());
+    documents.addAll(current.getDocuments());
+}
+
+// This prints to total content of the list of documents
+System.out.println(documents);
+```
+## Archive Document attributes
+
+You can add optional attributes to documents. An attribute is a key/val string-map that describe documents. You can add 
+up to 15 attributes pr. archive document. The attribute key and value is case sensitive.
+
+```java
+final ArchiveDocument invoice = new ArchiveDocument(
+    UUID.randomUUID()
+    , "invoice_123123.pdf"
+    , "pdf"
+    , "application/pdf"
+).withAttribute("INR", "123123").withAttribute("custid", "4321");
+```
+
+The attributes can be queried, so that you can get an iterable list of documents.
+
+```java
+final Archives archives = digipostClient.getArchives();
+Archive current = archives.getArchives().get(0);
+
+final List<ArchiveDocument> documents = current.getNextDocumentsWithAttributes(Map.of("INR", "123123", "custid", "4321"))
+        .map(digipostClient::getArchiveDocuments)
+        .map(Archive::getDocuments).orElse(emptyList());
+
+// This prints to total content of the list of documents
+System.out.println(documents);
+```
+
+We recommend that the usage of attributes is made such that the number of results for a query on attributes 
+is less than 100. If you still want that, it's ok, but you need to iterate the pages to get all the results.
+
+```java
+final Archives archives = client.getArchives();
+
+Archive current = archives.getArchives().get(0);
+final List<ArchiveDocument> documents = new ArrayList<>();
+
+while (current.getNextDocuments().isPresent()) {
+    current = current.getNextDocumentsWithAttributes(Map.of("INR", "123123"))
+    .map(client::getArchiveDocuments)
+    .orElse(new Archive());
+
+    documents.addAll(current.getDocuments());
 }
 
 // This prints to total content of the list of documents
@@ -134,6 +182,21 @@ final ArchiveDocument archiveDocument;
 
 URI getDocumentContentStreamURI = archiveDocument.getDocumentContentStream().orElseThrow();
 InputStream content = client.getArchiveDocumentContentStream(getDocumentContentStreamURI);
+```
+
+## Update document attributes and/or referenceID
+
+You can add an attribute or change an attribute value, but not delete an attribute. You can however set the value 
+to empty string. The value of the field for referenceID can be changed as well. 
+
+```java
+final UUID myConvensionUUID = UUID.fromString("vedlegg:123123:txt");
+
+final Archive archiveWithDocument = client.getArchiveDocumentByUuid(myConvensionUUID);
+
+archiveDocument.withReferenceId("My final referenceId").withAttribute("Status", "COMPLETED_PROCESS");
+
+client.updateArchiveDocument(archiveDocument, archiveDocument.getUpdate());
 ```
 
 ## Using archive as a broker

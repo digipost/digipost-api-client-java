@@ -1273,6 +1273,7 @@
 			</xsd:element>
 			<xsd:element name="content-type" type="xsd:string" minOccurs="0" maxOccurs="1"/>
 			<xsd:element name="content-hash" type="content-hash" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="attributes" type="archive-document-attribute" minOccurs="0" maxOccurs="15"/>
 			<xsd:element name="archived-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
 			<xsd:element name="deletion-time" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
 			<xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded"/>
@@ -1288,8 +1289,29 @@
 		</xsd:sequence>
 	</xsd:complexType>
 
+	<xsd:element name="archive-document-attribute" type="archive-document-attribute" />
+	
+	<xsd:complexType name="archive-document-attribute">
+		<xsd:sequence>
+			<xsd:element name="key" nillable="false" minOccurs="1" maxOccurs="1">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="20"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="value" nillable="false" minOccurs="1" maxOccurs="1">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:maxLength value="100"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	
 	<xsd:element name="batch" type="batch" />
-
+	
 	<xsd:complexType name="batch">
 		<xsd:sequence>
 			<xsd:element name="uuid" type="uuid" minOccurs="1" maxOccurs="1" nillable="false" />
