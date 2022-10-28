@@ -56,12 +56,14 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Duration.ZERO;
 import static java.time.Duration.between;
+import static java.util.stream.Collectors.toSet;
 import static no.digipost.api.client.internal.ExceptionUtils.asUnchecked;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MULTI_MEDIA_SUB_TYPE_V8;
@@ -114,6 +116,13 @@ public class MessageDeliverer {
      */
     public MessageDelivery sendMultipartMessage(Message message, Map<UUID, DocumentContent> documentsAndContent) {
         EncrypterAndDocsWithInputstream encryptionAndInputStream = createEncrypterIfNecessaryAndMapContentToInputstream(message, documentsAndContent);
+        final Set<UUID> picketUp = encryptionAndInputStream.documentsAndInputstream.keySet().stream().map(e -> e.uuid).collect(toSet());
+        final Set<UUID> given = documentsAndContent.keySet().stream().filter(g -> !picketUp.contains(g)).collect(toSet());
+
+        if (!given.isEmpty()) {
+            LOG.warn("There was more added documentContent compared to defined in message. uuids:{}", given);
+        }
+        
         Map<Document, InputStream> documentInputStream = encryptionAndInputStream.documentsAndInputstream;
         Message singleChannelMessage = encryptionAndInputStream.getSingleChannelMessage();
 
