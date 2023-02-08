@@ -59,9 +59,9 @@ The class `Archives` holds a list of `Archive` where you can see the name of the
 ## Iterate documents in an archive
 
 You _can_ get content of an archive with paged requests. Under is an example of how to iterate
-an archive. However it's use is strongly discouraged because it leads to the idea that 
-an archive can be itereated. We expect an archive to possibly reach many million rows so the iteration 
-will possibly give huge loads. On the other hand being able to dump all data is a nessary feature of any archive.
+an archive. However, it's use is strongly discouraged because it leads to the idea that 
+an archive can be iterated. We expect an archive to possibly reach many million rows so the iteration 
+will possibly give huge loads. On the other hand being able to dump all data is a necessary feature of any archive.
 
 _Please use fetch document by UUID or referenceID instead to create functionality on top of the archive._
 You should on your side know where and how to get a document from an archive. You do this by knowing where 
@@ -144,9 +144,9 @@ final Archives archives = client.getArchiveDocumentsByReferenceId("REFERENCE_ID"
 
 ## Get documents by uuid
 
-You can retrieve a set of documents by the UUID that you give the document when you achive it. In the example above
-we use `UUID.randomUUID()` to generate an uuid. You can either store that random uuid inyour database for
-retrieval later, or you can generate a deterministic uuid based on your convensions for later retrieval.
+You can retrieve a set of documents by the UUID that you give the document when you archive it. In the example above
+we use `UUID.randomUUID()` to generate an uuid. You can either store that random uuid in your database for
+retrieval later, or you can generate a deterministic uuid based on your conventions for later retrieval.
 
 You will get in return an instance of `Archive` which contains information on the archive the document is contained in
 and the actual document. From this you can fetch the actual document.
