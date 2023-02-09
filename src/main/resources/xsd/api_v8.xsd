@@ -1364,4 +1364,39 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+    <xsd:element name="tag" type="tag" />
+
+    <xsd:complexType name="tag">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="public-mailbox-tag" type="public-mailbox-tag">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            A tag which indicates that the corresponding account
+                            for the provided personal-identification-number should
+                            receive public mail through Digipost
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="public-mailbox-tag">
+        <xsd:sequence>
+            <xsd:element name="personal-identification-number" minOccurs="0" maxOccurs="1" nillable="false">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Fødselsnummer.
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:length value="11" />
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
 </xsd:schema>

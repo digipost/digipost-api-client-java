@@ -37,6 +37,7 @@ import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
+import no.digipost.api.client.representations.accounts.Tag;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
@@ -48,6 +49,7 @@ import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
 import no.digipost.http.client3.DigipostHttpClientFactory;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -86,6 +88,7 @@ public class DigipostClient {
     private final DocumentApi documentApi;
     private final ArchiveApi archiveApi;
     private final BatchApi batchApi;
+    private final TagApi tagApi;
 
 
     public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
@@ -97,15 +100,16 @@ public class DigipostClient {
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
-        this(config, apiService, apiService, apiService, apiService, apiService);
+        this(config, apiService, apiService, apiService, apiService, apiService, apiService);
     }
 
-    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi) {
+    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi) {
         this.messageApi = apiService;
         this.inboxApiService = inboxApiService;
         this.documentApi = documentApi;
         this.archiveApi = archiveApi;
         this.batchApi = batchApi;
+        this.tagApi = tagApi;
 
         this.messageSender = new MessageDeliverer(config, apiService);
         this.archiveSender = new ArchiveDeliverer(config, archiveApi);
@@ -293,6 +297,14 @@ public class DigipostClient {
 
     public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user) {
         return messageApi.createOrActivateUserAccount(senderId, user);
+    }
+
+    public void addTag(Tag tag) {
+        tagApi.addTag(tag);
+    }
+
+    public void removeTag(Tag tag) {
+        tagApi.removeTag(tag);
     }
 
     public ArchiveApi.ArchivingDocuments archiveDocuments(final Archive archive) {

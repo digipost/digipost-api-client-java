@@ -48,4 +48,8 @@ public enum Relation {
     CREATE_BATCH,
 	GET_BATCH,
 	COMPLETE_BATCH,
+    CREATE_OR_ACTIVATE_USER_ACCOUNT,
+    ADD_TAG,
+    REMOVE_TAG,
+
 }
