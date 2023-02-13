@@ -1384,7 +1384,7 @@
 
     <xsd:complexType name="public-mailbox-tag">
         <xsd:sequence>
-            <xsd:element name="personal-identification-number" minOccurs="0" maxOccurs="1" nillable="false">
+            <xsd:element name="personal-identification-number" minOccurs="1" maxOccurs="1" nillable="false">
                 <xsd:annotation>
                     <xsd:documentation>
                         Fødselsnummer.
