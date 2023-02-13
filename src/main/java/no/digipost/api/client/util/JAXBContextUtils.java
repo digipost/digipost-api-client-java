@@ -29,7 +29,9 @@ import no.digipost.api.client.representations.IdentificationResultWithEncryption
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.Recipients;
+import no.digipost.api.client.representations.accounts.PublicMailboxTag;
 import no.digipost.api.client.representations.accounts.UserAccount;
+import no.digipost.api.client.representations.accounts.Tag;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
@@ -48,7 +50,8 @@ public class JAXBContextUtils {
             EntryPoint.class, ErrorMessage.class, Identification.class, IdentificationResult.class, Message.class, Recipients.class,
             Autocomplete.class, DocumentEvents.class, DocumentStatus.class, MessageDelivery.class, EncryptionKey.class,
             IdentificationResultWithEncryptionKey.class, SenderInformation.class, UserInformation.class, UserAccount.class,
-            AdditionalData.class, EncryptionCertificate.class, Archives.class, Archive.class, ArchiveDocument.class
+            AdditionalData.class, EncryptionCertificate.class, Archives.class, Archive.class, ArchiveDocument.class,
+            Tag.class, PublicMailboxTag.class
     );
 
     private static JAXBContext initContext(Class<?>... clazz) {

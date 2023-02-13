@@ -47,6 +47,7 @@ import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MayHaveSender;
 import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
+import no.digipost.api.client.representations.accounts.Tag;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
@@ -60,6 +61,7 @@ import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.Digester;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.Header;
@@ -107,7 +109,7 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi {
+public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi, TagApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
 
@@ -428,7 +430,8 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     @Override
     public UserAccount createOrActivateUserAccount(SenderId senderId, UserInformation user) {
-        HttpPost httpPost = new HttpPost(digipostUrl.resolve("/" + senderId.stringValue() + "/user-accounts"));
+        URI uri = getEntryPoint().getCreateOrActivateUserAccountUri();
+        HttpPost httpPost = new HttpPost(uri);
         httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V8);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         marshal(jaxbContext, user, bao);
@@ -462,6 +465,26 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     @Override
     public void cancelBatch(Batch batch) {
         send(new HttpDelete(batch.getCancelBatch()));
+    }
+
+    @Override
+    public void addTag(Tag tag) {
+        URI uri = getEntryPoint().getAddTagUri();
+        try (CloseableHttpResponse response = sendDigipostMedia(tag, uri.getPath())) {
+            checkResponse(response, eventLogger);
+        } catch (IOException e) {
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public void removeTag(Tag tag) {
+        URI uri = getEntryPoint().getRemoveTagUri();
+        try (CloseableHttpResponse response = sendDigipostMedia(tag, uri.getPath())) {
+            checkResponse(response, eventLogger);
+        } catch (IOException e) {
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
+        }
     }
     
     private static String pathWithQuery(URI uri){
