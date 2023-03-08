@@ -56,6 +56,7 @@ import static org.apache.commons.lang3.StringUtils.join;
         "primaryDocument",
         "attachments",
         "printIfUnread", 
+        "printIfNotRegistered",
         "batch"})
 @XmlRootElement(name = "message")
 public class Message implements MayHaveSender {
@@ -89,11 +90,13 @@ public class Message implements MayHaveSender {
     public final List<Document> attachments;
     @XmlElement(name = "print-if-unread")
     public final PrintIfUnread printIfUnread;
+    @XmlElement(name = "print-if-not-registered")
+    public final PrintIfNotRegistered printIfNotRegistered;
     @XmlElement(name="batch")
     public final Batch batch;
 
     Message() {
-        this(null, null, null, null, null, null, null, null, null, null);
+        this(null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public static class MessageBuilder {
@@ -106,6 +109,7 @@ public class Message implements MayHaveSender {
         private final List<Document> attachments = new ArrayList<>();
         private String invoiceReference;
         private PrintIfUnread printIfUnread;
+        private PrintIfNotRegistered printIfNotRegistered;
         private Batch batch;
 
         private MessageBuilder(String messageId, Document primaryDocument) {
@@ -181,6 +185,11 @@ public class Message implements MayHaveSender {
             return this;
         }
 
+        public MessageBuilder printIfNotRegistered(PrintIfNotRegistered printIfNotRegistered) {
+            this.printIfNotRegistered = printIfNotRegistered;
+            return this;
+        }
+
         public MessageBuilder attachments(Document ... attachments) {
             return attachments(asList(attachments));
         }
@@ -202,14 +211,14 @@ public class Message implements MayHaveSender {
             if (senderId != null && senderOrganization != null) {
                 throw new IllegalStateException("You can't set both senderId *and* senderOrganization.");
             }
-            return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryTime, invoiceReference, printIfUnread, batch);
+            return new Message(messageId, senderId, senderOrganization, recipient, primaryDocument, attachments, deliveryTime, invoiceReference, printIfUnread, printIfNotRegistered, batch);
         }
 
     }
 
     private Message(String messageId, Long senderId, SenderOrganization senderOrganization, MessageRecipient recipient,
                     Document primaryDocument, Iterable<? extends Document> attachments, ZonedDateTime deliveryTime,
-                    String invoiceReference, PrintIfUnread printIfUnread, Batch batch) {
+                    String invoiceReference, PrintIfUnread printIfUnread, PrintIfNotRegistered printIfNotRegistered, Batch batch) {
         this.messageId = messageId;
         this.senderId = senderId;
         this.senderOrganization = senderOrganization;
@@ -222,6 +231,7 @@ public class Message implements MayHaveSender {
             this.attachments.add(attachment);
         }
         this.printIfUnread = printIfUnread;
+        this.printIfNotRegistered = printIfNotRegistered;
         this.batch = batch;
     }
 
@@ -234,7 +244,7 @@ public class Message implements MayHaveSender {
         return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
                 null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference,
                 messageToCopy.primaryDocument.copyDocumentAndSetDigipostFileTypeToPdf(), tmpAttachments, messageToCopy.recipient.getPrintDetails(), 
-                null, null, null, null, messageToCopy.batch);
+                null, null, null, null, null, messageToCopy.batch);
     }
 
     public static Message copyMessageWithOnlyDigipostDetails(Message messageToCopy){
@@ -243,7 +253,7 @@ public class Message implements MayHaveSender {
                 messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber,
                 messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
                 messageToCopy.attachments, null, messageToCopy.recipient.bankAccountNumber,
-                messageToCopy.printIfUnread, messageToCopy.recipient.peppolAddresses, messageToCopy.recipient.emailDetails, 
+                messageToCopy.printIfUnread, messageToCopy.printIfNotRegistered, messageToCopy.recipient.peppolAddresses, messageToCopy.recipient.emailDetails,
                 messageToCopy.batch);
     }
 
@@ -251,7 +261,7 @@ public class Message implements MayHaveSender {
                     final NameAndAddress nameAndAddress, final String digipostAddress, String personalIdentificationNumber,
                     final String organisationNumber, final ZonedDateTime deliveryTime, final String invoiceReference,
                     final Document primaryDocument, final List<Document> attachments, final PrintDetails printDetails, final String bankAccountNumber,
-                    final PrintIfUnread printIfUnread, final PeppolAddresses peppolAddresses, final EmailDetails emailDetails,
+                    final PrintIfUnread printIfUnread, final PrintIfNotRegistered printIfNotRegistered, final PeppolAddresses peppolAddresses, final EmailDetails emailDetails,
                     final Batch batch
     ){
         this.messageId = messageId;
@@ -265,6 +275,7 @@ public class Message implements MayHaveSender {
         this.primaryDocument = primaryDocument;
         this.attachments = attachments;
         this.printIfUnread = printIfUnread;
+        this.printIfNotRegistered = printIfNotRegistered;
         this.batch = batch;
     }
 

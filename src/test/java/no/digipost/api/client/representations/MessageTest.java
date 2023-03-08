@@ -63,20 +63,22 @@ public class MessageTest {
     @Test
     public void assertThatClassesHaveNotBeenChangedWithoutChangingMessageCopyMethod() {
         Field[] messageFields = Message.class.getDeclaredFields();
-        assertThat(messageFields.length, is(10));
+        assertThat(messageFields.length, is(11));
 
-        String[] allFieldsThatAreUsedForCopyInMessage = new String[]{"messageId", "senderId", "senderOrganization",
-        "recipient", "deliveryTime", "invoiceReference", "primaryDocument", "attachments", "printIfUnread", "batch"};
+        String[] allFieldsThatAreUsedForCopyInMessage = new String[]{
+                "messageId", "senderId", "senderOrganization", "recipient", "deliveryTime", "invoiceReference",
+                "primaryDocument", "attachments", "printIfUnread", "printIfNotRegistered", "batch"
+        };
 
-        for(int i = 0; i < messageFields.length; i++){
-            for(int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++){
-                if(messageFields[i].getName().equals(allFieldsThatAreUsedForCopyInMessage[n])){
+        for (Field messageField : messageFields) {
+            for (int n = 0; n < allFieldsThatAreUsedForCopyInMessage.length; n++) {
+                if (messageField.getName().equals(allFieldsThatAreUsedForCopyInMessage[n])) {
                     allFieldsThatAreUsedForCopyInMessage[n] = "";
                 }
             }
         }
 
-        for(String shouldBeEmpty : allFieldsThatAreUsedForCopyInMessage){
+        for (String shouldBeEmpty : allFieldsThatAreUsedForCopyInMessage){
             assertThat(shouldBeEmpty, is(""));
         }
 
