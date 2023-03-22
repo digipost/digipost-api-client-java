@@ -35,9 +35,11 @@ import no.digipost.api.client.representations.Identification;
 import no.digipost.api.client.representations.IdentificationResult;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Message;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.Recipients;
-import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.Tag;
+import no.digipost.api.client.representations.accounts.Tags;
+import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
@@ -305,6 +307,10 @@ public class DigipostClient {
 
     public void removeTag(Tag tag) {
         tagApi.removeTag(tag);
+    }
+
+    public Tags getTags(PersonalIdentificationNumber personalIdentificationNumber) {
+        return tagApi.getTags(personalIdentificationNumber);
     }
 
     public ArchiveApi.ArchivingDocuments archiveDocuments(final Archive archive) {

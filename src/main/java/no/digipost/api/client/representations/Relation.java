@@ -51,5 +51,6 @@ public enum Relation {
     CREATE_OR_ACTIVATE_USER_ACCOUNT,
     ADD_TAG,
     REMOVE_TAG,
+    GET_TAGS,
 
 }
