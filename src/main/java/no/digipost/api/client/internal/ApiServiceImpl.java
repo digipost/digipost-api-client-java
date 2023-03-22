@@ -45,9 +45,11 @@ import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.Identification;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.MayHaveSender;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.Recipients;
-import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.Tag;
+import no.digipost.api.client.representations.accounts.Tags;
+import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
@@ -485,6 +487,13 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         } catch (IOException e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
         }
+    }
+
+    @Override
+    public Tags getTags(PersonalIdentificationNumber personalIdentificationNumber) {
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("personal-identification-number", personalIdentificationNumber.asString());
+        return getEntity(Tags.class, getEntryPoint().getTagsUri().getPath(), queryParams);
     }
     
     private static String pathWithQuery(URI uri){

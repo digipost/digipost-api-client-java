@@ -108,6 +108,8 @@ public class EntryPoint extends Representation {
 
     public URI getRemoveTagUri() { return getLinkByRelationName(REMOVE_TAG).getUri(); }
 
+    public URI getTagsUri() { return getLinkByRelationName(GET_TAGS).getUri(); }
+
     public URI getCreateOrActivateUserAccountUri() { return getLinkByRelationName(CREATE_OR_ACTIVATE_USER_ACCOUNT).getUri(); }
 
     public String getCertificate() {

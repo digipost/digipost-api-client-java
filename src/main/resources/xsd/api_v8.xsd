@@ -1409,4 +1409,37 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:element name="tags" type="tags" />
+
+    <xsd:complexType name="tags">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <annox:annotate target="class">
+                    <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="tags"/>
+                </annox:annotate>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="tag-type" type="tag-type" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:simpleType name="tag-type">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:typesafeEnumClass />
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="PUBLIC_MAILBOX_TAG">
+                <xsd:annotation>
+                    <xsd:documentation>The account receives public mail through Digipost.</xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:typesafeEnumMember name="PUBLIC_MAILBOX_TAG" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
 </xsd:schema>

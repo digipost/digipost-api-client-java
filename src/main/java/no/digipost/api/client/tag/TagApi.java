@@ -15,7 +15,9 @@
  */
 package no.digipost.api.client.tag;
 
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.accounts.Tag;
+import no.digipost.api.client.representations.accounts.Tags;
 
 /**
  * Klasser som implementerer dette interfacet håndterer det å sette og fjerne
@@ -29,5 +31,7 @@ public interface TagApi {
     void addTag(Tag tag);
 
     void removeTag(Tag tag);
+
+    Tags getTags(PersonalIdentificationNumber personalIdentificationNumber);
 
 }
