@@ -37,6 +37,7 @@ import no.digipost.api.client.representations.MessageDelivery;
 import no.digipost.api.client.representations.MessageRecipient;
 import no.digipost.api.client.representations.MessageStatus;
 import no.digipost.api.client.representations.NorwegianAddress;
+import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -47,13 +48,20 @@ import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import no.digipost.sanitizing.HtmlValidator;
 import no.digipost.time.ControllableClock;
+
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -64,6 +72,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -94,6 +103,9 @@ import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.reset;
@@ -273,7 +285,7 @@ public class MessageDelivererTest {
         }
 
         Map<Document, InputStream> documentAndInputStreams = new HashMap<>();
-        Message printCopyMessage = Message.copyMessageWithOnlyPrintDetails(message);
+        Message printCopyMessage = Message.copyPrintMessage(message);
         MessageDeliverer.setPrintContentToUUID(documentAndContent, documentAndInputStreams, printCopyMessage.getAllDocuments());
 
         printCopyMessage.getAllDocuments().forEach(doc -> {
@@ -282,7 +294,7 @@ public class MessageDelivererTest {
         });
 
         assertThat(printCopyMessage.recipient.hasPrintDetails(), is(true));
-        assertThat(printCopyMessage.recipient.hasDigipostIdentification(),is(false));
+        assertThat(printCopyMessage.recipient.hasDigipostIdentification(),is(true));
     }
 
     @Test
@@ -328,4 +340,57 @@ public class MessageDelivererTest {
         then(pdfValidator).should(times(2)).validate(any(byte[].class), any(PdfValidationSettings.class));
         reset(pdfValidator);
     }
+
+    @ParameterizedTest(name = "{index} {0} clones as expected")
+    @MethodSource("provideMessages")
+    void setMapAndMessageToPrintClonesMessage(String description, Message message) {
+        Map<UUID, DocumentContent> docs2ContentMap = Collections
+                .singletonMap(message.primaryDocument.uuid, DocumentContent.CreateBothStreamContent(printablePdf1Page()));
+        Map<Document, InputStream> docs2StreamMap = new HashMap<>();
+        Message result = MessageDeliverer.setMapAndMessageToPrint(message, docs2ContentMap, docs2StreamMap);
+        assertNotSame(result, message);
+        assertMessagesAreEqual(message, result);
+    }
+
+    private static Stream<Arguments> provideMessages() {
+        Document primaryDoc = new Document(
+                UUID.randomUUID(), RandomStringUtils.randomAlphanumeric(1, 128), FileType.PDF
+        );
+        PrintRecipient printRecipient = new PrintRecipient();
+        PrintDetails printDetails = new PrintDetails(printRecipient, printRecipient);
+        MessageRecipient directPrintRecipient = new MessageRecipient(printDetails);
+        MessageRecipient fallbackPrintRecipient = new MessageRecipient(
+                new PersonalIdentificationNumber(RandomStringUtils.randomNumeric(11)), printDetails
+        );
+        return Stream.of(
+                Arguments.of("direct print message", Message.newMessage(UUID.randomUUID(), primaryDoc)
+                        .recipient(directPrintRecipient).build()),
+                Arguments.of("fallback print message", Message.newMessage(UUID.randomUUID(), primaryDoc)
+                        .recipient(fallbackPrintRecipient).build())
+        );
+    }
+
+    private static void assertMessagesAreEqual(Message message, Message result) {
+        assertEquals(message.attachments, result.attachments);
+        assertEquals(message.batch, result.batch);
+        assertEquals(message.deliveryTime, result.deliveryTime);
+        assertEquals(message.invoiceReference, result.invoiceReference);
+        assertEquals(message.messageId, result.messageId);
+        assertEquals(message.primaryDocument.uuid, result.primaryDocument.uuid);
+        assertEquals(message.primaryDocument.subject, result.primaryDocument.subject);
+        assertEquals(message.primaryDocument.getDigipostFileType(), result.primaryDocument.getDigipostFileType());
+        assertEquals(message.printIfNotRegistered, result.printIfNotRegistered);
+        assertEquals(message.printIfUnread, result.printIfUnread);
+        assertTrue(
+                EqualsBuilder.reflectionEquals(message.recipient, result.recipient),
+                String.format(
+                        "expected%n%s but was: %n%s",
+                        ToStringBuilder.reflectionToString(message.recipient),
+                        ToStringBuilder.reflectionToString(result.recipient)
+                )
+        );
+        assertEquals(message.senderId, result.senderId);
+        assertEquals(message.senderOrganization, result.senderOrganization);
+    }
+
 }

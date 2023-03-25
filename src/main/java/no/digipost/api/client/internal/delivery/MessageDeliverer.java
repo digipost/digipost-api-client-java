@@ -37,6 +37,7 @@ import no.digipost.api.client.security.DigipostPublicKey;
 import no.digipost.api.client.security.Encrypter;
 import no.digipost.print.validate.PdfValidator;
 import no.digipost.sanitizing.HtmlValidator;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -304,7 +305,7 @@ public class MessageDeliverer {
 
     static Message setMapAndMessageToPrint(Message messageToCopy, Map<UUID, DocumentContent> documentsAndContent,
                                            Map<Document, InputStream> documentsAndInputStream) {
-        Message singleChannelMessage = Message.copyMessageWithOnlyPrintDetails(messageToCopy);
+        Message singleChannelMessage = Message.copyPrintMessage(messageToCopy);
         setPrintContentToUUID(documentsAndContent, documentsAndInputStream, singleChannelMessage.getAllDocuments());
 
         return singleChannelMessage;
