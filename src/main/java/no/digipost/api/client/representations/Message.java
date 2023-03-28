@@ -235,26 +235,38 @@ public class Message implements MayHaveSender {
         this.batch = batch;
     }
 
-    public static Message copyMessageWithOnlyPrintDetails(Message messageToCopy){
+    /**
+     * Copies a message and forces all its documents to have file type of PDF.
+     *
+     * @param messageToCopy message to copy
+     * @return a copy of <code>messageToCopy</code>
+     */
+    public static Message copyPrintMessage(Message messageToCopy){
         List<Document> tmpAttachments = new ArrayList<>();
         for(Document attachment : messageToCopy.attachments){
             tmpAttachments.add(attachment.copyDocumentAndSetDigipostFileTypeToPdf());
         }
-
-        return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
-                null, null, null, null, messageToCopy.deliveryTime, messageToCopy.invoiceReference,
-                messageToCopy.primaryDocument.copyDocumentAndSetDigipostFileTypeToPdf(), tmpAttachments, messageToCopy.recipient.getPrintDetails(), 
-                null, null, null, null, null, messageToCopy.batch);
+        return copyMessage(
+                messageToCopy, messageToCopy.primaryDocument.copyDocumentAndSetDigipostFileTypeToPdf(), tmpAttachments,
+                messageToCopy.recipient.getPrintDetails()
+        );
     }
 
     public static Message copyMessageWithOnlyDigipostDetails(Message messageToCopy){
-        return new Message(messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
+        return copyMessage(messageToCopy, messageToCopy.primaryDocument, messageToCopy.attachments, null);
+    }
+
+    private static Message copyMessage(Message messageToCopy, Document newPrimaryDocument, List<Document> newAttachments, PrintDetails newPrintDetails) {
+        return new Message(
+                messageToCopy.messageId, messageToCopy.senderId, messageToCopy.senderOrganization,
                 messageToCopy.recipient.nameAndAddress, messageToCopy.recipient.digipostAddress,
                 messageToCopy.recipient.personalIdentificationNumber, messageToCopy.recipient.organisationNumber,
-                messageToCopy.deliveryTime, messageToCopy.invoiceReference, messageToCopy.primaryDocument,
-                messageToCopy.attachments, null, messageToCopy.recipient.bankAccountNumber,
-                messageToCopy.printIfUnread, messageToCopy.printIfNotRegistered, messageToCopy.recipient.peppolAddresses, messageToCopy.recipient.emailDetails,
-                messageToCopy.batch);
+                messageToCopy.deliveryTime, messageToCopy.invoiceReference,
+                newPrimaryDocument, newAttachments,
+                newPrintDetails, messageToCopy.recipient.bankAccountNumber,
+                messageToCopy.printIfUnread, messageToCopy.printIfNotRegistered,
+                messageToCopy.recipient.peppolAddresses, messageToCopy.recipient.emailDetails, messageToCopy.batch
+        );
     }
 
     private Message(final String messageId, final Long senderId, final SenderOrganization senderOrganization,

@@ -66,10 +66,6 @@ class DocumentsPreparer {
 
         final Map<Document, InputStream> prepared = new LinkedHashMap<>();
 
-        if(message.recipient.hasPrintDetails() && message.recipient.hasDigipostIdentification()){
-            throw new IllegalStateException("Forventet message med enkelt kanal");
-        }
-
         for (Document document : (Iterable<Document>) documentsAndContent.keySet().stream().sorted(message.documentOrder())::iterator) {
             if (document.willBeEncrypted()) {
                 byte[] byteContent = toByteArray(documentsAndContent.get(document));

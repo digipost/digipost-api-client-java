@@ -16,6 +16,7 @@
 package no.digipost.api.client.representations;
 
 import no.digipost.api.client.SenderId;
+
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -45,6 +46,7 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -96,13 +98,13 @@ public class MessageTest {
                         new PrintRecipient("Test", new NorwegianAddress("Bajs", "Korv", "Zip", "Zop")),
                         PrintDetails.PrintColors.COLORS, PrintDetails.NondeliverableHandling.RETURN_TO_SENDER))).build();
 
-        Message copyOfMessageWithPrintDetailsOnly = Message.copyMessageWithOnlyPrintDetails(message);
+        Message copyOfMessageWithPrintDetailsOnly = Message.copyPrintMessage(message);
 
         assertThat(copyOfMessageWithPrintDetailsOnly.deliveryTime, is(message.deliveryTime));
         assertThat(copyOfMessageWithPrintDetailsOnly.invoiceReference, is(message.invoiceReference));
         assertThat(copyOfMessageWithPrintDetailsOnly.messageId, is(message.messageId));
         assertThat(copyOfMessageWithPrintDetailsOnly.senderId, is(message.senderId));
-        assertNull(copyOfMessageWithPrintDetailsOnly.recipient.digipostAddress);
+        assertNotNull(copyOfMessageWithPrintDetailsOnly.recipient.digipostAddress);
         assertNull(copyOfMessageWithPrintDetailsOnly.recipient.nameAndAddress);
         assertNull(copyOfMessageWithPrintDetailsOnly.recipient.organisationNumber);
         assertNull(copyOfMessageWithPrintDetailsOnly.recipient.personalIdentificationNumber);
