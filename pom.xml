@@ -159,17 +159,15 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-data-types</artifactId>
-            <version>0.37</version>
+            <version>0.38</version>
         </dependency>
         <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.3</version>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>2.3.8</version>
+            <groupId>no.digipost</groupId>
+            <artifactId>jaxb-resolver-com.sun.xml.bind</artifactId>
             <scope>runtime</scope>
         </dependency>
 
@@ -177,6 +175,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>no.digipost</groupId>
+                <artifactId>jaxb-resolver-com.sun.xml.bind-bom</artifactId>
+                <version>1.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
@@ -393,14 +398,11 @@
                                         <include>org.hibernate.validator:hibernate-validator</include>
                                         <include>com.google.guava:guava</include>
                                         <include>com.fasterxml.jackson.core:jackson-core</include>
-                                        <include>jakarta.xml.bind:jakarta.xml.bind-api</include>
-                                        <include>jakarta.activation:jakarta.activation-api</include>
-                                        <include>com.sun.activation:jakarta.activation</include>
-                                        <include>org.glassfish.jaxb:jaxb-runtime</include>
-                                        <include>org.glassfish.jaxb:txw2</include>
-                                        <include>com.sun.istack:istack-commons-runtime</include>
-                                        <include>com.sun.xml.fastinfoset:FastInfoset</include>
-                                        <include>org.jvnet.staxex:stax-ex</include>
+                                        <include>no.digipost:jaxb-resolver-com.sun.xml.bind</include>
+                                        <include>javax.xml.bind:jaxb-api</include>
+                                        <include>com.sun.xml.bind:jaxb-impl</include>
+                                        <include>com.sun.xml.bind:jaxb-core</include>
+                                        <include>javax.activation:javax.activation-api</include>
                                         <include>org.checkerframework:checker-qual</include>
                                         <include>no.digipost:certificate-validator</include>
                                         <include>no.digipost:digipost-html-validator</include>

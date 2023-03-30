@@ -26,6 +26,7 @@ This software includes third party software subject to the following licenses:
   Digipost Caching under The Apache Software License, Version 2.0
   Digipost Data Types under The Apache Software License, Version 2.0
   Digipost HTTP Client Builder under The Apache Software License, Version 2.0
+  Digipost JAXB Resolver - com.sun.xml.bind under The Apache Software License, Version 2.0
   Digipost Printability Validator under The Apache Software License, Version 2.0
   digipost-html-validator under Apache License, Version 2.0
   error-prone annotations under Apache 2.0
@@ -34,21 +35,19 @@ This software includes third party software subject to the following licenses:
   Guava ListenableFuture only under The Apache Software License, Version 2.0
   Guava: Google Core Libraries for Java under Apache License, Version 2.0
   Hibernate Validator Engine under Apache License 2.0
-  istack common utility code runtime under Eclipse Distribution License - v 1.0
   J2ObjC Annotations under The Apache Software License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
-  Jakarta Activation under EDL 1.0
-  Jakarta Activation API jar under EDL 1.0
   Jakarta Bean Validation API under Apache License 2.0
   Jakarta Expression Language 3.0 under EPL 2.0 or GPL2 w/ CPE
-  Jakarta XML Binding API under Eclipse Distribution License - v 1.0
-  JAXB Runtime under Eclipse Distribution License - v 1.0
+  JavaBeans Activation Framework API jar under CDDL/GPLv2+CE
+  jaxb-api under CDDL 1.1 or GPL2 w/ CPE
   JBoss Logging 3 under Apache License, version 2.0
   JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
+  Old JAXB Core under CDDL+GPL License
+  Old JAXB Runtime under Eclipse Distribution License - v 1.0
   OWASP Java HTML Sanitizer under Apache License, Version 2.0
   SLF4J API Module under MIT License
-  TXW2 Runtime under Eclipse Distribution License - v 1.0
 
