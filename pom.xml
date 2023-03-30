@@ -17,7 +17,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <bouncycastle.version>1.70</bouncycastle.version>
+        <bouncycastle.version>1.73</bouncycastle.version>
         <slf4j.version>1.7.36</slf4j.version>
     </properties>
 
@@ -92,12 +92,12 @@
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
+            <artifactId>bcprov-jdk18on</artifactId>
             <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
+            <artifactId>bcpkix-jdk18on</artifactId>
             <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
@@ -131,13 +131,11 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -189,7 +187,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.9.2</version>
+                <version>5.9.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -202,6 +200,13 @@
                 <groupId>org.glassfish</groupId>
                 <artifactId>jakarta.el</artifactId>
                 <version>3.0.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-bom</artifactId>
+                <version>4.11.0</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -349,9 +354,9 @@
                                         <exclude>*:*:*:jar:provided</exclude>
                                     </excludes>
                                     <includes>
-                                        <include>org.bouncycastle:bcprov-jdk15on:${bouncycastle.version}:jar:compile</include>
-                                        <include>org.bouncycastle:bcpkix-jdk15on:${bouncycastle.version}:jar:compile</include>
-                                        <include>org.bouncycastle:bcutil-jdk15on:${bouncycastle.version}:jar:compile</include>
+                                        <include>org.bouncycastle:bcprov-jdk18on:${bouncycastle.version}:jar:compile</include>
+                                        <include>org.bouncycastle:bcpkix-jdk18on:${bouncycastle.version}:jar:compile</include>
+                                        <include>org.bouncycastle:bcutil-jdk18on:${bouncycastle.version}:jar:compile</include>
                                         <include>org.jvnet.mimepull:mimepull:*:jar:compile</include>
                                         <include>org.slf4j</include>
                                         <include>org.apache.pdfbox:fontbox</include>
