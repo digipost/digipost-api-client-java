@@ -722,7 +722,7 @@
 			<xsd:element name="primary-document" type="document" minOccurs="1" maxOccurs="1" nillable="false"/>
 			<xsd:element name="attachment" type="document" minOccurs="0" maxOccurs="201" nillable="false"/>
 			<xsd:element name="print-if-unread" type="print-if-unread" minOccurs="0"/>
-            <xsd:element name="print-if-not-registered" type="print-if-not-registered" minOccurs="0"/>
+            <xsd:element name="request-for-registration" type="request-for-registration" minOccurs="0"/>
 			<xsd:element name="batch" type="batch" minOccurs="0" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
@@ -1214,12 +1214,12 @@
 		</xsd:sequence>
 	</xsd:complexType>
 
-    <xsd:complexType name="print-if-not-registered">
+    <xsd:complexType name="request-for-registration">
         <xsd:sequence>
-            <xsd:element name="print-if-not-registered-after" type="xsd:dateTime"/>
+            <xsd:element name="registration-deadline" type="xsd:dateTime"/>
             <xsd:element name="phone-number" type="xsd:string" minOccurs="0" maxOccurs="1" />
             <xsd:element name="email-address" type="xsd:string" minOccurs="0" maxOccurs="1" />
-            <xsd:element name="print-details" type="print-details"/>
+            <xsd:element name="print-details" type="print-details" minOccurs="0" maxOccurs="1" />
         </xsd:sequence>
     </xsd:complexType>
 
@@ -1300,7 +1300,7 @@
 	</xsd:complexType>
 
 	<xsd:element name="archive-document-attribute" type="archive-document-attribute" />
-	
+
 	<xsd:complexType name="archive-document-attribute">
 		<xsd:sequence>
 			<xsd:element name="key" nillable="false" minOccurs="1" maxOccurs="1">
@@ -1319,9 +1319,9 @@
 			</xsd:element>
 		</xsd:sequence>
 	</xsd:complexType>
-	
+
 	<xsd:element name="batch" type="batch" />
-	
+
 	<xsd:complexType name="batch">
 		<xsd:sequence>
 			<xsd:element name="uuid" type="uuid" minOccurs="1" maxOccurs="1" nillable="false" />
