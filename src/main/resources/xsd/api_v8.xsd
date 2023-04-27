@@ -964,7 +964,8 @@
             <xsd:enumeration value="PRINT" />
             <xsd:enumeration value="DIGIPOST" />
             <xsd:enumeration value="PEPPOL" />
-			<xsd:enumeration value="EPOST" />
+            <xsd:enumeration value="EPOST" />
+            <xsd:enumeration value="PENDING" />
         </xsd:restriction>
     </xsd:simpleType>
 
