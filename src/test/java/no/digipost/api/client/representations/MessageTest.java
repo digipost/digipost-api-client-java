@@ -69,7 +69,7 @@ public class MessageTest {
 
         String[] allFieldsThatAreUsedForCopyInMessage = new String[]{
                 "messageId", "senderId", "senderOrganization", "recipient", "deliveryTime", "invoiceReference",
-                "primaryDocument", "attachments", "printIfUnread", "printIfNotRegistered", "batch"
+                "primaryDocument", "attachments", "printIfUnread", "requestForRegistration", "batch"
         };
 
         for (Field messageField : messageFields) {

@@ -23,35 +23,34 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import no.digipost.api.client.representations.accounts.EmailAddress;
-import no.digipost.api.client.representations.accounts.NationalIdentityNumber;
 import no.digipost.api.client.representations.accounts.PhoneNumber;
 import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "print-if-not-registered", propOrder = {
-        "printIfUnreadAfter",
+@XmlType(name = "request-for-registration", propOrder = {
+        "registrationDeadline",
         "phoneNumber",
         "emailAddress",
         "printDetails"
 })
-public class PrintIfNotRegistered {
+public class RequestForRegistration {
 
-    @XmlElement(name = "print-if-not-registered-after", type = String.class)
+    @XmlElement(name = "registration-deadline", type = String.class)
     @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
     @XmlSchemaType(name = "dateTime")
-    protected ZonedDateTime printIfUnreadAfter;
+    protected ZonedDateTime registrationDeadline;
     @XmlElement(name = "phone-number")
     protected PhoneNumber phoneNumber;
     @XmlElement(name = "email-address")
     protected EmailAddress emailAddress;
-    @XmlElement(name = "print-details", required = true)
+    @XmlElement(name = "print-details")
     protected PrintDetails printDetails;
 
-    PrintIfNotRegistered() {}
+    RequestForRegistration() {}
 
-    public PrintIfNotRegistered(ZonedDateTime printIfUnreadAfter, PhoneNumber phoneNumber, EmailAddress emailAddress, PrintDetails printDetails) {
-        this.printIfUnreadAfter = printIfUnreadAfter;
+    public RequestForRegistration(ZonedDateTime registrationDeadline, PhoneNumber phoneNumber, EmailAddress emailAddress, PrintDetails printDetails) {
+        this.registrationDeadline = registrationDeadline;
         this.phoneNumber = phoneNumber;
         this.emailAddress = emailAddress;
         this.printDetails = printDetails;

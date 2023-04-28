@@ -379,7 +379,7 @@ public class MessageDelivererTest {
         assertEquals(message.primaryDocument.uuid, result.primaryDocument.uuid);
         assertEquals(message.primaryDocument.subject, result.primaryDocument.subject);
         assertEquals(message.primaryDocument.getDigipostFileType(), result.primaryDocument.getDigipostFileType());
-        assertEquals(message.printIfNotRegistered, result.printIfNotRegistered);
+        assertEquals(message.requestForRegistration, result.requestForRegistration);
         assertEquals(message.printIfUnread, result.printIfUnread);
         assertTrue(
                 EqualsBuilder.reflectionEquals(message.recipient, result.recipient),
