@@ -16,12 +16,12 @@ This software includes third party software subject to the following licenses:
   Apache HttpClient Mime under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
   Apache PDFBox under Apache License, Version 2.0
+  Bean Validation API under Apache License 2.0
   Bouncy Castle ASN.1 Extension and Utility APIs under Bouncy Castle Licence
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
   Caffeine cache under Apache License, Version 2.0
   Checker Qual under The MIT License
-  ClassMate under The Apache Software License, Version 2.0
   Digipost API Client under The Apache Software License, Version 2.0
   Digipost Caching under The Apache Software License, Version 2.0
   Digipost Data Types under The Apache Software License, Version 2.0
@@ -34,17 +34,13 @@ This software includes third party software subject to the following licenses:
   Guava InternalFutureFailureAccess and InternalFutures under The Apache Software License, Version 2.0
   Guava ListenableFuture only under The Apache Software License, Version 2.0
   Guava: Google Core Libraries for Java under Apache License, Version 2.0
-  Hibernate Validator Engine under Apache License 2.0
   J2ObjC Annotations under The Apache Software License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
-  Jakarta Bean Validation API under Apache License 2.0
-  Jakarta Expression Language 3.0 under EPL 2.0 or GPL2 w/ CPE
   JavaBeans Activation Framework API jar under CDDL/GPLv2+CE
   jaxb-api under CDDL 1.1 or GPL2 w/ CPE
-  JBoss Logging 3 under Apache License, version 2.0
   JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
   Old JAXB Core under CDDL+GPL License
   Old JAXB Runtime under Eclipse Distribution License - v 1.0

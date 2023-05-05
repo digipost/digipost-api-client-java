@@ -202,11 +202,6 @@
                 <version>1.15</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>jakarta.el</artifactId>
-                <version>3.0.4</version>
-            </dependency>
-            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-bom</artifactId>
                 <version>4.11.0</version>
@@ -362,7 +357,6 @@
                                         <include>org.bouncycastle:bcprov-jdk18on:${bouncycastle.version}:jar:compile</include>
                                         <include>org.bouncycastle:bcpkix-jdk18on:${bouncycastle.version}:jar:compile</include>
                                         <include>org.bouncycastle:bcutil-jdk18on:${bouncycastle.version}:jar:compile</include>
-                                        <include>org.jvnet.mimepull:mimepull:*:jar:compile</include>
                                         <include>org.slf4j</include>
                                         <include>org.apache.pdfbox:fontbox</include>
                                         <include>org.apache.pdfbox:pdfbox</include>
@@ -370,7 +364,6 @@
                                         <include>no.digipost:digipost-cache</include>
                                         <include>com.google.code.findbugs:jsr305:jar</include>
                                         <include>com.google.j2objc:j2objc-annotations</include>
-                                        <include>org.codehaus.mojo:animal-sniffer-annotations</include>
                                         <include>com.google.errorprone:error_prone_annotations</include>
                                         <include>com.github.ben-manes.caffeine:caffeine</include>
                                         <include>no.digipost:http-client-builder3</include>
@@ -381,23 +374,15 @@
                                         <include>org.apache.httpcomponents:httpclient</include>
                                         <include>org.apache.httpcomponents:httpcore</include>
                                         <include>org.apache.httpcomponents:httpmime</include>
-                                        <include>org.jboss.logging:jboss-logging</include>
-                                        <include>org.jboss.xnio:xnio-api</include>
-                                        <include>org.jboss.xnio:xnio-nio</include>
                                         <include>no.digipost:digipost-data-types</include>
+                                        <include>com.fasterxml.jackson.core:jackson-core</include>
                                         <include>com.fasterxml.jackson.core:jackson-databind</include>
-                                        <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
                                         <include>com.fasterxml.jackson.core:jackson-annotations</include>
-                                        <include>com.fasterxml.jackson.module:jackson-module-jaxb-annotations</include>
-                                        <include>org.hibernate:hibernate-validator</include>
-                                        <include>com.fasterxml:classmate</include>
-                                        <include>org.glassfish:jakarta.el</include>
-                                        <include>jakarta.validation:jakarta.validation-api</include>
+                                        <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
+                                        <include>javax.validation:validation-api</include>
                                         <include>com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer</include>
                                         <include>com.google.guava:listenablefuture</include>
-                                        <include>org.hibernate.validator:hibernate-validator</include>
                                         <include>com.google.guava:guava</include>
-                                        <include>com.fasterxml.jackson.core:jackson-core</include>
                                         <include>no.digipost:jaxb-resolver-com.sun.xml.bind</include>
                                         <include>javax.xml.bind:jaxb-api</include>
                                         <include>com.sun.xml.bind:jaxb-impl</include>
