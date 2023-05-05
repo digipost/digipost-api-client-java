@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) Posten Norge AS
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,18 @@
  */
 package no.digipost.api.client.representations;
 
-import java.time.ZonedDateTime;
+import no.digipost.api.client.representations.accounts.EmailAddress;
+import no.digipost.api.client.representations.accounts.PhoneNumber;
+import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import no.digipost.api.client.representations.accounts.EmailAddress;
-import no.digipost.api.client.representations.accounts.PhoneNumber;
-import no.digipost.api.client.representations.xml.DateTimeXmlAdapter;
+
+import java.time.ZonedDateTime;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)

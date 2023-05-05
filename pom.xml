@@ -5,7 +5,7 @@
     <parent>
         <groupId>no.digipost</groupId>
         <artifactId>digipost-open-super-pom</artifactId>
-        <version>7</version>
+        <version>13</version>
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
@@ -17,7 +17,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <bouncycastle.version>1.70</bouncycastle.version>
+        <bouncycastle.version>1.73</bouncycastle.version>
         <slf4j.version>1.7.36</slf4j.version>
     </properties>
 
@@ -92,12 +92,12 @@
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
+            <artifactId>bcprov-jdk18on</artifactId>
             <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
+            <artifactId>bcpkix-jdk18on</artifactId>
             <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
@@ -131,13 +131,11 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -161,17 +159,15 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-data-types</artifactId>
-            <version>0.37</version>
+            <version>0.38</version>
         </dependency>
         <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.3</version>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>2.3.8</version>
+            <groupId>no.digipost</groupId>
+            <artifactId>jaxb-resolver-com.sun.xml.bind</artifactId>
             <scope>runtime</scope>
         </dependency>
 
@@ -179,6 +175,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>no.digipost</groupId>
+                <artifactId>jaxb-resolver-com.sun.xml.bind-bom</artifactId>
+                <version>1.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
@@ -189,7 +192,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.9.2</version>
+                <version>5.9.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -199,9 +202,11 @@
                 <version>1.15</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>jakarta.el</artifactId>
-                <version>3.0.4</version>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-bom</artifactId>
+                <version>4.11.0</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -226,39 +231,12 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.jasig.maven</groupId>
-                    <artifactId>maven-notice-plugin</artifactId>
-                    <version>1.1.0</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>javax.xml.bind</groupId>
-                            <artifactId>jaxb-api</artifactId>
-                            <version>2.3.1</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.glassfish.jaxb</groupId>
-                            <artifactId>jaxb-runtime</artifactId>
-                            <version>2.3.3</version>
-                        </dependency>
-                    </dependencies>
-                    <configuration>
-                        <noticeTemplate>${project.basedir}/src/main/notice/NOTICE.template</noticeTemplate>
-                        <excludeScopes>
-                            <excludeScope>test</excludeScope>
-                        </excludeScopes>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.11.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M5</version>
+                    <version>3.0.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
@@ -266,23 +244,23 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>3.1.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.2.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.0</version>
                     <configuration>
                         <archive>
                             <manifest>
@@ -294,32 +272,27 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>3.1.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.8.1</version>
+                    <version>2.15.0</version>
                 </plugin>
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.14.3</version>
+                    <version>0.17.2</version>
                     <configuration>
-                        <newVersion>
-                            <file><path>${project.build.directory}/${project.build.finalName}.${project.packaging}</path></file>
-                        </newVersion>
                         <parameter>
-                            <onlyModified>true</onlyModified>
-                            <onlyBinaryIncompatible>true</onlyBinaryIncompatible>
                             <includes>
                                 <include>no.digipost</include>
                             </includes>
@@ -329,71 +302,32 @@
                         </parameter>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>4.2</version>
+                    <configuration>
+                        <licenseSets>
+                            <licenseSet>
+                                <excludes>
+                                    <exclude>**/user-agent.properties</exclude>
+                                    <exclude>docs/**</exclude>
+                                    <exclude>**/*.pdf</exclude>
+                                    <exclude>**/*.html</exclude>
+                                    <exclude>**/*.p12</exclude>
+                                    <exclude>**/*.txt</exclude>
+                                    <exclude>**/*.xml</exclude>
+                                    <exclude>**/*.xsd</exclude>
+                                    <exclude>**/*.jks</exclude>
+                                    <exclude>LICENSE_*</exclude>
+                                </excludes>
+                            </licenseSet>
+                        </licenseSets>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
-                <configuration>
-                    <header>src/main/resources/header.txt</header>
-                    <strictCheck>true</strictCheck>
-                    <excludes>
-                        <exclude>NOTICE</exclude>
-                        <exclude>**/NOTICE.template</exclude>
-                        <exclude>LICENSE*</exclude>
-                        <exclude>**/*.pdf</exclude>
-                        <exclude>**/*.html</exclude>
-                        <exclude>**/*.p12</exclude>
-                        <exclude>**/*.txt</exclude>
-                        <exclude>**/*.xml</exclude>
-                        <exclude>**/*.xsd</exclude>
-                        <exclude>**/*.jks</exclude>
-                        <exclude>.github/**/*.yml</exclude>
-                        <exclude>**/user-agent.properties</exclude>
-                        <exclude>docs/**</exclude>
-                        <exclude>.java-version</exclude>
-                        <exclude>.mvn/maven.config</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>check-license-header</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <phase>test</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.jasig.maven</groupId>
-                <artifactId>maven-notice-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>check-NOTICE-file</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>analyze-only</goal>
-                        </goals>
-                        <configuration>
-                            <failOnWarning>true</failOnWarning>
-                            <ignoreNonCompile>true</ignoreNonCompile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <dependencies>
@@ -404,21 +338,6 @@
                     </dependency>
                 </dependencies>
                 <executions>
-                    <execution>
-                        <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <!-- Maven 3.3.1 is needed for .mvn/maven.config to work
-                                         https://maven.apache.org/docs/3.3.1/release-notes.html -->
-                                    <version>3.3.1</version>
-                                </requireMavenVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>verify-whitelisted-dependencies</id>
                         <phase>test</phase>
@@ -435,10 +354,9 @@
                                         <exclude>*:*:*:jar:provided</exclude>
                                     </excludes>
                                     <includes>
-                                        <include>org.bouncycastle:bcprov-jdk15on:${bouncycastle.version}:jar:compile</include>
-                                        <include>org.bouncycastle:bcpkix-jdk15on:${bouncycastle.version}:jar:compile</include>
-                                        <include>org.bouncycastle:bcutil-jdk15on:${bouncycastle.version}:jar:compile</include>
-                                        <include>org.jvnet.mimepull:mimepull:*:jar:compile</include>
+                                        <include>org.bouncycastle:bcprov-jdk18on:${bouncycastle.version}:jar:compile</include>
+                                        <include>org.bouncycastle:bcpkix-jdk18on:${bouncycastle.version}:jar:compile</include>
+                                        <include>org.bouncycastle:bcutil-jdk18on:${bouncycastle.version}:jar:compile</include>
                                         <include>org.slf4j</include>
                                         <include>org.apache.pdfbox:fontbox</include>
                                         <include>org.apache.pdfbox:pdfbox</include>
@@ -446,7 +364,6 @@
                                         <include>no.digipost:digipost-cache</include>
                                         <include>com.google.code.findbugs:jsr305:jar</include>
                                         <include>com.google.j2objc:j2objc-annotations</include>
-                                        <include>org.codehaus.mojo:animal-sniffer-annotations</include>
                                         <include>com.google.errorprone:error_prone_annotations</include>
                                         <include>com.github.ben-manes.caffeine:caffeine</include>
                                         <include>no.digipost:http-client-builder3</include>
@@ -457,31 +374,20 @@
                                         <include>org.apache.httpcomponents:httpclient</include>
                                         <include>org.apache.httpcomponents:httpcore</include>
                                         <include>org.apache.httpcomponents:httpmime</include>
-                                        <include>org.jboss.logging:jboss-logging</include>
-                                        <include>org.jboss.xnio:xnio-api</include>
-                                        <include>org.jboss.xnio:xnio-nio</include>
                                         <include>no.digipost:digipost-data-types</include>
+                                        <include>com.fasterxml.jackson.core:jackson-core</include>
                                         <include>com.fasterxml.jackson.core:jackson-databind</include>
-                                        <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
                                         <include>com.fasterxml.jackson.core:jackson-annotations</include>
-                                        <include>com.fasterxml.jackson.module:jackson-module-jaxb-annotations</include>
-                                        <include>org.hibernate:hibernate-validator</include>
-                                        <include>com.fasterxml:classmate</include>
-                                        <include>org.glassfish:jakarta.el</include>
-                                        <include>jakarta.validation:jakarta.validation-api</include>
+                                        <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
+                                        <include>javax.validation:validation-api</include>
                                         <include>com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer</include>
                                         <include>com.google.guava:listenablefuture</include>
-                                        <include>org.hibernate.validator:hibernate-validator</include>
                                         <include>com.google.guava:guava</include>
-                                        <include>com.fasterxml.jackson.core:jackson-core</include>
-                                        <include>jakarta.xml.bind:jakarta.xml.bind-api</include>
-                                        <include>jakarta.activation:jakarta.activation-api</include>
-                                        <include>com.sun.activation:jakarta.activation</include>
-                                        <include>org.glassfish.jaxb:jaxb-runtime</include>
-                                        <include>org.glassfish.jaxb:txw2</include>
-                                        <include>com.sun.istack:istack-commons-runtime</include>
-                                        <include>com.sun.xml.fastinfoset:FastInfoset</include>
-                                        <include>org.jvnet.staxex:stax-ex</include>
+                                        <include>no.digipost:jaxb-resolver-com.sun.xml.bind</include>
+                                        <include>javax.xml.bind:jaxb-api</include>
+                                        <include>com.sun.xml.bind:jaxb-impl</include>
+                                        <include>com.sun.xml.bind:jaxb-core</include>
+                                        <include>javax.activation:javax.activation-api</include>
                                         <include>org.checkerframework:checker-qual</include>
                                         <include>no.digipost:certificate-validator</include>
                                         <include>no.digipost:digipost-html-validator</include>
@@ -513,7 +419,7 @@
                                              If you wish, you can eliminate this vulnerability by explicitly setting the 'java.io.tmpdir' system property in the JVM to a safe directory.
                                          -->
                                         <exclude>sonatype-2020-0926</exclude>
-										
+
 										<!-- jackson: Må vente på 2.15 -->
 										<exclude>sonatype-2022-6438</exclude>
                                     </excludeVulnerabilityIds>
@@ -563,7 +469,7 @@
                     </plugin>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.3.0</version>
+                        <version>3.5.0</version>
                         <configuration>
                             <finalName>${project.artifactId}</finalName>
                             <descriptors>
