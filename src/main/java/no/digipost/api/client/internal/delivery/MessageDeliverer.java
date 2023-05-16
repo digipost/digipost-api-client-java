@@ -114,9 +114,13 @@ public class MessageDeliverer {
      * Sender melding med alle dokumenter og innhold med én API-forespørsel (HTTP multipart request).
      * Dersom dokumentene skal direkte til print og skal prekrypteres før sending kan det gjøres en ekstra request for å hente
      * krypteringsnøkkel.
+     * @param shouldIdentifyRecipient hvorvidt mottakeren skal forsøkes identifiset (ekstra API-anrop), eller ikke.
      */
-    public MessageDelivery sendMultipartMessage(Message message, Map<UUID, DocumentContent> documentsAndContent) {
-        EncrypterAndDocsWithInputstream encryptionAndInputStream = createEncrypterIfNecessaryAndMapContentToInputstream(message, documentsAndContent);
+    public MessageDelivery sendMultipartMessage(Message message, Map<UUID, DocumentContent> documentsAndContent,
+            boolean shouldIdentifyRecipient) {
+        EncrypterAndDocsWithInputstream encryptionAndInputStream = createEncrypterIfNecessaryAndMapContentToInputstream(
+                message, documentsAndContent, shouldIdentifyRecipient
+        );
         final Set<UUID> picketUp = encryptionAndInputStream.documentsAndInputstream.keySet().stream().map(e -> e.uuid).collect(toSet());
         final Set<UUID> given = documentsAndContent.keySet().stream().filter(g -> !picketUp.contains(g)).collect(toSet());
 
@@ -256,7 +260,7 @@ public class MessageDeliverer {
 
 
     private EncrypterAndDocsWithInputstream createEncrypterIfNecessaryAndMapContentToInputstream(Message message,
-                                                                                                 Map<UUID, DocumentContent> documentsAndContent) {
+            Map<UUID, DocumentContent> documentsAndContent, boolean shouldIdentifyRecipient) {
         final Map<Document, InputStream> documentsAndInputstream = new LinkedHashMap<>();
         Encrypter encrypter = FAIL_IF_TRYING_TO_ENCRYPT;
         Message singleChannelMessage;
@@ -273,8 +277,11 @@ public class MessageDeliverer {
                 singleChannelMessage = setMapAndMessageToDigipost(message, documentsAndContent, documentsAndInputstream);
 
             } else {
-                IdentificationResultWithEncryptionKey result = identifyAndGetEncryptionKey(message.recipient.toIdentification());
-                if (result.getResultCode() == IdentificationResultCode.DIGIPOST) {
+                IdentificationResultWithEncryptionKey result = null;
+                if (shouldIdentifyRecipient) {
+                    result = identifyAndGetEncryptionKey(message.recipient.toIdentification());
+                }
+                if (recipientHasDigipost(result)) {
                     singleChannelMessage = setMapAndMessageToDigipost(message, documentsAndContent, documentsAndInputstream);
 
                     if (singleChannelMessage.hasAnyDocumentRequiringEncryption()) {
@@ -293,6 +300,10 @@ public class MessageDeliverer {
                 }
             }
         return new EncrypterAndDocsWithInputstream(encrypter, documentsAndInputstream, singleChannelMessage);
+    }
+
+    private static boolean recipientHasDigipost(IdentificationResultWithEncryptionKey result) {
+        return result != null && result.getResultCode() == IdentificationResultCode.DIGIPOST;
     }
 
     static Message setMapAndMessageToDigipost(Message messageToCopy, Map<UUID, DocumentContent> documentsAndContent,

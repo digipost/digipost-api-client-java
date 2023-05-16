@@ -62,7 +62,12 @@ final class WithPrintFallback implements OngoingDelivery.SendableWithPrintFallba
 
     @Override
     public MessageDelivery send() {
-        return sender.sendMultipartMessage(message, documents);
+        return sender.sendMultipartMessage(message, documents, true);
+    }
+
+    @Override
+    public MessageDelivery sendUnidentified() {
+        return sender.sendMultipartMessage(message, documents, false);
     }
 }
 

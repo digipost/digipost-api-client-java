@@ -240,6 +240,74 @@ public class MessageDelivererTest {
     }
 
     @Test
+    void unidentifiedFallbackPrintGetsPrinted() {
+        CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
+        ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
+        marshal(jaxbContext,
+                new MessageDelivery(UUID.randomUUID().toString(), Channel.PRINT, MessageStatus.COMPLETE, now()), bao2);
+
+        when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray()));
+        when(response.getStatusLine()).thenReturn(new StatusLineMock(200));
+
+        when(api.sendMultipartMessage(any(HttpEntity.class))).thenReturn(response);
+
+        final Document printDocument = new Document(UUID.randomUUID(), "subject", FileType.PDF);
+        PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+        PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+
+        Map<UUID, DocumentContent> documentAndContent = new LinkedHashMap<>();
+
+        MessageDeliverer deliverer = new MessageDeliverer(newConfiguration().clock(clock).build(), api, new DocumentsPreparer(pdfValidator, htmlValidator));
+        Message message = Message.newMessage(UUID.randomUUID(), printDocument)
+                .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress))).build();
+
+        documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
+        SendableWithPrintFallback delivery = deliverer.createMessage(message).addContent(printDocument, printablePdf1Page());
+        MessageDelivery result = delivery.sendUnidentified();
+        assertEquals(MessageStatus.COMPLETE, result.getStatus());
+        assertEquals(Channel.PRINT, result.getChannel());
+    }
+
+    @Test
+    void identifiedNonDigipostFallbackPrintGetsPrinted() {
+        IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey =
+                new IdentificationResultWithEncryptionKey(new IdentificationResult(), null);
+        when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(200));
+
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        marshal(jaxbContext, identificationResultWithEncryptionKey, bao);
+
+        when(mockClientResponse.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
+
+        when(api.identifyAndGetEncryptionKey(any(Identification.class))).thenReturn(mockClientResponse);
+        CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
+        ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
+        marshal(jaxbContext,
+                new MessageDelivery(UUID.randomUUID().toString(), Channel.PRINT, MessageStatus.COMPLETE, now()), bao2);
+
+        when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray()));
+        when(response.getStatusLine()).thenReturn(new StatusLineMock(200));
+
+        when(api.sendMultipartMessage(any(HttpEntity.class))).thenReturn(response);
+
+        final Document printDocument = new Document(UUID.randomUUID(), "subject", FileType.PDF);
+        PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));
+        PrintRecipient returnAddress = new PrintRecipient("Megacorp", new NorwegianAddress("0105", "Oslo"));
+
+        Map<UUID, DocumentContent> documentAndContent = new LinkedHashMap<>();
+
+        MessageDeliverer deliverer = new MessageDeliverer(newConfiguration().clock(clock).build(), api, new DocumentsPreparer(pdfValidator, htmlValidator));
+        Message message = Message.newMessage(UUID.randomUUID(), printDocument)
+                .recipient(new MessageRecipient(new DigipostAddress("asdfasd"), new PrintDetails(recipient, returnAddress))).build();
+
+        documentAndContent.put(message.primaryDocument.uuid, DocumentContent.CreateMultiStreamContent(printablePdf1Page(), printablePdf1Page()));
+        SendableWithPrintFallback delivery = deliverer.createMessage(message).addContent(printDocument, printablePdf1Page());
+        MessageDelivery result = delivery.send();
+        assertEquals(MessageStatus.COMPLETE, result.getStatus());
+        assertEquals(Channel.PRINT, result.getChannel());
+    }
+
+    @Test
     public void setDigipostContentToUUIDTest(){
         Document printDocument = new Document(UUID.randomUUID(), "subject", FileType.HTML).encrypt();
         Map<UUID, DocumentContent> documentAndContent = new LinkedHashMap<>();

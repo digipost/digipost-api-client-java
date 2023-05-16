@@ -87,6 +87,18 @@ public interface OngoingDelivery<OPERATIONS extends OngoingDelivery<OPERATIONS> 
         default SendableWithPrintFallback addContent(Document document, byte[] content, byte[] printContent) {
             return addContent(document, new ByteArrayInputStream(content), new ByteArrayInputStream(printContent));
         }
+
+        /**
+         * Send uten å prøve å identifisere mottakeren først.
+         *
+         * <p>
+         * Unngår unødvendig prosessering dersom du allerede har
+         * identifisert mottakeren.
+         * </p>
+         *
+         * @return videre operasjoner for å fullføre leveransen.
+         */
+        MessageDelivery sendUnidentified();
     }
 
 

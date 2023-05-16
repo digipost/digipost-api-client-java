@@ -60,7 +60,7 @@ final class PrintOnlyMessage implements OngoingDelivery.SendableForPrintOnly {
 
     @Override
     public MessageDelivery send() {
-        return sender.sendMultipartMessage(printMessage, documents);
+        return sender.sendMultipartMessage(printMessage, documents, false);
     }
 
 }
