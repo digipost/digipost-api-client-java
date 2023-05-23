@@ -40,6 +40,16 @@ public final class SenderFeatureName {
     public static final SenderFeatureName DIGIPOST_DELIVERY = new SenderFeatureName("no.digipost.feature.delivery.digipost", false);
 
     /**
+     * Behandler kan sende masseutsendelser.
+     */
+    public static final SenderFeatureName MASSEUTSENDELSE = new SenderFeatureName("no.digipost.feature.batch.masseutsendelse", false);
+
+    /**
+     * Behandler kan sende mottakersplitt.
+     */
+    public static final SenderFeatureName MOTTAKERSPLITT = new SenderFeatureName("no.digipost.feature.batch.mottakersplitt", false);
+
+    /**
      * Avsender kan sende post til mottakere i Digipost, og har avtale om levering i fysisk post
      * dersom mottaker ikke har Digipost-konto.
      */
@@ -93,7 +103,7 @@ public final class SenderFeatureName {
     public static final SenderFeatureName PRINTVALIDATION_NEGATIVE_BLEED = new SenderFeatureName("no.digipost.feature.validation.print.negativebleed", false);
 
     private static final Map<String, SenderFeatureName> KNOWN_FEATURES = Stream.of(
-            DIGIPOST_DELIVERY, DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK, DELIVERY_DIRECT_TO_PRINT,
+            DIGIPOST_DELIVERY, DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK, DELIVERY_DIRECT_TO_PRINT, MASSEUTSENDELSE, MOTTAKERSPLITT,
             PRINTVALIDATION_FONTS, PRINTVALIDATION_MARGINS_LEFT, PRINTVALIDATION_PAGEAMOUNT, PRINTVALIDATION_PDFVERSION, PRINTVALIDATION_POSITIVE_BLEED,
             PRINTVALIDATION_NEGATIVE_BLEED)
                 .collect(collectingAndThen(toMap((SenderFeatureName name) -> name.identificator, identity()), Collections::unmodifiableMap));
