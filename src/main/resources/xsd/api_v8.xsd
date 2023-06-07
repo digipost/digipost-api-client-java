@@ -7,7 +7,7 @@
     ***********************************
             XML API for avsendere
     ***********************************
-	09.03.2022 - v8 ble påbegynt
+    09.03.2022 - v8 ble påbegynt
     09.03.2022 - Fjernet post-type
     09.03.2022 - Fjernet invoice. Benytt Digipost data-type i stedet.
     -->
@@ -442,13 +442,39 @@
 
     <xsd:element name="identification" type="identification" />
 
+    <xsd:simpleType name="personal-identification-number">
+        <xsd:annotation>
+            <xsd:documentation>
+                Fødselsnummer.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:length value="11" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="organisation-number">
+        <xsd:annotation>
+            <xsd:documentation>
+                Organisasjonsnummer.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:length value="9" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <xsd:complexType name="identification">
         <xsd:sequence>
             <xsd:choice>
-                <xsd:element name="personal-identification-number" minOccurs="0" maxOccurs="1" nillable="false">
+                <xsd:element name="personal-identification-number" minOccurs="0" maxOccurs="1" nillable="false" type="personal-identification-number" />
+                <xsd:element name="organisation-number" minOccurs="0" maxOccurs="1" nillable="false" type="organisation-number" />
+                <xsd:element name="digipost-address" minOccurs="0" maxOccurs="1" type="xsd:string" nillable="false" />
+                <xsd:element name="name-and-address" minOccurs="0" maxOccurs="1" type="name-and-address" nillable="false" />
+                <xsd:element name="bank-account-number" minOccurs="0" maxOccurs="1" nillable="false">
                     <xsd:annotation>
                         <xsd:documentation>
-                            Fødselsnummer.
+                            Bankkontonummer.
                         </xsd:documentation>
                     </xsd:annotation>
                     <xsd:simpleType>
@@ -457,32 +483,6 @@
                         </xsd:restriction>
                     </xsd:simpleType>
                 </xsd:element>
-                <xsd:element name="organisation-number" minOccurs="0" maxOccurs="1" nillable="false">
-                    <xsd:annotation>
-                        <xsd:documentation>
-                            Organisasjonsnummer.
-                        </xsd:documentation>
-                    </xsd:annotation>
-                    <xsd:simpleType>
-                        <xsd:restriction base="xsd:string">
-                            <xsd:length value="9" />
-                        </xsd:restriction>
-                    </xsd:simpleType>
-                </xsd:element>
-                <xsd:element name="digipost-address" minOccurs="0" maxOccurs="1" type="xsd:string" nillable="false" />
-                <xsd:element name="name-and-address" minOccurs="0" maxOccurs="1" type="name-and-address" nillable="false" />
-				<xsd:element name="bank-account-number" minOccurs="0" maxOccurs="1" nillable="false">
-					<xsd:annotation>
-						<xsd:documentation>
-							Bankkontonummer.
-						</xsd:documentation>
-					</xsd:annotation>
-					<xsd:simpleType>
-						<xsd:restriction base="xsd:string">
-							<xsd:length value="11" />
-						</xsd:restriction>
-					</xsd:simpleType>
-				</xsd:element>
             </xsd:choice>
         </xsd:sequence>
         <xsd:attribute name="include-personalias-for-digipost-user" type="xsd:boolean" default="false" />
@@ -491,10 +491,16 @@
     <xsd:complexType name="message-recipient">
         <xsd:sequence>
             <xsd:choice>
-                <xsd:element name="personal-identification-number" minOccurs="0" maxOccurs="1" nillable="false">
+                <xsd:element name="personal-identification-number" minOccurs="0" maxOccurs="1" nillable="false" type="personal-identification-number" />
+                <xsd:element name="organisation-number" minOccurs="0" maxOccurs="1" nillable="false" type="organisation-number" />
+                <xsd:element name="digipost-address" minOccurs="0" maxOccurs="1" type="xsd:string" nillable="false" />
+                <xsd:element name="email-details" minOccurs="0" maxOccurs="1" type="email-details" nillable="false" />
+                <xsd:element name="peppol-addresses" minOccurs="0" maxOccurs="1" type="peppol-addresses" nillable="false" />
+                <xsd:element name="name-and-address" minOccurs="0" maxOccurs="1" type="name-and-address" nillable="false" />
+                <xsd:element name="bank-account-number" minOccurs="0" maxOccurs="1" nillable="false">
                     <xsd:annotation>
                         <xsd:documentation>
-                            Fødselsnummer.
+                            Bankkontonummer.
                         </xsd:documentation>
                     </xsd:annotation>
                     <xsd:simpleType>
@@ -503,34 +509,6 @@
                         </xsd:restriction>
                     </xsd:simpleType>
                 </xsd:element>
-                <xsd:element name="organisation-number" minOccurs="0" maxOccurs="1" nillable="false">
-                    <xsd:annotation>
-                        <xsd:documentation>
-                            Organisasjonsnummer.
-                        </xsd:documentation>
-                    </xsd:annotation>
-                    <xsd:simpleType>
-                        <xsd:restriction base="xsd:string">
-                            <xsd:length value="9" />
-                        </xsd:restriction>
-                    </xsd:simpleType>
-                </xsd:element>
-                <xsd:element name="digipost-address" minOccurs="0" maxOccurs="1" type="xsd:string" nillable="false" />
-				<xsd:element name="email-details" minOccurs="0" maxOccurs="1" type="email-details" nillable="false" />
-                <xsd:element name="peppol-addresses" minOccurs="0" maxOccurs="1" type="peppol-addresses" nillable="false" />
-                <xsd:element name="name-and-address" minOccurs="0" maxOccurs="1" type="name-and-address" nillable="false" />
-				<xsd:element name="bank-account-number" minOccurs="0" maxOccurs="1" nillable="false">
-					<xsd:annotation>
-						<xsd:documentation>
-							Bankkontonummer.
-						</xsd:documentation>
-					</xsd:annotation>
-					<xsd:simpleType>
-						<xsd:restriction base="xsd:string">
-							<xsd:length value="11" />
-						</xsd:restriction>
-					</xsd:simpleType>
-				</xsd:element>
             </xsd:choice>
             <xsd:element name="print-details" type="print-details" minOccurs="0" maxOccurs="1" nillable="false" />
         </xsd:sequence>
@@ -1395,18 +1373,7 @@
 
     <xsd:complexType name="public-mailbox-tag">
         <xsd:sequence>
-            <xsd:element name="personal-identification-number" minOccurs="1" maxOccurs="1" nillable="false">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        Fødselsnummer.
-                    </xsd:documentation>
-                </xsd:annotation>
-                <xsd:simpleType>
-                    <xsd:restriction base="xsd:string">
-                        <xsd:length value="11" />
-                    </xsd:restriction>
-                </xsd:simpleType>
-            </xsd:element>
+            <xsd:element name="personal-identification-number" minOccurs="1" maxOccurs="1" nillable="false" type="personal-identification-number" />
         </xsd:sequence>
     </xsd:complexType>
 
@@ -1442,5 +1409,58 @@
             </xsd:enumeration>
         </xsd:restriction>
     </xsd:simpleType>
+
+    <xsd:element name="organisation-registration" type="organisation-registration" />
+
+    <xsd:complexType name="organisation-registration">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <annox:annotate target="class">
+                    <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="organisation-registration"/>
+                </annox:annotate>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="organisation-number" type="organisation-number" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="organisation-part" type="xsd:string" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="phone-number" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="email-address" type="xsd:string" minOccurs="1" maxOccurs="1"  />
+            <xsd:element name="activate-mailbox" type="xsd:boolean" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="language" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="administrator" type="organisation-registration-trustee" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="address-information" type="organisation-registration-address-information" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="organisation-registration-address-information">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <annox:annotate target="class">
+                    <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="organisation-registration-address-information"/>
+                </annox:annotate>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="address" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="code" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="city" type="xsd:string" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="organisation-registration-trustee">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <annox:annotate target="class">
+                    <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="organisation-registration-trustee"/>
+                </annox:annotate>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="first-name" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="last-name" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="personal-identification-number" minOccurs="1" maxOccurs="1" type="personal-identification-number" />
+        </xsd:sequence>
+    </xsd:complexType>
 
 </xsd:schema>

@@ -112,6 +112,8 @@ public class EntryPoint extends Representation {
 
     public URI getCreateOrActivateUserAccountUri() { return getLinkByRelationName(CREATE_OR_ACTIVATE_USER_ACCOUNT).getUri(); }
 
+    public URI getOrganisationRegistrationUri() { return getLinkByRelationName(REGISTER_ORGANISATION).getUri(); }
+
     public String getCertificate() {
         return certificate;
     }

@@ -35,6 +35,7 @@ import no.digipost.api.client.internal.http.request.interceptor.RequestUserAgent
 import no.digipost.api.client.internal.http.response.interceptor.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseDateInterceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseSignatureInterceptor;
+import no.digipost.api.client.organisation.OrganisationRegistrationApi;
 import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Autocomplete;
@@ -58,6 +59,7 @@ import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.batch.Batch;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
+import no.digipost.api.client.representations.organisation.OrganisationRegistration;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
@@ -111,7 +113,7 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi, TagApi {
+public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi, TagApi, OrganisationRegistrationApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
 
@@ -495,6 +497,16 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         queryParams.put("personal-identification-number", personalIdentificationNumber.asString());
         return getEntity(Tags.class, getEntryPoint().getTagsUri().getPath(), queryParams);
     }
+
+    @Override
+    public void registerOrganisation(OrganisationRegistration organisationRegistration) {
+        URI uri = getEntryPoint().getOrganisationRegistrationUri();
+        try (CloseableHttpResponse response = sendDigipostMedia(organisationRegistration, uri.getPath())) {
+            checkResponse(response, eventLogger);
+        } catch (IOException e) {
+            throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
+        }
+    }
     
     private static String pathWithQuery(URI uri){
         return uri.getPath() + ((uri.getQuery() != null) ? "?" + uri.getQuery() : "");
@@ -571,4 +583,5 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
         return send(httpPost);
     }
+
 }

@@ -52,5 +52,5 @@ public enum Relation {
     ADD_TAG,
     REMOVE_TAG,
     GET_TAGS,
-
+    REGISTER_ORGANISATION
 }

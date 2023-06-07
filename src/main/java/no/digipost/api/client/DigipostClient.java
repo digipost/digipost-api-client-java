@@ -26,6 +26,7 @@ import no.digipost.api.client.inbox.InboxApi;
 import no.digipost.api.client.internal.ApiServiceImpl;
 import no.digipost.api.client.internal.delivery.ArchiveDeliverer;
 import no.digipost.api.client.internal.delivery.MessageDeliverer;
+import no.digipost.api.client.organisation.OrganisationRegistrationApi;
 import no.digipost.api.client.representations.AddDataLink;
 import no.digipost.api.client.representations.AdditionalData;
 import no.digipost.api.client.representations.Autocomplete;
@@ -48,6 +49,7 @@ import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.batch.Batch;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
+import no.digipost.api.client.representations.organisation.OrganisationRegistration;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.Signer;
@@ -91,6 +93,7 @@ public class DigipostClient {
     private final ArchiveApi archiveApi;
     private final BatchApi batchApi;
     private final TagApi tagApi;
+    private final OrganisationRegistrationApi organisationRegistrationApi;
 
 
     public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
@@ -102,16 +105,17 @@ public class DigipostClient {
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
-        this(config, apiService, apiService, apiService, apiService, apiService, apiService);
+        this(config, apiService, apiService, apiService, apiService, apiService, apiService, apiService);
     }
 
-    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi) {
+    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi, OrganisationRegistrationApi organisationRegistrationApi) {
         this.messageApi = apiService;
         this.inboxApiService = inboxApiService;
         this.documentApi = documentApi;
         this.archiveApi = archiveApi;
         this.batchApi = batchApi;
         this.tagApi = tagApi;
+        this.organisationRegistrationApi = organisationRegistrationApi;
 
         this.messageSender = new MessageDeliverer(config, apiService);
         this.archiveSender = new ArchiveDeliverer(config, archiveApi);
@@ -366,5 +370,9 @@ public class DigipostClient {
 
     public void cancelBatch(Batch batch) {
         batchApi.cancelBatch(batch);
+    }
+
+    public void registerOrganisation(OrganisationRegistration organisation) {
+        organisationRegistrationApi.registerOrganisation(organisation);
     }
 }
