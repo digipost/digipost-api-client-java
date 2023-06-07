@@ -18,6 +18,7 @@ package no.digipost.api.client.eksempelkode;
 import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.DigipostClient;
 import no.digipost.api.client.DigipostClientConfig;
+import no.digipost.api.client.representations.organisation.Language;
 import no.digipost.api.client.representations.organisation.OrganisationRegistration;
 import no.digipost.api.client.representations.organisation.OrganisationRegistrationAddressInformation;
 import no.digipost.api.client.representations.organisation.OrganisationRegistrationTrustee;
@@ -57,7 +58,7 @@ public class OrganisationRegistrationEksempel {
                 true,                // La andre sende digital post til virksomheten
                 "99999999",          // Telefonnummer
                 "email@example.com", // Epostadresse
-                "nb",                // TODO: Fiks type: Språk, enten "nb" for bokmål, "nn" for nynors eller "en" for engelsk
+                Language.BOKMAL,     // Språk
                 administrator,       // Administrator for virksomheten
                 addressInformation   // Virksomhetens adresse
         );

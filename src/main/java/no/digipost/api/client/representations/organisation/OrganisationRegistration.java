@@ -46,13 +46,13 @@ public class OrganisationRegistration {
 
     public OrganisationRegistration() {}
 
-	public OrganisationRegistration(String name, String organisationNumber, boolean activateMailbox, String phoneNumber, String emailAddress, String language, OrganisationRegistrationTrustee administrator, OrganisationRegistrationAddressInformation addressInformation) {
+	public OrganisationRegistration(String name, String organisationNumber, boolean activateMailbox, String phoneNumber, String emailAddress, Language language, OrganisationRegistrationTrustee administrator, OrganisationRegistrationAddressInformation addressInformation) {
 		this.name = name;
 		this.organisationNumber = organisationNumber;
 		this.activateMailbox = activateMailbox;
 		this.phoneNumber = phoneNumber;
 		this.emailAddress = emailAddress;
-		this.language = language;
+		this.language = language.getKode();
 		this.administrator = administrator;
 		this.addressInformation = addressInformation;
 	}
@@ -62,12 +62,14 @@ public class OrganisationRegistration {
 		return "OrganisationRegistration{" +
 			"name=" + name +
 			", organisationNumber=" + organisationNumber +
+            ", organisationPart=" + organisationPart +
 			", phoneNumber=" + phoneNumber +
 			", emailAddress=" + emailAddress +
 			", activateMailbox=" + activateMailbox +
 			", administrator=" + administrator +
             ", language=" + language +
-			'}';
+            ", addressInformation=" + addressInformation +
+            '}';
 	}
 
 	public String getLanguage() {
