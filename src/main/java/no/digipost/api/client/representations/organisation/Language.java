@@ -15,6 +15,8 @@
  */
 package no.digipost.api.client.representations.organisation;
 
+import java.util.NoSuchElementException;
+
 public enum Language {
     BOKMAL("nb"),
     NYNORSK("nn"),
@@ -28,5 +30,14 @@ public enum Language {
 
     public String getKode() {
         return kode;
+    }
+
+    public static Language parse(final String kode) {
+        for (Language lang : values()) {
+            if (lang.getKode().equals(kode)) {
+                return lang;
+            }
+        }
+        throw new NoSuchElementException(kode);
     }
 }
