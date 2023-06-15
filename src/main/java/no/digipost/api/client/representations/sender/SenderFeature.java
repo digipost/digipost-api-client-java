@@ -88,6 +88,15 @@ public final class SenderFeature {
         }
     }
 
+    public long getLongParam() {
+        try {
+            return Long.parseLong(getParam());
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("The sender feature " + value + " has the parameter '" + param + "', " +
+                                            "which can not be converted to an long. (" + e.getMessage() + ")", e);
+        }
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other instanceof SenderFeature) {
