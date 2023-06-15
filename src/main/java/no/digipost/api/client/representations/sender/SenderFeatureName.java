@@ -61,6 +61,21 @@ public final class SenderFeatureName {
      */
     public static final SenderFeatureName DELIVERY_DIRECT_TO_PRINT = new SenderFeatureName("no.digipost.feature.delivery.direct-to-print", false);
 
+     /**
+     * Kan avsender sende faktura uten KID? KID er normalt sett påkrevet i Digipost, men en virksomhet kan flagges for å ha lov til å sende uten KID.
+     */
+    public static final SenderFeatureName DIGIPOSTVALIDATION_INVOICE_ALLOW_NO_KID = new SenderFeatureName("no.digipost.feature.validation.digipost.invoice-allow-no-kid", false);
+
+    /**
+     * Max filstørrelse for sending til Digipost for virksomheter.
+     */
+    public static final SenderFeatureName DIGIPOSTVALIDATION_FILE_SIZE = new SenderFeatureName("no.digipost.feature.validation.digipost.file-size", false);
+
+    /**
+     * Filtyper som er lov å sende inn til Digipost for avsender.
+     */
+    public static final SenderFeatureName DIGIPOSTVALIDATION_ALLOWED_FILE_TYPES = new SenderFeatureName("no.digipost.feature.validation.digipost.allowed-file-types", false);
+
     /**
      * For brev som skal til print og fysisk levering vil
      * PDF-versjoner som ikke offisielt er støttet vil bli avvist.
@@ -105,7 +120,7 @@ public final class SenderFeatureName {
     private static final Map<String, SenderFeatureName> KNOWN_FEATURES = Stream.of(
             DIGIPOST_DELIVERY, DIGIPOST_DELIVERY_WITH_PRINT_FALLBACK, DELIVERY_DIRECT_TO_PRINT, MASSEUTSENDELSE, MOTTAKERSPLITT,
             PRINTVALIDATION_FONTS, PRINTVALIDATION_MARGINS_LEFT, PRINTVALIDATION_PAGEAMOUNT, PRINTVALIDATION_PDFVERSION, PRINTVALIDATION_POSITIVE_BLEED,
-            PRINTVALIDATION_NEGATIVE_BLEED)
+            PRINTVALIDATION_NEGATIVE_BLEED, DIGIPOSTVALIDATION_INVOICE_ALLOW_NO_KID, DIGIPOSTVALIDATION_FILE_SIZE, DIGIPOSTVALIDATION_ALLOWED_FILE_TYPES)
                 .collect(collectingAndThen(toMap((SenderFeatureName name) -> name.identificator, identity()), Collections::unmodifiableMap));
 
     public final String identificator;
