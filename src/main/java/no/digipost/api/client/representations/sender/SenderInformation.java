@@ -95,6 +95,7 @@ public class SenderInformation
     }
 
     public SenderFeature get(SenderFeatureName featureName) {
+        if (supportedFeatures == null) return null;
         for (SenderFeature feature : supportedFeatures ){
             if (featureName.equals(feature.getName())) {
                 return feature;
