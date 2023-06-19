@@ -26,13 +26,14 @@ import static no.digipost.api.client.representations.sender.SenderFeatureName.DI
 import static no.digipost.api.client.representations.sender.SenderStatus.NO_INFO_AVAILABLE;
 import static no.digipost.api.client.representations.sender.SenderStatus.VALID_SENDER;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SenderInformationTest {
 
     @Test
     public void marshallValidateXmlAndUnmarshall() {
-        SenderInformation senderInformation = new SenderInformation(null, NO_INFO_AVAILABLE, Collections.<SenderFeature>emptyList());
+        SenderInformation senderInformation = new SenderInformation(null, NO_INFO_AVAILABLE, Collections.emptyList());
         SenderInformation unmarshalled = marshallValidateAndUnmarshall(senderInformation);
         assertTrue(reflectionEquals(senderInformation, unmarshalled));
 
@@ -41,4 +42,11 @@ public class SenderInformationTest {
         assertTrue(reflectionEquals(senderInformation, unmarshalled));
     }
 
+
+    @Test
+    void shouldNotCauseNullpointerException() {
+        SenderInformation senderInformation = new SenderInformation(null, NO_INFO_AVAILABLE, Collections.emptyList());
+        assertFalse(senderInformation.hasEnabled(DIGIPOST_DELIVERY));
+        System.out.println(senderInformation);
+    }
 }
