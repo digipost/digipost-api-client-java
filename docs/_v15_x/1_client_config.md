@@ -6,16 +6,9 @@ layout: default
 
 ### Install
 
-The client library is available on the [Maven Central Repository](https://search.maven.org/artifact/no.digipost/digipost-api-client-java).
-Add the following to your `pom.xml`. Make sure to use the latest version available.
-
-```xml
-<dependency>
-  <groupId>no.digipost</groupId>
-  <artifactId>digipost-api-client-java</artifactId>
-  <version>15.3</version>
-</dependency>
-```
+The client library is available on the [Maven Central Repository](https://central.sonatype.com/artifact/no.digipost/digipost-api-client-java).
+Copy the `<dependency>`-snippet from that website and put it in your pom.xml file.
+Make sure to use the latest version available.
 
 ### Configure for production use
 
