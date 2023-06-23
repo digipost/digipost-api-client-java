@@ -122,6 +122,7 @@ public enum ErrorCode {
     PEPPOL_ERROR(CLIENT_DATA),
     PEPPOL_FILE_MUST_BE_XML(CLIENT_DATA),
     UNKNOWN_PEPPOL_RECIPIENT(CLIENT_DATA),
+    UNKNOWN_BATCH(CLIENT_DATA),
     ;
 
     private static final Map<String, ErrorCode> errorByName = new HashMap<>(); static {
