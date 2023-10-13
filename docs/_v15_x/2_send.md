@@ -298,3 +298,17 @@ UserAccount userAccount = client.createOrActivateUserAccount(sender, user);
 DigipostAddress digipostAddress = userAccount.getDigipostAddress();
 EncryptionKey encryptionKey = userAccount.getEncryptionKey();
 ```
+
+
+## Get Status of Document
+
+After you have sent a message, you can get the _status_ of a document with `getDocumentStatus`.
+The response includes basic information about the delivery, like the channel the document was delivered to, as well as
+delivery times and more.
+
+```java
+DocumentStatus status = client.getDocumentStatus(senderId, documentUuid);
+
+System.out.println("Status: " + status.status);
+System.out.println("Channel: " + status.channel);
+```
