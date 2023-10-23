@@ -52,5 +52,6 @@ public enum Relation {
     ADD_TAG,
     REMOVE_TAG,
     GET_TAGS,
+    GET_SHARED_DOCUMENTS_STATE,
 
 }
