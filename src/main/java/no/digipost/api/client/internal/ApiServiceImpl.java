@@ -499,8 +499,8 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
-    public SharedDocumentsRequestState getSharedDocumentRequestState(UUID sharedDocumentsRequestUuid) {
-        return getEntity(SharedDocumentsRequestState.class, getEntryPoint().getSharedDocumentsRequestStateUri().getPath() + sharedDocumentsRequestUuid.toString());
+    public SharedDocumentsRequestState getSharedDocumentRequestState(SenderId senderId, UUID sharedDocumentsRequestUuid) {
+        return getEntity(SharedDocumentsRequestState.class, getEntryPoint(senderId).getSharedDocumentsRequestStateUri().getPath() + sharedDocumentsRequestUuid.toString());
     }
 
     @Override

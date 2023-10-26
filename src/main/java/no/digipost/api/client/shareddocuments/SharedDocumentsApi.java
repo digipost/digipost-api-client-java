@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.shareddocuments;
 
+import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentsRequestState;
 
@@ -33,7 +34,7 @@ public interface SharedDocumentsApi {
      * @param sharedDocumentsRequestUuid The UUID of the primary document of the original ShareDocumentsRequest message
      * @return
      */
-    SharedDocumentsRequestState getSharedDocumentRequestState(UUID sharedDocumentsRequestUuid);
+    SharedDocumentsRequestState getSharedDocumentRequestState(SenderId senderId, UUID sharedDocumentsRequestUuid);
 
     /**
      * Gets the content of a specific document as a stream of bytes.

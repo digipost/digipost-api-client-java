@@ -319,8 +319,8 @@ public class DigipostClient {
         return tagApi.getTags(personalIdentificationNumber);
     }
 
-    public SharedDocumentsRequestState getSharedDocumentsRequestState(UUID sharedDocumentsRequestUuid) {
-        return sharedDocumentsApi.getSharedDocumentRequestState(sharedDocumentsRequestUuid);
+    public SharedDocumentsRequestState getSharedDocumentsRequestState(SenderId senderId, UUID sharedDocumentsRequestUuid) {
+        return sharedDocumentsApi.getSharedDocumentRequestState(senderId, sharedDocumentsRequestUuid);
     }
 
     public InputStream getSharedDocumentContentStream(URI uri) {
