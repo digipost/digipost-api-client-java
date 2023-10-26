@@ -15,6 +15,7 @@
  */
 package no.digipost.api.client.shareddocuments;
 
+import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentsRequestState;
 
 import java.io.InputStream;
@@ -35,11 +36,19 @@ public interface SharedDocumentsApi {
     SharedDocumentsRequestState getSharedDocumentRequestState(UUID sharedDocumentsRequestUuid);
 
     /**
-     * Gets the content of a specific document.
+     * Gets the content of a specific document as a stream of bytes.
      *
      * @param uri The URI of the SharedDocument returned as part of the SharedDocumentsRequestState
      * @return
      */
     InputStream getSharedDocumentContentStream(URI uri);
+
+    /**
+     * Gets the content of a specific document as a link to view on Digipost's domain.
+     *
+     * @param uri The URI of the SharedDocument returned as part of the SharedDocumentsRequestState
+     * @return
+     */
+    SharedDocumentContent getSharedDocumentContent(URI uri);
 
 }

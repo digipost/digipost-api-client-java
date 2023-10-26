@@ -25,8 +25,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
+
+import static no.digipost.api.client.representations.Relation.GET_SHARED_DOCUMENT_CONTENT;
+import static no.digipost.api.client.representations.Relation.GET_SHARED_DOCUMENT_CONTENT_STREAM;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "shared-document", propOrder = {
@@ -112,6 +116,15 @@ public class SharedDocument extends Representation {
     protected void setLink(final List<Link> links) {
         this.links = links;
     }
+
+    public URI getSharedDocumentContent() {
+        return getLinkByRelationName(GET_SHARED_DOCUMENT_CONTENT).getUri();
+    }
+
+    public URI getSharedDocumentContentStream() {
+        return getLinkByRelationName(GET_SHARED_DOCUMENT_CONTENT_STREAM).getUri();
+    }
+
 
     @Override
     public String toString() {

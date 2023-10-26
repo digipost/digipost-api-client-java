@@ -1501,4 +1501,13 @@
     <xsd:complexType name="shared-document-origin-private-person">
         <xsd:attribute name="name" type="xsd:string"/>
     </xsd:complexType>
+
+    <xsd:element name="shared-document-content" type="shared-document-content"/>
+
+    <xsd:complexType name="shared-document-content">
+        <xsd:sequence>
+            <xsd:element name="content-type" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <xsd:element name="uri" type="xsd:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xsd:sequence>
+    </xsd:complexType>
 </xsd:schema>

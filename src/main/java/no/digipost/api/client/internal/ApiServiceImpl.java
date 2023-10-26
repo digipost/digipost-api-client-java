@@ -61,6 +61,7 @@ import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentsRequestState;
 import no.digipost.api.client.security.Digester;
 import no.digipost.api.client.security.Signer;
@@ -509,6 +510,11 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         final HttpCoreContext httpCoreContext = HttpCoreContext.create();
         httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
         return requestStream(httpGet);
+    }
+
+    @Override
+    public SharedDocumentContent getSharedDocumentContent(URI uri) {
+        return getEntity(SharedDocumentContent.class, uri.getPath());
     }
 
     private static String pathWithQuery(URI uri){

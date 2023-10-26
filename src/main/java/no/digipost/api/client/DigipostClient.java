@@ -49,6 +49,8 @@ import no.digipost.api.client.representations.batch.Batch;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.api.client.representations.shareddocuments.SharedDocument;
+import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentsRequestState;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.Signer;
@@ -323,6 +325,10 @@ public class DigipostClient {
 
     public InputStream getSharedDocumentContentStream(URI uri) {
         return sharedDocumentsApi.getSharedDocumentContentStream(uri);
+    }
+
+    public SharedDocumentContent getSharedDocumentContent(URI uri) {
+        return sharedDocumentsApi.getSharedDocumentContent(uri);
     }
 
     public ArchiveApi.ArchivingDocuments archiveDocuments(final Archive archive) {
