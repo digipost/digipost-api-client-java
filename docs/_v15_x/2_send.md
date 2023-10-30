@@ -257,7 +257,7 @@ client.createMessage(message)
 
 ## Send message with request for registration
 
-It is possible to send a message to a person, who does not have a Digipost account, where the message triggers an SMS notification with a request for registration. The SMS notification says that if they register for a Digipost account the document will be delivered digitally. If the user does not register for a Digipost account within the defined deadline, the document will either be delivered as physical mail or not at all.
+It is possible to send a message to a person, who does not have a Digipost account, where the message triggers an SMS notification with a request for registration. The SMS notification says that if they register for a Digipost account the document will be delivered digitally. The actual content of the SMS notification is set manually by Digipost. If the user does not register for a Digipost account within the defined deadline, the document will either be delivered as physical mail or not at all.
 
 ### Request for registration with physical mail as fallback
 
