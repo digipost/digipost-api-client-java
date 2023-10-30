@@ -255,7 +255,7 @@ client.createMessage(message)
         .send();
 ```
 
-## Send messaage with request for registration
+## Send message with request for registration
 
 It is possible to send a message to a person, who does not have a Digipost account, where the message triggers an SMS notification with a request for registration. The SMS notification says that if they register for a Digipost account the document will be delivered digitally. If the user does not register for a Digipost account within the defined deadline, the document will either be delivered as physical mail or not at all.
 
@@ -272,7 +272,7 @@ PrintDetails printDetails = new PrintDetails(RECIPIENT, RETURN_RECIPIENT);
 RequestForRegistration requestForRegistration = new RequestForRegistration(
 // Deadline for when the recipent can no longer register a Digipost account
     ZonedDateTime.now().plus(6, ChronoUnit.HOURS),
-// Phone number that will be used for the SMS notification
+// Phone number that will be used for the SMS notification. Make sure the country code is included, starting with "+".
     new PhoneNumber("+4712345678"), 
     null, 
     printDetails 
@@ -290,19 +290,21 @@ MessageDelivery delivery = sendClient.createMessage(message)
     .send(); 
 
 System.out.println("status: " + delivery.getStatus()); 
-System.out.println("channel: " + delivery.getChannel()); 
+System.out.println("channel: " + delivery.getChannel());
+
+// If the recipient does not have a Digipost account already, the value of `getChannel()` will be `null`, otherwise `Channel.DIGIPOST`.
 ```
 
 ### Request for registration without physical mail as fallback
 
-If the sender wishes to send the document as physical mail through it's own service (if the recipient does not register a Digipost account), print details must not be included.
+If the sender wishes to send the document as physical mail through its own service (if the recipient does not register a Digipost account), print details must not be included.
 
 ```java
 UUID documentId = UUID.randomUUID(); 
 Document document = new Document(documentId, "Hello!", FileType.PDF);  
  
 RequestForRegistration requestForRegistration = new RequestForRegistration(
-// Deadline for when the recipent can no longer register a Digipost account
+// Deadline for when the recipent can receive the document digitally right after Digipost account registration.
     ZonedDateTime.now().plus(6, ChronoUnit.HOURS),
 // Phone number that will be used for the SMS notification
     new PhoneNumber("+4712345678"), 
@@ -334,7 +336,7 @@ The following statuses are possible:
 
 * NOT_DELIVERED
 * DELIVERED
-	* When the document is delivered the channel can be either "DIGITAL" og "PRINT"
+	* When the document is delivered the channel can be either "DIGITAL" or "PRINT"
 
 ## Identify user based on personal identification number
 
