@@ -8,7 +8,6 @@ The Java client library also contains some
 [example code](https://github.com/digipost/digipost-api-client-java/tree/master/src/test/java/no/digipost/api/client/eksempelkode)
 which include similar examples.
 
-
 ## Send a message to a recipient
 
 To send a message to a recipient in Digipost, you need to choose a way to identify
@@ -46,8 +45,6 @@ NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1"
 BankAccountNumber accountNum = new BankAccountNumber("12345123451");
 ```
 
-
-
 ### Multiple documents in one message
 
 A message is required to have at least one document, the _primary_ document. Additional
@@ -72,9 +69,6 @@ client.createMessage(message)
         .addContent(attachment2, Files.newInputStream(Paths.get("attachment2_content.pdf")))
         .send();
 ```
-
-
-
 ## Send invoice
 
 ```java
@@ -100,7 +94,6 @@ client.createMessage(message)
 
 
 ```
-
 
 ## Send a message with SMS notification
 
@@ -147,8 +140,6 @@ MessageDelivery result = client.createMessage(message)
         .send();
 ```
 
-
-
 ## Send letter with html
 
 If you want to be able to send HTML-documents you first need to contact Digipost to activate
@@ -194,9 +185,6 @@ client.createMessage(message)
         .addContent(primaryDocument, Files.newInputStream("content.pdf")))
         .send();
 ```
-
-
-
 
 ## Send a message with extra computer readable data
 
@@ -267,7 +255,88 @@ client.createMessage(message)
         .send();
 ```
 
+## Send message with request for registration
 
+It is possible to send a message to a person, who does not have a Digipost account, where the message triggers an SMS notification with a request for registration. The SMS notification says that if they register for a Digipost account the document will be delivered digitally. The actual content of the SMS notification is set manually by Digipost. If the user does not register for a Digipost account within the defined deadline, the document will either be delivered as physical mail or not at all.
+
+### Request for registration with physical mail as fallback
+
+In this case the document will be delivered as physical mail if the recipient has not registered for a Digipost account by the defined deadline.
+
+```java
+UUID documentId = UUID.randomUUID(); 
+Document document = new Document(documentId, "Hello!", FileType.PDF); 
+
+PrintDetails printDetails = new PrintDetails(RECIPIENT, RETURN_RECIPIENT); 
+ 
+RequestForRegistration requestForRegistration = new RequestForRegistration(
+// Deadline for when the recipent can no longer register a Digipost account
+    ZonedDateTime.now().plus(6, ChronoUnit.HOURS),
+// Phone number that will be used for the SMS notification. Make sure the country code is included, starting with "+".
+    new PhoneNumber("+4712345678"), 
+    null, 
+    printDetails 
+); 
+ 
+UUID messageId = UUID.randomUUID(); 
+Message message = Message.newMessage(messageId.toString(), document) 
+    .recipient(new PersonalIdentificationNumber("12345678901")) 
+    .senderId(senderId) 
+    .requestForRegistration(requestForRegistration) 
+    .build(); 
+ 
+MessageDelivery delivery = sendClient.createMessage(message) 
+    .addContent(document, Contents.filFraDisk("gyldig-for-print.pdf")) 
+    .send(); 
+
+System.out.println("status: " + delivery.getStatus()); 
+System.out.println("channel: " + delivery.getChannel());
+
+// If the recipient does not have a Digipost account already, the value of `getChannel()` will be `null`, otherwise `Channel.DIGIPOST`.
+```
+
+### Request for registration without physical mail as fallback
+
+If the sender wishes to send the document as physical mail through its own service (if the recipient does not register a Digipost account), print details must not be included.
+
+```java
+UUID documentId = UUID.randomUUID(); 
+Document document = new Document(documentId, "Hello!", FileType.PDF);  
+ 
+RequestForRegistration requestForRegistration = new RequestForRegistration(
+// Deadline for when the recipent can receive the document digitally right after Digipost account registration.
+    ZonedDateTime.now().plus(6, ChronoUnit.HOURS),
+// Phone number that will be used for the SMS notification
+    new PhoneNumber("+4712345678"), 
+    null, 
+    null 
+); 
+ 
+UUID messageId = UUID.randomUUID(); 
+Message message = Message.newMessage(messageId.toString(), document) 
+    .recipient(new PersonalIdentificationNumber("12345678901")) 
+    .senderId(senderId) 
+    .requestForRegistration(requestForRegistration) 
+    .build(); 
+ 
+MessageDelivery delivery = sendClient.createMessage(message) 
+    .addContent(document, Contents.filFraDisk("gyldig-for-print.pdf")) 
+    .send();
+```
+It is up to the sender to then check if the document has been delivered digitaly prior to the defined deadline. After the deadline has passed the document will not be delivered if recipient registers for a Digipost account. The delivery status can be checked with the following:
+
+```java
+// The messageId would be the UUID that was used when the originating message was sent
+UUID messageId = UUID.fromString("efe11ce1-dfce-459a-865b-52dc313dbcb9"); 
+DocumentStatus status = sendClient.getDocumentStatus(senderId, messageId);
+System.out.println("Status: " + status.status); 
+System.out.println("Channel: " + status.channel); 
+```
+The following statuses are possible:
+
+* NOT_DELIVERED
+* DELIVERED
+	* When the document is delivered the channel can be either "DIGITAL" or "PRINT"
 
 ## Identify user based on personal identification number
 
