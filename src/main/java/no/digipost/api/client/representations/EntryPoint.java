@@ -110,7 +110,7 @@ public class EntryPoint extends Representation {
 
     public URI getTagsUri() { return getLinkByRelationName(GET_TAGS).getUri(); }
 
-    public URI getSharedDocumentsRequestStateUri() { return getLinkByRelationName(GET_SHARED_DOCUMENTS_STATE).getUri(); }
+    public URI getShareDocumentsRequestStateUri() { return getLinkByRelationName(GET_SHARED_DOCUMENTS_STATE).getUri(); }
 
     public URI getCreateOrActivateUserAccountUri() { return getLinkByRelationName(CREATE_OR_ACTIVATE_USER_ACCOUNT).getUri(); }
 

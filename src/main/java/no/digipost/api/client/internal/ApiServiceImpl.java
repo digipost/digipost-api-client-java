@@ -62,7 +62,7 @@ import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
-import no.digipost.api.client.representations.shareddocuments.SharedDocumentsRequestState;
+import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequestState;
 import no.digipost.api.client.security.Digester;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
@@ -499,8 +499,8 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
-    public SharedDocumentsRequestState getSharedDocumentRequestState(SenderId senderId, UUID sharedDocumentsRequestUuid) {
-        return getEntity(SharedDocumentsRequestState.class, getEntryPoint(senderId).getSharedDocumentsRequestStateUri().getPath() + sharedDocumentsRequestUuid.toString());
+    public ShareDocumentsRequestState getShareDocumentsRequestState(SenderId senderId, UUID shareDocumentsRequestUuid) {
+        return getEntity(ShareDocumentsRequestState.class, getEntryPoint(senderId).getShareDocumentsRequestStateUri().getPath() + shareDocumentsRequestUuid.toString());
     }
 
     @Override

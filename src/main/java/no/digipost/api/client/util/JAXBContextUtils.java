@@ -38,7 +38,7 @@ import no.digipost.api.client.representations.archive.ArchiveDocument;
 import no.digipost.api.client.representations.archive.Archives;
 import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.representations.shareddocuments.SharedDocument;
-import no.digipost.api.client.representations.shareddocuments.SharedDocumentsRequestState;
+import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequestState;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -53,7 +53,7 @@ public class JAXBContextUtils {
             Autocomplete.class, DocumentEvents.class, DocumentStatus.class, MessageDelivery.class, EncryptionKey.class,
             IdentificationResultWithEncryptionKey.class, SenderInformation.class, UserInformation.class, UserAccount.class,
             AdditionalData.class, EncryptionCertificate.class, Archives.class, Archive.class, ArchiveDocument.class,
-            Tag.class, PublicMailboxTag.class, SharedDocumentsRequestState.class, SharedDocument.class
+            Tag.class, PublicMailboxTag.class, ShareDocumentsRequestState.class, SharedDocument.class
     );
 
     private static JAXBContext initContext(Class<?>... clazz) {

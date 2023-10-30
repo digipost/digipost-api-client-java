@@ -32,15 +32,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "shared-documents-request-state", propOrder = {
+@XmlType(name = "share-documents-request-state", propOrder = {
         "sharedDocuments",
         "sharedAtTime",
         "expiryTime",
         "withdrawnTime",
         "links"
 })
-@XmlRootElement(name = "shared-documents-request-state")
-public class SharedDocumentsRequestState extends Representation {
+@XmlRootElement(name = "share-documents-request-state")
+public class ShareDocumentsRequestState extends Representation {
 
     @XmlElementWrapper(name = "shared-documents")
     @XmlElement(name = "shared-document", required = true)
@@ -58,10 +58,10 @@ public class SharedDocumentsRequestState extends Representation {
     @XmlSchemaType(name = "dateTime")
     private ZonedDateTime withdrawnTime;
 
-    public SharedDocumentsRequestState() {
+    public ShareDocumentsRequestState() {
     }
 
-    public SharedDocumentsRequestState(List<SharedDocument> sharedDocuments, ZonedDateTime sharedAtTime, ZonedDateTime expiryTime, ZonedDateTime withdrawnTime) {
+    public ShareDocumentsRequestState(List<SharedDocument> sharedDocuments, ZonedDateTime sharedAtTime, ZonedDateTime expiryTime, ZonedDateTime withdrawnTime) {
         this.sharedDocuments = sharedDocuments;
         this.sharedAtTime = sharedAtTime;
         this.expiryTime = expiryTime;
