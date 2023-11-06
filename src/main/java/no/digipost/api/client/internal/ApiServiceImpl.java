@@ -68,6 +68,9 @@ import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
+import no.digipost.api.datatypes.DataType;
+import no.digipost.api.datatypes.types.share.ShareDocumentsRequestEvent;
+import no.digipost.api.datatypes.types.share.ShareDocumentsRequestEventType;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -515,6 +518,20 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     @Override
     public SharedDocumentContent getSharedDocumentContent(URI uri) {
         return getEntity(SharedDocumentContent.class, uri.getPath());
+    }
+
+    @Override
+    public CloseableHttpResponse stopSharing(SenderId senderId, URI uri) {
+        DataType dataType = new ShareDocumentsRequestEvent(
+                ShareDocumentsRequestEventType.SHARING_STOPPED,
+                ZonedDateTime.now(),
+                null
+        );
+        AdditionalData data = AdditionalData.Builder
+                .newAdditionalData(dataType)
+                .setSenderId(senderId)
+                .build();
+        return addData(new AddDataLink(uri.getPath()), data);
     }
 
     private static String pathWithQuery(URI uri){

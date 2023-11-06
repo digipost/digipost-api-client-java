@@ -27,9 +27,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static no.digipost.api.client.representations.Relation.STOP_SHARING;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "share-documents-request-state", propOrder = {
@@ -111,5 +114,21 @@ public class ShareDocumentsRequestState extends Representation {
 
     protected void setLink(final List<Link> links) {
         this.links = links;
+    }
+
+    public URI stopSharing() {
+        Link link = getLinkByRelationName(STOP_SHARING);
+        return link != null ? link.getUri() : null;
+    }
+
+    @Override
+    public String toString() {
+        return "ShareDocumentsRequestState{" +
+                "sharedDocuments=" + sharedDocuments +
+                ", sharedAtTime=" + sharedAtTime +
+                ", expiryTime=" + expiryTime +
+                ", withdrawnTime=" + withdrawnTime +
+                ", links=" + links +
+                '}';
     }
 }

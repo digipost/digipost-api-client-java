@@ -159,7 +159,7 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-data-types</artifactId>
-            <version>0.39-RC4</version>
+            <version>0.39-RC9</version>
         </dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>

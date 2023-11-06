@@ -1458,6 +1458,7 @@
             <xsd:element name="shared-at-time" type="xsd:dateTime" minOccurs="0" />
             <xsd:element name="expiry-time" type="xsd:dateTime" minOccurs="0" />
             <xsd:element name="withdrawn-time" type="xsd:dateTime" minOccurs="0" />
+            <xsd:element name="link" type="link" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
 
