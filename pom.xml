@@ -17,7 +17,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <bouncycastle.version>1.73</bouncycastle.version>
+        <bouncycastle.version>1.76</bouncycastle.version>
         <slf4j.version>1.7.36</slf4j.version>
     </properties>
 
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-html-validator</artifactId>
-            <version>1.0.6</version>
+            <version>1.0.7</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
