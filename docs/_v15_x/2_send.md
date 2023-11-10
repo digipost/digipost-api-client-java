@@ -257,14 +257,15 @@ client.createMessage(message)
 
 ### Datatype ShareDocumentsRequest
 
-This datatypes facilitates exchange of documents between an organisation and a Digipost end user. The sender
+This datatype enables sharing of documents between an organisation and a Digipost end user. The organisation
 first sends a message of datatype ShareDocumentsRequest, to which the end user can attach a list of documents. When
 new documents are shared, a DocumentEvent is generated. The organisation can retrieve the status of their
 ShareDocumentsRequest. If documents are shared and the sharing is not cancelled, the documents can either be downloaded
 or viewed on the digipostdata.no domain. Active requests can be cancelled both by the end user and the organisation.
 
 The `purpose` attribute of the ShareDocumentsRequest should briefly explain why the sender organisation want to gain
-access to the relevant documents. The primary document should contain a more detailed explanation.
+access to the relevant documents. This text will be displayed prominently, and should contain the information necessary
+for the user to make an informed choice. The primary document should contain a more detailed explanation.
 
 #### Send ShareDocumentsRequest
 ```java
@@ -287,8 +288,8 @@ client.createMessage(message)
         .send();
 ```
 
-#### Be notified of new shared documents
-The sender organisation can be notified of new shared documents by polling document events regularly. Use the `uuid` attribute
+#### Discover new shared documents
+The sender organisation can discover new shared documents by polling document events regularly. Use the `uuid` attribute
 of the DocumentEvent to match with the `messageUUID` of the origin ShareDocumentsRequest:
 
 ```java
