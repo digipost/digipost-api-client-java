@@ -255,6 +255,88 @@ client.createMessage(message)
         .send();
 ```
 
+### Datatype ShareDocumentsRequest
+
+This datatype enables sharing of documents between an organisation and a Digipost end user. The organisation
+first sends a message of datatype ShareDocumentsRequest, to which the end user can attach a list of documents. When
+new documents are shared, a DocumentEvent is generated. The organisation can retrieve the status of their
+ShareDocumentsRequest. If documents are shared and the sharing is not cancelled, the documents can either be downloaded
+or viewed on the digipostdata.no domain. Active requests can be cancelled both by the end user and the organisation.
+
+The `purpose` attribute of the ShareDocumentsRequest should briefly explain why the sender organisation want to gain
+access to the relevant documents. This text will be displayed prominently, and should contain the information necessary
+for the user to make an informed choice. The primary document should contain a more detailed explanation.
+
+#### Send ShareDocumentsRequest
+```java
+PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
+UUID messageUUID = UUID.randomUUID();
+
+ShareDocumentsRequest shareDocumentsRequest = new ShareDocumentsRequest(
+        Duration.ofDays(60).toSeconds(),
+        "We require to see your six latest pay slips in order to give you a loan."
+);
+
+Document primaryDocument = new Document(messageUUID, "Request to access your latest payslips", FileType.PDF, shareDocumentsRequest);
+
+Message message = Message.newMessage("messageId", primaryDocument)
+        .recipient(pin)
+        .build();
+
+client.createMessage(message)
+        .addContent(primaryDocument, Files.newInputStream(Path.of("longer-desc-of-sharing-purpose.pdf")))
+        .send();
+```
+
+#### Discover new shared documents
+The sender organisation can discover new shared documents by polling document events regularly. Use the `uuid` attribute
+of the DocumentEvent to match with the `messageUUID` of the origin ShareDocumentsRequest:
+
+```java
+List<DocumentEvent> sharedDocumentEvents = digipostClient.getDocumentEvents(brokerId.asSenderId(), ZonedDateTime.now().minus(Duration.ofDays(1)), ZonedDateTime.now(), 0, 100);
+        .getEvents()
+        .stream()
+        .filter(event -> DocumentEventType.SHARE_DOCUMENTS_REQUEST_DOCUMENTS_SHARED.equals(event.getType()))
+        .toList()
+```
+
+NB: events are attached to the broker, _not_ each individual sender.
+
+#### Get state of ShareDocumentsRequest
+
+```java
+ShareDocumentsRequestState sharedDocumentsRequestState = sendClient.getShareDocumentsRequestState(senderId, uuid);
+```
+
+#### Get documents
+
+Each `SharedDocument` has attributes describing the document and its origin. If `SharedDocumentOrigin` is of type
+`OrganisationOrigin`, the corresponding document was received by the end user through Digipost from the organisation
+with the provided organisation number. If the origin is of type `PrivatePersonOrigin`, the document was received either
+from another end user or uploaded by the user itself.
+
+Get a single document as stream:
+
+```java
+SharedDocument doc1 = sharedDocumentsRequestState.getSharedDocuments().get(0);
+InputStream inputStream = sendClient.getSharedDocumentContentStream(doc1.getSharedDocumentContentStream());
+```
+
+Get link to view a single document on digipostdata.no
+
+```java
+SharedDocumentContent sharedDocumentContent = sendClient.getSharedDocumentContent(doc1.getSharedDocumentContent());
+String uri = sharedDocumentContent.getUri();
+```
+
+#### Stop sharing
+
+```java
+client.stopSharing(senderId, sharedDocumentsRequestState.stopSharing())
+```
+
+
+
 ## Send message with request for registration
 
 It is possible to send a message to a person, who does not have a Digipost account, where the message triggers an SMS notification with a request for registration. The SMS notification says that if they register for a Digipost account the document will be delivered digitally. The actual content of the SMS notification is set manually by Digipost. If the user does not register for a Digipost account within the defined deadline, the document will either be delivered as physical mail or not at all.

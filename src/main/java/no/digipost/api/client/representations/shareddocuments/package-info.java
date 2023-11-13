@@ -13,26 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.representations;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
-
-@XmlType(name = "event-type")
-@XmlEnum
-public enum DocumentEventType {
-
-    EMAIL_MESSAGE_FAILED,
-    EMAIL_MESSAGE_SENT,
-    EMAIL_NOTIFICATION_FAILED,
-    SMS_NOTIFICATION_FAILED,
-    OPENED,
-    MOVE_FILES_FROM_PUBLIC_SECTOR,
-    POSTMARKED,
-    PRINT_FAILED,
-    PEPPOL_FAILED,
-    PEPPOL_DELIVERED,
-    SHREDDED,
-    SHARE_DOCUMENTS_REQUEST_DOCUMENTS_SHARED
-
-}
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://api.digipost.no/schema/v8", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+package no.digipost.api.client.representations.shareddocuments;

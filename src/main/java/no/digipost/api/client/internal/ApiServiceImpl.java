@@ -61,10 +61,15 @@ import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.AuthorialSender;
 import no.digipost.api.client.representations.sender.AuthorialSender.Type;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
+import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequestState;
 import no.digipost.api.client.security.Digester;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
+import no.digipost.api.datatypes.DataType;
+import no.digipost.api.datatypes.types.share.ShareDocumentsRequestSharingStopped;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -111,7 +116,7 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi, TagApi {
+public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi, TagApi, SharedDocumentsApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
 
@@ -291,7 +296,6 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         HttpGet httpGet = new HttpGet(digipostUrl.resolve(createEncodedURIPath(getEntryPoint().getAutocompleteUri().getPath() + "/" + searchString)));
         return requestEntity(httpGet, Autocomplete.class);
     }
-
 
     @Override
     public CloseableHttpResponse identifyRecipient(Identification identification) {
@@ -495,7 +499,36 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         queryParams.put("personal-identification-number", personalIdentificationNumber.asString());
         return getEntity(Tags.class, getEntryPoint().getTagsUri().getPath(), queryParams);
     }
-    
+
+    @Override
+    public ShareDocumentsRequestState getShareDocumentsRequestState(SenderId senderId, UUID shareDocumentsRequestUuid) {
+        return getEntity(ShareDocumentsRequestState.class, getEntryPoint(senderId).getShareDocumentsRequestStateUri().getPath() + shareDocumentsRequestUuid.toString());
+    }
+
+    @Override
+    public InputStream getSharedDocumentContentStream(URI uri) {
+        HttpGet httpGet = new HttpGet(uri);
+        httpGet.setHeader(HttpHeaders.ACCEPT, ContentType.WILDCARD.toString());
+        final HttpCoreContext httpCoreContext = HttpCoreContext.create();
+        httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
+        return requestStream(httpGet);
+    }
+
+    @Override
+    public SharedDocumentContent getSharedDocumentContent(URI uri) {
+        return getEntity(SharedDocumentContent.class, uri.getPath());
+    }
+
+    @Override
+    public CloseableHttpResponse stopSharing(SenderId senderId, URI uri) {
+        DataType dataType = new ShareDocumentsRequestSharingStopped();
+        AdditionalData data = AdditionalData.Builder
+                .newAdditionalData(dataType)
+                .setSenderId(senderId)
+                .build();
+        return addData(new AddDataLink(uri.getPath()), data);
+    }
+
     private static String pathWithQuery(URI uri){
         return uri.getPath() + ((uri.getQuery() != null) ? "?" + uri.getQuery() : "");
     }

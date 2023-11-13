@@ -49,8 +49,11 @@ import no.digipost.api.client.representations.batch.Batch;
 import no.digipost.api.client.representations.inbox.Inbox;
 import no.digipost.api.client.representations.inbox.InboxDocument;
 import no.digipost.api.client.representations.sender.SenderInformation;
+import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequestState;
+import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
 import no.digipost.http.client3.DigipostHttpClientFactory;
@@ -91,6 +94,7 @@ public class DigipostClient {
     private final ArchiveApi archiveApi;
     private final BatchApi batchApi;
     private final TagApi tagApi;
+    private final SharedDocumentsApi sharedDocumentsApi;
 
 
     public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
@@ -102,16 +106,17 @@ public class DigipostClient {
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
-        this(config, apiService, apiService, apiService, apiService, apiService, apiService);
+        this(config, apiService, apiService, apiService, apiService, apiService, apiService, apiService);
     }
 
-    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi) {
+    public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi, SharedDocumentsApi sharedDocumentsApi) {
         this.messageApi = apiService;
         this.inboxApiService = inboxApiService;
         this.documentApi = documentApi;
         this.archiveApi = archiveApi;
         this.batchApi = batchApi;
         this.tagApi = tagApi;
+        this.sharedDocumentsApi = sharedDocumentsApi;
 
         this.messageSender = new MessageDeliverer(config, apiService);
         this.archiveSender = new ArchiveDeliverer(config, archiveApi);
@@ -311,6 +316,22 @@ public class DigipostClient {
 
     public Tags getTags(PersonalIdentificationNumber personalIdentificationNumber) {
         return tagApi.getTags(personalIdentificationNumber);
+    }
+
+    public ShareDocumentsRequestState getShareDocumentsRequestState(SenderId senderId, UUID shareDocumentsRequestUuid) {
+        return sharedDocumentsApi.getShareDocumentsRequestState(senderId, shareDocumentsRequestUuid);
+    }
+
+    public InputStream getSharedDocumentContentStream(URI uri) {
+        return sharedDocumentsApi.getSharedDocumentContentStream(uri);
+    }
+
+    public SharedDocumentContent getSharedDocumentContent(URI uri) {
+        return sharedDocumentsApi.getSharedDocumentContent(uri);
+    }
+
+    public CloseableHttpResponse stopSharing(SenderId senderId, URI uri) {
+        return sharedDocumentsApi.stopSharing(senderId, uri);
     }
 
     public ArchiveApi.ArchivingDocuments archiveDocuments(final Archive archive) {
