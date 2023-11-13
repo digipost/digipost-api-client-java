@@ -69,8 +69,7 @@ import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
 import no.digipost.api.datatypes.DataType;
-import no.digipost.api.datatypes.types.share.ShareDocumentsRequestEvent;
-import no.digipost.api.datatypes.types.share.ShareDocumentsRequestEventType;
+import no.digipost.api.datatypes.types.share.ShareDocumentsRequestSharingStopped;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -522,11 +521,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     @Override
     public CloseableHttpResponse stopSharing(SenderId senderId, URI uri) {
-        DataType dataType = new ShareDocumentsRequestEvent(
-                ShareDocumentsRequestEventType.SHARING_STOPPED,
-                ZonedDateTime.now(),
-                null
-        );
+        DataType dataType = new ShareDocumentsRequestSharingStopped();
         AdditionalData data = AdditionalData.Builder
                 .newAdditionalData(dataType)
                 .setSenderId(senderId)
