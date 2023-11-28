@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations.archive;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "archive-document-content", propOrder = {

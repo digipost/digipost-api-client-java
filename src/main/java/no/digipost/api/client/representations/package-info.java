@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@javax.xml.bind.annotation.XmlSchema
+@jakarta.xml.bind.annotation.XmlSchema
         (namespace = "http://api.digipost.no/schema/v8", xmlns = {
-                @javax.xml.bind.annotation.XmlNs(prefix = "", namespaceURI = "http://api.digipost.no/schema/v8"),
-                @javax.xml.bind.annotation.XmlNs(prefix = "data-types", namespaceURI = no.digipost.api.datatypes.marshalling.DataTypesJAXBContext.DIGIPOST_DATATYPES_NAMESPACE)},
-                elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+                @jakarta.xml.bind.annotation.XmlNs(prefix = "", namespaceURI = "http://api.digipost.no/schema/v8"),
+                @jakarta.xml.bind.annotation.XmlNs(prefix = "data-types", namespaceURI = no.digipost.api.datatypes.marshalling.DataTypesJAXBContext.DIGIPOST_DATATYPES_NAMESPACE)},
+                elementFormDefault = jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package no.digipost.api.client.representations;

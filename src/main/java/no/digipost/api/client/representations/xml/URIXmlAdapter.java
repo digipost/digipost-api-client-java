@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations.xml;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.net.URI;
 
 public class URIXmlAdapter extends XmlAdapter<String, URI> {

@@ -27,7 +27,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 
-import javax.xml.bind.DataBindingException;
+import jakarta.xml.bind.DataBindingException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

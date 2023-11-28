@@ -15,8 +15,8 @@
  */
 package no.digipost.api.client.representations.accounts;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(name = "tag-type")
 @XmlEnum

@@ -15,8 +15,8 @@
  */
 package no.digipost.api.client.representations.sender;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * Status for en avsender.
