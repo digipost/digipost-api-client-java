@@ -86,7 +86,7 @@
             {% for depr in site.deprecatedVersions %}
             {% if page.url contains depr %}
             <div class="alert alert-danger">
-                  This version is deprecated and will stop working as of Spring 2022. Do not use or upgrade to newest client.
+                  This version is deprecated. As of dec 2023 we will only support v16 and higher since we now only support Java >= 11 with jakarta.xml-bind.
             </div>
             {% endif %}
           {% endfor %}
@@ -184,40 +184,6 @@
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/trianglify/0.1.2/trianglify.min.js"></script>
   <script>trianglify('{{site.header.color1}}', '{{site.header.color2}}');</script>
-  {% endif %}
-
-  {% if site.twitter.enabled or site.twitter.account %}
-  <script>
-    window.twttr = (function (d,s,id) {
-      var t, js, fjs = d.getElementsByTagName(s)[0];
-      if (d.getElementById(id)) return; js=d.createElement(s); js.id=id; js.async=1;
-      js.src="https://platform.twitter.com/widgets.js"; fjs.parentNode.insertBefore(js, fjs);
-      return window.twttr || (t = { _e: [], ready: function(f){ t._e.push(f) } });
-    }(document, "script", "twitter-wjs"));
-  </script>
-  {% endif %}
-
-  {% if site.facebook.enabled or site.facebook.profileUrl %}
-  <div id="fb-root"></div>
-  <script>(function(d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-      if (d.getElementById(id)) return;
-      js = d.createElement(s); js.id = id;
-      js.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
-      fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
-  </script>
-  {% endif %}
-
-  {% if site.analytics.account and site.analytics.domain %}
-  <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-    ga('create', '{{site.analytics.account}}', '{{site.analytics.domain}}');
-    ga('send', 'pageview');
-  </script>
   {% endif %}
 
 </body>
