@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations;
 
-import javax.xml.bind.annotation.XmlValue;
+import jakarta.xml.bind.annotation.XmlValue;
 
 import java.util.Objects;
 

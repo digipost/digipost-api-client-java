@@ -10,7 +10,7 @@ The client library is available on the [Maven Central Repository](https://centra
 Copy the `<dependency>`-snippet from that website and put it in your pom.xml file.
 Make sure to use the latest version available.
 
-This client requires Java 8 and uses `javax.xml-bind`.
+This client requires Java 11 and `jakarta.xml-bind`.
 
 ### Configure for production use
 

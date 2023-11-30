@@ -28,7 +28,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicStatusLine;
 
-import javax.xml.bind.JAXB;
+import jakarta.xml.bind.JAXB;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -8,17 +8,11 @@ licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
 
 baseurl: "/digipost-api-client-java"
 
-currentVersion: "15.x"
-versions: ["15.x", "13.x", "11.x", "10.x", "9.0", "8.0", "6.1", "6.0"]
-deprecatedVersions: ["6.1", "6.0"]
+currentVersion: "16.x"
+versions: ["16.x", "15.x", "13.x", "11.x", "10.x", "9.0", "8.0"]
+deprecatedVersions: ["8.0", "9.0", "10.x", "11.x", "13.x"]
 
 collections:
-  v6_0:  
-    output: true
-    permalink: /v6.0/    
-  v6_1:
-    output: true
-    permalink: /v6.1/
   v8_0:
     output: true
     permalink: /v8.0/
@@ -37,6 +31,9 @@ collections:
   v15_x:
     output: true
     permalink: /v15.x/
+  v16_x:
+    output: true
+    permalink: /v16.x/
 
 # list of additional links on the right of the top menu
 headerLinks:
@@ -64,23 +61,6 @@ header:
 githubButton:
   user: digipost
   repo: digipost-api-client-java
-
-# twitter buttons
-twitter:
-  enabled: true
-  via:
-  hash:
-  account: digipost_no
-
-# facebook buttons
-facebook:
-  enabled: false
-  profileUrl:
-
-# google analytics
-analytics:
-  account:
-  domain:
 
 # DON'T MODIFY
 highlight: rouge

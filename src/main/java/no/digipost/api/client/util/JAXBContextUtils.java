@@ -40,8 +40,8 @@ import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.representations.shareddocuments.SharedDocument;
 import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequestState;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import java.io.InputStream;
 import java.io.OutputStream;
 

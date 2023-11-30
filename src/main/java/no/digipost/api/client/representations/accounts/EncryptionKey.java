@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations.accounts;
 
-import javax.xml.bind.annotation.XmlValue;
+import jakarta.xml.bind.annotation.XmlValue;
 
 public class EncryptionKey {
 

@@ -15,9 +15,9 @@
  */
 package no.digipost.api.client.representations.xml;
 
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import java.time.ZonedDateTime;
 import java.util.Calendar;

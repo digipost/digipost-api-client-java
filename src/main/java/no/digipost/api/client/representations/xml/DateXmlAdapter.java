@@ -15,7 +15,7 @@
  */
 package no.digipost.api.client.representations.xml;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,8 +24,8 @@ import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import static javax.xml.bind.DatatypeConverter.parseDate;
-import static javax.xml.bind.DatatypeConverter.printDate;
+import static jakarta.xml.bind.DatatypeConverter.parseDate;
+import static jakarta.xml.bind.DatatypeConverter.printDate;
 
 public class DateXmlAdapter extends XmlAdapter<String, LocalDate> {
 

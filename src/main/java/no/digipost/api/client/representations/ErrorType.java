@@ -17,8 +17,8 @@ package no.digipost.api.client.representations;
 
 import org.apache.http.StatusLine;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(name = "error-type")
 @XmlEnum

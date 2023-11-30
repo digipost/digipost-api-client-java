@@ -33,7 +33,7 @@ public interface SharedDocumentsApi {
      * corresponding links.
      *
      * @param shareDocumentsRequestUuid The UUID of the primary document of the original ShareDocumentsRequest message
-     * @return
+     * @return the state 
      */
     ShareDocumentsRequestState getShareDocumentsRequestState(SenderId senderId, UUID shareDocumentsRequestUuid);
 
@@ -41,7 +41,7 @@ public interface SharedDocumentsApi {
      * Gets the content of a specific document as a stream of bytes.
      *
      * @param uri The URI of the SharedDocument returned as part of the ShareDocumentsRequestState
-     * @return
+     * @return the shared document content as stream
      */
     InputStream getSharedDocumentContentStream(URI uri);
 
@@ -49,7 +49,7 @@ public interface SharedDocumentsApi {
      * Gets the content of a specific document as a link to view on Digipost's domain.
      *
      * @param uri The URI of the SharedDocument returned as part of the ShareDocumentsRequestState
-     * @return
+     * @return the shared document content with url
      */
     SharedDocumentContent getSharedDocumentContent(URI uri);
 
