@@ -41,6 +41,8 @@ import static no.digipost.api.client.representations.DocumentEventType.MOVE_FILE
 import static no.digipost.api.client.representations.DocumentEventType.OPENED;
 import static no.digipost.api.client.representations.DocumentEventType.POSTMARKED;
 import static no.digipost.api.client.representations.DocumentEventType.PRINT_FAILED;
+import static no.digipost.api.client.representations.DocumentEventType.SHARE_DOCUMENTS_REQUEST_DOCUMENTS_SHARED;
+import static no.digipost.api.client.representations.DocumentEventType.SHARE_DOCUMENTS_REQUEST_SHARING_WITHDRAWN;
 import static no.digipost.api.client.representations.DocumentEventType.SHREDDED;
 import static no.digipost.api.client.representations.DocumentEventType.SMS_NOTIFICATION_FAILED;
 import static no.digipost.api.client.representations.ErrorType.CLIENT_DATA;
@@ -214,9 +216,23 @@ public class XsdValidationTest {
 
         DocumentEvent shreddedEvent = new DocumentEvent(randomUUID(), SHREDDED, now, now);
 
+        DocumentEvent newSharedDocuments = new DocumentEvent(
+                randomUUID(),
+                SHARE_DOCUMENTS_REQUEST_DOCUMENTS_SHARED,
+                now,
+                now
+        );
+
+        DocumentEvent sharingWithdrawn = new DocumentEvent(
+                randomUUID(),
+                SHARE_DOCUMENTS_REQUEST_SHARING_WITHDRAWN,
+                now,
+                now
+        );
+
         DocumentEvents documentEvents = new DocumentEvents(asList(openedEvent, emailDeliveredEvent,
                 emailDeliveredEventWithMetadata, failedEmailNotificationEvent, failedSmsNotificationEvent,
-                printFailedEvent, movedFilesEvent, postmarkedEvent, shreddedEvent));
+                printFailedEvent, movedFilesEvent, postmarkedEvent, shreddedEvent, newSharedDocuments, sharingWithdrawn));
         marshallValidateAndUnmarshall(documentEvents);
     }
 
