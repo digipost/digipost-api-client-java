@@ -1107,6 +1107,8 @@
             <xsd:enumeration value="SHREDDED" />
             <xsd:enumeration value="PEPPOL_DELIVERED" />
             <xsd:enumeration value="PEPPOL_FAILED" />
+            <xsd:enumeration value="SHARE_DOCUMENTS_REQUEST_DOCUMENTS_SHARED" />
+            <xsd:enumeration value="SHARE_DOCUMENTS_REQUEST_SHARING_WITHDRAWN" />
         </xsd:restriction>
     </xsd:simpleType>
 
