@@ -17,7 +17,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
-        <bouncycastle.version>1.77</bouncycastle.version>
+        <bouncycastle.version>1.78.1</bouncycastle.version>
         <slf4j.version>2.0.9</slf4j.version>
     </properties>
 
@@ -25,33 +25,30 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>printability-validator</artifactId>
-            <version>3.3</version>
+            <version>3.5.1</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-html-validator</artifactId>
-            <version>1.0.7</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-cache</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -83,12 +80,12 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.11.0</version>
+            <version>2.16.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>3.14.0</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -141,7 +138,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.15.2</version>
+            <version>3.16.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -153,13 +150,13 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digg</artifactId>
-            <version>0.33</version>
+            <version>0.34</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-data-types</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
@@ -176,38 +173,45 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>2.15.3</version>
-                <scope>import</scope>
+                <version>2.17.0</version>
                 <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-bom</artifactId>
+                <version>2.0.13</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.10.1</version>
+                <version>5.10.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.15</version>
+                <version>1.16.1</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-bom</artifactId>
-                <version>5.7.0</version>
+                <version>5.11.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
                 <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>4.0.1</version>
+                <version>4.0.2</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>4.0.4</version>
+                <version>4.0.5</version>
                 <scope>runtime</scope>
             </dependency>
         </dependencies>
@@ -234,35 +238,35 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.13.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.2.5</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.3.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.6.3</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.6.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.1</version>
                     <configuration>
                         <archive>
                             <manifest>
@@ -274,7 +278,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
@@ -282,17 +286,17 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.15.0</version>
+                    <version>2.16.2</version>
                 </plugin>
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.17.2</version>
+                    <version>0.21.1</version>
                     <configuration>
                         <parameter>
                             <includes>
@@ -307,7 +311,7 @@
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>4.2</version>
+                    <version>4.3</version>
                     <configuration>
                         <licenseSets>
                             <licenseSet>
@@ -356,12 +360,9 @@
                                         <exclude>*:*:*:jar:provided</exclude>
                                     </excludes>
                                     <includes>
-                                        <include>org.bouncycastle:bcprov-jdk18on:${bouncycastle.version}:jar:compile</include>
-                                        <include>org.bouncycastle:bcpkix-jdk18on:${bouncycastle.version}:jar:compile</include>
-                                        <include>org.bouncycastle:bcutil-jdk18on:${bouncycastle.version}:jar:compile</include>
+                                        <include>org.bouncycastle:*-jdk18on</include>
                                         <include>org.slf4j</include>
-                                        <include>org.apache.pdfbox:fontbox</include>
-                                        <include>org.apache.pdfbox:pdfbox</include>
+                                        <include>org.apache.pdfbox</include>
                                         <include>no.digipost:printability-validator</include>
                                         <include>no.digipost:digipost-cache</include>
                                         <include>com.google.code.findbugs:jsr305:jar</include>
@@ -381,8 +382,9 @@
                                         <include>com.fasterxml.jackson.core:jackson-databind</include>
                                         <include>com.fasterxml.jackson.core:jackson-annotations</include>
                                         <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
+                                        <include>net.bytebuddy:byte-buddy</include>
                                         <include>jakarta.validation:jakarta.validation-api</include>
-                                        <include>com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer</include>
+                                        <include>com.googlecode.owasp-java-html-sanitizer</include>
                                         <include>com.google.guava:listenablefuture</include>
                                         <include>com.google.guava:guava</include>
                                         <include>jakarta.xml.bind:jakarta.xml.bind-api</include>
@@ -473,7 +475,7 @@
                     </plugin>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.5.0</version>
+                        <version>3.7.1</version>
                         <configuration>
                             <finalName>${project.artifactId}</finalName>
                             <descriptors>

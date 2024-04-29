@@ -17,20 +17,24 @@ package no.digipost.api.client.pdf;
 
 import java.io.InputStream;
 
-import static org.apache.commons.lang3.Validate.notNull;
+import static no.digipost.DiggBase.nonNull;
 
 public final class EksempelPdf {
 
     public static InputStream printablePdf1Page() {
-        return notNull(EksempelPdf.class.getResourceAsStream("/pdf/a4-left-margin-20mm.pdf"), "not found");
+        return nonNull("/pdf/a4-left-margin-20mm.pdf", EksempelPdf.class::getResourceAsStream);
     }
 
     public static InputStream printablePdf2Pages() {
-        return notNull(EksempelPdf.class.getResourceAsStream("/pdf/a4-2pages.pdf"), "not found");
+        return nonNull("/pdf/a4-2pages.pdf", EksempelPdf.class::getResourceAsStream);
     }
 
     public static InputStream pdf20Pages() {
-        return notNull(EksempelPdf.class.getResourceAsStream("/pdf/a4-20pages.pdf"), "not found");
+        return nonNull("/pdf/a4-20pages.pdf", EksempelPdf.class::getResourceAsStream);
+    }
+
+    public static InputStream pdf30Pages() {
+        return nonNull("/pdf/a4-30pages.pdf", EksempelPdf.class::getResourceAsStream);
     }
 
 }
