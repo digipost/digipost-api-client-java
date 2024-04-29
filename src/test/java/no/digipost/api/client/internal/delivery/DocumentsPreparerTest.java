@@ -48,7 +48,7 @@ import java.util.UUID;
 import static co.unruly.matchers.Java8Matchers.where;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
-import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
+import static no.digipost.api.client.pdf.EksempelPdf.pdf30Pages;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
@@ -57,7 +57,6 @@ import static no.digipost.api.client.representations.FileType.GIF;
 import static no.digipost.api.client.representations.FileType.HTML;
 import static no.digipost.api.client.representations.FileType.PDF;
 import static no.digipost.api.client.security.Encrypter.FAIL_IF_TRYING_TO_ENCRYPT;
-import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -74,11 +73,11 @@ import static org.mockito.Mockito.withSettings;
 
 public class DocumentsPreparerTest {
 
-    private static final byte[] pdf20Pages;
+    private static final byte[] pdf30Pages;
     static {
         CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
-        try {
-            pdf20Pages = toByteArray(pdf20Pages());
+        try (InputStream pdfStream = pdf30Pages()) {
+            pdf30Pages = pdfStream.readAllBytes();
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -126,10 +125,10 @@ public class DocumentsPreparerTest {
 
     @Test
     public void passesDocumentForWebWhichWouldNotBeOkForPrint() throws IOException {
-        preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL);
+        preparer.validateAndSetNrOfPages(DIGIPOST, new Document(UUID.randomUUID(), null, PDF), pdf30Pages, () -> PdfValidationSettings.CHECK_ALL);
 
         DigipostClientException thrown = assertThrows(DigipostClientException.class,
-                () -> preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID(), null, PDF), pdf20Pages, () -> PdfValidationSettings.CHECK_ALL));
+                () -> preparer.validateAndSetNrOfPages(PRINT, new Document(UUID.randomUUID(), null, PDF), pdf30Pages, () -> PdfValidationSettings.CHECK_ALL));
         assertThat(thrown, where(Exception::getMessage, containsString("too many pages")));
     }
 
