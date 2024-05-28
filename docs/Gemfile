@@ -7,3 +7,4 @@ versions = JSON.parse(OpenURI.open_uri('https://pages.github.com/versions.json')
 gem 'github-pages', versions['github-pages'], group: :jekyll_plugins
 gem 'activesupport', '~> 7.1', '>= 7.1.3'
 gem "webrick", "~> 1.8"
+gem "nokogiri", "~> 1.16.5"
