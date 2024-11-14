@@ -15,20 +15,22 @@
  */
 package no.digipost.api.client.representations.archive;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Representation;
 import no.digipost.api.client.representations.SenderOrganization;
 import org.apache.http.client.utils.URIBuilder;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -122,7 +124,41 @@ public class Archive extends Representation {
         return Optional.ofNullable(getLinkByRelationName(NEXT_DOCUMENTS)).map(Link::getUri)
                 .map(uri -> {
                     try {
-                        return new URIBuilder(uri).addParameter("attributes", Base64.getEncoder().encodeToString(attributesCommaSeparated.getBytes(StandardCharsets.UTF_8))).build();
+                        return new URIBuilder(uri)
+                                .addParameter("attributes", Base64.getEncoder().encodeToString(attributesCommaSeparated.getBytes(StandardCharsets.UTF_8)))
+                                .build();
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+
+    public Optional<URI> getNextDocumentsWithAttributesByDate(Map<String, String> attributes, OffsetDateTime from, OffsetDateTime to) {
+        final String attributesCommaSeparated = attributes.entrySet().stream().flatMap(en -> Stream.of(en.getKey(), en.getValue())).collect(Collectors.joining(","));
+        
+        return Optional.ofNullable(getLinkByRelationName(NEXT_DOCUMENTS)).map(Link::getUri)
+                .map(uri -> {
+                    try {
+                        return new URIBuilder(uri)
+                                .addParameter("attributes", base64(attributesCommaSeparated))
+                                .addParameter("fromDate", base64(from.toString()))
+                                .addParameter("toDate", base64(to.toString()))
+                                .build();
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+
+    public Optional<URI> getNextDocumentsByDate(OffsetDateTime from, OffsetDateTime to) {
+        
+        return Optional.ofNullable(getLinkByRelationName(NEXT_DOCUMENTS)).map(Link::getUri)
+                .map(uri -> {
+                    try {
+                        return new URIBuilder(uri)
+                                .addParameter("fromDate", base64(from.toString()))
+                                .addParameter("toDate", base64(to.toString()))
+                                .build();
                     } catch (URISyntaxException e) {
                         throw new RuntimeException(e);
                     }
@@ -180,4 +216,8 @@ public class Archive extends Representation {
         }
     }
 
+    private static String base64(String param){
+        return Base64.getEncoder().encodeToString(param.getBytes(StandardCharsets.UTF_8));
+    }
+    
 }

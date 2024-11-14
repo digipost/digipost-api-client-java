@@ -30,11 +30,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.time.Period;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings("unused")
@@ -64,6 +66,27 @@ public class GithubPagesArchiveExamples {
                 .map(client::getArchiveDocuments)
                 .map(Archive::getDocuments)
                 .orElse(Collections.emptyList());
+    }
+    
+    public void get_documents_by_attributes(){
+        Archives archives = client.getArchives(SenderId.of(123456));
+        Archive defaultArchive = archives.getArchives().get(0);
+        
+        defaultArchive.getNextDocumentsWithAttributes(Map.of("Key", "Value"));
+    }
+
+    public void get_documents_by_date_with_attributes_by_date(){
+        Archives archives = client.getArchives(SenderId.of(123456));
+        Archive defaultArchive = archives.getArchives().get(0);
+
+        defaultArchive.getNextDocumentsWithAttributesByDate(Map.of("Key", "Value"), OffsetDateTime.now().minus(Period.ofDays(4)), OffsetDateTime.now());
+    }
+
+    public void get_documents_by_date(){
+        Archives archives = client.getArchives(SenderId.of(123456));
+        Archive defaultArchive = archives.getArchives().get(0);
+        
+        defaultArchive.getNextDocumentsByDate(OffsetDateTime.now().minus(Period.ofDays(4)), OffsetDateTime.now());
     }
 
     public void example_of_iteration_of_all_documents(){

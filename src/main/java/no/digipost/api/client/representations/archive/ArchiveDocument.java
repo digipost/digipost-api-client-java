@@ -205,7 +205,7 @@ public class ArchiveDocument extends Representation {
                 ", fileType='" + fileType + '\'' +
                 ", referenceid='" + referenceid + '\'' +
                 ", contentType='" + contentType + '\'' +
-                ", contentHash=" + contentHash.getHashAlgorithm() + ":" + contentHash.getHash() +
+                (contentHash == null ? "" : ", contentHash=" + contentHash.getHashAlgorithm() + ":" + contentHash.getHash()) +
                 ", attributes=" + attributes +
                 ", archivedTime=" + archivedTime +
                 ", deletionTime=" + deletionTime +
