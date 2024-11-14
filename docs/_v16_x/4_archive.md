@@ -133,6 +133,28 @@ while (current.getNextDocuments().isPresent()) {
 System.out.println(documents);
 ```
 
+You can now also select by date or by attributes by date. Date is when the documents has been stored in Digipost archive.
+
+```java
+final Archives archives = client.getArchives();
+
+Archive current = archives.getArchives().get(0);
+final List<ArchiveDocument> documents = new ArrayList<>();
+
+while (current.getNextDocuments().isPresent()) {
+    current = current.getNextDocumentsWithAttributesByDate(Map.of("INR", "123123"), OffsetDateTime.now().minus(Period.ofDays(4)), OffsetDateTime.now())
+		//current = defaultArchive.getNextDocumentsByDate(OffsetDateTime.now().minus(Period.ofDays(4)), OffsetDateTime.now());
+    .map(client::getArchiveDocuments)
+    .orElse(new Archive());
+
+    documents.addAll(current.getDocuments());
+}
+
+// This prints to total content of the list of documents
+System.out.println(documents);
+```
+
+
 ## Get documents by referenceID
 
 You can retrieve a set of documents by a given referenceID. You will then get the documents listed in their respective
