@@ -13,6 +13,23 @@
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
 
+    <organization>
+        <name>Posten Bring AS</name>
+        <url>https://www.posten.no/</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <distribution>repo</distribution>
+            <comments>
+                Copyright 2011-2025 Posten Bring AS. All Rights Reserved.
+                This product includes software developed by Posten Bring AS.
+            </comments>
+        </license>
+    </licenses>
+
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>

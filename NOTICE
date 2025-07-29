@@ -1,8 +1,8 @@
 Digipost API Client
 
-Copyright 2011 Posten Norge AS. All Rights Reserved.
+Copyright 2011–2025 Posten Bring AS. All Rights Reserved.
 
-This product includes software developed by Posten Norge AS. - https://www.posten.no/
+This product includes software developed by Posten Bring AS. - https://www.posten.no/
 Licensed under Apache 2 - http://www.apache.org/licenses/LICENSE-2.0.html
 
 
@@ -24,7 +24,7 @@ This software includes third party software subject to the following licenses:
   Byte Buddy (without dependencies) under Apache License, Version 2.0
   Caffeine cache under Apache License, Version 2.0
   Checker Qual under The MIT License
-  Digipost API Client under The Apache Software License, Version 2.0
+  Digipost API Client under Apache License, Version 2.0
   Digipost Caching under The Apache Software License, Version 2.0
   Digipost Data Types under The Apache Software License, Version 2.0
   Digipost HTTP Client Builder under The Apache Software License, Version 2.0
@@ -43,8 +43,8 @@ This software includes third party software subject to the following licenses:
   Java 8 Shim under Apache License, Version 2.0
   JAXB Core under Eclipse Distribution License - v 1.0
   JAXB Runtime under Eclipse Distribution License - v 1.0
-  JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
+  JCL 1.2 implemented over SLF4J under Apache-2.0
   OWASP Java HTML Sanitizer under Apache License, Version 2.0
-  SLF4J API Module under MIT License
+  SLF4J API Module under MIT
   TXW2 Runtime under Eclipse Distribution License - v 1.0
 
