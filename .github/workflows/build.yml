@@ -10,8 +10,8 @@ jobs:
     name: Build on Java ${{ matrix.java }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
@@ -19,37 +19,41 @@ jobs:
       - name: Build with Maven
         run: mvn -B -U verify --no-transfer-progress --show-version --settings .mvn/settings.xml
 
-
-  publishing_parameters:
-    needs: build
-    name: Publishing parameters
-    runs-on: ubuntu-latest
-    outputs:
-      is_release: ${{ steps.version.outputs.is_release }}
-      version: ${{ steps.version.outputs.version }}
-    steps:
-      - name: Determine version
-        id: version
-        run: |
-          if [[ $GITHUB_REF == *"tags"* ]]; then
-            is_release=true
-            version=${GITHUB_REF#refs/tags/}
-          else
-            is_release=false
-            version=${GITHUB_REF#refs/heads/}-SNAPSHOT
-          fi
-          echo "is_release=${is_release//\//-}" >> $GITHUB_OUTPUT
-          echo "version=${version//\//-}" >> $GITHUB_OUTPUT
-
-
   publish:
-    needs: publishing_parameters
-    name: Publish ${{ needs.publishing_parameters.outputs.version }}
+    needs: build
+    name: Publish ${{ github.ref_name }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: digipost/action-maven-publish@v1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Set up Java
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
-          sonatype_secrets: ${{ secrets.sonatype_secrets }}
-          release_version: ${{ needs.publishing_parameters.outputs.version }}
-          perform_release: ${{ needs.publishing_parameters.outputs.is_release }}
+          distribution: temurin
+          java-version: '21'
+          cache: "maven"
+          gpg-private-key: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PRIVATE }}
+          server-id: central
+          server-username: MAVEN_CENTRAL_TOKEN_USERNAME
+          server-password: MAVEN_CENTRAL_TOKEN_PASSWORD
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Activate Artifact Signing and Version Suffix
+        run: |
+          profiles="build-sources-and-javadoc,deploy-to-maven-central"
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            profiles="$profiles,sign-artifacts"
+            version_suffix=""
+          else
+            version_suffix="-SNAPSHOT"         
+          fi
+          echo "MAVEN_PROFILES=$profiles" >> $GITHUB_ENV
+          version="${GITHUB_REF_NAME}${version_suffix}"
+          echo "VERSION=$version" >> $GITHUB_ENV
+      - name: Set Maven version
+        run: mvn --batch-mode --no-transfer-progress versions:set -DnewVersion=${VERSION}
+      - name: Build and deploy to Maven Central
+        run: |
+          mvn --batch-mode --no-transfer-progress --activate-profiles ${MAVEN_PROFILES} deploy
+        env:
+          MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
+          MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PASSPHRASE }}
