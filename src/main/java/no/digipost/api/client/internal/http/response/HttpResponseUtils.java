@@ -15,19 +15,19 @@
  */
 package no.digipost.api.client.internal.http.response;
 
+import jakarta.xml.bind.DataBindingException;
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.representations.ErrorMessage;
 import no.digipost.api.client.representations.ErrorType;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
-
-import jakarta.xml.bind.DataBindingException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -66,21 +66,21 @@ public final class HttpResponseUtils {
         }
     }
 
-    public static boolean responseOk(StatusLine status) {
-        return status.getStatusCode() / 100 == 2; //all 2xx is ok
+    public static boolean responseOk(int statusCode) {
+        return statusCode / 100 == 2; //all 2xx is ok
     }
 
     public static boolean resourceAlreadyExists(HttpResponse response) {
-        return response.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT;
+        return response.getCode() == HttpStatus.SC_CONFLICT;
     }
 
 
-    public static void checkResponse(HttpResponse response, EventLogger eventLogger) {
-        StatusLine status = response.getStatusLine();
-        if (!responseOk(status)) {
-            ErrorMessage error = fetchErrorMessageString(status, response.getEntity());
+    public static void checkResponse(ClassicHttpResponse response, EventLogger eventLogger) {
+        int statusCode = response.getCode();
+        if (!responseOk(statusCode)) {
+            ErrorMessage error = fetchErrorMessageString(response, response.getEntity());
             eventLogger.log(error.toString());
-            switch (status.getStatusCode()) {
+            switch (statusCode) {
                 case HttpStatus.SC_INTERNAL_SERVER_ERROR:
                     throw new DigipostClientException(ErrorCode.SERVER_ERROR, error.getErrorMessage());
                 case HttpStatus.SC_SERVICE_UNAVAILABLE:
@@ -91,8 +91,12 @@ public final class HttpResponseUtils {
         }
     }
 
-    private static ErrorMessage fetchErrorMessageString(final StatusLine statusLine, final HttpEntity responseEntity) {
-        final ErrorType errorType = ErrorType.fromResponseStatus(statusLine);
+    private static ErrorMessage fetchErrorMessageString(final HttpResponse response, final HttpEntity responseEntity) {
+        String statusLine = response.getVersion() + " " + response.getCode();
+        if (StringUtils.isNotBlank(response.getReasonPhrase())) {
+            statusLine += " " + response.getReasonPhrase();
+        }
+        final ErrorType errorType = ErrorType.fromResponseStatus(response.getCode());
         if (responseEntity == null) {
             return new ErrorMessage(errorType, "status=" + statusLine + ", body=<empty>");
         }

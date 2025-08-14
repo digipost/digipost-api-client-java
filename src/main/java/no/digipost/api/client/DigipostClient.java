@@ -56,9 +56,9 @@ import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
-import no.digipost.http.client3.DigipostHttpClientFactory;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.impl.client.HttpClientBuilder;
+import no.digipost.http.client.HttpClientFactory;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +98,7 @@ public class DigipostClient {
 
 
     public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
-        this(config, brokerId, signer, DigipostHttpClientFactory.createDefaultBuilder());
+        this(config, brokerId, signer, HttpClientFactory.createDefaultBuilder());
     }
 
     public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer, HttpClientBuilder clientBuilder) {

@@ -18,10 +18,11 @@ package no.digipost.api.client.internal.http.response.interceptor;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.security.ResponseMessageSignatureUtil;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpResponseInterceptor;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -47,7 +48,7 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
     }
 
     @Override
-    public void process(HttpResponse response, HttpContext context) {
+    public void process(HttpResponse response, EntityDetails entityDetails, HttpContext context) {
         final Boolean notSignedResponse = (Boolean) context.getAttribute(NOT_SIGNED_RESPONSE);
         if (notSignedResponse != null && notSignedResponse) {
             return;

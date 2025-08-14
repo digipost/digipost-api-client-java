@@ -16,10 +16,9 @@
 package no.digipost.api.client.internal.http.request.interceptor;
 
 import no.digipost.api.client.security.RequestToSign;
-import org.apache.http.Header;
-import org.apache.http.HttpRequest;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpRequest;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -34,13 +33,13 @@ final class ApacheHttpRequestToSign implements RequestToSign {
 
     @Override
     public String getMethod() {
-        return clientRequest.getRequestLine().getMethod();
+        return clientRequest.getMethod();
     }
 
     @Override
     public SortedMap<String, String> getHeaders() {
         TreeMap<String, String> sortedHeaders = new TreeMap<String, String>();
-        Header[] headers = clientRequest.getAllHeaders();
+        Header[] headers = clientRequest.getHeaders();
         for (Header header : headers) {
             sortedHeaders.put(header.getName(), header.getValue());
         }
@@ -49,20 +48,20 @@ final class ApacheHttpRequestToSign implements RequestToSign {
 
     @Override
     public String getPath() {
-        try {
-            String path = new URI(clientRequest.getRequestLine().getUri()).getRawPath();
-            return path != null ? path : "";
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        String path = clientRequest.getPath();
+        return path != null ? path : "";
     }
 
     @Override
     public String getParameters() {
-        return queryParametersFromURI(clientRequest.getRequestLine().getUri());
+        try {
+            return queryParametersFromURI(clientRequest.getUri().toString());
+        } catch (URISyntaxException e) {
+            return "";
+        }
     }
 
-    static String queryParametersFromURI(String uri){
+    static String queryParametersFromURI(String uri) {
         int index = uri.indexOf('?');
 
         return index == -1 ? "" : uri.substring(index + 1);

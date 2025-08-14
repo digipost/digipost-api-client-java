@@ -24,7 +24,11 @@ import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.SmsNotification;
 import no.digipost.api.client.representations.batch.Batch;
 import no.digipost.api.client.security.Signer;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.util.TimeValue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +37,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static no.digipost.api.client.representations.AuthenticationLevel.PASSWORD;
 import static no.digipost.api.client.representations.FileType.PDF;
@@ -57,8 +60,16 @@ public class BatchSendMessagesEksempel {
 		}
 
 		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().digipostApiUri(URI.create("http://localhost:8282")).build(),
-			AVSENDERS_KONTOID.asBrokerId(), signer, HttpClientBuilder.create().setConnectionTimeToLive(2, TimeUnit.MINUTES));
+        ConnectionConfig config = ConnectionConfig.custom()
+                .setTimeToLive(TimeValue.ofMinutes(2))
+                .build();
+        DigipostClient client;
+        try (PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setDefaultConnectionConfig(config)
+                .build()) {
+            client = new DigipostClient(DigipostClientConfig.newConfiguration().digipostApiUri(URI.create("http://localhost:8282")).build(),
+                    AVSENDERS_KONTOID.asBrokerId(), signer, HttpClientBuilder.create().setConnectionManager(connectionManager));
+        }
 
 		// 3. Vi må ha en unik id for batchen som skal gå gjennom helle prosessen. Lag deg en og ta var på den!
 		final UUID batchUUID = UUID.randomUUID();

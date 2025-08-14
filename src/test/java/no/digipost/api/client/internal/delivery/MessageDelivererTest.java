@@ -19,7 +19,6 @@ import no.digipost.api.client.SenderId;
 import no.digipost.api.client.delivery.MessageDeliveryApi;
 import no.digipost.api.client.delivery.OngoingDelivery.SendableForPrintOnly;
 import no.digipost.api.client.delivery.OngoingDelivery.SendableWithPrintFallback;
-import no.digipost.api.client.internal.http.StatusLineMock;
 import no.digipost.api.client.representations.Channel;
 import no.digipost.api.client.representations.DigipostAddress;
 import no.digipost.api.client.representations.DigipostUri;
@@ -48,14 +47,14 @@ import no.digipost.print.validate.PdfValidationSettings;
 import no.digipost.print.validate.PdfValidator;
 import no.digipost.sanitizing.HtmlValidator;
 import no.digipost.time.ControllableClock;
-
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.ByteArrayEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,7 +68,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.Collections;
@@ -90,6 +88,7 @@ import static no.digipost.api.client.pdf.EksempelPdf.pdf20Pages;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf1Page;
 import static no.digipost.api.client.pdf.EksempelPdf.printablePdf2Pages;
 import static no.digipost.api.client.representations.Channel.PRINT;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V8;
 import static no.digipost.api.client.representations.MessageStatus.DELIVERED_TO_PRINT;
 import static no.digipost.api.client.representations.Relation.GET_ENCRYPTION_KEY;
 import static no.digipost.api.client.representations.sender.SenderFeatureName.DELIVERY_DIRECT_TO_PRINT;
@@ -100,7 +99,7 @@ import static no.digipost.api.client.representations.sender.SenderFeatureName.PR
 import static no.digipost.api.client.representations.sender.SenderStatus.VALID_SENDER;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
-import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -154,7 +153,7 @@ public class MessageDelivererTest {
 
         encryptionCertificateResponse = MockfriendlyResponse.MockedResponseBuilder.create()
                 .status(SC_OK)
-                .entity(new ByteArrayEntity(bao.toByteArray()))
+                .entity(new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)))
                 .build();
 
         sender = new MessageDeliverer(newConfiguration().clock(clock).build(), api, new DocumentsPreparer(pdfValidator, htmlValidator));
@@ -164,7 +163,7 @@ public class MessageDelivererTest {
 
     @Test
     public void skal_bruke_cached_print_encryption_key() {
-        when(api.getEncryptionCertificateForPrint()).thenReturn(encryptionCertificateResponse);
+        when(api.getEncryptionCertificateForPrint()).thenReturn(CloseableHttpResponse.adapt(encryptionCertificateResponse));
 
         sender.getEncryptionCertificateForPrint();
         then(api).should(times(1)).getEncryptionCertificateForPrint();
@@ -180,7 +179,7 @@ public class MessageDelivererTest {
 
     @Test
     public void skal_ikke_bruke_cached_print_encryption_key_da_encryption_er_avskrudd() {
-        when(api.getEncryptionCertificateForPrint()).thenReturn(encryptionCertificateResponse);
+        when(api.getEncryptionCertificateForPrint()).thenReturn(CloseableHttpResponse.adapt(encryptionCertificateResponse));
 
         cachelessSender.getEncryptionCertificateForPrint();
         then(api).should(times(1)).getEncryptionCertificateForPrint();
@@ -199,12 +198,12 @@ public class MessageDelivererTest {
         IdentificationResultWithEncryptionKey identificationResultWithEncryptionKey =
                 new IdentificationResultWithEncryptionKey(IdentificationResult.digipost("123"), fakeEncryptionKey);
 
-        when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(200));
+        when(mockClientResponse.getCode()).thenReturn(200);
 
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         marshal(jaxbContext, identificationResultWithEncryptionKey, bao);
 
-        when(mockClientResponse.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray()));
+        when(mockClientResponse.getEntity()).thenReturn(new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)));
 
         when(api.identifyAndGetEncryptionKey(any(Identification.class))).thenReturn(mockClientResponse);
 
@@ -213,8 +212,8 @@ public class MessageDelivererTest {
         marshal(jaxbContext,
                 new MessageDelivery(UUID.randomUUID().toString(), Channel.PRINT, MessageStatus.COMPLETE, now()), bao2);
 
-        when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray()));
-        when(response.getStatusLine()).thenReturn(new StatusLineMock(200));
+        when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)));
+        when(response.getCode()).thenReturn(200);
 
         when(api.sendMultipartMessage(any(HttpEntity.class))).thenReturn(response);
 
@@ -298,11 +297,11 @@ public class MessageDelivererTest {
     }
 
     @Test
-    public void passes_pdf_validation_for_printonly_message() throws IOException {
+    public void passes_pdf_validation_for_printonly_message() {
         UUID messageId = UUID.randomUUID();
-        when(api.getEncryptionCertificateForPrint()).thenReturn(encryptionCertificateResponse);
+        when(api.getEncryptionCertificateForPrint()).thenReturn(CloseableHttpResponse.adapt(encryptionCertificateResponse));
         when(api.sendMultipartMessage(any(HttpEntity.class))).thenReturn(mockClientResponse);
-        when(mockClientResponse.getStatusLine()).thenReturn(new StatusLineMock(SC_OK));
+        when(mockClientResponse.getCode()).thenReturn(200);
 
         final Document printDocument = new Document(UUID.randomUUID(), "subject", FileType.PDF).encrypt();
         final List<Document> printAttachments = asList(new Document(UUID.randomUUID(), "attachment", FileType.PDF).encrypt());
@@ -314,7 +313,7 @@ public class MessageDelivererTest {
                 new MessageDelivery(messageId.toString(), PRINT, DELIVERED_TO_PRINT, now()), bao);
 
         when(mockClientResponse.getEntity())
-                .thenReturn(new ByteArrayEntity(bao.toByteArray()));
+                .thenReturn(new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)));
 
 
         PrintRecipient recipient = new PrintRecipient("Rallhild Ralleberg", new NorwegianAddress("0560", "Oslo"));

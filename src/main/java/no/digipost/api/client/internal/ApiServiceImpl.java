@@ -71,23 +71,24 @@ import no.digipost.api.client.util.JAXBContextUtils;
 import no.digipost.api.datatypes.DataType;
 import no.digipost.api.datatypes.types.share.ShareDocumentsRequestSharingStopped;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpCoreContext;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.http.protocol.HttpCoreContext;
+import org.apache.hc.core5.net.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,6 +113,7 @@ import static no.digipost.api.client.internal.http.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.internal.http.UriUtils.withQueryParams;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.safelyOfferEntityStreamExternally;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V8;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
@@ -139,12 +141,12 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
         this.cached = new Cached(() -> fetchEntryPoint(Optional.empty()));
         this.httpClient = httpClientBuilder
-            .addInterceptorLast(new RequestDateInterceptor(config.eventLogger, config.clock))
-            .addInterceptorLast(new RequestUserAgentInterceptor())
-            .addInterceptorLast(new RequestSignatureInterceptor(signer, config.eventLogger, new RequestContentHashFilter(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256)))
-            .addInterceptorLast(new ResponseDateInterceptor(config.clock))
-            .addInterceptorLast(new ResponseContentSHA256Interceptor())
-            .addInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
+            .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, config.clock))
+            .addRequestInterceptorLast(new RequestUserAgentInterceptor())
+            .addRequestInterceptorLast(new RequestSignatureInterceptor(signer, config.eventLogger, new RequestContentHashFilter(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256)))
+            .addResponseInterceptorLast(new ResponseDateInterceptor(config.clock))
+            .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
+            .addResponseInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
             .build();
         this.eventLogger.log("Initialiserte apache-klient mot " + config.digipostApiUri);
     }
@@ -309,7 +311,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
         try (CloseableHttpResponse response = send(httpGet, httpCoreContext)) {
 
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            if (response.getCode() == HttpStatus.SC_OK) {
                 return unmarshal(jaxbContext, response.getEntity().getContent(), EntryPoint.class);
             } else {
                 ErrorMessage errorMessage = unmarshal(jaxbContext, response.getEntity().getContent(), ErrorMessage.class);
@@ -406,7 +408,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         httpPut.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V8);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         marshal(jaxbContext, archiveDocument, bao);
-        httpPut.setEntity(new ByteArrayEntity(bao.toByteArray()));
+        httpPut.setEntity(new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)));
         
         return requestEntity(httpPut, ArchiveDocument.class);
     }
@@ -441,7 +443,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V8);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         marshal(jaxbContext, user, bao);
-        httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
+        httpPost.setEntity(new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)));
         return requestEntity(httpPost, UserAccount.class);
     }
     
@@ -550,15 +552,15 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         return requestEntity(httpGet, entityType);
     }
 
-    private <R> InputStream requestStream(HttpRequestBase request) {
+    private <R> InputStream requestStream(ClassicHttpRequest request) {
         return request(request, InputStream.class, new Header[0]);
     }
 
-    private <R> R requestEntity(HttpRequestBase request, Class<R> entityType) {
+    private <R> R requestEntity(ClassicHttpRequest request, Class<R> entityType) {
         return request(request, entityType, Accept_DIGIPOST_MEDIA_TYPE_V8);
     }
 
-    private <R> R request(HttpRequestBase request, Class<R> entityType, Header ... headers) {
+    private <R> R request(ClassicHttpRequest request, Class<R> entityType, Header ... headers) {
         for (Header header : headers) {
             request.setHeader(header);
         }
@@ -578,17 +580,17 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     }
 
-    private CloseableHttpResponse send(HttpRequestBase request){
+    private CloseableHttpResponse send(ClassicHttpRequest request){
         return send(request, null);
     }
 
-    private CloseableHttpResponse send(HttpRequestBase request, HttpContext context){
+    private CloseableHttpResponse send(ClassicHttpRequest request, HttpContext context){
         try {
             request.setHeader(X_Digipost_UserId, brokerId.stringValue());
             if (context == null) {
-                return httpClient.execute(request);
+                return httpClient.execute(request, responseHandler());
             } else {
-                return httpClient.execute(request, context);
+                return httpClient.execute(request, context, responseHandler());
             }
         } catch (IOException e) {
             throw asUnchecked(e);
@@ -601,7 +603,23 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V8);
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         marshal(jaxbContext, data, bao);
-        httpPost.setEntity(new ByteArrayEntity(bao.toByteArray()));
+        httpPost.setEntity(new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)));
         return send(httpPost);
+    }
+
+    private HttpClientResponseHandler<CloseableHttpResponse> responseHandler() {
+        return response -> {
+            if (response.getCode() / 100 == 2) {
+                if (response instanceof CloseableHttpResponse) {
+                    return (CloseableHttpResponse) response;
+                } else {
+                    throw new DigipostClientException(ErrorCode.GENERAL_ERROR,
+                            "Expected response to be instance of CloseableHttpResponse, but got " + response.getClass().getName());
+                }
+            } else {
+                ErrorMessage errorMessage = unmarshal(jaxbContext, response.getEntity().getContent(), ErrorMessage.class);
+                throw new DigipostClientException(errorMessage);
+            }
+        };
     }
 }

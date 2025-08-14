@@ -17,16 +17,18 @@ package no.digipost.api.client.internal.http.request.interceptor;
 
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.util.DateUtils;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Clock;
 import java.time.ZonedDateTime;
 
-import static org.apache.http.HttpHeaders.DATE;
+import static org.apache.hc.core5.http.HttpHeaders.DATE;
+
 
 public class RequestDateInterceptor implements HttpRequestInterceptor {
 
@@ -40,7 +42,7 @@ public class RequestDateInterceptor implements HttpRequestInterceptor {
     }
 
     @Override
-    public void process(HttpRequest httpRequest, HttpContext httpContext) {
+    public void process(HttpRequest httpRequest, EntityDetails entityDetails, HttpContext httpContext) {
         modifyRequest(httpRequest);
     }
 

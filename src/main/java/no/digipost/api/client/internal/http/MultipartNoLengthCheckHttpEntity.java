@@ -15,11 +15,19 @@
  */
 package no.digipost.api.client.internal.http;
 
-import org.apache.http.ContentTooLongException;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 
-import java.io.*;
+import org.apache.hc.core5.function.Supplier;
+import org.apache.hc.core5.http.ContentTooLongException;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Set;
 
 public class MultipartNoLengthCheckHttpEntity implements HttpEntity {
     private final HttpEntity entity;
@@ -44,12 +52,12 @@ public class MultipartNoLengthCheckHttpEntity implements HttpEntity {
     }
 
     @Override
-    public Header getContentType() {
+    public String getContentType() {
         return entity.getContentType();
     }
 
     @Override
-    public Header getContentEncoding() {
+    public String getContentEncoding() {
         return entity.getContentEncoding();
     }
 
@@ -75,8 +83,17 @@ public class MultipartNoLengthCheckHttpEntity implements HttpEntity {
     }
 
     @Override
-    @Deprecated
-    public void consumeContent() throws IOException {
-        entity.consumeContent();
+    public Supplier<List<? extends Header>> getTrailers() {
+        return null;
+    }
+
+    @Override
+    public Set<String> getTrailerNames() {
+        return null;
+    }
+
+    @Override
+    public final void close() throws IOException {
+        entity.close();
     }
 }

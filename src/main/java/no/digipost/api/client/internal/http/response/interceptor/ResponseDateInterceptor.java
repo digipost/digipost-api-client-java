@@ -18,11 +18,12 @@ package no.digipost.api.client.internal.http.response.interceptor;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.NameValuePair;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpResponseInterceptor;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
 import java.io.IOException;
 import java.time.Clock;
@@ -33,7 +34,7 @@ import java.util.Optional;
 
 import static java.time.ZonedDateTime.now;
 import static no.digipost.api.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
-import static org.apache.http.HttpHeaders.DATE;
+import static org.apache.hc.core5.http.HttpHeaders.DATE;
 
 public class ResponseDateInterceptor implements HttpResponseInterceptor {
     private static final Duration ACCEPTABLE_TIME_DIFF = Duration.ofMinutes(5);
@@ -45,13 +46,13 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
     }
 
     @Override
-    public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+    public void process(HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException, IOException {
         final String dateHeader = Optional.ofNullable(response.getFirstHeader(DATE))
                 .map(NameValuePair::getValue)
                 .filter(StringUtils::isNoneBlank)
                 .orElseThrow(() -> new DigipostClientException(SERVER_SIGNATURE_ERROR,
                     String.format("Missing %s header in response. This header is expected in all response. Http status was %s",
-                            DATE, response.getStatusLine())));
+                            DATE, response.getCode())));
         checkDate(dateHeader);
     }
 

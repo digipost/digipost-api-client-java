@@ -18,7 +18,7 @@ package no.digipost.api.client.shareddocuments;
 import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequestState;
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 
 import java.io.InputStream;
 import java.net.URI;

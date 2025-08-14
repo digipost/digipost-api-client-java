@@ -15,12 +15,13 @@
  */
 package no.digipost.api.client.internal.http;
 
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
+
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.message.BasicHeader;
 
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V8;
-import static org.apache.http.HttpHeaders.ACCEPT;
-import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.hc.core5.http.HttpHeaders.ACCEPT;
+import static org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE;
 
 public final class Headers {
 

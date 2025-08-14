@@ -68,30 +68,29 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.4.4</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents.core5</groupId>
+                    <artifactId>httpcore5-h2</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4.16</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.5.14</version>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5</artifactId>
+        <version>5.3.4</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
-            <artifactId>http-client-builder3</artifactId>
-            <version>3.0.1</version>
+            <artifactId>http-client-builder5</artifactId>
+            <version>5.0.1</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -385,14 +384,13 @@
                                         <include>com.google.j2objc:j2objc-annotations</include>
                                         <include>com.google.errorprone:error_prone_annotations</include>
                                         <include>com.github.ben-manes.caffeine:caffeine</include>
-                                        <include>no.digipost:http-client-builder3</include>
+                                        <include>no.digipost:http-client-builder5</include>
                                         <include>commons-io:commons-io</include>
                                         <include>com.google.guava:failureaccess</include>
                                         <include>commons-codec:commons-codec</include>
                                         <include>org.apache.commons:commons-lang3</include>
-                                        <include>org.apache.httpcomponents:httpclient</include>
-                                        <include>org.apache.httpcomponents:httpcore</include>
-                                        <include>org.apache.httpcomponents:httpmime</include>
+                                        <include>org.apache.httpcomponents.client5:httpclient5</include>
+                                        <include>org.apache.httpcomponents.core5:httpcore5</include>
                                         <include>no.digipost:digipost-data-types</include>
                                         <include>com.fasterxml.jackson.core:jackson-core</include>
                                         <include>com.fasterxml.jackson.core:jackson-databind</include>

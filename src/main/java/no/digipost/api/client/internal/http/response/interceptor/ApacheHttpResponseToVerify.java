@@ -16,9 +16,9 @@
 package no.digipost.api.client.internal.http.response.interceptor;
 
 import no.digipost.api.client.security.ResponseToVerify;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -35,13 +35,13 @@ final class ApacheHttpResponseToVerify implements ResponseToVerify {
 
     @Override
     public int getStatus() {
-        return response.getStatusLine().getStatusCode();
+        return response.getCode();
     }
 
     @Override
     public SortedMap<String, String> getHeaders() {
         SortedMap<String, String> sortedHeaders = new TreeMap<>();
-        for(Header header : response.getAllHeaders()){
+        for(Header header : response.getHeaders()){
             sortedHeaders.put(header.getName(), header.getValue());
         }
         return sortedHeaders;

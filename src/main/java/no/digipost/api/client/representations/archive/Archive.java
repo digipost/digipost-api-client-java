@@ -24,11 +24,10 @@ import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Representation;
 import no.digipost.api.client.representations.SenderOrganization;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.hc.core5.net.URIBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;

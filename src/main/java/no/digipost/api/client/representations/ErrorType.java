@@ -15,8 +15,6 @@
  */
 package no.digipost.api.client.representations;
 
-import org.apache.http.StatusLine;
-
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -38,8 +36,7 @@ public enum ErrorType {
         return valueOf(v);
     }
 
-    public static ErrorType fromResponseStatus(StatusLine serverResponseStatus) {
-        int statusCode = serverResponseStatus.getStatusCode();
+    public static ErrorType fromResponseStatus(int statusCode) {
         if (statusCode >= 400 && statusCode < 500) {
             return ErrorType.CLIENT_TECHNICAL;
         } else if (statusCode >= 500) {

@@ -23,7 +23,7 @@ import java.util.SortedMap;
 import static no.digipost.api.client.internal.http.Headers.Content_MD5;
 import static no.digipost.api.client.internal.http.Headers.X_Content_SHA256;
 import static no.digipost.api.client.internal.http.Headers.X_Digipost_UserId;
-import static org.apache.http.HttpHeaders.DATE;
+import static org.apache.hc.core5.http.HttpHeaders.DATE;
 
 public final class ResponseMessageSignatureUtil {
 
