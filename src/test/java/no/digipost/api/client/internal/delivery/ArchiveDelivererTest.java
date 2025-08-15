@@ -16,15 +16,15 @@
 package no.digipost.api.client.internal.delivery;
 
 import no.digipost.api.client.archive.ArchiveApi;
-import no.digipost.api.client.internal.http.StatusLineMock;
 import no.digipost.api.client.pdf.EksempelPdf;
 import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
 import no.digipost.time.ControllableClock;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.ByteArrayEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -36,6 +36,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static no.digipost.api.client.DigipostClientConfig.newConfiguration;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V8;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static org.hamcrest.CoreMatchers.not;
@@ -71,8 +72,8 @@ class ArchiveDelivererTest {
         CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
         ByteArrayOutputStream bao2 = new ByteArrayOutputStream();
         marshal(jaxbContext, archive, bao2);
-        when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray()));
-        when(response.getStatusLine()).thenReturn(new StatusLineMock(200));
+        when(response.getEntity()).thenReturn(new ByteArrayEntity(bao2.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)));
+        when(response.getCode()).thenReturn(200);
         when(archiveApi.sendMultipartArchive(any(HttpEntity.class))).thenReturn(response);
 
         final Archive archiveResponse = new ArchiveDeliverer(newConfiguration().clock(clock).build(), archiveApi)

@@ -17,7 +17,7 @@ package no.digipost.api.client.internal.http.request.interceptor;
 
 import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.security.Digester;
-import org.apache.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequest;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

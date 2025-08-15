@@ -15,49 +15,48 @@
  */
 package no.digipost.api.client.internal.delivery;
 
+import jakarta.xml.bind.JAXB;
 import no.digipost.api.client.representations.MessageDelivery;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.Header;
-import org.apache.http.HeaderIterator;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.message.BasicStatusLine;
-
-import jakarta.xml.bind.JAXB;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ProtocolException;
+import org.apache.hc.core5.http.ProtocolVersion;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
 import static no.digipost.api.client.representations.Channel.DIGIPOST;
+import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V8;
 import static no.digipost.api.client.representations.MessageStatus.COMPLETE;
-import static org.apache.http.HttpStatus.SC_OK;
 
-public class MockfriendlyResponse implements CloseableHttpResponse {
+public class MockfriendlyResponse implements ClassicHttpResponse {
 
-    public static final Map<String, CloseableHttpResponse> responses = new HashMap<>();
+    public static final Map<String, ClassicHttpResponse> responses = new HashMap<>();
     public static final Map<String, RuntimeException> errors = new HashMap<>();
 
-    public static CloseableHttpResponse DEFAULT_RESPONSE = getDefaultResponse();
+    public static ClassicHttpResponse DEFAULT_RESPONSE = getDefaultResponse();
 
-    public static CloseableHttpResponse getDefaultResponse(){
+    public static ClassicHttpResponse getDefaultResponse() {
         MessageDelivery messageDelivery = new MessageDelivery(UUID.randomUUID().toString(), DIGIPOST, COMPLETE, ZonedDateTime.now());
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         JAXB.marshal(messageDelivery, bao);
 
         return MockedResponseBuilder.create()
                 .status(HttpStatus.SC_OK)
-                .entity(new ByteArrayEntity(bao.toByteArray()))
+                .entity(new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)))
                 .build();
     }
 
@@ -69,34 +68,25 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
     }
 
     @Override
+    public int getCode() {
+        return 200;
+    }
+
+    @Override
+    public void setCode(int code) {
+        throw new UnsupportedOperationException("This is a mock");
+    }
+
+    @Override
+    public String getReasonPhrase() {
+        return "";
+    }
+
+    @Override
     public void close() throws IOException {
         throw new UnsupportedOperationException("This is a mock");
     }
 
-    @Override
-    public StatusLine getStatusLine() {
-        throw new UnsupportedOperationException("This is a mock");
-    }
-
-    @Override
-    public void setStatusLine(StatusLine statusline) {
-        throw new UnsupportedOperationException("This is a mock");
-    }
-
-    @Override
-    public void setStatusLine(ProtocolVersion ver, int code) {
-        throw new UnsupportedOperationException("This is a mock");
-    }
-
-    @Override
-    public void setStatusLine(ProtocolVersion ver, int code, String reason) {
-        throw new UnsupportedOperationException("This is a mock");
-    }
-
-    @Override
-    public void setStatusCode(int code) throws IllegalStateException {
-        throw new UnsupportedOperationException("This is a mock");
-    }
 
     @Override
     public void setReasonPhrase(String reason) throws IllegalStateException {
@@ -110,7 +100,7 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
 
     @Override
     public void setEntity(HttpEntity entity) {
-        throw new UnsupportedOperationException("This is a mock");
+
     }
 
     @Override
@@ -124,13 +114,13 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
     }
 
     @Override
-    public ProtocolVersion getProtocolVersion() {
+    public boolean containsHeader(String name) {
         throw new UnsupportedOperationException("This is a mock");
     }
 
     @Override
-    public boolean containsHeader(String name) {
-        throw new UnsupportedOperationException("This is a mock");
+    public int countHeaders(String name) {
+        return 0;
     }
 
     @Override
@@ -144,13 +134,38 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
     }
 
     @Override
+    public Header getHeader(String name) throws ProtocolException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return new Header[0];
+    }
+
+    @Override
     public Header getLastHeader(String name) {
         throw new UnsupportedOperationException("This is a mock");
     }
 
     @Override
-    public Header[] getAllHeaders() {
-        throw new UnsupportedOperationException("This is a mock");
+    public Iterator<Header> headerIterator() {
+        return null;
+    }
+
+    @Override
+    public Iterator<Header> headerIterator(String name) {
+        return null;
+    }
+
+    @Override
+    public void setVersion(ProtocolVersion version) {
+
+    }
+
+    @Override
+    public ProtocolVersion getVersion() {
+        return null;
     }
 
     @Override
@@ -159,8 +174,8 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
     }
 
     @Override
-    public void addHeader(String name, String value) {
-        throw new UnsupportedOperationException("This is a mock");
+    public void addHeader(String name, Object value) {
+
     }
 
     @Override
@@ -169,8 +184,8 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
     }
 
     @Override
-    public void setHeader(String name, String value) {
-        throw new UnsupportedOperationException("This is a mock");
+    public void setHeader(String name, Object value) {
+
     }
 
     @Override
@@ -179,34 +194,13 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
     }
 
     @Override
-    public void removeHeader(Header header) {
-        throw new UnsupportedOperationException("This is a mock");
+    public boolean removeHeader(Header header) {
+        return false;
     }
 
     @Override
-    public void removeHeaders(String name) {
-        throw new UnsupportedOperationException("This is a mock");
-    }
-
-    @Override
-    public HeaderIterator headerIterator() {
-        throw new UnsupportedOperationException("This is a mock");
-    }
-
-    @Override
-    public HeaderIterator headerIterator(String name) {
-        throw new UnsupportedOperationException("This is a mock");
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public org.apache.http.params.HttpParams getParams() {
-        throw new UnsupportedOperationException("This is a mock");
-    }
-
-    @Override
-    public void setParams(@SuppressWarnings("deprecation") org.apache.http.params.HttpParams params) {
-        throw new UnsupportedOperationException("This is a mock");
+    public boolean removeHeaders(String name) {
+        return false;
     }
 
     public static class MockedResponseBuilder {
@@ -237,7 +231,7 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
                     JAXB.marshal(object, bao);
                 }
 
-                this.entity = new ByteArrayEntity(bao.toByteArray());
+                this.entity = new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8));
                 return this;
             } catch (IOException e) {
                 throw new RuntimeException(e.getMessage(), e);
@@ -247,11 +241,6 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
         public MockfriendlyResponse build() {
             return new MockfriendlyResponse() {
                 @Override
-                public StatusLine getStatusLine() {
-                    return new BasicStatusLine(new ProtocolVersion("1",2,3), status, "reason");
-                }
-
-                @Override
                 public HttpEntity getEntity() {
                     return entity;
                 }
@@ -260,21 +249,6 @@ public class MockfriendlyResponse implements CloseableHttpResponse {
                 public void close() throws IOException {
                 }
             };
-        }
-
-        public static CloseableHttpResponse ok(Object object) {
-            try{
-                ByteArrayOutputStream bao = new ByteArrayOutputStream();
-                if(object instanceof InputStream){
-                    IOUtils.copy((InputStream)object, bao);
-                }
-                else {
-                    JAXB.marshal(object, bao);
-                }
-                return MockedResponseBuilder.create().status(SC_OK).entity(new ByteArrayEntity(bao.toByteArray())).build();
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
         }
     }
 }

@@ -19,18 +19,18 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.internal.http.Headers;
 import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Optional;
 
 public class RequestSignatureInterceptor implements HttpRequestInterceptor {
@@ -65,10 +65,10 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
     }
 
     @Override
-    public void process(HttpRequest httpRequest, HttpContext httpContext) throws IOException {
+    public void process(HttpRequest httpRequest, EntityDetails entityDetails, HttpContext httpContext) throws IOException {
 
-        if(httpRequest instanceof HttpEntityEnclosingRequest) {
-            HttpEntityEnclosingRequest request = (HttpEntityEnclosingRequest) httpRequest;
+        if(httpRequest instanceof ClassicHttpRequest) {
+            ClassicHttpRequest request = (ClassicHttpRequest) httpRequest;
             HttpEntity rqEntity = request.getEntity();
 
             if (rqEntity == null) {
@@ -81,7 +81,7 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
         } else {
             setSignatureHeader(httpRequest);
         }
-        httpContext.setAttribute("request-path", URI.create(httpRequest.getRequestLine().getUri()).getPath());
+        httpContext.setAttribute("request-path", httpRequest.getPath());
 
 
     }

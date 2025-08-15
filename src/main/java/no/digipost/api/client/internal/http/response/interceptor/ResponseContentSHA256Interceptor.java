@@ -17,14 +17,17 @@ package no.digipost.api.client.internal.http.response.interceptor;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.NameValuePair;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpResponseInterceptor;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -37,18 +40,19 @@ import static no.digipost.api.client.internal.http.Headers.X_Content_SHA256;
 public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor {
 
     @Override
-    public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-        final HttpEntity entity = response.getEntity();
+    public void process(HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException, IOException {
+        ClassicHttpResponse classicHttpResponse = (ClassicHttpResponse) response;
+        final HttpEntity entity = classicHttpResponse.getEntity();
         if (entity != null && entity.getContent() != null && entity.getContentLength() > 0) {
             String hashHeaderValue = Optional.ofNullable(response.getFirstHeader(X_Content_SHA256))
                     .map(NameValuePair::getValue)
                     .filter(StringUtils::isNoneBlank)
                     .orElseThrow(() -> new DigipostClientException(SERVER_SIGNATURE_ERROR,
-                            String.format("Missing %s header in response. This header is expected when a response body is present. Http response was %s",
-                                    X_Content_SHA256, response.getStatusLine())));
+                            String.format("Missing %s header in response. This header is expected when a response body is present. Http status was %s",
+                                    X_Content_SHA256, response.getCode())));
             byte[] entityBytes = EntityUtils.toByteArray(entity);
             validerBytesMotHashHeader(hashHeaderValue, entityBytes);
-            response.setEntity(new ByteArrayEntity(entityBytes));
+            classicHttpResponse.setEntity(new ByteArrayEntity(entityBytes, ContentType.create(entityDetails.getContentType())));
         }
     }
 

@@ -17,15 +17,13 @@ package no.digipost.api.client.internal.http.response.interceptor;
 
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.representations.EntryPoint;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.IOException;
 
 import static co.unruly.matchers.Java8Matchers.where;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -36,18 +34,17 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ResponseSignatureFilterTest {
-
     private final ResponseSignatureInterceptor interceptor = new ResponseSignatureInterceptor(EntryPoint::new);
 
     @Test
-    public void skal_kaste_feil_om_server_signatur_mangler(@Mock HttpResponse response, @Mock HttpContext httpContext) throws IOException, HttpException {
-        DigipostClientException thrown = assertThrows(DigipostClientException.class, () -> interceptor.process(response, httpContext));
+    public void skal_kaste_feil_om_server_signatur_mangler(@Mock HttpResponse response, @Mock EntityDetails entityDetails, @Mock HttpContext httpContext) {
+        DigipostClientException thrown = assertThrows(DigipostClientException.class, () -> interceptor.process(response, entityDetails, httpContext));
         assertThat(thrown, where(Exception::getMessage, containsString("Missing X-Digipost-Signature header")));
     }
 
     @Test
-    public void skal_ikke_kaste_feil_om_server_signatur_mangler_for_kall_som_eksplisitt_ikke_krever_signatur(@Mock HttpResponse response, @Mock HttpContext httpContext) throws Exception {
+    public void skal_ikke_kaste_feil_om_server_signatur_mangler_for_kall_som_eksplisitt_ikke_krever_signatur(@Mock HttpResponse response, @Mock EntityDetails entityDetails, @Mock HttpContext httpContext) {
         when(httpContext.getAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE)).thenReturn(true);
-        assertDoesNotThrow(() -> interceptor.process(response, httpContext));
+        assertDoesNotThrow(() -> interceptor.process(response, entityDetails, httpContext));
     }
 }
