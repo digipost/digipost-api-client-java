@@ -28,6 +28,7 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.StatusLine;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -92,10 +93,7 @@ public final class HttpResponseUtils {
     }
 
     private static ErrorMessage fetchErrorMessageString(final HttpResponse response, final HttpEntity responseEntity) {
-        String statusLine = response.getVersion() + " " + response.getCode();
-        if (StringUtils.isNotBlank(response.getReasonPhrase())) {
-            statusLine += " " + response.getReasonPhrase();
-        }
+        StatusLine statusLine = new StatusLine(response);
         final ErrorType errorType = ErrorType.fromResponseStatus(response.getCode());
         if (responseEntity == null) {
             return new ErrorMessage(errorType, "status=" + statusLine + ", body=<empty>");

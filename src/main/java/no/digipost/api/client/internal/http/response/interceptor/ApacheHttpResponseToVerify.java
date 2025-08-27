@@ -49,6 +49,11 @@ final class ApacheHttpResponseToVerify implements ResponseToVerify {
 
     @Override
     public String getPath() {
-        return (String) context.getAttribute("request-path");
+        String pathWithQueryParams = (String) context.getAttribute("request-path");
+        int indexOfQuestionMark = pathWithQueryParams.indexOf('?');
+        if (indexOfQuestionMark != -1) {
+           return pathWithQueryParams.substring(0, indexOfQuestionMark);
+        }
+        return pathWithQueryParams;
     }
 }

@@ -609,17 +609,12 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     private HttpClientResponseHandler<CloseableHttpResponse> responseHandler() {
         return response -> {
-            if (response.getCode() / 100 == 2) {
                 if (response instanceof CloseableHttpResponse) {
                     return (CloseableHttpResponse) response;
                 } else {
                     throw new DigipostClientException(ErrorCode.GENERAL_ERROR,
                             "Expected response to be instance of CloseableHttpResponse, but got " + response.getClass().getName());
                 }
-            } else {
-                ErrorMessage errorMessage = unmarshal(jaxbContext, response.getEntity().getContent(), ErrorMessage.class);
-                throw new DigipostClientException(errorMessage);
-            }
         };
     }
 }
