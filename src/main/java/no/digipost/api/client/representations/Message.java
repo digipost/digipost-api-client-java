@@ -42,7 +42,7 @@ import static no.digipost.api.client.representations.Channel.DIGIPOST;
 import static no.digipost.api.client.representations.Channel.PRINT;
 import static org.apache.commons.lang3.ArrayUtils.INDEX_NOT_FOUND;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.join;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -55,7 +55,7 @@ import static org.apache.commons.lang3.StringUtils.join;
         "invoiceReference",
         "primaryDocument",
         "attachments",
-        "printIfUnread", 
+        "printIfUnread",
         "requestForRegistration",
         "batch"})
 @XmlRootElement(name = "message")
@@ -195,7 +195,7 @@ public class Message implements MayHaveSender {
         }
 
         public MessageBuilder attachments(Iterable<? extends Document> attachments) {
-            defaultIfNull(attachments, Collections.<Document>emptyList()).forEach(this.attachments::add);
+            getIfNull(attachments, Collections.<Document>emptyList()).forEach(this.attachments::add);
             return this;
         }
 
@@ -203,7 +203,7 @@ public class Message implements MayHaveSender {
             this.batch = new Batch(batchUUID.toString());
             return this;
         }
-        
+
         public Message build() {
             if (recipient == null) {
                 throw new IllegalStateException("You must specify a recipient.");
@@ -227,7 +227,7 @@ public class Message implements MayHaveSender {
         this.invoiceReference = invoiceReference;
         this.deliveryTime = deliveryTime;
         this.attachments = new ArrayList<>();
-        for (Document attachment : defaultIfNull(attachments, Collections.<Document>emptyList())) {
+        for (Document attachment : getIfNull(attachments, Collections.<Document>emptyList())) {
             this.attachments.add(attachment);
         }
         this.printIfUnread = printIfUnread;

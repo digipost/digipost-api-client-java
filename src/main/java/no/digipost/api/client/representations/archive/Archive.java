@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static no.digipost.api.client.representations.Relation.NEXT_DOCUMENTS;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "archive", propOrder = {
@@ -134,7 +134,7 @@ public class Archive extends Representation {
 
     public Optional<URI> getNextDocumentsWithAttributesByDate(Map<String, String> attributes, OffsetDateTime from, OffsetDateTime to) {
         final String attributesCommaSeparated = attributes.entrySet().stream().flatMap(en -> Stream.of(en.getKey(), en.getValue())).collect(Collectors.joining(","));
-        
+
         return Optional.ofNullable(getLinkByRelationName(NEXT_DOCUMENTS)).map(Link::getUri)
                 .map(uri -> {
                     try {
@@ -150,7 +150,7 @@ public class Archive extends Representation {
     }
 
     public Optional<URI> getNextDocumentsByDate(OffsetDateTime from, OffsetDateTime to) {
-        
+
         return Optional.ofNullable(getLinkByRelationName(NEXT_DOCUMENTS)).map(Link::getUri)
                 .map(uri -> {
                     try {
@@ -202,7 +202,7 @@ public class Archive extends Representation {
         }
 
         public ArchiveBuilder documents(Iterable<ArchiveDocument> documents) {
-            defaultIfNull(documents, Collections.<ArchiveDocument>emptyList()).forEach(this.documents::add);
+            getIfNull(documents, Collections.<ArchiveDocument>emptyList()).forEach(this.documents::add);
             return this;
         }
 
@@ -218,5 +218,5 @@ public class Archive extends Representation {
     private static String base64(String param){
         return Base64.getEncoder().encodeToString(param.getBytes(StandardCharsets.UTF_8));
     }
-    
+
 }

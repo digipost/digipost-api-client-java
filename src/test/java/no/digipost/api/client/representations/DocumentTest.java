@@ -114,6 +114,7 @@ public class DocumentTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void isOpenedWhenTrueBuiltWithDeprecatedConstructorsIsPassed() {
         Document boolConstructorTrueDoc = new Document(null, null, null, null, null, null, null, null, new Boolean(true), null, "");
         assertThat(boolConstructorTrueDoc.opened, is(true));
