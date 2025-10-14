@@ -189,7 +189,7 @@ public class MockfriendlyResponse implements ClassicHttpResponse {
     }
 
     @Override
-    public void setHeaders(Header[] headers) {
+    public void setHeaders(Header ... headers) {
         throw new UnsupportedOperationException("This is a mock");
     }
 
@@ -243,6 +243,11 @@ public class MockfriendlyResponse implements ClassicHttpResponse {
                 @Override
                 public HttpEntity getEntity() {
                     return entity;
+                }
+
+                @Override
+                public int getCode() {
+                    return status;
                 }
 
                 @Override

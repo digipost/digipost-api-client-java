@@ -353,13 +353,13 @@ public class MessageDelivererTest {
 
     private static Stream<Arguments> provideMessages() {
         Document primaryDoc = new Document(
-                UUID.randomUUID(), RandomStringUtils.randomAlphanumeric(1, 128), FileType.PDF
+                UUID.randomUUID(), RandomStringUtils.insecure().nextAlphanumeric(1, 128), FileType.PDF
         );
         PrintRecipient printRecipient = new PrintRecipient();
         PrintDetails printDetails = new PrintDetails(printRecipient, printRecipient);
         MessageRecipient directPrintRecipient = new MessageRecipient(printDetails);
         MessageRecipient fallbackPrintRecipient = new MessageRecipient(
-                new PersonalIdentificationNumber(RandomStringUtils.randomNumeric(11)), printDetails
+                new PersonalIdentificationNumber(RandomStringUtils.insecure().nextNumeric(11)), printDetails
         );
         return Stream.of(
                 Arguments.of("direct print message", Message.newMessage(UUID.randomUUID(), primaryDoc)
