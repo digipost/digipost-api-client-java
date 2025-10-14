@@ -76,10 +76,6 @@
                     <groupId>commons-logging</groupId>
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents.core5</groupId>
-                    <artifactId>httpcore5-h2</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -389,13 +385,9 @@
                                         <include>com.google.guava:failureaccess</include>
                                         <include>commons-codec:commons-codec</include>
                                         <include>org.apache.commons:commons-lang3</include>
-                                        <include>org.apache.httpcomponents.client5:httpclient5</include>
-                                        <include>org.apache.httpcomponents.core5:httpcore5</include>
+                                        <include>org.apache.httpcomponents.*</include>
                                         <include>no.digipost:digipost-data-types</include>
-                                        <include>com.fasterxml.jackson.core:jackson-core</include>
-                                        <include>com.fasterxml.jackson.core:jackson-databind</include>
-                                        <include>com.fasterxml.jackson.core:jackson-annotations</include>
-                                        <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
+                                        <include>com.fasterxml.jackson.*</include>
                                         <include>net.bytebuddy:byte-buddy</include>
                                         <include>jakarta.validation:jakarta.validation-api</include>
                                         <include>com.googlecode.owasp-java-html-sanitizer</include>
