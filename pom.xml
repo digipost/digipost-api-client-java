@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>digipost-api-client-java</artifactId>
-    <version>16.0-SNAPSHOT</version>
+    <version>LOCAL-SNAPSHOT</version>
     <name>Digipost API Client</name>
     <description>Java library for interacting with the Digipost REST API</description>
     
@@ -33,8 +33,6 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-
-        <bouncycastle.version>1.81</bouncycastle.version>
     </properties>
 
     <dependencies>
@@ -46,7 +44,7 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-html-validator</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.3</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
@@ -70,22 +68,18 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.4.4</version>
+            <version>5.5.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents.core5</groupId>
-                    <artifactId>httpcore5-h2</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
-        <groupId>org.apache.httpcomponents.core5</groupId>
-        <artifactId>httpcore5</artifactId>
-        <version>5.3.4</version>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5</artifactId>
+            <version>5.3.6</version>
         </dependency>
         <dependency>
             <groupId>no.digipost</groupId>
@@ -100,17 +94,15 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.18.0</version>
+            <version>3.19.0</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk18on</artifactId>
-            <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -125,7 +117,7 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
-            <version>2.2</version>
+            <version>3.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -153,7 +145,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.16.1</version>
+            <version>3.19.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -171,7 +163,7 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>digipost-data-types</artifactId>
-            <version>1.2.2</version>
+            <version>1.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
@@ -193,6 +185,13 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bc-jdk18on-bom</artifactId>
+                <version>1.82</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-bom</artifactId>
                 <version>2.0.17</version>
@@ -202,7 +201,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.13.4</version>
+                <version>5.14.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -214,19 +213,19 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-bom</artifactId>
-                <version>5.18.0</version>
+                <version>5.20.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
                 <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>4.0.2</version>
+                <version>4.0.4</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>4.0.5</version>
+                <version>4.0.6</version>
                 <scope>runtime</scope>
             </dependency>
         </dependencies>
@@ -253,11 +252,11 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.14.0</version>
+                    <version>3.14.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.3</version>
+                    <version>3.5.4</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
@@ -265,7 +264,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.11.2</version>
+                    <version>3.12.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
@@ -277,7 +276,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.9.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -301,17 +300,17 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>3.6.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.18.0</version>
+                    <version>2.19.1</version>
                 </plugin>
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.23.1</version>
+                    <version>0.24.2</version>
                     <configuration>
                         <parameter>
                             <includes>
@@ -389,13 +388,9 @@
                                         <include>com.google.guava:failureaccess</include>
                                         <include>commons-codec:commons-codec</include>
                                         <include>org.apache.commons:commons-lang3</include>
-                                        <include>org.apache.httpcomponents.client5:httpclient5</include>
-                                        <include>org.apache.httpcomponents.core5:httpcore5</include>
+                                        <include>org.apache.httpcomponents.*</include>
                                         <include>no.digipost:digipost-data-types</include>
-                                        <include>com.fasterxml.jackson.core:jackson-core</include>
-                                        <include>com.fasterxml.jackson.core:jackson-databind</include>
-                                        <include>com.fasterxml.jackson.core:jackson-annotations</include>
-                                        <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
+                                        <include>com.fasterxml.jackson.*</include>
                                         <include>net.bytebuddy:byte-buddy</include>
                                         <include>jakarta.validation:jakarta.validation-api</include>
                                         <include>com.googlecode.owasp-java-html-sanitizer</include>
