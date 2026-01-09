@@ -20,7 +20,7 @@ import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
 import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
 import no.digipost.api.client.representations.archive.Archives;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 
 import java.io.ByteArrayInputStream;
@@ -32,7 +32,7 @@ public interface ArchiveApi {
 
     Archives getArchives(SenderId senderId);
 
-    CloseableHttpResponse sendMultipartArchive(HttpEntity build);
+    ClassicHttpResponse sendMultipartArchive(HttpEntity build);
 
     Archive getArchiveDocuments(URI uri);
 

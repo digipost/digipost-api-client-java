@@ -44,7 +44,7 @@ import org.apache.hc.client5.http.entity.mime.ByteArrayBody;
 import org.apache.hc.client5.http.entity.mime.FormBodyPartBuilder;
 import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,7 +155,7 @@ public class MessageDeliverer {
                         .addField("Content-Disposition", "attachment;" + " filename=\"" + document.uuid.toString() + "\"").build());
             }
             eventLogger.log("*** STARTER INTERAKSJON MED API: SENDER MELDING MED ID " + singleChannelMessage.messageId + " ***");
-            try (CloseableHttpResponse response = apiService.sendMultipartMessage(multipartEntity.build())) {
+            try (ClassicHttpResponse response = apiService.sendMultipartMessage(multipartEntity.build())) {
                 checkResponse(response, eventLogger);
 
                 eventLogger.log("Brevet ble sendt. Status: [" + response + "]");
@@ -174,7 +174,7 @@ public class MessageDeliverer {
 
     public void addData(AddDataLink addDataLink, AdditionalData data) {
         eventLogger.log("*** STARTER INTERAKSJON MED API: LEGGER TIL DATA PÅ DOKUMENT ***");
-        try (CloseableHttpResponse response = apiService.addData(addDataLink, data)) {
+        try (ClassicHttpResponse response = apiService.addData(addDataLink, data)) {
 
             checkResponse(response, eventLogger);
 
@@ -193,7 +193,7 @@ public class MessageDeliverer {
     public InputStream fetchKeyAndEncrypt(Document document, InputStream content) {
         checkThatMessageCanBePreEncrypted(document);
 
-        try(CloseableHttpResponse encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri())){
+        try(ClassicHttpResponse encryptionKeyResponse = apiService.getEncryptionKey(document.getEncryptionKeyLink().getUri())){
             checkResponse(encryptionKeyResponse, eventLogger);
 
             EncryptionKey key = unmarshal(jaxbContext, encryptionKeyResponse.getEntity().getContent(), EncryptionKey.class);
@@ -205,7 +205,7 @@ public class MessageDeliverer {
     }
 
     public IdentificationResultWithEncryptionKey identifyAndGetEncryptionKey(Identification identification) {
-        try(CloseableHttpResponse response = apiService.identifyAndGetEncryptionKey(identification)){
+        try(ClassicHttpResponse response = apiService.identifyAndGetEncryptionKey(identification)){
             checkResponse(response, eventLogger);
             IdentificationResultWithEncryptionKey result =
                     unmarshal(jaxbContext, response.getEntity().getContent(), IdentificationResultWithEncryptionKey.class);
@@ -228,7 +228,7 @@ public class MessageDeliverer {
 
         if (ZERO.equals(config.printKeyCacheTimeToLive) || between(printKeyCachedTime, now).compareTo(config.printKeyCacheTimeToLive) > 0) {
             eventLogger.log("*** STARTER INTERAKSJON MED API: HENT KRYPTERINGSNØKKEL FOR PRINT ***");
-            try (CloseableHttpResponse response = apiService.getEncryptionCertificateForPrint()) {
+            try (ClassicHttpResponse response = apiService.getEncryptionCertificateForPrint()) {
                 checkResponse(response, eventLogger);
                 EncryptionCertificate encryptionCertificate = unmarshal(jaxbContext, response.getEntity().getContent(), EncryptionCertificate.class);
                 cachedPrintCertificate = encryptionCertificate.getX509Certificate();
