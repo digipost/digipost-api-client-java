@@ -50,14 +50,14 @@ public final class HttpResponseUtils {
      *
      * @return the stream containing the entity of the response.
      */
-    public static InputStream safelyOfferEntityStreamExternally(CloseableHttpResponse response, EventLogger eventLogger) {
+    public static InputStream safelyOfferEntityStreamExternally(ClassicHttpResponse response, EventLogger eventLogger) {
         HttpEntity entity = null;
         try {
             checkResponse(response, eventLogger);
             entity = response.getEntity();
             return entity.getContent();
         } catch (IOException | RuntimeException e) {
-            try (CloseableHttpResponse autoClosed = response) {
+            try (ClassicHttpResponse autoClosed = response) {
                 EntityUtils.consume(entity);
             } catch (IOException | RuntimeException entityConsumptionException) {
                 e.addSuppressed(entityConsumptionException);

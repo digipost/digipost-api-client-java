@@ -30,6 +30,7 @@ import org.apache.hc.client5.http.entity.mime.FormBodyPartBuilder;
 import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +100,7 @@ public class ArchiveDeliverer {
                                 .addField("Content-Disposition", "attachment;" + " filename=\"" + document.uuid.toString() + "\"").build());
             }
             eventLogger.log("*** STARTER INTERAKSJON MED API: Arkiverer filer ***");
-            try (CloseableHttpResponse response = apiService.sendMultipartArchive(multipartEntity.build())) {
+            try (ClassicHttpResponse response = apiService.sendMultipartArchive(multipartEntity.build())) {
                 checkResponse(response, eventLogger);
 
                 eventLogger.log("Arkivdokumentet ble sendt. Status: [" + response + "]");

@@ -116,7 +116,12 @@ public class GithubPagesArchiveExamples {
         URI getDocumentContentStreamURI = firstDocument.getDocumentContentStream();
 
         ArchiveDocumentContent content = client.getArchiveDocumentContent(getDocumentContentURI);
-        InputStream contentStream = client.getArchiveDocumentContentStream(getDocumentContentStreamURI);
+        try (InputStream contentStream = client.getArchiveDocumentContentStream(getDocumentContentStreamURI)) {
+            // use contentStream
+        } catch (IOException e) {
+            // handle exception
+            throw new RuntimeException(e);
+        }
     }
     
     public void get_documents_by_uuid() {

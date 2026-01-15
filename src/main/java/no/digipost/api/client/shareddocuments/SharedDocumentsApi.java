@@ -18,7 +18,7 @@ package no.digipost.api.client.shareddocuments;
 import no.digipost.api.client.SenderId;
 import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequestState;
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -58,6 +58,6 @@ public interface SharedDocumentsApi {
      *
      * @param uri The URI of the StopSharing relation returned as part of the ShareDocumentsRequestState
      */
-    CloseableHttpResponse stopSharing(SenderId senderId, URI uri);
+    ClassicHttpResponse stopSharing(SenderId senderId, URI uri);
 
 }

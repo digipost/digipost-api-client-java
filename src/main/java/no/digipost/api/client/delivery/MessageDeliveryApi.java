@@ -25,7 +25,7 @@ import no.digipost.api.client.representations.Recipients;
 import no.digipost.api.client.representations.accounts.UserAccount;
 import no.digipost.api.client.representations.accounts.UserInformation;
 import no.digipost.api.client.representations.sender.SenderInformation;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 
 import java.net.URI;
@@ -49,19 +49,19 @@ public interface MessageDeliveryApi {
     /**
      * Oppretter og sender en multipartforsendelse
      */
-    CloseableHttpResponse sendMultipartMessage(HttpEntity multipart);
+    ClassicHttpResponse sendMultipartMessage(HttpEntity multipart);
 
     /**
      * Legger til ytterligere data til et dokument.
      * Det er en forutsetning at dokumentet har datatype fra tidligere.
      */
-    CloseableHttpResponse addData(AddDataLink document, AdditionalData data);
+    ClassicHttpResponse addData(AddDataLink document, AdditionalData data);
 
     Recipients search(String searchString);
 
     Autocomplete searchSuggest(String searchString);
 
-    CloseableHttpResponse identifyRecipient(Identification identification);
+    ClassicHttpResponse identifyRecipient(Identification identification);
 
     /**
      * Sjekker hvis spesifisert mottaker er Digipost-bruker.
@@ -69,15 +69,15 @@ public interface MessageDeliveryApi {
      * Nøkkelen brukes for å kryptere dokument-innhold for dokumenter som
      * skal prekrypteres.
      */
-    CloseableHttpResponse identifyAndGetEncryptionKey(Identification identification);
+    ClassicHttpResponse identifyAndGetEncryptionKey(Identification identification);
 
 
-    CloseableHttpResponse getEncryptionKey(URI location);
+    ClassicHttpResponse getEncryptionKey(URI location);
 
     /**
      * Henter public krypteringsnøkkel i x509 format for forsendelser som skal sendes til print.
      */
-    CloseableHttpResponse getEncryptionCertificateForPrint();
+    ClassicHttpResponse getEncryptionCertificateForPrint();
 
     /**
      * Henter informasjon om en faktisk avsender av en melding, altså
