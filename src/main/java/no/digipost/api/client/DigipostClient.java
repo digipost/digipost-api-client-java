@@ -330,8 +330,12 @@ public class DigipostClient {
         return sharedDocumentsApi.getSharedDocumentContent(uri);
     }
 
-    public ClassicHttpResponse stopSharing(SenderId senderId, URI uri) {
-        return sharedDocumentsApi.stopSharing(senderId, uri);
+    public void stopSharing(SenderId senderId, URI uri) {
+        try (ClassicHttpResponse response = sharedDocumentsApi.stopSharing(senderId, uri)) {
+            checkResponse(response, eventLogger);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     public ArchiveApi.ArchivingDocuments archiveDocuments(final Archive archive) {
