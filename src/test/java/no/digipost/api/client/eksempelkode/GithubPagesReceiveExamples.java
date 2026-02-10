@@ -55,7 +55,9 @@ public class GithubPagesReceiveExamples {
         InboxDocument documentMetadata = inbox.documents.get(0);
 
         System.out.println("Content type is: " + documentMetadata.getContentType());
-        InputStream documentContent = client.getInboxDocumentContent(documentMetadata);
+        try (InputStream documentContent = client.getInboxDocumentContent(documentMetadata)) {
+            // use documentContent
+        }
     }
 
     public void delete_document() throws IOException {

@@ -57,8 +57,8 @@ import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
 import no.digipost.http.client.HttpClientFactory;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,7 +145,7 @@ public class DigipostClient {
     }
 
     public IdentificationResult identifyRecipient(final Identification identification) {
-        try (CloseableHttpResponse response = messageApi.identifyRecipient(identification)) {
+        try (ClassicHttpResponse response = messageApi.identifyRecipient(identification)) {
             checkResponse(response, eventLogger);
             return JAXBContextUtils.unmarshal(jaxbContext, response.getEntity().getContent(), IdentificationResult.class);
         } catch (IOException e) {
@@ -330,8 +330,12 @@ public class DigipostClient {
         return sharedDocumentsApi.getSharedDocumentContent(uri);
     }
 
-    public CloseableHttpResponse stopSharing(SenderId senderId, URI uri) {
-        return sharedDocumentsApi.stopSharing(senderId, uri);
+    public void stopSharing(SenderId senderId, URI uri) {
+        try (ClassicHttpResponse response = sharedDocumentsApi.stopSharing(senderId, uri)) {
+            checkResponse(response, eventLogger);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     public ArchiveApi.ArchivingDocuments archiveDocuments(final Archive archive) {

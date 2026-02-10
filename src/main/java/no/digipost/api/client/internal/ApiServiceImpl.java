@@ -76,15 +76,14 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.http.protocol.HttpCoreContext;
@@ -164,7 +163,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
 
     @Override
-    public CloseableHttpResponse sendMultipartMessage(HttpEntity multipart) {
+    public ClassicHttpResponse sendMultipartMessage(HttpEntity multipart) {
         MultipartNoLengthCheckHttpEntity multipartLengthCheckHttpEntity = new MultipartNoLengthCheckHttpEntity(multipart);
 
         EntryPoint entryPoint = getEntryPoint();
@@ -179,7 +178,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
-    public CloseableHttpResponse sendMultipartArchive(HttpEntity multipart) {
+    public ClassicHttpResponse sendMultipartArchive(HttpEntity multipart) {
         MultipartNoLengthCheckHttpEntity multipartLengthCheckHttpEntity = new MultipartNoLengthCheckHttpEntity(multipart);
 
         EntryPoint entryPoint = getEntryPoint();
@@ -213,20 +212,20 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
-    public CloseableHttpResponse identifyAndGetEncryptionKey(Identification identification) {
+    public ClassicHttpResponse identifyAndGetEncryptionKey(Identification identification) {
         EntryPoint entryPoint = getEntryPoint();
         return sendDigipostMedia(identification, entryPoint.getIdentificationWithEncryptionKeyUri().getPath());
     }
 
     @Override
-    public CloseableHttpResponse getEncryptionKey(URI location) {
+    public ClassicHttpResponse getEncryptionKey(URI location) {
         HttpGet httpGet = new HttpGet(location);
         httpGet.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V8);
         return send(httpGet);
     }
 
     @Override
-    public CloseableHttpResponse getEncryptionCertificateForPrint() {
+    public ClassicHttpResponse getEncryptionCertificateForPrint() {
         EntryPoint entryPoint = getEntryPoint();
 
         HttpGet httpGet = new HttpGet(digipostUrl.resolve(entryPoint.getPrintEncryptionCertificate().getPath()));
@@ -235,7 +234,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
-    public CloseableHttpResponse addData(AddDataLink addDataLink, AdditionalData data) {
+    public ClassicHttpResponse addData(AddDataLink addDataLink, AdditionalData data) {
         return sendDigipostMedia(data, addDataLink.getPath());
     }
 
@@ -300,7 +299,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
-    public CloseableHttpResponse identifyRecipient(Identification identification) {
+    public ClassicHttpResponse identifyRecipient(Identification identification) {
         return sendDigipostMedia(identification, getEntryPoint().getIdentificationUri().getPath());
     }
 
@@ -309,7 +308,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         httpGet.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V8);
         final HttpCoreContext httpCoreContext = HttpCoreContext.create();
         httpCoreContext.setAttribute(ResponseSignatureInterceptor.NOT_SIGNED_RESPONSE, true);
-        try (CloseableHttpResponse response = send(httpGet, httpCoreContext)) {
+        try (ClassicHttpResponse response = send(httpGet, httpCoreContext)) {
 
             if (response.getCode() == HttpStatus.SC_OK) {
                 return unmarshal(jaxbContext, response.getEntity().getContent(), EntryPoint.class);
@@ -391,7 +390,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
                 newuuid, document.getFileName(), document.getFileType(), document.getContentType()
         );
 
-        try (CloseableHttpResponse response = sendDigipostMedia(nyttDokument, addUniqeUUIDUri.getPath())) {
+        try (ClassicHttpResponse response = sendDigipostMedia(nyttDokument, addUniqeUUIDUri.getPath())) {
             checkResponse(response, eventLogger);
             
             archive.getDocuments().addAll(unmarshal(jaxbContext, response.getEntity().getContent(), Archive.class).getDocuments());
@@ -450,7 +449,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     @Override
     public Batch createBatch(UUID batchUUID) {
         final URI createBatch = getEntryPoint().getCreateBatch();
-        try (CloseableHttpResponse response = sendDigipostMedia(new Batch(batchUUID.toString()), createBatch.toString())) {
+        try (ClassicHttpResponse response = sendDigipostMedia(new Batch(batchUUID.toString()), createBatch.toString())) {
             checkResponse(response, eventLogger);
             return JAXBContextUtils.unmarshal(jaxbContext, response.getEntity().getContent(), Batch.class);
         } catch (IOException e) {
@@ -478,7 +477,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     @Override
     public void addTag(Tag tag) {
         URI uri = getEntryPoint().getAddTagUri();
-        try (CloseableHttpResponse response = sendDigipostMedia(tag, uri.getPath())) {
+        try (ClassicHttpResponse response = sendDigipostMedia(tag, uri.getPath())) {
             checkResponse(response, eventLogger);
         } catch (IOException e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
@@ -488,7 +487,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     @Override
     public void removeTag(Tag tag) {
         URI uri = getEntryPoint().getRemoveTagUri();
-        try (CloseableHttpResponse response = sendDigipostMedia(tag, uri.getPath())) {
+        try (ClassicHttpResponse response = sendDigipostMedia(tag, uri.getPath())) {
             checkResponse(response, eventLogger);
         } catch (IOException e) {
             throw new DigipostClientException(ErrorCode.GENERAL_ERROR, e);
@@ -522,7 +521,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     }
 
     @Override
-    public CloseableHttpResponse stopSharing(SenderId senderId, URI uri) {
+    public ClassicHttpResponse stopSharing(SenderId senderId, URI uri) {
         DataType dataType = new ShareDocumentsRequestSharingStopped();
         AdditionalData data = AdditionalData.Builder
                 .newAdditionalData(dataType)
@@ -570,7 +569,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
             R responseStream = (R) safelyOfferEntityStreamExternally(send(request), eventLogger);
             return responseStream;
         } else {
-            try (CloseableHttpResponse response = send(request)) {
+            try (ClassicHttpResponse response = send(request)) {
                 checkResponse(response, eventLogger);
                 return unmarshal(response.getEntity().getContent(), entityType);
             } catch (IOException e) {
@@ -580,24 +579,20 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     }
 
-    private CloseableHttpResponse send(ClassicHttpRequest request){
+    private ClassicHttpResponse send(ClassicHttpRequest request) {
         return send(request, null);
     }
 
-    private CloseableHttpResponse send(ClassicHttpRequest request, HttpContext context){
+    private ClassicHttpResponse send(ClassicHttpRequest request, HttpContext context) {
         try {
             request.setHeader(X_Digipost_UserId, brokerId.stringValue());
-            if (context == null) {
-                return httpClient.execute(request, responseHandler());
-            } else {
-                return httpClient.execute(request, context, responseHandler());
-            }
+            return httpClient.executeOpen(null, request, context);
         } catch (IOException e) {
             throw asUnchecked(e);
         }
     }
 
-    private CloseableHttpResponse sendDigipostMedia(Object data, String uri) {
+    private ClassicHttpResponse sendDigipostMedia(Object data, String uri) {
         HttpPost httpPost = new HttpPost(digipostUrl.resolve(uri));
         httpPost.setHeader(Accept_DIGIPOST_MEDIA_TYPE_V8);
         httpPost.setHeader(Content_Type_DIGIPOST_MEDIA_TYPE_V8);
@@ -605,16 +600,5 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         marshal(jaxbContext, data, bao);
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)));
         return send(httpPost);
-    }
-
-    private HttpClientResponseHandler<CloseableHttpResponse> responseHandler() {
-        return response -> {
-                if (response instanceof CloseableHttpResponse) {
-                    return (CloseableHttpResponse) response;
-                } else {
-                    throw new DigipostClientException(ErrorCode.GENERAL_ERROR,
-                            "Expected response to be instance of CloseableHttpResponse, but got " + response.getClass().getName());
-                }
-        };
     }
 }
