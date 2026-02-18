@@ -52,7 +52,7 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
                                     X_Content_SHA256, response.getCode())));
             byte[] entityBytes = EntityUtils.toByteArray(entity);
             validerBytesMotHashHeader(hashHeaderValue, entityBytes);
-            classicHttpResponse.setEntity(new ByteArrayEntity(entityBytes, ContentType.parse(entityDetails.getContentType())));
+            classicHttpResponse.setEntity(new ByteArrayEntity(entityBytes, ContentType.parse(entityDetails.getContentType()), entityDetails.getContentEncoding()));
         }
     }
 
