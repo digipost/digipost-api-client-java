@@ -23,6 +23,8 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import static no.digipost.api.client.internal.http.request.interceptor.RequestHttpRequestPathInterceptor.REQUEST_PATH_ATTRIBUTE;
+
 final class ApacheHttpResponseToVerify implements ResponseToVerify {
 
     private final HttpContext context;
@@ -49,7 +51,7 @@ final class ApacheHttpResponseToVerify implements ResponseToVerify {
 
     @Override
     public String getPath() {
-        String pathWithQueryParams = (String) context.getAttribute("request-path");
+        String pathWithQueryParams = (String) context.getAttribute(REQUEST_PATH_ATTRIBUTE);
         int indexOfQuestionMark = pathWithQueryParams.indexOf('?');
         if (indexOfQuestionMark != -1) {
            return pathWithQueryParams.substring(0, indexOfQuestionMark);
