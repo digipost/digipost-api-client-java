@@ -61,6 +61,5 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
     @Override
     public void process(HttpRequest httpRequest, EntityDetails entityDetails, HttpContext httpContext) throws IOException {
         setSignatureHeader(httpRequest);
-        httpContext.setAttribute("request-path", httpRequest.getPath());
     }
 }

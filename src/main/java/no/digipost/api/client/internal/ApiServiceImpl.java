@@ -31,6 +31,7 @@ import no.digipost.api.client.internal.http.MultipartNoLengthCheckHttpEntity;
 import no.digipost.api.client.internal.http.request.interceptor.RequestBearerTokenInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestContentHashInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestDateInterceptor;
+import no.digipost.api.client.internal.http.request.interceptor.RequestHttpRequestPathInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestSignatureInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestUserAgentInterceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseContentSHA256Interceptor;
@@ -161,6 +162,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         return httpClientBuilder
                 .addRequestInterceptorLast(new RequestDateInterceptor(eventLogger, clock))
                 .addRequestInterceptorLast(new RequestUserAgentInterceptor())
+                .addRequestInterceptorLast(new RequestHttpRequestPathInterceptor())
                 .addRequestInterceptorLast(new RequestContentHashInterceptor(eventLogger, Digester.sha256, Headers.X_Content_SHA256))
                 .addRequestInterceptorLast(new RequestSignatureInterceptor(signer, eventLogger))
                 .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
@@ -180,6 +182,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
                         .build())
                 .addRequestInterceptorLast(new RequestDateInterceptor(eventLogger, clock))
                 .addRequestInterceptorLast(new RequestUserAgentInterceptor())
+                .addRequestInterceptorLast(new RequestHttpRequestPathInterceptor())
                 .addRequestInterceptorLast(new RequestBearerTokenInterceptor(tokenProvider))
                 .addRequestInterceptorLast(new RequestContentHashInterceptor(eventLogger, Digester.sha256, Headers.X_Content_SHA256))
                 .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
