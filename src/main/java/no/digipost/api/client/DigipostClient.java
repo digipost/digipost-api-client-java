@@ -53,6 +53,7 @@ import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequ
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.security.jwt.JwtAuthConfig;
 import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
@@ -103,6 +104,14 @@ public class DigipostClient {
 
     public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer, HttpClientBuilder clientBuilder) {
         this(config, new ApiServiceImpl(config, clientBuilder, brokerId, signer));
+    }
+
+    public DigipostClient(DigipostClientConfig config, BrokerId brokerId) {
+        this(config, brokerId, HttpClientFactory.createDefaultBuilder());
+    }
+
+    public DigipostClient(DigipostClientConfig config, BrokerId brokerId, HttpClientBuilder clientBuilder) {
+        this(config, new ApiServiceImpl(config, clientBuilder, brokerId, null));
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {

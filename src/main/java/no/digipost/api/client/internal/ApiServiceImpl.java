@@ -28,6 +28,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.inbox.InboxApi;
 import no.digipost.api.client.internal.http.Headers;
 import no.digipost.api.client.internal.http.MultipartNoLengthCheckHttpEntity;
+import no.digipost.api.client.internal.http.request.interceptor.RequestBearerTokenInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestContentHashFilter;
 import no.digipost.api.client.internal.http.request.interceptor.RequestDateInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestSignatureInterceptor;
@@ -65,6 +66,8 @@ import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequ
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.security.Digester;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.security.jwt.JwtAuthConfig;
+import no.digipost.api.client.security.jwt.MutualTlsTokenProvider;
 import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
@@ -75,8 +78,10 @@ import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
+import no.digipost.http.client.HttpClientConnectionManagerFactory;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -95,12 +100,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static jakarta.xml.bind.JAXB.unmarshal;
 import static java.util.Optional.ofNullable;
@@ -137,17 +144,46 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         this.brokerId = brokerId;
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
         this.digipostUrl = config.digipostApiUri;
-
         this.cached = new Cached(() -> fetchEntryPoint(Optional.empty()));
-        this.httpClient = httpClientBuilder
-            .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, config.clock))
-            .addRequestInterceptorLast(new RequestUserAgentInterceptor())
-            .addRequestInterceptorLast(new RequestSignatureInterceptor(signer, config.eventLogger, new RequestContentHashFilter(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256)))
-            .addResponseInterceptorLast(new ResponseDateInterceptor(config.clock))
-            .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
-            .addResponseInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
-            .build();
-        this.eventLogger.log("Initialiserte apache-klient mot " + config.digipostApiUri);
+
+        if (signer != null) {
+            this.httpClient = createCertificateAuthenticatingHttpClient(httpClientBuilder, eventLogger, signer, config.clock);
+            this.eventLogger.log("Initialiserte apache-klient (sertifikatmodus) mot " + config.digipostApiUri);
+        } else if (config.jwtAuthConfig != null) {
+            this.httpClient = createJwtAuthenticatingHttpClient(httpClientBuilder, eventLogger, config.jwtAuthConfig, brokerId, this::getEntryPoint, config.clock);
+            this.eventLogger.log("Initialiserte apache-klient (JWT/mTLS-modus) mot " + config.digipostApiUri);
+        } else {
+            throw new IllegalArgumentException("Klienten må konfigureres med en Signer for sertifikatbasert autentisering, eller JwtAuthConfig for OAuth 2.0 mTLS-basert autentisering");
+        }
+    }
+
+    private CloseableHttpClient createCertificateAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, EventLogger eventLogger, Signer signer, Clock clock) {
+        return httpClientBuilder
+                .addRequestInterceptorLast(new RequestDateInterceptor(eventLogger, clock))
+                .addRequestInterceptorLast(new RequestUserAgentInterceptor())
+                .addRequestInterceptorLast(new RequestSignatureInterceptor(signer, eventLogger, new RequestContentHashFilter(eventLogger, Digester.sha256, Headers.X_Content_SHA256)))
+                .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
+                .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
+                .addResponseInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
+                .build();
+    }
+
+    private static CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, EventLogger eventLogger, JwtAuthConfig jwtAuthConfig, BrokerId brokerId, Supplier<EntryPoint> entryPointSupplier, Clock clock) {
+        MutualTlsTokenProvider tokenProvider = new MutualTlsTokenProvider(jwtAuthConfig, brokerId, clock);
+
+        return httpClientBuilder
+                .setConnectionManager(HttpClientConnectionManagerFactory.createDefaultBuilder()
+                        .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                                .setSslContext(tokenProvider.getSslContext())
+                                .build())
+                        .build())
+                .addRequestInterceptorLast(new RequestDateInterceptor(eventLogger, clock))
+                .addRequestInterceptorLast(new RequestUserAgentInterceptor())
+                .addRequestInterceptorLast(new RequestBearerTokenInterceptor(tokenProvider))
+                .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
+                .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
+                .addResponseInterceptorLast(new ResponseSignatureInterceptor(entryPointSupplier))
+                .build();
     }
 
     //Kan sende inn null. Man får da det samme som getEntryPoint()
