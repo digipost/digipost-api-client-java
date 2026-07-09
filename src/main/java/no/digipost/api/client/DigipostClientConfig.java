@@ -15,9 +15,12 @@
  */
 package no.digipost.api.client;
 
+import no.digipost.api.client.security.jwt.JwtAuthConfig;
+
 import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
@@ -33,6 +36,7 @@ public final class DigipostClientConfig {
         private EventLogger eventLogger = EventLogger.NOOP_LOGGER;
         private Clock clock = Clock.systemDefaultZone();
         private boolean failOnHtmlDiff = false;
+        private JwtAuthConfig jwtAuthConfig = null;
 
         private Builder() {
         }
@@ -66,8 +70,13 @@ public final class DigipostClientConfig {
             return this;
         }
 
+        public Builder jwtAuthConfig(JwtAuthConfig jwtAuthConfig) {
+            this.jwtAuthConfig = jwtAuthConfig;
+            return this;
+        }
+
         public DigipostClientConfig build() {
-            return new DigipostClientConfig(digipostApiUri, printKeyCacheTimeToLive, eventLogger, clock, failOnHtmlDiff);
+            return new DigipostClientConfig(digipostApiUri, printKeyCacheTimeToLive, eventLogger, clock, failOnHtmlDiff, jwtAuthConfig);
         }
     }
 
@@ -80,13 +89,15 @@ public final class DigipostClientConfig {
     public final EventLogger eventLogger;
     public final Clock clock;
     public final boolean failOnHtmlDiff;
+    public final JwtAuthConfig jwtAuthConfig;
 
-    private DigipostClientConfig(URI digipostApiUri, Duration printKeyCacheTimeToLive, EventLogger eventLogger, Clock clock, boolean failOnHtmlDiff) {
+    private DigipostClientConfig(URI digipostApiUri, Duration printKeyCacheTimeToLive, EventLogger eventLogger, Clock clock, boolean failOnHtmlDiff, JwtAuthConfig jwtAuthConfig) {
         this.digipostApiUri = requireNonNull(digipostApiUri, "digipostApiUri cat not be null");
         this.printKeyCacheTimeToLive = requireNonNull(printKeyCacheTimeToLive, "printKeyCacheTimeToLive can not be null");
         this.eventLogger = requireNonNull(eventLogger, "eventLogger can not be null");
         this.clock = clock;
         this.failOnHtmlDiff = failOnHtmlDiff;
+        this.jwtAuthConfig = jwtAuthConfig;
     }
 
 }
