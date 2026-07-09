@@ -19,36 +19,30 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.internal.http.Headers;
 import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
-import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.EntityDetails;
-import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Optional;
 
 public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestSignatureInterceptor.class);
 
     private final Signer signer;
-    private final RequestContentHashFilter hashFilter;
     private final EventLogger eventLogger;
 
-    public RequestSignatureInterceptor(Signer signer, RequestContentHashFilter hashFilter) {
-        this(signer, EventLogger.NOOP_LOGGER, hashFilter);
+    public RequestSignatureInterceptor(Signer signer) {
+        this(signer, EventLogger.NOOP_LOGGER);
     }
 
-    public RequestSignatureInterceptor(Signer signer, EventLogger eventLogger, RequestContentHashFilter hashFilter){
+    public RequestSignatureInterceptor(Signer signer, EventLogger eventLogger) {
         this.eventLogger = (eventLogger != null ? eventLogger : EventLogger.NOOP_LOGGER).withDebugLogTo(LOG);
         this.signer = signer;
-        this.hashFilter = hashFilter;
     }
 
     private void setSignatureHeader(HttpRequest httpRequest) {
@@ -66,23 +60,7 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 
     @Override
     public void process(HttpRequest httpRequest, EntityDetails entityDetails, HttpContext httpContext) throws IOException {
-
-        if(httpRequest instanceof ClassicHttpRequest) {
-            ClassicHttpRequest request = (ClassicHttpRequest) httpRequest;
-            HttpEntity rqEntity = request.getEntity();
-
-            if (rqEntity == null) {
-                setSignatureHeader(httpRequest);
-            } else {
-                byte[] entityBytes = Optional.ofNullable(EntityUtils.toByteArray(rqEntity)).orElseGet(() -> new byte[0]);
-                hashFilter.settContentHashHeader(entityBytes, request);
-                setSignatureHeader(httpRequest);
-            }
-        } else {
-            setSignatureHeader(httpRequest);
-        }
+        setSignatureHeader(httpRequest);
         httpContext.setAttribute("request-path", httpRequest.getPath());
-
-
     }
 }
