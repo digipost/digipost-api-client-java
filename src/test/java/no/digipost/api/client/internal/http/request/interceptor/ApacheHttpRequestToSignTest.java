@@ -16,12 +16,25 @@
 package no.digipost.api.client.internal.http.request.interceptor;
 
 
+import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class ApacheHttpRequestToSignTest {
+
+    @Test
+    public void getPathReturnsEncodedPath() {
+        BasicClassicHttpRequest request = new BasicClassicHttpRequest("GET", "https://api.digipost.no/api/documents/%C3%86%20%C3%98/send");
+        assertThat(new ApacheHttpRequestToSign(request).getPath(), is("/api/documents/%C3%86%20%C3%98/send"));
+    }
+
+    @Test
+    public void getPathLeavesPlainAsciiPathUnchanged() {
+        BasicClassicHttpRequest request = new BasicClassicHttpRequest("GET", "https://api.digipost.no/api/documents/send");
+        assertThat(new ApacheHttpRequestToSign(request).getPath(), is("/api/documents/send"));
+    }
 
     @Test
     public void testStandardQuery(){

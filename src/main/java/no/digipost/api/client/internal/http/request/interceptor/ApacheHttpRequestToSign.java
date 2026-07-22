@@ -49,7 +49,7 @@ final class ApacheHttpRequestToSign implements RequestToSign {
     @Override
     public String getPath() {
         try {
-            String path = clientRequest.getUri().getPath();
+            String path = clientRequest.getUri().getRawPath();
             return path != null ? path : "";
         } catch (URISyntaxException e) {
             throw new RuntimeException(e.getMessage(), e);
