@@ -67,7 +67,7 @@ public class BatchSendMessagesEksempel {
         try (PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                 .setDefaultConnectionConfig(config)
                 .build()) {
-            client = new DigipostClient(DigipostClientConfig.newConfiguration().digipostApiUri(URI.create("http://localhost:8282")).build(),
+            client = DigipostClient.withCertificateAuthentication(DigipostClientConfig.newConfiguration().digipostApiUri(URI.create("http://localhost:8282")).build(),
                     AVSENDERS_KONTOID.asBrokerId(), signer, HttpClientBuilder.create().setConnectionManager(connectionManager));
         }
 

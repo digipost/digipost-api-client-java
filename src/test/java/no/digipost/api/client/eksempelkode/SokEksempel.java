@@ -50,7 +50,7 @@ public class SokEksempel {
         }
 
         // 2. Vi oppretter en DigipostClient
-        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, signer);
+        DigipostClient client = DigipostClient.withCertificateAuthentication(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, signer);
 
         // 3. Vi søker etter personer med matchende navn eller adresse
         List<Recipient> recipients = client.search("Ole Nilsen Stavanger").getRecipients();
