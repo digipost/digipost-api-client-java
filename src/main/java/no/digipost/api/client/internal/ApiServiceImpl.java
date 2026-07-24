@@ -141,20 +141,46 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     // which was the case for the pattern "yyyy-MM-dd'T'HH:mm:ss.SSSZZ". See commit messages for 59caeb5737e45a15 and dcf41785a84f42caf935 for details.
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
-    public ApiServiceImpl(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, Signer signer) {
+    /**
+     * The authentication mechanism the client uses when communicating with the Digipost API.
+     */
+    private enum AuthMode {
+        /** Certificate-based authentication: requests are signed with a {@link Signer}. */
+        CERTIFICATE,
+        /** OAuth 2.0 authentication where tokens are obtained over a mutual-TLS channel. */
+        JWT_MTLS
+    }
+
+    private static AuthMode resolveAuthMode(Signer signer, JwtAuthConfig jwtAuthConfig) {
+        if (signer != null && jwtAuthConfig != null) {
+            throw new IllegalArgumentException("Klienten kan ikke konfigureres med både en Signer og JwtAuthConfig – velg enten sertifikatbasert autentisering eller OAuth 2.0 mTLS-basert autentisering");
+        } else if (signer != null) {
+            return AuthMode.CERTIFICATE;
+        } else if (jwtAuthConfig != null) {
+            return AuthMode.JWT_MTLS;
+        } else {
+            throw new IllegalArgumentException("Klienten må konfigureres med en Signer for sertifikatbasert autentisering, eller JwtAuthConfig for OAuth 2.0 mTLS-basert autentisering");
+        }
+    }
+
+    public ApiServiceImpl(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, Signer signer, JwtAuthConfig jwtAuthConfig) {
         this.brokerId = brokerId;
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
         this.digipostUrl = config.digipostApiUri;
         this.cached = new Cached(() -> fetchEntryPoint(Optional.empty()));
 
-        if (signer != null) {
-            this.httpClient = createCertificateAuthenticatingHttpClient(httpClientBuilder, eventLogger, signer, config.clock);
-            this.eventLogger.log("Initialiserte apache-klient (sertifikatmodus) mot " + config.digipostApiUri);
-        } else if (config.jwtAuthConfig != null) {
-            this.httpClient = createJwtAuthenticatingHttpClient(httpClientBuilder, eventLogger, config.jwtAuthConfig, brokerId, this::getEntryPoint, config.clock);
-            this.eventLogger.log("Initialiserte apache-klient (JWT/mTLS-modus) mot " + config.digipostApiUri);
-        } else {
-            throw new IllegalArgumentException("Klienten må konfigureres med en Signer for sertifikatbasert autentisering, eller JwtAuthConfig for OAuth 2.0 mTLS-basert autentisering");
+        AuthMode authMode = resolveAuthMode(signer, jwtAuthConfig);
+        switch (authMode) {
+            case CERTIFICATE:
+                this.httpClient = createCertificateAuthenticatingHttpClient(httpClientBuilder, eventLogger, signer, config.clock);
+                this.eventLogger.log("Initialiserte apache-klient (sertifikatmodus) mot " + config.digipostApiUri);
+                break;
+            case JWT_MTLS:
+                this.httpClient = createJwtAuthenticatingHttpClient(httpClientBuilder, eventLogger, jwtAuthConfig, brokerId, this::getEntryPoint, config.clock);
+                this.eventLogger.log("Initialiserte apache-klient (JWT/mTLS-modus) mot " + config.digipostApiUri);
+                break;
+            default:
+                throw new IllegalStateException("Ukjent autentiseringsmodus: " + authMode);
         }
     }
 

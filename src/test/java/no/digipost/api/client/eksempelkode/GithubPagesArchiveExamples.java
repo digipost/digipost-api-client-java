@@ -47,7 +47,7 @@ public class GithubPagesArchiveExamples {
     public void set_up_client() throws FileNotFoundException {
         SenderId senderId = SenderId.of(10987);
 
-        DigipostClient client = new DigipostClient(
+        DigipostClient client = DigipostClient.withCertificateAuthentication(
                 DigipostClientConfig.newConfiguration().build(),
                 senderId.asBrokerId(),
                 Signer.usingKeyFromPKCS12KeyStore(new FileInputStream("certificate.p12"), "TheSecretPassword"));

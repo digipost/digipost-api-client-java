@@ -636,7 +636,7 @@ public class DigipostSwingClient {
                         .digipostApiUri(URI.create(endpointField.getText()))
                         .build();
                 try (InputStream certStream = newInputStream(Paths.get(certField.getText()))) {
-                    client = new DigipostClient(clientConfig, BrokerId.of(Long.parseLong(senderField.getText())),
+                    client = DigipostClient.withCertificateAuthentication(clientConfig, BrokerId.of(Long.parseLong(senderField.getText())),
                             Signer.usingKeyFromPKCS12KeyStore(certStream, new String(passwordField.getPassword())));
                 } catch (NumberFormatException e1) {
                     eventLogger.log("FEIL: Avsenders ID må være et tall > 0");

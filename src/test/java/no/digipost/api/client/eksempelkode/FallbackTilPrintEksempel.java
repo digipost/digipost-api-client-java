@@ -67,7 +67,7 @@ public class FallbackTilPrintEksempel {
         }
 
         // 3. Vi oppretter en DigipostClient
-        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(),
+        DigipostClient client = DigipostClient.withCertificateAuthentication(DigipostClientConfig.newConfiguration().build(),
                                                    AVSENDERS_KONTOID.asBrokerId(), signer);
 
         // 4. Vi oppretter et fødselsnummerobjekt som skal brukes til å

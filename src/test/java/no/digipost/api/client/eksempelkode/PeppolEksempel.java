@@ -55,7 +55,7 @@ public class PeppolEksempel {
         }
 
         // 2. Vi oppretter en DigipostClient
-        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(),
+        DigipostClient client = DigipostClient.withCertificateAuthentication(DigipostClientConfig.newConfiguration().build(),
                                                    AVSENDERS_KONTOID.asBrokerId(), signer);
 
         // 3. Vi oppretter et fødselsnummerobjekt
