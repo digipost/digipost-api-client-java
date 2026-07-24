@@ -74,7 +74,7 @@ public class GithubPagesSendExamples {
             signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, "TheSecretPassword");
         }
 
-        DigipostClient client = new DigipostClient(
+        DigipostClient client = DigipostClient.withCertificateAuthentication(
                 DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), signer);
     }
 
@@ -246,7 +246,7 @@ public class GithubPagesSendExamples {
             signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, CERTIFICATE_PASSWORD);
         }
 
-        DigipostClient client = new DigipostClient(config, SENDER_ID.asBrokerId(), signer);
+        DigipostClient client = DigipostClient.withCertificateAuthentication(config, SENDER_ID.asBrokerId(), signer);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 

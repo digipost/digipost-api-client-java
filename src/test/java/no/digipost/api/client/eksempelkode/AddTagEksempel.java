@@ -46,7 +46,7 @@ public class AddTagEksempel {
         }
 
         // 2. Vi oppretter en DigipostClient
-        DigipostClient client = new DigipostClient(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, signer);
+        DigipostClient client = DigipostClient.withCertificateAuthentication(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, signer);
 
         // 3. Vi oppretter et fødselsnummerobjekt
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");

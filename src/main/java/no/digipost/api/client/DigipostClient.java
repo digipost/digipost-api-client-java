@@ -69,6 +69,7 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNull;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 
@@ -98,20 +99,43 @@ public class DigipostClient {
     private final SharedDocumentsApi sharedDocumentsApi;
 
 
-    public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
-        this(config, brokerId, signer, HttpClientFactory.createDefaultBuilder());
+    /**
+     * Creates a client that authenticates with the Digipost API using certificate-base request signing.
+     *
+     * @param signer signs each request with the broker's private key
+     */
+    public static DigipostClient withCertificateAuthentication(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
+        return withCertificateAuthentication(config, brokerId, signer, HttpClientFactory.createDefaultBuilder());
     }
 
-    public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer, HttpClientBuilder clientBuilder) {
-        this(config, new ApiServiceImpl(config, clientBuilder, brokerId, signer));
+    /**
+     * Creates a client that authenticates with the Digipost API using certificate-base request signing.
+     *
+     * @param signer signs each request with the broker's private key
+     * @param clientBuilder the Apache {@link HttpClientBuilder} used to build the underlying HTTP client, allowing customization of e.g. connection manager, timeouts and proxy settings
+     */
+    public static DigipostClient withCertificateAuthentication(DigipostClientConfig config, BrokerId brokerId, Signer signer, HttpClientBuilder clientBuilder) {
+        return new DigipostClient(config, new ApiServiceImpl(config, clientBuilder, brokerId, requireNonNull(signer, "signer cannot be null"), null));
     }
 
-    public DigipostClient(DigipostClientConfig config, BrokerId brokerId) {
-        this(config, brokerId, HttpClientFactory.createDefaultBuilder());
+    /**
+     * Creates a client that authenticates with the Digipost API using OAuth 2.0 access tokens
+     * obtained over a mutual-TLS channel.
+     *
+     * @param jwtAuthConfig configures the token endpoint and the client certificate used for mTLS
+     */
+    public static DigipostClient withJwtMtlsAuthentication(DigipostClientConfig config, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
+        return withJwtMtlsAuthentication(config, brokerId, jwtAuthConfig, HttpClientFactory.createDefaultBuilder());
     }
 
-    public DigipostClient(DigipostClientConfig config, BrokerId brokerId, HttpClientBuilder clientBuilder) {
-        this(config, new ApiServiceImpl(config, clientBuilder, brokerId, null));
+    /**
+     * Creates a client that authenticates with the Digipost API using OAuth 2.0 access tokens obtained over a mutual-TLS channel.
+     *
+     * @param jwtAuthConfig configures the token endpoint and the client certificate used for mTLS
+     * @param clientBuilder the Apache {@link HttpClientBuilder} used to build the underlying HTTP client, allowing customization of e.g. timeouts and proxy settings. Note that its connection manager is replaced with one configured for the mTLS handshake.
+     */
+    public static DigipostClient withJwtMtlsAuthentication(DigipostClientConfig config, BrokerId brokerId, JwtAuthConfig jwtAuthConfig, HttpClientBuilder clientBuilder) {
+        return new DigipostClient(config, new ApiServiceImpl(config, clientBuilder, brokerId, null, requireNonNull(jwtAuthConfig, "jwtAuthConfig cannot be null")));
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
