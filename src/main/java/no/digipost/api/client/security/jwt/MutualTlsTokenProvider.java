@@ -176,7 +176,7 @@ public class MutualTlsTokenProvider {
         return Arrays.asList(
                 new BasicNameValuePair("grant_type", "client_credentials"),
                 new BasicNameValuePair("client_id", config.clientId),
-                new BasicNameValuePair("scope", brokerId.stringValue() + ":dpost-api"),
+                new BasicNameValuePair("scope", "dpost-api:" + brokerId.stringValue()),
                 new BasicNameValuePair("resource", config.resourceServerUri.toString())
         );
     }
