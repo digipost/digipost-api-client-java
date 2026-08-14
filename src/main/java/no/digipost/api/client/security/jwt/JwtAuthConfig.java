@@ -25,29 +25,39 @@ import java.security.cert.CertificateException;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Configures how the client obtains OAuth 2.0 access tokens over a mutual-TLS channel:
+ * which token endpoint to ask, which client to identify as, and which client certificate
+ * to present in the handshake.
+ * <p>
+ * The resource the tokens are requested for is <em>not</em> configured here. It is derived
+ * from {@link no.digipost.api.client.DigipostClientConfig#digipostApiUri}, so that the
+ * tokens are always issued for the same API the client actually talks to.
+ */
 public final class JwtAuthConfig {
 
     public final URI tokenEndpointUri;
-    public final URI resourceServerUri;
     public final String clientId;
     final KeyStore keyStore;
     final char[] keyPassword;
 
-    public static Builder newConfig(URI tokenEndpointUri, URI resourceServerUri, String clientId) {
-        return new Builder(tokenEndpointUri, resourceServerUri, clientId);
+    public static Builder newConfig(String clientId) {
+        return new Builder(clientId);
     }
 
     public static class Builder {
-        private final URI tokenEndpointUri;
-        private final URI resourceServerUri;
+        private URI tokenEndpointUri = URI.create("https://midp.digipost.no/oauth2/token");
         private final String clientId;
         private KeyStore keyStore;
         private char[] keyPassword;
 
-        private Builder(URI tokenEndpointUri, URI resourceServerUri, String clientId) {
-            this.tokenEndpointUri = requireNonNull(tokenEndpointUri, "tokenEndpointUri cannot be null");
-            this.resourceServerUri = requireNonNull(resourceServerUri, "resourceServerUri cannot be null");
+        private Builder(String clientId) {
             this.clientId = requireNonNull(clientId, "clientId cannot be null");
+        }
+
+        public Builder tokenEndpoint(String tokenEndpoint) {
+            this.tokenEndpointUri = URI.create(tokenEndpoint);
+            return this;
         }
 
         public Builder pkcs12KeyStore(InputStream pkcs12Stream, String password) {
@@ -72,13 +82,12 @@ public final class JwtAuthConfig {
 
         public JwtAuthConfig build() {
             requireNonNull(keyStore, "A keyStore is required. Call pkcs12KeyStore() or keyStore().");
-            return new JwtAuthConfig(tokenEndpointUri, resourceServerUri, clientId, keyStore, keyPassword);
+            return new JwtAuthConfig(tokenEndpointUri, clientId, keyStore, keyPassword);
         }
     }
 
-    private JwtAuthConfig(URI tokenEndpointUri, URI resourceServerUri, String clientId, KeyStore keyStore, char[] keyPassword) {
+    private JwtAuthConfig(URI tokenEndpointUri, String clientId, KeyStore keyStore, char[] keyPassword) {
         this.tokenEndpointUri = tokenEndpointUri;
-        this.resourceServerUri = resourceServerUri;
         this.clientId = clientId;
         this.keyStore = keyStore;
         this.keyPassword = keyPassword;

@@ -172,11 +172,11 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         AuthMode authMode = resolveAuthMode(signer, jwtAuthConfig);
         switch (authMode) {
             case CERTIFICATE:
-                this.httpClient = createCertificateAuthenticatingHttpClient(httpClientBuilder, eventLogger, signer, config.clock);
+                this.httpClient = createCertificateAuthenticatingHttpClient(httpClientBuilder, eventLogger, signer, config);
                 this.eventLogger.log("Initialiserte apache-klient (sertifikatmodus) mot " + config.digipostApiUri);
                 break;
             case JWT_MTLS:
-                this.httpClient = createJwtAuthenticatingHttpClient(httpClientBuilder, eventLogger, jwtAuthConfig, brokerId, this::getEntryPoint, config.clock);
+                this.httpClient = createJwtAuthenticatingHttpClient(httpClientBuilder, eventLogger, jwtAuthConfig, brokerId, this::getEntryPoint, config);
                 this.eventLogger.log("Initialiserte apache-klient (JWT/mTLS-modus) mot " + config.digipostApiUri);
                 break;
             default:
@@ -184,7 +184,8 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         }
     }
 
-    private CloseableHttpClient createCertificateAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, EventLogger eventLogger, Signer signer, Clock clock) {
+    private CloseableHttpClient createCertificateAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, EventLogger eventLogger, Signer signer, DigipostClientConfig config) {
+        Clock clock = config.clock;
         return httpClientBuilder
                 .addRequestInterceptorLast(new RequestDateInterceptor(eventLogger, clock))
                 .addRequestInterceptorLast(new RequestUserAgentInterceptor())
@@ -197,8 +198,9 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
                 .build();
     }
 
-    private static CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, EventLogger eventLogger, JwtAuthConfig jwtAuthConfig, BrokerId brokerId, Supplier<EntryPoint> entryPointSupplier, Clock clock) {
-        MutualTlsTokenProvider tokenProvider = new MutualTlsTokenProvider(jwtAuthConfig, brokerId, clock);
+    private static CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, EventLogger eventLogger, JwtAuthConfig jwtAuthConfig, BrokerId brokerId, Supplier<EntryPoint> entryPointSupplier, DigipostClientConfig config) {
+        Clock clock = config.clock;
+        MutualTlsTokenProvider tokenProvider = new MutualTlsTokenProvider(jwtAuthConfig, brokerId, config.digipostApiUri, clock);
 
         return httpClientBuilder
                 .setConnectionManager(HttpClientConnectionManagerFactory.createDefaultBuilder()

@@ -65,7 +65,7 @@ public class MutualTlsTokenProviderTest {
     @Test
     void presenterer_klientsertifikat_i_mtls_handshake() throws Exception {
         JwtAuthConfig config = JwtAuthConfig
-                .newConfig(URI.create("https://localhost/token"), URI.create("api.localhost"), "test-client")
+                .newConfig("test-client")
                 .pkcs12KeyStore(p12Stream(), P12_PASSWORD)
                 .build();
 

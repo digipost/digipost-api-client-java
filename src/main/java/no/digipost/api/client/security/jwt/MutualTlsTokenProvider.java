@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
@@ -39,6 +40,8 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 public class MutualTlsTokenProvider {
 
@@ -60,12 +63,12 @@ public class MutualTlsTokenProvider {
     private volatile Instant cacheValidUntil = Instant.MIN;
     private final Object refreshLock = new Object();
 
-    public MutualTlsTokenProvider(JwtAuthConfig config, BrokerId brokerId, Clock clock) {
+    public MutualTlsTokenProvider(JwtAuthConfig config, BrokerId brokerId, URI resourceServerUri, Clock clock) {
         this.config = config;
         this.clock = clock;
         this.sslContext = buildSslContext(config);
         this.tokenClient = buildTokenClient(this.sslContext);
-        this.oAuthTokenEndpointParams = createOAuth2TokenEndpointParams(config, brokerId);
+        this.oAuthTokenEndpointParams = createOAuth2TokenEndpointParams(config, brokerId, resourceServerUri);
     }
 
     public String getToken() {
@@ -172,12 +175,12 @@ public class MutualTlsTokenProvider {
                 .build());
     }
 
-    private static List<BasicNameValuePair> createOAuth2TokenEndpointParams(JwtAuthConfig config, BrokerId brokerId){
+    private static List<BasicNameValuePair> createOAuth2TokenEndpointParams(JwtAuthConfig config, BrokerId brokerId, URI resourceServerUri){
         return Arrays.asList(
                 new BasicNameValuePair("grant_type", "client_credentials"),
                 new BasicNameValuePair("client_id", config.clientId),
                 new BasicNameValuePair("scope", "dpost-api:" + brokerId.stringValue()),
-                new BasicNameValuePair("resource", config.resourceServerUri.toString())
+                new BasicNameValuePair("resource", requireNonNull(resourceServerUri, "resourceServerUri cannot be null").toString())
         );
     }
 }
