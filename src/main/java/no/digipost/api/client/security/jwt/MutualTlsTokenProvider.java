@@ -50,6 +50,7 @@ public class MutualTlsTokenProvider {
     private static final Logger LOG = LoggerFactory.getLogger(MutualTlsTokenProvider.class);
 
     private static final Duration REFRESH_MARGIN = Duration.ofSeconds(30);
+    private static final Duration MINIMUM_CACHE_TIME = Duration.ofSeconds(5);
     private static final Duration FALLBACK_TOKEN_LIFETIME = Duration.ofSeconds(60);
 
     private static final ObjectMapper JSON = new ObjectMapper();
@@ -107,9 +108,9 @@ public class MutualTlsTokenProvider {
                 Instant expiry = resolveExpiry(token, tokenResponse);
 
                 cachedToken = token;
-                cacheValidUntil = expiry.minus(REFRESH_MARGIN);
+                cacheValidUntil = resolveCacheValidUntil(Instant.now(clock), expiry);
 
-                LOG.debug("Fetched new access token from {}, valid until {}", config.tokenEndpointUri, expiry);
+                LOG.debug("Fetched new access token from {}, valid until {}, cached until {}", config.tokenEndpointUri, expiry, cacheValidUntil);
                 return token;
             });
         } catch (IOException e) {
@@ -153,6 +154,15 @@ public class MutualTlsTokenProvider {
         }
 
         return Instant.now(clock).plus(FALLBACK_TOKEN_LIFETIME);
+    }
+
+    static Instant resolveCacheValidUntil(Instant now, Instant expiry) {
+        Instant refreshAt = expiry.minus(REFRESH_MARGIN);
+        Instant minimum = now.plus(MINIMUM_CACHE_TIME);
+        if (refreshAt.isAfter(minimum)) {
+            return refreshAt;
+        }
+        return minimum.isBefore(expiry) ? minimum : expiry;
     }
 
     private static SSLContext buildSslContext(JwtAuthConfig config) {
