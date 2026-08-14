@@ -32,6 +32,7 @@ public enum ErrorCode {
 
     // Internal client errors
     CLIENT_ERROR(CLIENT_TECHNICAL),
+    FAILED_TO_OBTAIN_ACCESS_TOKEN(CLIENT_TECHNICAL),
 
     // Server errors
     GENERAL_ERROR(UNKNOWN),
