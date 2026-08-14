@@ -77,7 +77,7 @@ public class ApiServiceImplAuthModeTest {
 
     private static JwtAuthConfig jwtAuthConfig() {
         return JwtAuthConfig
-                .newConfig(URI.create("https://idp.example.com/token"), URI.create("https://api.digipost.no"), "test-client")
+                .newConfig("test-client")
                 .pkcs12KeyStore(p12Stream(), P12_PASSWORD)
                 .build();
     }
