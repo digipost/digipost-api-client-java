@@ -33,9 +33,9 @@ Before you can use the Digipost API using JWT/mTLS, you must register a client w
 Digipost OAuth 2 client authority. Contact the sales team at Digipost to get access to
 the client authority and register your client.
 
-Configure a `JwtAuthConfig` with the OAuth 2.0 token endpoint, the resource server URI and
-your client ID, together with the client certificate (as a `.p12` keystore) used for the
-mutual-TLS handshake against the token endpoint.
+Configure a `JwtAuthConfig` with your client ID and the client certificate (as a `.p12`
+keystore) used for the mutual-TLS handshake against the token endpoint. The token endpoint
+defaults to the production one, so it only has to be set for other environments.
 
 ```java
 SenderId senderId = SenderId.of(123456);
@@ -43,10 +43,7 @@ SenderId senderId = SenderId.of(123456);
 JwtAuthConfig jwtAuthConfig;
 try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("client-cert.p12"))) {
     jwtAuthConfig = JwtAuthConfig
-            .newConfig(
-                    URI.create("https://idp.example.com/oauth2/token"), // token endpoint
-                    URI.create("https://api.digipost.no"),              // resource server
-                    "your-client-id")
+            .newConfig("your-client-id")
             .pkcs12KeyStore(sertifikatInputStream, "TheSecretPassword")
             .build();
 }
@@ -56,6 +53,8 @@ DigipostClient client = DigipostClient.withJwtMtlsAuthentication(
 ```
 
 Access tokens are fetched lazily on first use and cached until shortly before they expire.
+They are requested for the API given by `DigipostClientConfig.digipostApiUri`, so you do
+not configure the API URI in two places.
 
 
 #### Certificate-based authentication
@@ -86,6 +85,16 @@ If you have access to other environments, this can be configured using
 ```java
 URI apiUri = URI.create("https://api.test.digipost.no");
 DigipostClientConfig config = DigipostClientConfig.newConfiguration().digipostApiUri(apiUri).build();
+```
+
+When using JWT/mTLS, also point `JwtAuthConfig` at the token endpoint of that environment:
+
+```java
+JwtAuthConfig jwtAuthConfig = JwtAuthConfig
+        .newConfig("your-client-id")
+        .tokenEndpoint("https://midp.test.digipost.no/oauth2/token")
+        .pkcs12KeyStore(sertifikatInputStream, "TheSecretPassword")
+        .build();
 ```
 
 #### Norsk Helsenett (NHN)
