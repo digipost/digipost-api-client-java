@@ -18,6 +18,7 @@ package no.digipost.api.client.security.jwt;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.digipost.api.client.BrokerId;
+import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.http.client.HttpClientConnectionManagerFactory;
 import no.digipost.http.client.HttpClientFactory;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -42,6 +43,7 @@ import java.util.Base64;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
+import static no.digipost.api.client.errorhandling.ErrorCode.FAILED_TO_OBTAIN_ACCESS_TOKEN;
 
 public class MutualTlsTokenProvider {
 
@@ -96,7 +98,7 @@ public class MutualTlsTokenProvider {
                 int statusCode = response.getCode();
                 if (statusCode != 200) {
                     String body = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                    throw new IllegalStateException("Token endpoint returned HTTP " + statusCode + " for " + config.tokenEndpointUri + ": " + body);
+                    throw new DigipostClientException(FAILED_TO_OBTAIN_ACCESS_TOKEN, "Token endpoint returned HTTP " + statusCode + " for " + config.tokenEndpointUri + ": " + body);
                 }
 
                 String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
@@ -111,7 +113,7 @@ public class MutualTlsTokenProvider {
                 return token;
             });
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to fetch access token from " + config.tokenEndpointUri, e);
+            throw new DigipostClientException(FAILED_TO_OBTAIN_ACCESS_TOKEN, "Failed to fetch access token from " + config.tokenEndpointUri, e);
         }
     }
 
@@ -119,14 +121,14 @@ public class MutualTlsTokenProvider {
         try {
             return JSON.readTree(responseBody);
         } catch (IOException e) {
-            throw new IllegalStateException("Could not parse token endpoint response as JSON");
+            throw new DigipostClientException(FAILED_TO_OBTAIN_ACCESS_TOKEN, "Could not parse token endpoint response as JSON", e);
         }
     }
 
     private static String extractAccessToken(JsonNode tokenResponse) {
         JsonNode accessToken = tokenResponse.get("access_token");
         if (accessToken == null || !accessToken.isTextual() || accessToken.asText().isEmpty()) {
-            throw new IllegalStateException("Token endpoint response did not contain an 'access_token' field");
+            throw new DigipostClientException(FAILED_TO_OBTAIN_ACCESS_TOKEN, "Token endpoint response did not contain an 'access_token' field");
         }
         return accessToken.asText();
     }
