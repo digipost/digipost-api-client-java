@@ -19,6 +19,7 @@ import no.digipost.api.client.EventLogger;
 import no.digipost.api.client.internal.http.Headers;
 import no.digipost.api.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.client.security.Signer;
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.EntityDetails;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
@@ -58,8 +59,19 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
         eventLogger.log(getClass().getSimpleName() + " satt headeren " + Headers.X_Digipost_Signature + "=" + signature);
     }
 
+    private static void verifyContentIsHashed(HttpRequest httpRequest) {
+        boolean hasContent = httpRequest instanceof ClassicHttpRequest && ((ClassicHttpRequest) httpRequest).getEntity() != null;
+        if (hasContent && !httpRequest.containsHeader(Headers.X_Content_SHA256)) {
+            throw new IllegalStateException(
+                    "Refusing to sign a request with content, but without the " + Headers.X_Content_SHA256 + " header. " +
+                    RequestContentHashInterceptor.class.getSimpleName() + " must be registered before " +
+                    RequestSignatureInterceptor.class.getSimpleName() + ".");
+        }
+    }
+
     @Override
     public void process(HttpRequest httpRequest, EntityDetails entityDetails, HttpContext httpContext) throws IOException {
+        verifyContentIsHashed(httpRequest);
         setSignatureHeader(httpRequest);
     }
 }
