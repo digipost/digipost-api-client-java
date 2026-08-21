@@ -15,22 +15,24 @@
  */
 package no.digipost.api.client.internal.http.request.interceptor;
 
-import no.digipost.api.client.security.jwt.MutualTlsTokenProvider;
 import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.core5.http.protocol.HttpContext;
 
+import java.util.function.Supplier;
+
 public class RequestBearerTokenInterceptor implements HttpRequestInterceptor {
 
-    private final MutualTlsTokenProvider tokenProvider;
+    private final Supplier<String> accessToken;
 
-    public RequestBearerTokenInterceptor(MutualTlsTokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
+    public RequestBearerTokenInterceptor(Supplier<String> accessToken) {
+        this.accessToken = accessToken;
     }
 
     @Override
     public void process(HttpRequest request, EntityDetails entityDetails, HttpContext context) {
-        request.setHeader("Authorization", "Bearer " + tokenProvider.getToken());
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken.get());
     }
 }

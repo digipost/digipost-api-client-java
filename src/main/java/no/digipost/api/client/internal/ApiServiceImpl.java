@@ -190,7 +190,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
                 .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, clock))
                 .addRequestInterceptorLast(new RequestUserAgentInterceptor())
                 .addRequestInterceptorLast(new RequestHttpRequestPathInterceptor())
-                .addRequestInterceptorLast(new RequestBearerTokenInterceptor(tokenProvider))
+                .addRequestInterceptorLast(new RequestBearerTokenInterceptor(tokenProvider::getToken))
                 .addRequestInterceptorLast(new RequestContentHashInterceptor(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256))
                 .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
                 .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
