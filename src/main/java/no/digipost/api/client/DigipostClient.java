@@ -69,7 +69,6 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import static java.util.Objects.requireNonNull;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 
@@ -115,7 +114,7 @@ public class DigipostClient {
      * @param clientBuilder the Apache {@link HttpClientBuilder} used to build the underlying HTTP client, allowing customization of e.g. connection manager, timeouts and proxy settings
      */
     public static DigipostClient withCertificateAuthentication(DigipostClientConfig config, BrokerId brokerId, Signer signer, HttpClientBuilder clientBuilder) {
-        return new DigipostClient(config, new ApiServiceImpl(config, clientBuilder, brokerId, requireNonNull(signer, "signer cannot be null"), null));
+        return new DigipostClient(config, ApiServiceImpl.withCertificateAuthentication(config, clientBuilder, brokerId, signer));
     }
 
     /**
@@ -135,7 +134,7 @@ public class DigipostClient {
      * @param clientBuilder the Apache {@link HttpClientBuilder} used to build the underlying HTTP client, allowing customization of e.g. timeouts and proxy settings. Note that its connection manager is replaced with one configured for the mTLS handshake.
      */
     public static DigipostClient withJwtMtlsAuthentication(DigipostClientConfig config, BrokerId brokerId, JwtAuthConfig jwtAuthConfig, HttpClientBuilder clientBuilder) {
-        return new DigipostClient(config, new ApiServiceImpl(config, clientBuilder, brokerId, null, requireNonNull(jwtAuthConfig, "jwtAuthConfig cannot be null")));
+        return new DigipostClient(config, ApiServiceImpl.withJwtMtlsAuthentication(config, clientBuilder, brokerId, jwtAuthConfig));
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
