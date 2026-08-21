@@ -108,9 +108,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import static jakarta.xml.bind.JAXB.unmarshal;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static no.digipost.api.client.internal.ExceptionUtils.asUnchecked;
 import static no.digipost.api.client.internal.ExceptionUtils.exceptionNameAndMessage;
@@ -141,52 +142,27 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     // which was the case for the pattern "yyyy-MM-dd'T'HH:mm:ss.SSSZZ". See commit messages for 59caeb5737e45a15 and dcf41785a84f42caf935 for details.
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
-    /**
-     * The authentication mechanism the client uses when communicating with the Digipost API.
-     */
-    private enum AuthMode {
-        /** Certificate-based authentication: requests are signed with a {@link Signer}. */
-        CERTIFICATE,
-        /** OAuth 2.0 authentication where tokens are obtained over a mutual-TLS channel. */
-        JWT_MTLS
+    public static ApiServiceImpl withCertificateAuthentication(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, Signer signer) {
+        requireNonNull(signer, "signer cannot be null");
+        return new ApiServiceImpl(config, brokerId, apiService -> apiService.createCertificateAuthenticatingHttpClient(httpClientBuilder, signer, config));
     }
 
-    private static AuthMode resolveAuthMode(Signer signer, JwtAuthConfig jwtAuthConfig) {
-        if (signer != null && jwtAuthConfig != null) {
-            throw new IllegalArgumentException("Klienten kan ikke konfigureres med både en Signer og JwtAuthConfig – velg enten sertifikatbasert autentisering eller OAuth 2.0 mTLS-basert autentisering");
-        } else if (signer != null) {
-            return AuthMode.CERTIFICATE;
-        } else if (jwtAuthConfig != null) {
-            return AuthMode.JWT_MTLS;
-        } else {
-            throw new IllegalArgumentException("Klienten må konfigureres med en Signer for sertifikatbasert autentisering, eller JwtAuthConfig for OAuth 2.0 mTLS-basert autentisering");
-        }
+    public static ApiServiceImpl withJwtMtlsAuthentication(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
+        requireNonNull(jwtAuthConfig, "jwtAuthConfig cannot be null");
+        return new ApiServiceImpl(config, brokerId, apiService -> apiService.createJwtAuthenticatingHttpClient(httpClientBuilder, jwtAuthConfig, config));
     }
 
-    public ApiServiceImpl(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, Signer signer, JwtAuthConfig jwtAuthConfig) {
+    private ApiServiceImpl(DigipostClientConfig config, BrokerId brokerId, Function<ApiServiceImpl, CloseableHttpClient> httpClientFactory) {
         this.brokerId = brokerId;
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
         this.digipostUrl = config.digipostApiUri;
         this.cached = new Cached(() -> fetchEntryPoint(Optional.empty()));
-
-        AuthMode authMode = resolveAuthMode(signer, jwtAuthConfig);
-        switch (authMode) {
-            case CERTIFICATE:
-                this.httpClient = createCertificateAuthenticatingHttpClient(httpClientBuilder, eventLogger, signer, config);
-                this.eventLogger.log("Initialiserte apache-klient (sertifikatmodus) mot " + config.digipostApiUri);
-                break;
-            case JWT_MTLS:
-                this.httpClient = createJwtAuthenticatingHttpClient(httpClientBuilder, eventLogger, jwtAuthConfig, brokerId, this::getEntryPoint, config);
-                this.eventLogger.log("Initialiserte apache-klient (JWT/mTLS-modus) mot " + config.digipostApiUri);
-                break;
-            default:
-                throw new IllegalStateException("Ukjent autentiseringsmodus: " + authMode);
-        }
+        this.httpClient = httpClientFactory.apply(this);
     }
 
-    private CloseableHttpClient createCertificateAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, EventLogger eventLogger, Signer signer, DigipostClientConfig config) {
+    private CloseableHttpClient createCertificateAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, Signer signer, DigipostClientConfig config) {
         Clock clock = config.clock;
-        return httpClientBuilder
+        CloseableHttpClient httpClient = httpClientBuilder
                 .addRequestInterceptorLast(new RequestDateInterceptor(eventLogger, clock))
                 .addRequestInterceptorLast(new RequestUserAgentInterceptor())
                 .addRequestInterceptorLast(new RequestHttpRequestPathInterceptor())
@@ -196,13 +172,16 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
                 .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
                 .addResponseInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
                 .build();
+
+        eventLogger.log("Initialiserte apache-klient (sertifikatmodus) mot " + config.digipostApiUri);
+        return httpClient;
     }
 
-    private static CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, EventLogger eventLogger, JwtAuthConfig jwtAuthConfig, BrokerId brokerId, Supplier<EntryPoint> entryPointSupplier, DigipostClientConfig config) {
+    private CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, JwtAuthConfig jwtAuthConfig, DigipostClientConfig config) {
         Clock clock = config.clock;
         MutualTlsTokenProvider tokenProvider = new MutualTlsTokenProvider(jwtAuthConfig, brokerId, config.digipostApiUri, clock);
 
-        return httpClientBuilder
+        CloseableHttpClient httpClient = httpClientBuilder
                 .setConnectionManager(HttpClientConnectionManagerFactory.createDefaultBuilder()
                         .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
                                 .setSslContext(tokenProvider.getSslContext())
@@ -215,8 +194,11 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
                 .addRequestInterceptorLast(new RequestContentHashInterceptor(eventLogger, Digester.sha256, Headers.X_Content_SHA256))
                 .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
                 .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
-                .addResponseInterceptorLast(new ResponseSignatureInterceptor(entryPointSupplier))
+                .addResponseInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
                 .build();
+
+        eventLogger.log("Initialiserte apache-klient (JWT/mTLS-modus) mot " + config.digipostApiUri);
+        return httpClient;
     }
 
     //Kan sende inn null. Man får da det samme som getEntryPoint()

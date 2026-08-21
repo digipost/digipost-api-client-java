@@ -23,15 +23,12 @@ import no.digipost.http.client.HttpClientFactory;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
-import java.net.URI;
 
 import static no.digipost.api.client.DigipostClientConfig.newConfiguration;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ApiServiceImplAuthModeTest {
+public class ApiServiceImplTest {
 
     private static final BrokerId BROKER_ID = BrokerId.of(1234);
     private static final String P12_RESOURCE = "/no/digipost/api/client/security/jwt/client-cert.p12";
@@ -40,39 +37,35 @@ public class ApiServiceImplAuthModeTest {
     private static final Signer DUMMY_SIGNER = dataToSign -> new byte[0];
 
     @Test
-    void kaster_feil_naar_verken_signer_eller_jwtAuthConfig_er_konfigurert() {
-        DigipostClientConfig config = newConfiguration().build();
-
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
-                new ApiServiceImpl(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, null, null));
-
-        assertThat(thrown.getMessage(), containsString("må konfigureres"));
-    }
-
-    @Test
-    void kaster_feil_naar_baade_signer_og_jwtAuthConfig_er_konfigurert() {
-        DigipostClientConfig config = newConfiguration().build();
-
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
-                new ApiServiceImpl(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, DUMMY_SIGNER, jwtAuthConfig()));
-
-        assertThat(thrown.getMessage(), containsString("kan ikke konfigureres med både"));
-    }
-
-    @Test
-    void bygger_klient_naar_kun_jwtAuthConfig_er_konfigurert() {
+    void bygger_jwt_autentiserende_klient() {
         DigipostClientConfig config = newConfiguration().build();
 
         assertDoesNotThrow(() ->
-                new ApiServiceImpl(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, null, jwtAuthConfig()));
+                ApiServiceImpl.withJwtMtlsAuthentication(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, jwtAuthConfig()));
     }
 
     @Test
-    void bygger_klient_naar_kun_signer_er_konfigurert() {
+    void bygger_sertifikat_autentiserende_klient() {
         DigipostClientConfig config = newConfiguration().build();
 
         assertDoesNotThrow(() ->
-                new ApiServiceImpl(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, DUMMY_SIGNER, null));
+                ApiServiceImpl.withCertificateAuthentication(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, DUMMY_SIGNER));
+    }
+
+    @Test
+    void krever_signer_for_sertifikatbasert_autentisering() {
+        DigipostClientConfig config = newConfiguration().build();
+
+        assertThrows(NullPointerException.class, () ->
+                ApiServiceImpl.withCertificateAuthentication(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, null));
+    }
+
+    @Test
+    void krever_jwtAuthConfig_for_jwt_basert_autentisering() {
+        DigipostClientConfig config = newConfiguration().build();
+
+        assertThrows(NullPointerException.class, () ->
+                ApiServiceImpl.withJwtMtlsAuthentication(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, null));
     }
 
     private static JwtAuthConfig jwtAuthConfig() {
@@ -83,7 +76,7 @@ public class ApiServiceImplAuthModeTest {
     }
 
     private static InputStream p12Stream() {
-        InputStream stream = ApiServiceImplAuthModeTest.class.getResourceAsStream(P12_RESOURCE);
+        InputStream stream = ApiServiceImplTest.class.getResourceAsStream(P12_RESOURCE);
         if (stream == null) {
             throw new IllegalStateException("Mangler testressurs " + P12_RESOURCE);
         }
