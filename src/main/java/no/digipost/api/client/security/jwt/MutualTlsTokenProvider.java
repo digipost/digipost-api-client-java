@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -67,9 +68,13 @@ public class MutualTlsTokenProvider {
     private final Object refreshLock = new Object();
 
     public MutualTlsTokenProvider(JwtAuthConfig config, BrokerId brokerId, URI resourceServerUri, Clock clock) {
+        this(config, brokerId, resourceServerUri, clock, null);
+    }
+
+    MutualTlsTokenProvider(JwtAuthConfig config, BrokerId brokerId, URI resourceServerUri, Clock clock, TrustManager[] trustManagers) {
         this.config = config;
         this.clock = clock;
-        this.sslContext = buildSslContext(config);
+        this.sslContext = buildSslContext(config, trustManagers);
         this.tokenClient = buildTokenClient(this.sslContext);
         this.oAuthTokenEndpointParams = createOAuth2TokenEndpointParams(config, brokerId, resourceServerUri);
     }
@@ -165,13 +170,13 @@ public class MutualTlsTokenProvider {
         return minimum.isBefore(expiry) ? minimum : expiry;
     }
 
-    private static SSLContext buildSslContext(JwtAuthConfig config) {
+    private static SSLContext buildSslContext(JwtAuthConfig config, TrustManager[] trustManagers) {
         try {
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             keyManagerFactory.init(config.keyStore, config.keyPassword);
 
             SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
+            sslContext.init(keyManagerFactory.getKeyManagers(), trustManagers, null);
             return sslContext;
         } catch (Exception e) {
             throw new IllegalStateException("Could not build SSL context from keystore for " + config.tokenEndpointUri, e);
