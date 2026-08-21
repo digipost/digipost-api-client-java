@@ -99,8 +99,10 @@ public class DigipostClient {
 
 
     /**
-     * Creates a client that authenticates with the Digipost API using certificate-base request signing.
+     * Creates a client that authenticates with the Digipost API using certificate-based request signing.
      *
+     * @param config the client configuration, e.g. which API to communicate with
+     * @param brokerId the broker permitted to integrate with the Digipost API
      * @param signer signs each request with the broker's private key
      */
     public static DigipostClient withCertificateAuthentication(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
@@ -108,8 +110,10 @@ public class DigipostClient {
     }
 
     /**
-     * Creates a client that authenticates with the Digipost API using certificate-base request signing.
+     * Creates a client that authenticates with the Digipost API using certificate-based request signing.
      *
+     * @param config the client configuration, e.g. which API to communicate with
+     * @param brokerId the broker permitted to integrate with the Digipost API
      * @param signer signs each request with the broker's private key
      * @param clientBuilder the Apache {@link HttpClientBuilder} used to build the underlying HTTP client, allowing customization of e.g. connection manager, timeouts and proxy settings
      */
@@ -121,6 +125,8 @@ public class DigipostClient {
      * Creates a client that authenticates with the Digipost API using OAuth 2.0 access tokens
      * obtained over a mutual-TLS channel.
      *
+     * @param config the client configuration, e.g. which API to communicate with. The access tokens are requested for that same API
+     * @param brokerId the broker permitted to integrate with the Digipost API
      * @param jwtAuthConfig configures the token endpoint and the client certificate used for mTLS
      */
     public static DigipostClient withJwtMtlsAuthentication(DigipostClientConfig config, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
@@ -130,6 +136,8 @@ public class DigipostClient {
     /**
      * Creates a client that authenticates with the Digipost API using OAuth 2.0 access tokens obtained over a mutual-TLS channel.
      *
+     * @param config the client configuration, e.g. which API to communicate with. The access tokens are requested for that same API
+     * @param brokerId the broker permitted to integrate with the Digipost API
      * @param jwtAuthConfig configures the token endpoint and the client certificate used for mTLS
      * @param clientBuilder the Apache {@link HttpClientBuilder} used to build the underlying HTTP client, allowing customization of e.g. timeouts and proxy settings. Note that its connection manager is replaced with one configured for the mTLS handshake.
      */
