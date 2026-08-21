@@ -23,7 +23,7 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import static no.digipost.api.client.internal.http.request.interceptor.RequestHttpRequestPathInterceptor.REQUEST_PATH_ATTRIBUTE;
+import static no.digipost.api.client.internal.http.request.interceptor.RequestPathInterceptor.REQUEST_PATH_ATTRIBUTE;
 
 final class ApacheHttpResponseToVerify implements ResponseToVerify {
 
