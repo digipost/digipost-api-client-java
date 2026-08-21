@@ -15,150 +15,180 @@
  */
 package no.digipost.api.client.security.jwt;
 
-import com.sun.net.httpserver.HttpsConfigurator;
-import com.sun.net.httpserver.HttpsParameters;
-import com.sun.net.httpserver.HttpsServer;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.ssl.TLS;
+import no.digipost.api.client.BrokerId;
+import no.digipost.api.client.errorhandling.DigipostClientException;
+import org.apache.hc.core5.http.NameValuePair;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.InputStream;
-import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.atomic.AtomicReference;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.List;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static no.digipost.api.client.errorhandling.ErrorCode.FAILED_TO_OBTAIN_ACCESS_TOKEN;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MutualTlsTokenProviderTest {
 
     private static final String P12_RESOURCE = "client-cert.p12";
     private static final String P12_PASSWORD = "qwer1234";
+    private static final String CLIENT_ID = "test-client";
+    private static final BrokerId BROKER_ID = BrokerId.of(1234);
+    private static final URI RESOURCE_SERVER_URI = URI.create("https://api.digipost.no");
+    private static final Instant NOW = Instant.parse("2026-08-14T12:00:00Z");
 
-    private HttpsServer server;
+    private TokenEndpointStub tokenEndpoint;
+    private SettableClock clock;
+
+    @BeforeEach
+    void startTokenEndpoint() throws Exception {
+        tokenEndpoint = new TokenEndpointStub();
+        clock = new SettableClock(NOW);
+    }
 
     @AfterEach
-    void stopServer() {
-        if (server != null) {
-            server.stop(0);
+    void stopTokenEndpoint() {
+        if (tokenEndpoint != null) {
+            tokenEndpoint.close();
         }
     }
 
     @Test
-    void presenterer_klientsertifikat_i_mtls_handshake() throws Exception {
+    void henter_token_og_presenterer_klientsertifikatet_i_handshaken() throws Exception {
+        tokenEndpoint.respondWith(200, "{\"access_token\":\"the-token\",\"expires_in\":300}");
+
+        assertThat(tokenProvider().getToken(), is("the-token"));
+
+        Certificate[] presented = tokenEndpoint.certificatesPresentedByClient();
+        assertThat("mIdP mottok ingen klientsertifikat – klienten presenterte ingenting i handshaken", presented, notNullValue());
+        assertThat(presented[0], instanceOf(X509Certificate.class));
+        assertThat(((X509Certificate) presented[0]).getSubjectX500Principal().getName(), containsString("sertifikat-TEST"));
+    }
+
+    @Test
+    void sender_client_credentials_parametrene_til_token_endepunktet() throws Exception {
+        tokenEndpoint.respondWith(200, "{\"access_token\":\"the-token\",\"expires_in\":300}");
+
+        tokenProvider().getToken();
+
+        assertThat(parameter("grant_type"), is("client_credentials"));
+        assertThat(parameter("client_id"), is(CLIENT_ID));
+        assertThat(parameter("scope"), is("dpost-api:1234"));
+        assertThat(parameter("resource"), is(RESOURCE_SERVER_URI.toString()));
+    }
+
+    @Test
+    void cacher_tokenet_mellom_kall() throws Exception {
+        tokenEndpoint.respondWith(200, "{\"access_token\":\"the-token\",\"expires_in\":300}");
+        MutualTlsTokenProvider tokenProvider = tokenProvider();
+
+        tokenProvider.getToken();
+        clock.advance(Duration.ofSeconds(100));
+
+        assertThat(tokenProvider.getToken(), is("the-token"));
+        assertThat(tokenEndpoint.receivedRequestCount(), is(1));
+    }
+
+    @Test
+    void henter_nytt_token_naar_det_forrige_naermer_seg_utloep() throws Exception {
+        tokenEndpoint.respondWith(200, "{\"access_token\":\"first-token\",\"expires_in\":300}");
+        MutualTlsTokenProvider tokenProvider = tokenProvider();
+
+        tokenProvider.getToken();
+        clock.advance(Duration.ofSeconds(280));
+        tokenEndpoint.respondWith(200, "{\"access_token\":\"second-token\",\"expires_in\":300}");
+
+        assertThat(tokenProvider.getToken(), is("second-token"));
+        assertThat(tokenEndpoint.receivedRequestCount(), is(2));
+    }
+
+    @Test
+    void bruker_exp_fra_tokenet_naar_expires_in_mangler() throws Exception {
+        tokenEndpoint.respondWith(200, "{\"access_token\":\"" + jwtExpiringAt(NOW.plus(300, SECONDS)) + "\"}");
+        MutualTlsTokenProvider tokenProvider = tokenProvider();
+
+        tokenProvider.getToken();
+        clock.advance(Duration.ofSeconds(100));
+        tokenProvider.getToken();
+        assertThat("tokenet er gyldig i 300s, så det skal fortsatt være cachet", tokenEndpoint.receivedRequestCount(), is(1));
+
+        clock.advance(Duration.ofSeconds(180));
+        tokenProvider.getToken();
+        assertThat(tokenEndpoint.receivedRequestCount(), is(2));
+    }
+
+    @Test
+    void feil_fra_token_endepunktet_gir_DigipostClientException() throws Exception {
+        tokenEndpoint.respondWith(503, "{\"error\":\"temporarily_unavailable\"}");
+
+        DigipostClientException thrown = assertThrows(DigipostClientException.class, () -> tokenProvider().getToken());
+
+        assertThat(thrown.getErrorCode(), is(FAILED_TO_OBTAIN_ACCESS_TOKEN));
+        assertThat(thrown.getMessage(), containsString("503"));
+    }
+
+    @Test
+    void svar_som_ikke_er_json_gir_DigipostClientException() throws Exception {
+        tokenEndpoint.respondWith(200, "<html>not json</html>");
+
+        DigipostClientException thrown = assertThrows(DigipostClientException.class, () -> tokenProvider().getToken());
+
+        assertThat(thrown.getErrorCode(), is(FAILED_TO_OBTAIN_ACCESS_TOKEN));
+    }
+
+    @Test
+    void svar_uten_access_token_gir_DigipostClientException() throws Exception {
+        tokenEndpoint.respondWith(200, "{\"expires_in\":300}");
+
+        DigipostClientException thrown = assertThrows(DigipostClientException.class, () -> tokenProvider().getToken());
+
+        assertThat(thrown.getErrorCode(), is(FAILED_TO_OBTAIN_ACCESS_TOKEN));
+        assertThat(thrown.getMessage(), containsString("access_token"));
+    }
+
+    private MutualTlsTokenProvider tokenProvider() throws Exception {
         JwtAuthConfig config = JwtAuthConfig
-                .newConfig("test-client")
+                .newConfig(CLIENT_ID)
+                .tokenEndpoint(tokenEndpoint.tokenEndpointUri().toString())
                 .pkcs12KeyStore(p12Stream(), P12_PASSWORD)
                 .build();
 
-        AtomicReference<Certificate[]> presentedByClient = new AtomicReference<>();
-        URI tokenEndpoint = startTokenServer(config, presentedByClient);
-
-        try (CloseableHttpClient client = clientPresentingConfiguredCertificate(config)) {
-            client.execute(new HttpGet(tokenEndpoint), response -> {
-                EntityUtils.consume(response.getEntity());
-                return null;
-            });
-        }
-
-        Certificate[] presented = presentedByClient.get();
-        assertThat("mIdP mottok ingen klientsertifikat – klienten presenterte ingenting i handshaken", presented, notNullValue());
-        assertThat(presented[0], instanceOf(X509Certificate.class));
+        return new MutualTlsTokenProvider(config, BROKER_ID, RESOURCE_SERVER_URI, clock, tokenEndpoint.trustManagers());
     }
 
-    private CloseableHttpClient clientPresentingConfiguredCertificate(JwtAuthConfig config) throws Exception {
-        SSLContext clientContext = SSLContext.getInstance("TLS");
-        clientContext.init(keyManagers(config), new TrustManager[]{ TRUST_ALL }, null);
-
-        PoolingHttpClientConnectionManagerBuilder connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
-                        .setSslContext(clientContext)
-                        .setTlsVersions(TLS.V_1_2)
-                        .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                        .build());
-
-        return HttpClients.custom()
-                .setConnectionManager(connectionManager.build())
-                .build();
+    private String parameter(String name) {
+        List<NameValuePair> form = tokenEndpoint.lastReceivedForm();
+        return form.stream()
+                .filter(parameter -> parameter.getName().equals(name))
+                .map(NameValuePair::getValue)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Parameteren '" + name + "' ble ikke sendt. Mottok: " + form));
     }
 
-    private URI startTokenServer(JwtAuthConfig config, AtomicReference<Certificate[]> presentedByClient) throws Exception {
-        SSLContext serverContext = SSLContext.getInstance("TLS");
-        serverContext.init(
-                keyManagers(config), // server presents the .p12 cert
-                new TrustManager[]{ TRUST_ALL },
-                null
-        );
-
-        server = HttpsServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.setHttpsConfigurator(new HttpsConfigurator(serverContext) {
-            @Override
-            public void configure(HttpsParameters params) {
-                SSLParameters sslParameters = serverContext.getDefaultSSLParameters();
-                sslParameters.setProtocols(new String[]{ "TLSv1.2" });
-                sslParameters.setWantClientAuth(true);
-                params.setSSLParameters(sslParameters);
-            }
-        });
-        server.createContext("/token", exchange -> {
-            SSLSession sslSession = ((com.sun.net.httpserver.HttpsExchange) exchange).getSSLSession();
-            try {
-                presentedByClient.set(sslSession.getPeerCertificates());
-            } catch (SSLPeerUnverifiedException e) {
-                presentedByClient.set(null);
-            }
-            byte[] body = "{\"access_token\":\"t\",\"expires_in\":300}".getBytes();
-            exchange.getResponseHeaders().add("Content-Type", "application/json");
-            exchange.sendResponseHeaders(200, body.length);
-            exchange.getResponseBody().write(body);
-            exchange.close();
-        });
-        server.start();
-
-        return URI.create("https://127.0.0.1:" + server.getAddress().getPort() + "/token");
+    private static String jwtExpiringAt(Instant expiry) {
+        Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+        String header = encoder.encodeToString("{\"alg\":\"none\"}".getBytes(StandardCharsets.UTF_8));
+        String payload = encoder.encodeToString(("{\"exp\":" + expiry.getEpochSecond() + "}").getBytes(StandardCharsets.UTF_8));
+        return header + "." + payload + ".signature";
     }
 
-    private static KeyManager[] keyManagers(JwtAuthConfig config) throws Exception {
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        keyManagerFactory.init(config.keyStore, config.keyPassword);
-        return keyManagerFactory.getKeyManagers();
-    }
-
-    private static final X509TrustManager TRUST_ALL = new X509TrustManager() {
-        @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) { }
-
-        @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) { }
-
-        @Override
-        public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[0];
-        }
-    };
-
-    private InputStream p12Stream() {
-        InputStream stream = getClass().getResourceAsStream(P12_RESOURCE);
+    private static InputStream p12Stream() {
+        InputStream stream = MutualTlsTokenProviderTest.class.getResourceAsStream(P12_RESOURCE);
         if (stream == null) {
-            throw new IllegalStateException("Mangler testressurs " + P12_RESOURCE + " – legg den vedlagte .p12-filen under src/test/resources/no/digipost/api/client/security/jwt/");
+            throw new IllegalStateException("Mangler testressurs " + P12_RESOURCE);
         }
         return stream;
     }
