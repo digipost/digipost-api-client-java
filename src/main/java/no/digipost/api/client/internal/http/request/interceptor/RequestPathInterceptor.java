@@ -20,7 +20,7 @@ import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.core5.http.protocol.HttpContext;
 
-public class RequestHttpRequestPathInterceptor implements HttpRequestInterceptor {
+public class RequestPathInterceptor implements HttpRequestInterceptor {
 
     public static final String REQUEST_PATH_ATTRIBUTE = "request-path";
 

@@ -31,7 +31,7 @@ import no.digipost.api.client.internal.http.MultipartNoLengthCheckHttpEntity;
 import no.digipost.api.client.internal.http.request.interceptor.RequestBearerTokenInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestContentHashInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestDateInterceptor;
-import no.digipost.api.client.internal.http.request.interceptor.RequestHttpRequestPathInterceptor;
+import no.digipost.api.client.internal.http.request.interceptor.RequestPathInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestSignatureInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestUserAgentInterceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseContentSHA256Interceptor;
@@ -165,7 +165,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         CloseableHttpClient httpClient = httpClientBuilder
                 .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, clock))
                 .addRequestInterceptorLast(new RequestUserAgentInterceptor())
-                .addRequestInterceptorLast(new RequestHttpRequestPathInterceptor())
+                .addRequestInterceptorLast(new RequestPathInterceptor())
                 .addRequestInterceptorLast(new RequestContentHashInterceptor(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256))
                 .addRequestInterceptorLast(new RequestSignatureInterceptor(signer, config.eventLogger))
                 .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
@@ -189,7 +189,7 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
                         .build())
                 .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, clock))
                 .addRequestInterceptorLast(new RequestUserAgentInterceptor())
-                .addRequestInterceptorLast(new RequestHttpRequestPathInterceptor())
+                .addRequestInterceptorLast(new RequestPathInterceptor())
                 .addRequestInterceptorLast(new RequestBearerTokenInterceptor(tokenProvider::getToken))
                 .addRequestInterceptorLast(new RequestContentHashInterceptor(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256))
                 .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
