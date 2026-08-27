@@ -17,20 +17,21 @@ package no.digipost.api.client.representations;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlSeeAlso;
+import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "event-metadata")
-@XmlSeeAlso({
-        MoveFilesFromPublicSectorMetadata.class,
-        EmailDeliveredMetadata.class,
-        EmailNotificationFailedMetadata.class,
-        SmsNotificationFailedMetadata.class,
-        SmsNotificationDeliveredMetadata.class,
-        FailedPrintMetadata.class,
-        FailedPeppolMetadata.class,
-        PostmarkedMetadata.class
-})
-public abstract class EventMetadata {
+@XmlType(name = "sms-notification-delivered-metadata")
+public class SmsNotificationDeliveredMetadata extends EventMetadata {
+
+    @XmlAttribute(name = "mobile-number")
+    public final String mobileNumber;
+
+    public SmsNotificationDeliveredMetadata() {
+        this(null);
+    }
+
+    public SmsNotificationDeliveredMetadata(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+    }
 }
