@@ -31,7 +31,7 @@ The chosen method is stated explicitly in the factory method you call.
 
 Before you can use the Digipost API using JWT/mTLS, you must register a client with the
 Digipost OAuth 2 client authority. Contact the sales team at Digipost to get access to
-the client authority and register your client.
+the client authority and register your client. More information can be found in the (Digipost API Documentation)[https://digipost.github.io/digipost-technical-docs/].
 
 Configure a `JwtAuthConfig` with your client ID and the client certificate (as a `.p12`
 keystore) used for the mutual-TLS handshake against the token endpoint. The token endpoint
