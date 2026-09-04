@@ -28,6 +28,7 @@ import static java.util.Arrays.asList;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sms-notification", propOrder = {
     "overrides",
+    "alwaysSend",
     "ats",
     "afterHours"
 })
@@ -35,6 +36,8 @@ public class SmsNotification {
 
     @XmlElement(name = "overrides")
     public final SmsOverrides overrides;
+    @XmlElement(name = "always-send")
+    public final boolean alwaysSend;
     @XmlElement(name = "at", nillable = false)
     public final List<ListedTime> ats;
     @XmlElement(name = "after-hours", type = Integer.class, nillable = false)
@@ -49,7 +52,19 @@ public class SmsNotification {
     }
 
     public SmsNotification(List<ListedTime> ats, List<Integer> afterHours) {
-        this(ats, afterHours, null);
+        this(ats, afterHours, false);
+    }
+
+    /**
+     * This constructor requires that the sender is allowed to override the
+     * recipient's reservation against receiving sender-initiated SMS
+     * notifications from Digipost. If {@code alwaysSend} is {@code true}, the
+     * notification will also be sent even if the recipient has already read
+     * the message before the scheduled notification time, skipping the
+     * cancellation that would otherwise happen.
+     */
+    public SmsNotification(List<ListedTime> ats, List<Integer> afterHours, boolean alwaysSend) {
+        this(ats, afterHours, null, alwaysSend);
     }
 
     /**
@@ -57,13 +72,28 @@ public class SmsNotification {
      * preferences with {@link SmsOverrides}.
      */
     public SmsNotification(List<ListedTime> ats, SmsOverrides overrides) {
-        this(ats, null, overrides);
+        this(ats, null, overrides, false);
     }
 
-    private SmsNotification(List<ListedTime> ats, List<Integer> afterHours, SmsOverrides overrides) {
+    /**
+     * This constructor requires that the sender is allowed to override SMS
+     * preferences with {@link SmsOverrides}, and, if {@code alwaysSend}
+     * is {@code true}, that the sender is allowed to override the recipient's
+     * reservation against receiving sender-initiated SMS notifications from
+     * Digipost. If {@code alwaysSend} is {@code true}, the notification will
+     * also be sent even if the recipient has already read the message before
+     * the scheduled notification time, skipping the cancellation that would
+     * otherwise happen.
+     */
+    public SmsNotification(List<ListedTime> ats, SmsOverrides overrides, boolean alwaysSend) {
+        this(ats, null, overrides, alwaysSend);
+    }
+
+    private SmsNotification(List<ListedTime> ats, List<Integer> afterHours, SmsOverrides overrides, boolean alwaysSend) {
         this.ats = ats != null ? new ArrayList<>(ats) : new ArrayList<ListedTime>();
         this.afterHours = afterHours != null ? new ArrayList<>(afterHours) : new ArrayList<Integer>();
         this.overrides = overrides;
+        this.alwaysSend = alwaysSend;
     }
 
 }
