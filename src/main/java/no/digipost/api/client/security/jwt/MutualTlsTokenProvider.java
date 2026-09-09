@@ -25,6 +25,7 @@ import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
@@ -103,8 +104,13 @@ public class MutualTlsTokenProvider {
             return tokenClient.execute(request, response -> {
                 int statusCode = response.getCode();
                 if (statusCode != 200) {
-                    String body = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                    throw new DigipostClientException(FAILED_TO_OBTAIN_ACCESS_TOKEN, "Token endpoint returned HTTP " + statusCode + " for " + config.tokenEndpointUri + ": " + body);
+                    HttpEntity responseEntity = response.getEntity();
+                    if (responseEntity != null) {
+                        String body = EntityUtils.toString(responseEntity, StandardCharsets.UTF_8);
+                        throw new DigipostClientException(FAILED_TO_OBTAIN_ACCESS_TOKEN, "Token endpoint returned HTTP " + statusCode + " for " + config.tokenEndpointUri + ": " + body);
+                    } else {
+                        throw new DigipostClientException(FAILED_TO_OBTAIN_ACCESS_TOKEN, "Token endpoint returned HTTP " + statusCode + " for " + config.tokenEndpointUri);
+                    }
                 }
 
                 String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);

@@ -17,10 +17,14 @@ package no.digipost.api.client.security.jwt;
 
 import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -38,6 +42,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -138,6 +143,28 @@ public class MutualTlsTokenProviderTest {
 
         assertThat(thrown.getErrorCode(), is(FAILED_TO_OBTAIN_ACCESS_TOKEN));
         assertThat(thrown.getMessage(), containsString("503"));
+    }
+
+    /**
+     * Statuskoder som ikke kan ha en responsbody gir ingen {@link HttpEntity} å lese
+     * feilmeldingen fra, og {@link EntityUtils#toString(HttpEntity, java.nio.charset.Charset)}
+     * kaster {@link NullPointerException} hvis den blir kalt med en null-entity.
+     */
+    @ParameterizedTest
+    @ValueSource(ints = { 204, 304 })
+    void feil_uten_responsbody_gir_DigipostClientException_og_ikke_NullPointerException(int statusUtenBody) throws Exception {
+        tokenEndpoint.respondWithoutBody(statusUtenBody);
+
+        Exception thrown = assertThrows(Exception.class, () -> tokenProvider().getToken());
+
+        assertThat("EntityUtils.toString(..) ble kalt med responsens null-entity", thrown, not(instanceOf(NullPointerException.class)));
+        assertThat(thrown, instanceOf(DigipostClientException.class));
+
+        DigipostClientException clientException = (DigipostClientException) thrown;
+        assertThat(clientException.getErrorCode(), is(FAILED_TO_OBTAIN_ACCESS_TOKEN));
+        assertThat(clientException.getMessage(), containsString(String.valueOf(statusUtenBody)));
+        assertThat(clientException.getMessage(), containsString(tokenEndpoint.tokenEndpointUri().toString()));
+        assertThat("feilmeldingen skal ikke antyde at det fulgte med en body", clientException.getMessage(), not(containsString("null")));
     }
 
     @Test

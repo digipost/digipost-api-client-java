@@ -96,10 +96,15 @@ final class TokenEndpointStub implements Closeable {
                 receivedForms.add(WWWFormCodec.parse(form, StandardCharsets.UTF_8));
             }
 
-            byte[] body = responseBody.getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().add("Content-Type", "application/json");
-            exchange.sendResponseHeaders(responseStatus, body.length);
-            exchange.getResponseBody().write(body);
+            String body = responseBody;
+            if (body == null) {
+                exchange.sendResponseHeaders(responseStatus, -1);
+            } else {
+                byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(responseStatus, bodyBytes.length);
+                exchange.getResponseBody().write(bodyBytes);
+            }
             exchange.close();
         });
         server.start();
@@ -114,6 +119,12 @@ final class TokenEndpointStub implements Closeable {
     void respondWith(int status, String body) {
         this.responseStatus = status;
         this.responseBody = body;
+    }
+
+    /** Respond with the given status and no response body at all, i.e. not even an empty one. */
+    void respondWithoutBody(int status) {
+        this.responseStatus = status;
+        this.responseBody = null;
     }
 
     int receivedRequestCount() {
