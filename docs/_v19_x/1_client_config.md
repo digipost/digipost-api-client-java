@@ -21,7 +21,7 @@ an authentication method. The client supports two:
 - **OAuth 2.0 over mutual TLS (JWT/mTLS):** the client obtains access tokens over an
   mTLS-secured channel and sends them as bearer tokens. Use
   `DigipostClient.withJwtMtlsAuthentication(...)`.
-- **Certificate-based signing:** each request is signed with a private key. Use
+- **Certificate-based signing (legacy):** each request is signed with a private key. Use
   `DigipostClient.withCertificateAuthentication(...)`.
 
 The chosen method is stated explicitly in the factory method you call.
@@ -76,7 +76,7 @@ the client talking to the Digipost API itself are configured separately, with th
 `HttpClientBuilder` accepted by `DigipostClient.withJwtMtlsAuthentication(..)`.
 
 
-#### Certificate-based authentication
+#### Certificate-based authentication (legacy)
 
 Create a `Signer` instance, e.g. by using a `.p12` file to read the private key used to
 sign the API requests.
