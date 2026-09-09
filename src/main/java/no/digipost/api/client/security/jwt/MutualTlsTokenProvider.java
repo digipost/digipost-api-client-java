@@ -24,7 +24,7 @@ import no.digipost.http.client.HttpClientFactory;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
@@ -204,9 +204,9 @@ public class MutualTlsTokenProvider implements Closeable {
 
         return HttpClientFactory.create(config.httpClientSettings,
                 HttpClientConnectionManagerFactory.createBuilder(config.httpClientConnectionSettings)
-                        .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                        .setTlsSocketStrategy(ClientTlsStrategyBuilder.create()
                                 .setSslContext(sslContext)
-                                .build())
+                                .buildClassic())
                         .build());
     }
 
