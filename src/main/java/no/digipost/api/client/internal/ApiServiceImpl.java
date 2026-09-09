@@ -82,7 +82,7 @@ import org.apache.hc.client5.http.classic.methods.HttpPut;
 import no.digipost.http.client.HttpClientConnectionManagerFactory;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -183,9 +183,9 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
         CloseableHttpClient httpClient = httpClientBuilder
                 .setConnectionManager(HttpClientConnectionManagerFactory.createDefaultBuilder()
-                        .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                        .setTlsSocketStrategy(ClientTlsStrategyBuilder.create()
                                 .setSslContext(tokenProvider.getSslContext())
-                                .build())
+                                .buildClassic())
                         .build())
                 .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, clock))
                 .addRequestInterceptorLast(new RequestUserAgentInterceptor())
