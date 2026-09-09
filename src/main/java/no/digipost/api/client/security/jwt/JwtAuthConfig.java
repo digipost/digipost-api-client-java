@@ -15,6 +15,9 @@
  */
 package no.digipost.api.client.security.jwt;
 
+import no.digipost.http.client.HttpClientConnectionSettings;
+import no.digipost.http.client.HttpClientSettings;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -40,6 +43,8 @@ public final class JwtAuthConfig {
     public final String clientId;
     final KeyStore keyStore;
     final char[] keyPassword;
+    final HttpClientSettings httpClientSettings;
+    final HttpClientConnectionSettings httpClientConnectionSettings;
 
     public static Builder newConfig(String clientId) {
         return new Builder(clientId);
@@ -50,6 +55,8 @@ public final class JwtAuthConfig {
         private final String clientId;
         private KeyStore keyStore;
         private char[] keyPassword;
+        private HttpClientSettings httpClientSettings = HttpClientSettings.DEFAULT;
+        private HttpClientConnectionSettings httpClientConnectionSettings = HttpClientConnectionSettings.DEFAULT;
 
         private Builder(String clientId) {
             this.clientId = requireNonNull(clientId, "clientId cannot be null");
@@ -80,16 +87,42 @@ public final class JwtAuthConfig {
             return this;
         }
 
+        /**
+         * Customizes the HTTP client used to fetch access tokens from the token endpoint, e.g. its
+         * timeouts. The client is built by this library, as it must present the client certificate
+         * configured here in the TLS handshake, and is separate from the client used to talk to the
+         * Digipost API. Both parameters have sensible defaults, so pass
+         * {@link HttpClientSettings#DEFAULT} or {@link HttpClientConnectionSettings#DEFAULT} for
+         * the one you do not need to change.
+         *
+         * <pre>{@code
+         * .tokenEndpointHttpSettings(
+         *         HttpClientSettings.DEFAULT.timeouts(HttpClientDefaults.DEFAULT_TIMEOUTS_MS.connect(2000).connectionRequest(1000)),
+         *         HttpClientConnectionSettings.DEFAULT.socketTimeout(5000))
+         * }</pre>
+         *
+         * @param httpClientSettings the connect and connection request timeouts, and any proxy, of the token client
+         * @param httpClientConnectionSettings the socket timeout and connection pool of the token client
+         */
+        public Builder tokenEndpointHttpSettings(HttpClientSettings httpClientSettings, HttpClientConnectionSettings httpClientConnectionSettings) {
+            this.httpClientSettings = requireNonNull(httpClientSettings, "httpClientSettings cannot be null");
+            this.httpClientConnectionSettings = requireNonNull(httpClientConnectionSettings, "httpClientConnectionSettings cannot be null");
+            return this;
+        }
+
         public JwtAuthConfig build() {
             requireNonNull(keyStore, "A keyStore is required. Call pkcs12KeyStore() or keyStore().");
-            return new JwtAuthConfig(tokenEndpointUri, clientId, keyStore, keyPassword);
+            return new JwtAuthConfig(tokenEndpointUri, clientId, keyStore, keyPassword, httpClientSettings, httpClientConnectionSettings);
         }
     }
 
-    private JwtAuthConfig(URI tokenEndpointUri, String clientId, KeyStore keyStore, char[] keyPassword) {
+    private JwtAuthConfig(URI tokenEndpointUri, String clientId, KeyStore keyStore, char[] keyPassword,
+                          HttpClientSettings httpClientSettings, HttpClientConnectionSettings httpClientConnectionSettings) {
         this.tokenEndpointUri = tokenEndpointUri;
         this.clientId = clientId;
         this.keyStore = keyStore;
         this.keyPassword = keyPassword;
+        this.httpClientSettings = httpClientSettings;
+        this.httpClientConnectionSettings = httpClientConnectionSettings;
     }
 }

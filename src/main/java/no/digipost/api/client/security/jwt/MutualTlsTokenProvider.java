@@ -78,7 +78,7 @@ public class MutualTlsTokenProvider implements Closeable {
         this.config = config;
         this.clock = clock;
         this.sslContext = buildSslContext(config, trustManagers);
-        this.tokenClient = buildTokenClient(this.sslContext);
+        this.tokenClient = buildTokenClient(config, this.sslContext);
         this.oAuthTokenEndpointParams = createOAuth2TokenEndpointParams(config, brokerId, resourceServerUri);
     }
 
@@ -200,13 +200,14 @@ public class MutualTlsTokenProvider implements Closeable {
         }
     }
 
-    private static CloseableHttpClient buildTokenClient(SSLContext sslContext) {
+    private static CloseableHttpClient buildTokenClient(JwtAuthConfig config, SSLContext sslContext) {
 
-        return HttpClientFactory.create(HttpClientConnectionManagerFactory.createDefaultBuilder()
-                .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
-                        .setSslContext(sslContext)
-                        .build())
-                .build());
+        return HttpClientFactory.create(config.httpClientSettings,
+                HttpClientConnectionManagerFactory.createBuilder(config.httpClientConnectionSettings)
+                        .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                                .setSslContext(sslContext)
+                                .build())
+                        .build());
     }
 
     private static List<BasicNameValuePair> createOAuth2TokenEndpointParams(JwtAuthConfig config, BrokerId brokerId, URI resourceServerUri){

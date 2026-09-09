@@ -47,6 +47,7 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,6 +68,7 @@ final class TokenEndpointStub implements Closeable {
 
     private volatile int responseStatus = 200;
     private volatile String responseBody = "{}";
+    private volatile Duration responseDelay = Duration.ZERO;
 
     TokenEndpointStub() throws Exception {
         KeyPair keyPair = generateKeyPair();
@@ -96,6 +98,8 @@ final class TokenEndpointStub implements Closeable {
                 receivedForms.add(WWWFormCodec.parse(form, StandardCharsets.UTF_8));
             }
 
+            sleep(responseDelay);
+
             String body = responseBody;
             if (body == null) {
                 exchange.sendResponseHeaders(responseStatus, -1);
@@ -119,6 +123,11 @@ final class TokenEndpointStub implements Closeable {
     void respondWith(int status, String body) {
         this.responseStatus = status;
         this.responseBody = body;
+    }
+
+    /** Wait the given duration before responding, e.g. to provoke a socket timeout in the client. */
+    void delayResponsesBy(Duration delay) {
+        this.responseDelay = delay;
     }
 
     /** Respond with the given status and no response body at all, i.e. not even an empty one. */
@@ -157,6 +166,17 @@ final class TokenEndpointStub implements Closeable {
     @Override
     public void close() {
         server.stop(0);
+    }
+
+    private static void sleep(Duration duration) {
+        if (duration.isZero() || duration.isNegative()) {
+            return;
+        }
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private static SSLContext serverSslContext(KeyPair keyPair, X509Certificate certificate) throws Exception {
