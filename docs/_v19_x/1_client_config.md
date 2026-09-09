@@ -56,6 +56,25 @@ Access tokens are fetched lazily on first use and cached until shortly before th
 They are requested for the API given by `DigipostClientConfig.digipostApiUri`, so you do
 not configure the API URI in two places.
 
+The access tokens are fetched with a separate HTTP client, as it has to present the client
+certificate configured above in the TLS handshake against the token endpoint. Its timeouts
+(and proxy, connection pool, ...) can be configured with `tokenEndpointHttpSettings(..)`:
+
+```java
+JwtAuthConfig jwtAuthConfig = JwtAuthConfig
+        .newConfig("your-client-id")
+        .pkcs12KeyStore(sertifikatInputStream, "TheSecretPassword")
+        .tokenEndpointHttpSettings(
+                HttpClientSettings.DEFAULT.timeouts(HttpClientDefaults.DEFAULT_TIMEOUTS_MS.connect(2000).connectionRequest(1000)),
+                HttpClientConnectionSettings.DEFAULT.socketTimeout(5000))
+        .build();
+```
+
+Both parameters have sensible defaults, so pass `HttpClientSettings.DEFAULT` or
+`HttpClientConnectionSettings.DEFAULT` for the one you do not need to change. The timeouts of
+the client talking to the Digipost API itself are configured separately, with the
+`HttpClientBuilder` accepted by `DigipostClient.withJwtMtlsAuthentication(..)`.
+
 
 #### Certificate-based authentication
 

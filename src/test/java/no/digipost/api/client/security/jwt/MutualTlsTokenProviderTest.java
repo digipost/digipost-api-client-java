@@ -17,6 +17,8 @@ package no.digipost.api.client.security.jwt;
 
 import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.errorhandling.DigipostClientException;
+import no.digipost.http.client.HttpClientConnectionSettings;
+import no.digipost.http.client.HttpClientSettings;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
@@ -27,6 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
@@ -190,16 +193,36 @@ public class MutualTlsTokenProviderTest {
         assertThat(thrown.getMessage(), containsString("access_token"));
     }
 
-    private MutualTlsTokenProvider tokenProvider() throws Exception {
-        JwtAuthConfig config = JwtAuthConfig
-                .newConfig(CLIENT_ID)
-                .tokenEndpoint(tokenEndpoint.tokenEndpointUri().toString())
-                .pkcs12KeyStore(p12Stream(), P12_PASSWORD)
+    @Test
+    void bruker_timeoutene_som_er_konfigurert_for_token_klienten() throws Exception {
+        tokenEndpoint.respondWith(200, "{\"access_token\":\"the-token\",\"expires_in\":300}");
+        tokenEndpoint.delayResponsesBy(Duration.ofSeconds(2));
+
+        JwtAuthConfig config = configBuilder()
+                .tokenEndpointHttpSettings(HttpClientSettings.DEFAULT, HttpClientConnectionSettings.DEFAULT.socketTimeout(200))
                 .build();
 
+        DigipostClientException thrown = assertThrows(DigipostClientException.class, () -> tokenProvider(config).getToken());
+
+        assertThat(thrown.getErrorCode(), is(FAILED_TO_OBTAIN_ACCESS_TOKEN));
+        assertThat("token-klienten ventet lenger enn den konfigurerte socket-timeouten", thrown.getCause(), instanceOf(SocketTimeoutException.class));
+    }
+
+    private MutualTlsTokenProvider tokenProvider() throws Exception {
+        return tokenProvider(configBuilder().build());
+    }
+
+    private MutualTlsTokenProvider tokenProvider(JwtAuthConfig config) throws Exception {
         MutualTlsTokenProvider tokenProvider = new MutualTlsTokenProvider(config, BROKER_ID, RESOURCE_SERVER_URI, clock, tokenEndpoint.trustManagers());
         tokenProviders.add(tokenProvider);
         return tokenProvider;
+    }
+
+    private JwtAuthConfig.Builder configBuilder() {
+        return JwtAuthConfig
+                .newConfig(CLIENT_ID)
+                .tokenEndpoint(tokenEndpoint.tokenEndpointUri().toString())
+                .pkcs12KeyStore(p12Stream(), P12_PASSWORD);
     }
 
     private String parameter(String name) {
