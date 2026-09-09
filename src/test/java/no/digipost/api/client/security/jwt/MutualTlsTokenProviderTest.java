@@ -33,6 +33,7 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -57,6 +58,7 @@ public class MutualTlsTokenProviderTest {
 
     private TokenEndpointStub tokenEndpoint;
     private SettableClock clock;
+    private final List<MutualTlsTokenProvider> tokenProviders = new ArrayList<>();
 
     @BeforeEach
     void startTokenEndpoint() throws Exception {
@@ -65,7 +67,9 @@ public class MutualTlsTokenProviderTest {
     }
 
     @AfterEach
-    void stopTokenEndpoint() {
+    void closeTokenProvidersAndStopTokenEndpoint() {
+        tokenProviders.forEach(MutualTlsTokenProvider::close);
+        tokenProviders.clear();
         if (tokenEndpoint != null) {
             tokenEndpoint.close();
         }
@@ -193,7 +197,9 @@ public class MutualTlsTokenProviderTest {
                 .pkcs12KeyStore(p12Stream(), P12_PASSWORD)
                 .build();
 
-        return new MutualTlsTokenProvider(config, BROKER_ID, RESOURCE_SERVER_URI, clock, tokenEndpoint.trustManagers());
+        MutualTlsTokenProvider tokenProvider = new MutualTlsTokenProvider(config, BROKER_ID, RESOURCE_SERVER_URI, clock, tokenEndpoint.trustManagers());
+        tokenProviders.add(tokenProvider);
+        return tokenProvider;
     }
 
     private String parameter(String name) {
