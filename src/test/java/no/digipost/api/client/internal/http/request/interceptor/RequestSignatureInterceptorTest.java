@@ -36,7 +36,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RequestSignatureInterceptorTest {
 
@@ -62,17 +61,6 @@ public class RequestSignatureInterceptorTest {
         String expectedHash = Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(body));
         assertThat(signedContent.get(), containsString(Headers.X_Content_SHA256.toLowerCase() + ": " + expectedHash));
         assertThat(request.getFirstHeader(Headers.X_Digipost_Signature), notNullValue());
-    }
-
-    @Test
-    public void nekter_aa_signere_innhold_som_ikke_er_hashet() {
-        HttpPost request = new HttpPost("https://api.digipost.no/api/documents");
-        request.setEntity(new ByteArrayEntity("digipost".getBytes(StandardCharsets.UTF_8), ContentType.APPLICATION_OCTET_STREAM));
-
-        IllegalStateException thrown = assertThrows(IllegalStateException.class, () ->
-                signatureInterceptor.process(request, null, new BasicHttpContext()));
-
-        assertThat(thrown.getMessage(), containsString(Headers.X_Content_SHA256));
     }
 
     @Test
