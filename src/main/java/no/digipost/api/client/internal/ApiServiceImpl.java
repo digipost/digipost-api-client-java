@@ -99,6 +99,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;
@@ -126,13 +127,14 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi, TagApi, SharedDocumentsApi {
+public class ApiServiceImpl implements AutoCloseable, MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi, TagApi, SharedDocumentsApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
 
     private static final String ENTRY_POINT = "/";
     private final BrokerId brokerId;
     private final CloseableHttpClient httpClient;
+    private final MutualTlsTokenProvider tokenProvider;
     private final URI digipostUrl;
 
     private final Cached cached;
@@ -144,19 +146,24 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
 
     public static ApiServiceImpl withCertificateAuthentication(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, Signer signer) {
         requireNonNull(signer, "signer cannot be null");
-        return new ApiServiceImpl(config, brokerId, apiService -> apiService.createCertificateAuthenticatingHttpClient(httpClientBuilder, signer, config));
+        return new ApiServiceImpl(config, brokerId, null, apiService -> apiService.createCertificateAuthenticatingHttpClient(httpClientBuilder, signer, config));
     }
 
     public static ApiServiceImpl withJwtMtlsAuthentication(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
         requireNonNull(jwtAuthConfig, "jwtAuthConfig cannot be null");
-        return new ApiServiceImpl(config, brokerId, apiService -> apiService.createJwtAuthenticatingHttpClient(httpClientBuilder, jwtAuthConfig, config));
+        return withMutualTlsTokenProvider(config, httpClientBuilder, brokerId, new MutualTlsTokenProvider(jwtAuthConfig, brokerId, config.digipostApiUri, config.clock));
     }
 
-    private ApiServiceImpl(DigipostClientConfig config, BrokerId brokerId, Function<ApiServiceImpl, CloseableHttpClient> httpClientFactory) {
+    static ApiServiceImpl withMutualTlsTokenProvider(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, MutualTlsTokenProvider tokenProvider) {
+        return new ApiServiceImpl(config, brokerId, tokenProvider, apiService -> apiService.createJwtAuthenticatingHttpClient(httpClientBuilder, tokenProvider, config));
+    }
+
+    private ApiServiceImpl(DigipostClientConfig config, BrokerId brokerId, MutualTlsTokenProvider tokenProvider, Function<ApiServiceImpl, CloseableHttpClient> httpClientFactory) {
         this.brokerId = brokerId;
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
         this.digipostUrl = config.digipostApiUri;
         this.cached = new Cached(() -> fetchEntryPoint(Optional.empty()));
+        this.tokenProvider = tokenProvider;
         this.httpClient = httpClientFactory.apply(this);
     }
 
@@ -177,10 +184,8 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         return httpClient;
     }
 
-    private CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, JwtAuthConfig jwtAuthConfig, DigipostClientConfig config) {
+    private CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, MutualTlsTokenProvider tokenProvider, DigipostClientConfig config) {
         Clock clock = config.clock;
-        MutualTlsTokenProvider tokenProvider = new MutualTlsTokenProvider(jwtAuthConfig, brokerId, config.digipostApiUri, clock);
-
         CloseableHttpClient httpClient = httpClientBuilder
                 .setConnectionManager(HttpClientConnectionManagerFactory.createDefaultBuilder()
                         .setTlsSocketStrategy(ClientTlsStrategyBuilder.create()
@@ -651,5 +656,14 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         marshal(jaxbContext, data, bao);
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)));
         return send(httpPost);
+    }
+
+    @Override
+    public void close() {
+        try (MutualTlsTokenProvider closedTokenProvider = tokenProvider) {
+            httpClient.close();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to close the http client used for " + digipostUrl, e);
+        }
     }
 }
