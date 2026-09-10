@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -87,7 +88,7 @@ public class DigipostClient implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
 
     private final EventLogger eventLogger;
-    private final ApiServiceImpl ownedApiService;
+    private final AutoCloseable closeableResources;
     private final MessageDeliveryApi messageApi;
     private final MessageDeliverer messageSender;
     private final ArchiveDeliverer archiveSender;
@@ -151,14 +152,14 @@ public class DigipostClient implements AutoCloseable {
     }
 
     public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi, SharedDocumentsApi sharedDocumentsApi) {
-        this(config, null, apiService, inboxApiService, documentApi, archiveApi, batchApi, tagApi, sharedDocumentsApi);
+        this(config, () -> {}, apiService, inboxApiService, documentApi, archiveApi, batchApi, tagApi, sharedDocumentsApi);
     }
 
     /**
-     * @param ownedApiService the api service this client created itself, and is therefore responsible for {@link ApiServiceImpl#close() closing}, or {@code null} if the api services were provided from the outside and their lifecycle is managed by the caller
+     * @param closeableResources the api service this client created itself, and is therefore responsible for {@link ApiServiceImpl#close() closing}, or a no-op if the api services were provided from the outside and their lifecycle is managed by the caller
      */
-    private DigipostClient(DigipostClientConfig config, ApiServiceImpl ownedApiService, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi, SharedDocumentsApi sharedDocumentsApi) {
-        this.ownedApiService = ownedApiService;
+    private DigipostClient(DigipostClientConfig config, AutoCloseable closeableResources, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi, SharedDocumentsApi sharedDocumentsApi) {
+        this.closeableResources = closeableResources;
         this.messageApi = apiService;
         this.inboxApiService = inboxApiService;
         this.documentApi = documentApi;
@@ -444,8 +445,10 @@ public class DigipostClient implements AutoCloseable {
 
     @Override
     public void close() {
-        if (ownedApiService != null) {
-            ownedApiService.close();
+        try {
+            closeableResources.close();
+        } catch (Exception e) {
+            throw new UncheckedIOException(new IOException("Failed to close resources used by DigipostClient", e));
         }
     }
 }
