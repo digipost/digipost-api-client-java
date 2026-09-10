@@ -19,6 +19,7 @@ import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.security.jwt.JwtAuthConfig;
+import no.digipost.api.client.security.jwt.MutualTlsTokenProvider;
 import no.digipost.http.client.HttpClientFactory;
 import org.junit.jupiter.api.Test;
 
@@ -68,9 +69,31 @@ public class ApiServiceImplTest {
                 ApiServiceImpl.withJwtMtlsAuthentication(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, null));
     }
 
+    @Test
+    void lukker_ogsaa_token_provideren_sin_http_klient() {
+        DigipostClientConfig config = newConfiguration().build();
+        MutualTlsTokenProvider tokenProvider = new MutualTlsTokenProvider(jwtAuthConfig(), BROKER_ID, config.digipostApiUri, config.clock);
+        ApiServiceImpl apiService = ApiServiceImpl.withMutualTlsTokenProvider(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, tokenProvider);
+
+        apiService.close();
+
+        assertThrows(IllegalStateException.class, tokenProvider::getToken,
+                "token provideren har fortsatt en åpen http-klient, og lekker connection poolen sin");
+    }
+
+    @Test
+    void lukking_av_sertifikatbasert_klient_gaar_greit() {
+        ApiServiceImpl apiService = ApiServiceImpl.withCertificateAuthentication(
+                newConfiguration().build(), HttpClientFactory.createDefaultBuilder(), BROKER_ID, DUMMY_SIGNER);
+
+        assertDoesNotThrow(apiService::close);
+    }
+
     private static JwtAuthConfig jwtAuthConfig() {
         return JwtAuthConfig
                 .newConfig("test-client")
+                // ingen skal svare her: testene under skal aldri komme så langt som til å gjøre et kall
+                .tokenEndpoint("https://localhost:1/oauth2/token")
                 .pkcs12KeyStore(p12Stream(), P12_PASSWORD)
                 .build();
     }

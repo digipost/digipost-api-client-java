@@ -78,7 +78,7 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
  * er opprettet med et fungerende sertifikat og tilhørende passord, kan man
  * gjøre søk og sende brev gjennom Digipost.
  */
-public class DigipostClient {
+public class DigipostClient implements AutoCloseable {
 
     static {
         CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
@@ -87,6 +87,7 @@ public class DigipostClient {
     private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
 
     private final EventLogger eventLogger;
+    private final ApiServiceImpl ownedApiService;
     private final MessageDeliveryApi messageApi;
     private final MessageDeliverer messageSender;
     private final ArchiveDeliverer archiveSender;
@@ -146,10 +147,18 @@ public class DigipostClient {
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
-        this(config, apiService, apiService, apiService, apiService, apiService, apiService, apiService);
+        this(config, apiService, apiService, apiService, apiService, apiService, apiService, apiService, apiService);
     }
 
     public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi, SharedDocumentsApi sharedDocumentsApi) {
+        this(config, null, apiService, inboxApiService, documentApi, archiveApi, batchApi, tagApi, sharedDocumentsApi);
+    }
+
+    /**
+     * @param ownedApiService the api service this client created itself, and is therefore responsible for {@link ApiServiceImpl#close() closing}, or {@code null} if the api services were provided from the outside and their lifecycle is managed by the caller
+     */
+    private DigipostClient(DigipostClientConfig config, ApiServiceImpl ownedApiService, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi, SharedDocumentsApi sharedDocumentsApi) {
+        this.ownedApiService = ownedApiService;
         this.messageApi = apiService;
         this.inboxApiService = inboxApiService;
         this.documentApi = documentApi;
@@ -431,5 +440,12 @@ public class DigipostClient {
 
     public void cancelBatch(Batch batch) {
         batchApi.cancelBatch(batch);
+    }
+
+    @Override
+    public void close() {
+        if (ownedApiService != null) {
+            ownedApiService.close();
+        }
     }
 }

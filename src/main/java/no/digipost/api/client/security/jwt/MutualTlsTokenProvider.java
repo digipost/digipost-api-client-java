@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
@@ -49,7 +48,7 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 import static no.digipost.api.client.errorhandling.ErrorCode.FAILED_TO_OBTAIN_ACCESS_TOKEN;
 
-public class MutualTlsTokenProvider implements Closeable {
+public class MutualTlsTokenProvider implements AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MutualTlsTokenProvider.class);
 
