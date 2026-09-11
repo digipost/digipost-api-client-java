@@ -25,6 +25,8 @@ import java.util.function.Supplier;
 
 public class RequestBearerTokenInterceptor implements HttpRequestInterceptor {
 
+    public static final String ATTEMPTED_ACCESS_TOKEN = "ATTEMPTED_ACCESS_TOKEN";
+
     private final Supplier<String> accessToken;
 
     public RequestBearerTokenInterceptor(Supplier<String> accessToken) {
@@ -33,6 +35,8 @@ public class RequestBearerTokenInterceptor implements HttpRequestInterceptor {
 
     @Override
     public void process(HttpRequest request, EntityDetails entityDetails, HttpContext context) {
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken.get());
+        String token = accessToken.get();
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        context.setAttribute(ATTEMPTED_ACCESS_TOKEN, token);
     }
 }

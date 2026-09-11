@@ -28,6 +28,7 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.inbox.InboxApi;
 import no.digipost.api.client.internal.http.Headers;
 import no.digipost.api.client.internal.http.MultipartNoLengthCheckHttpEntity;
+import no.digipost.api.client.internal.http.RefreshAccessTokenOnUnauthorizedExec;
 import no.digipost.api.client.internal.http.request.interceptor.RequestBearerTokenInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestContentHashInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestDateInterceptor;
@@ -81,6 +82,7 @@ import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import no.digipost.http.client.HttpClientConnectionManagerFactory;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.ChainElement;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.core5.http.ClassicHttpRequest;
@@ -122,6 +124,7 @@ import static no.digipost.api.client.internal.http.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.internal.http.UriUtils.withQueryParams;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.safelyOfferEntityStreamExternally;
+import static no.digipost.api.client.internal.http.response.interceptor.VerifyUnlessUnauthorized.unlessUnauthorized;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V8;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
@@ -132,6 +135,7 @@ public class ApiServiceImpl implements AutoCloseable, MessageDeliveryApi, InboxA
     private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
 
     private static final String ENTRY_POINT = "/";
+    private static final String REFRESH_ACCESS_TOKEN_ON_UNAUTHORIZED = "REFRESH_ACCESS_TOKEN_ON_UNAUTHORIZED";
     private final BrokerId brokerId;
     private final CloseableHttpClient httpClient;
     private final MutualTlsTokenProvider tokenProvider;
@@ -197,9 +201,10 @@ public class ApiServiceImpl implements AutoCloseable, MessageDeliveryApi, InboxA
                 .addRequestInterceptorLast(new RequestPathInterceptor())
                 .addRequestInterceptorLast(new RequestBearerTokenInterceptor(tokenProvider::getToken))
                 .addRequestInterceptorLast(new RequestContentHashInterceptor(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256))
-                .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
-                .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
-                .addResponseInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
+                .addResponseInterceptorLast(unlessUnauthorized(new ResponseDateInterceptor(clock)))
+                .addResponseInterceptorLast(unlessUnauthorized(new ResponseContentSHA256Interceptor()))
+                .addResponseInterceptorLast(unlessUnauthorized(new ResponseSignatureInterceptor(this::getEntryPoint)))
+                .addExecInterceptorBefore(ChainElement.PROTOCOL.name(), REFRESH_ACCESS_TOKEN_ON_UNAUTHORIZED, new RefreshAccessTokenOnUnauthorizedExec(tokenProvider::invalidate))
                 .build();
 
         eventLogger.log("Initialiserte apache-klient (JWT/mTLS-modus) mot " + config.digipostApiUri);
