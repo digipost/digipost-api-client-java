@@ -44,6 +44,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 import static no.digipost.api.client.errorhandling.ErrorCode.FAILED_TO_OBTAIN_ACCESS_TOKEN;
@@ -90,6 +91,25 @@ public class MutualTlsTokenProvider implements AutoCloseable {
                 return cachedToken;
             }
             return fetchAndCacheToken();
+        }
+    }
+
+    /**
+     * Discards the cached access token, so that the next {@link #getToken()} fetches a new one
+     * from the token endpoint. This is meant for the case where the resource server rejects a
+     * token the client still considers valid, e.g. because it was revoked before it expired.
+     * <p>
+     * Only the given token is discarded. Another thread may already have replaced it with a
+     * newly fetched one, and that replacement must survive the late rejection of its predecessor.
+     *
+     * @param rejectedToken the access token that was rejected
+     */
+    public void invalidate(String rejectedToken) {
+        synchronized (refreshLock) {
+            if (Objects.equals(cachedToken, rejectedToken)) {
+                cacheValidUntil = Instant.MIN;
+                LOG.debug("Discarded the cached access token from {} after it was rejected", config.tokenEndpointUri);
+            }
         }
     }
 

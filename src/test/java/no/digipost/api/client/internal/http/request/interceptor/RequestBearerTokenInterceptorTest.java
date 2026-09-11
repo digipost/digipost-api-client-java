@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static no.digipost.api.client.internal.http.request.interceptor.RequestBearerTokenInterceptor.ATTEMPTED_ACCESS_TOKEN;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -49,6 +50,15 @@ public class RequestBearerTokenInterceptorTest {
 
         assertThat(first.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue(), is("Bearer first-token"));
         assertThat(second.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue(), is("Bearer second-token"));
+    }
+
+    @Test
+    public void legger_tokenet_i_konteksten_saa_det_kan_invalideres_om_det_blir_avvist() {
+        BasicHttpContext context = new BasicHttpContext();
+
+        new RequestBearerTokenInterceptor(() -> "the-token").process(new HttpGet("https://api.digipost.no/"), null, context);
+
+        assertThat((String) context.getAttribute(ATTEMPTED_ACCESS_TOKEN), is("the-token"));
     }
 
     @Test
