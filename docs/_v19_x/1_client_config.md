@@ -56,6 +56,11 @@ Access tokens are fetched lazily on first use and cached until shortly before th
 They are requested for the API given by `DigipostClientConfig.digipostApiUri`, so you do
 not configure the API URI in two places.
 
+Should the API nevertheless answer `401 Unauthorized`, the cached token is discarded and the
+request is sent once more with a newly fetched one. Only requests whose content can be sent
+again are retried, and only once: if the new token is rejected as well, the error is passed on
+to you.
+
 The access tokens are fetched with a separate HTTP client, as it has to present the client
 certificate configured above in the TLS handshake against the token endpoint. Its timeouts
 (and proxy, connection pool, ...) can be configured with `tokenEndpointHttpSettings(..)`:

@@ -128,6 +128,31 @@ public class MutualTlsTokenProviderTest {
     }
 
     @Test
+    void henter_nytt_token_naar_det_forrige_er_invalidert() throws Exception {
+        tokenEndpoint.respondWith(200, "{\"access_token\":\"first-token\",\"expires_in\":300}");
+        MutualTlsTokenProvider tokenProvider = tokenProvider();
+
+        tokenProvider.getToken();
+        tokenEndpoint.respondWith(200, "{\"access_token\":\"second-token\",\"expires_in\":300}");
+        tokenProvider.invalidate("first-token");
+
+        assertThat(tokenProvider.getToken(), is("second-token"));
+        assertThat(tokenEndpoint.receivedRequestCount(), is(2));
+    }
+
+    @Test
+    void beholder_tokenet_naar_et_annet_blir_invalidert() throws Exception {
+        tokenEndpoint.respondWith(200, "{\"access_token\":\"the-token\",\"expires_in\":300}");
+        MutualTlsTokenProvider tokenProvider = tokenProvider();
+
+        tokenProvider.getToken();
+        tokenProvider.invalidate("a-token-already-replaced-by-the-cached-one");
+
+        assertThat(tokenProvider.getToken(), is("the-token"));
+        assertThat(tokenEndpoint.receivedRequestCount(), is(1));
+    }
+
+    @Test
     void bruker_exp_fra_tokenet_naar_expires_in_mangler() throws Exception {
         tokenEndpoint.respondWith(200, "{\"access_token\":\"" + jwtExpiringAt(NOW.plus(300, SECONDS)) + "\"}");
         MutualTlsTokenProvider tokenProvider = tokenProvider();
