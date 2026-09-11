@@ -53,6 +53,7 @@ import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequ
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.security.CryptoUtil;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.security.jwt.JwtAuthConfig;
 import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
@@ -64,6 +65,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -77,7 +79,7 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
  * er opprettet med et fungerende sertifikat og tilhørende passord, kan man
  * gjøre søk og sende brev gjennom Digipost.
  */
-public class DigipostClient {
+public class DigipostClient implements AutoCloseable {
 
     static {
         CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
@@ -86,6 +88,7 @@ public class DigipostClient {
     private static final Logger LOG = LoggerFactory.getLogger(DigipostClient.class);
 
     private final EventLogger eventLogger;
+    private final AutoCloseable closeableResources;
     private final MessageDeliveryApi messageApi;
     private final MessageDeliverer messageSender;
     private final ArchiveDeliverer archiveSender;
@@ -97,19 +100,66 @@ public class DigipostClient {
     private final SharedDocumentsApi sharedDocumentsApi;
 
 
-    public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
-        this(config, brokerId, signer, HttpClientFactory.createDefaultBuilder());
+    /**
+     * Creates a client that authenticates with the Digipost API using certificate-based request signing.
+     *
+     * @param config the client configuration, e.g. which API to communicate with
+     * @param brokerId the broker permitted to integrate with the Digipost API
+     * @param signer signs each request with the broker's private key
+     */
+    public static DigipostClient withCertificateAuthentication(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
+        return withCertificateAuthentication(config, brokerId, signer, HttpClientFactory.createDefaultBuilder());
     }
 
-    public DigipostClient(DigipostClientConfig config, BrokerId brokerId, Signer signer, HttpClientBuilder clientBuilder) {
-        this(config, new ApiServiceImpl(config, clientBuilder, brokerId, signer));
+    /**
+     * Creates a client that authenticates with the Digipost API using certificate-based request signing.
+     *
+     * @param config the client configuration, e.g. which API to communicate with
+     * @param brokerId the broker permitted to integrate with the Digipost API
+     * @param signer signs each request with the broker's private key
+     * @param clientBuilder the Apache {@link HttpClientBuilder} used to build the underlying HTTP client, allowing customization of e.g. connection manager, timeouts and proxy settings
+     */
+    public static DigipostClient withCertificateAuthentication(DigipostClientConfig config, BrokerId brokerId, Signer signer, HttpClientBuilder clientBuilder) {
+        return new DigipostClient(config, ApiServiceImpl.withCertificateAuthentication(config, clientBuilder, brokerId, signer));
+    }
+
+    /**
+     * Creates a client that authenticates with the Digipost API using OAuth 2.0 access tokens
+     * obtained over a mutual-TLS channel.
+     *
+     * @param config the client configuration, e.g. which API to communicate with. The access tokens are requested for that same API
+     * @param brokerId the broker permitted to integrate with the Digipost API
+     * @param jwtAuthConfig configures the token endpoint and the client certificate used for mTLS
+     */
+    public static DigipostClient withJwtMtlsAuthentication(DigipostClientConfig config, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
+        return withJwtMtlsAuthentication(config, brokerId, jwtAuthConfig, HttpClientFactory.createDefaultBuilder());
+    }
+
+    /**
+     * Creates a client that authenticates with the Digipost API using OAuth 2.0 access tokens obtained over a mutual-TLS channel.
+     *
+     * @param config the client configuration, e.g. which API to communicate with. The access tokens are requested for that same API
+     * @param brokerId the broker permitted to integrate with the Digipost API
+     * @param jwtAuthConfig configures the token endpoint and the client certificate used for mTLS
+     * @param clientBuilder the Apache {@link HttpClientBuilder} used to build the underlying HTTP client, allowing customization of e.g. timeouts and proxy settings. Note that its connection manager is replaced with one configured for the mTLS handshake.
+     */
+    public static DigipostClient withJwtMtlsAuthentication(DigipostClientConfig config, BrokerId brokerId, JwtAuthConfig jwtAuthConfig, HttpClientBuilder clientBuilder) {
+        return new DigipostClient(config, ApiServiceImpl.withJwtMtlsAuthentication(config, clientBuilder, brokerId, jwtAuthConfig));
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
-        this(config, apiService, apiService, apiService, apiService, apiService, apiService, apiService);
+        this(config, apiService, apiService, apiService, apiService, apiService, apiService, apiService, apiService);
     }
 
     public DigipostClient(DigipostClientConfig config, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi, SharedDocumentsApi sharedDocumentsApi) {
+        this(config, () -> {}, apiService, inboxApiService, documentApi, archiveApi, batchApi, tagApi, sharedDocumentsApi);
+    }
+
+    /**
+     * @param closeableResources the api service this client created itself, and is therefore responsible for {@link ApiServiceImpl#close() closing}, or a no-op if the api services were provided from the outside and their lifecycle is managed by the caller
+     */
+    private DigipostClient(DigipostClientConfig config, AutoCloseable closeableResources, MessageDeliveryApi apiService, InboxApi inboxApiService, DocumentApi documentApi, ArchiveApi archiveApi, BatchApi batchApi, TagApi tagApi, SharedDocumentsApi sharedDocumentsApi) {
+        this.closeableResources = closeableResources;
         this.messageApi = apiService;
         this.inboxApiService = inboxApiService;
         this.documentApi = documentApi;
@@ -391,5 +441,14 @@ public class DigipostClient {
 
     public void cancelBatch(Batch batch) {
         batchApi.cancelBatch(batch);
+    }
+
+    @Override
+    public void close() {
+        try {
+            closeableResources.close();
+        } catch (Exception e) {
+            throw new UncheckedIOException(new IOException("Failed to close resources used by DigipostClient", e));
+        }
     }
 }

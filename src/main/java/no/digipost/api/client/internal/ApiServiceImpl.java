@@ -28,8 +28,11 @@ import no.digipost.api.client.errorhandling.ErrorCode;
 import no.digipost.api.client.inbox.InboxApi;
 import no.digipost.api.client.internal.http.Headers;
 import no.digipost.api.client.internal.http.MultipartNoLengthCheckHttpEntity;
-import no.digipost.api.client.internal.http.request.interceptor.RequestContentHashFilter;
+import no.digipost.api.client.internal.http.RefreshAccessTokenOnUnauthorizedExec;
+import no.digipost.api.client.internal.http.request.interceptor.RequestBearerTokenInterceptor;
+import no.digipost.api.client.internal.http.request.interceptor.RequestContentHashInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestDateInterceptor;
+import no.digipost.api.client.internal.http.request.interceptor.RequestPathInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestSignatureInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestUserAgentInterceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseContentSHA256Interceptor;
@@ -65,6 +68,8 @@ import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequ
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.security.Digester;
 import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.security.jwt.JwtAuthConfig;
+import no.digipost.api.client.security.jwt.MutualTlsTokenProvider;
 import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
 import no.digipost.api.client.util.JAXBContextUtils;
@@ -75,8 +80,11 @@ import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
+import no.digipost.http.client.HttpClientConnectionManagerFactory;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.ChainElement;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -93,16 +101,20 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static jakarta.xml.bind.JAXB.unmarshal;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static no.digipost.api.client.internal.ExceptionUtils.asUnchecked;
 import static no.digipost.api.client.internal.ExceptionUtils.exceptionNameAndMessage;
@@ -112,18 +124,21 @@ import static no.digipost.api.client.internal.http.Headers.X_Digipost_UserId;
 import static no.digipost.api.client.internal.http.UriUtils.withQueryParams;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.checkResponse;
 import static no.digipost.api.client.internal.http.response.HttpResponseUtils.safelyOfferEntityStreamExternally;
+import static no.digipost.api.client.internal.http.response.interceptor.VerifyUnlessUnauthorized.unlessUnauthorized;
 import static no.digipost.api.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V8;
 import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 import static no.digipost.api.client.util.JAXBContextUtils.marshal;
 import static no.digipost.api.client.util.JAXBContextUtils.unmarshal;
 
-public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi, TagApi, SharedDocumentsApi {
+public class ApiServiceImpl implements AutoCloseable, MessageDeliveryApi, InboxApi, DocumentApi, ArchiveApi, BatchApi, TagApi, SharedDocumentsApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiServiceImpl.class);
 
     private static final String ENTRY_POINT = "/";
+    private static final String REFRESH_ACCESS_TOKEN_ON_UNAUTHORIZED = "REFRESH_ACCESS_TOKEN_ON_UNAUTHORIZED";
     private final BrokerId brokerId;
     private final CloseableHttpClient httpClient;
+    private final MutualTlsTokenProvider tokenProvider;
     private final URI digipostUrl;
 
     private final Cached cached;
@@ -133,21 +148,67 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
     // which was the case for the pattern "yyyy-MM-dd'T'HH:mm:ss.SSSZZ". See commit messages for 59caeb5737e45a15 and dcf41785a84f42caf935 for details.
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
-    public ApiServiceImpl(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, Signer signer) {
+    public static ApiServiceImpl withCertificateAuthentication(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, Signer signer) {
+        requireNonNull(signer, "signer cannot be null");
+        return new ApiServiceImpl(config, brokerId, null, apiService -> apiService.createCertificateAuthenticatingHttpClient(httpClientBuilder, signer, config));
+    }
+
+    public static ApiServiceImpl withJwtMtlsAuthentication(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
+        requireNonNull(jwtAuthConfig, "jwtAuthConfig cannot be null");
+        return withMutualTlsTokenProvider(config, httpClientBuilder, brokerId, new MutualTlsTokenProvider(jwtAuthConfig, brokerId, config.digipostApiUri, config.clock));
+    }
+
+    static ApiServiceImpl withMutualTlsTokenProvider(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, MutualTlsTokenProvider tokenProvider) {
+        return new ApiServiceImpl(config, brokerId, tokenProvider, apiService -> apiService.createJwtAuthenticatingHttpClient(httpClientBuilder, tokenProvider, config));
+    }
+
+    private ApiServiceImpl(DigipostClientConfig config, BrokerId brokerId, MutualTlsTokenProvider tokenProvider, Function<ApiServiceImpl, CloseableHttpClient> httpClientFactory) {
         this.brokerId = brokerId;
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
         this.digipostUrl = config.digipostApiUri;
-
         this.cached = new Cached(() -> fetchEntryPoint(Optional.empty()));
-        this.httpClient = httpClientBuilder
-            .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, config.clock))
-            .addRequestInterceptorLast(new RequestUserAgentInterceptor())
-            .addRequestInterceptorLast(new RequestSignatureInterceptor(signer, config.eventLogger, new RequestContentHashFilter(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256)))
-            .addResponseInterceptorLast(new ResponseDateInterceptor(config.clock))
-            .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
-            .addResponseInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
-            .build();
-        this.eventLogger.log("Initialiserte apache-klient mot " + config.digipostApiUri);
+        this.tokenProvider = tokenProvider;
+        this.httpClient = httpClientFactory.apply(this);
+    }
+
+    private CloseableHttpClient createCertificateAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, Signer signer, DigipostClientConfig config) {
+        Clock clock = config.clock;
+        CloseableHttpClient httpClient = httpClientBuilder
+                .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, clock))
+                .addRequestInterceptorLast(new RequestUserAgentInterceptor())
+                .addRequestInterceptorLast(new RequestPathInterceptor())
+                .addRequestInterceptorLast(new RequestContentHashInterceptor(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256))
+                .addRequestInterceptorLast(new RequestSignatureInterceptor(signer, config.eventLogger))
+                .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
+                .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
+                .addResponseInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
+                .build();
+
+        eventLogger.log("Initialiserte apache-klient (sertifikatmodus) mot " + config.digipostApiUri);
+        return httpClient;
+    }
+
+    private CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, MutualTlsTokenProvider tokenProvider, DigipostClientConfig config) {
+        Clock clock = config.clock;
+        CloseableHttpClient httpClient = httpClientBuilder
+                .setConnectionManager(HttpClientConnectionManagerFactory.createDefaultBuilder()
+                        .setTlsSocketStrategy(ClientTlsStrategyBuilder.create()
+                                .setSslContext(tokenProvider.getSslContext())
+                                .buildClassic())
+                        .build())
+                .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, clock))
+                .addRequestInterceptorLast(new RequestUserAgentInterceptor())
+                .addRequestInterceptorLast(new RequestPathInterceptor())
+                .addRequestInterceptorLast(new RequestBearerTokenInterceptor(tokenProvider::getToken))
+                .addRequestInterceptorLast(new RequestContentHashInterceptor(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256))
+                .addResponseInterceptorLast(unlessUnauthorized(new ResponseDateInterceptor(clock)))
+                .addResponseInterceptorLast(unlessUnauthorized(new ResponseContentSHA256Interceptor()))
+                .addResponseInterceptorLast(unlessUnauthorized(new ResponseSignatureInterceptor(this::getEntryPoint)))
+                .addExecInterceptorBefore(ChainElement.PROTOCOL.name(), REFRESH_ACCESS_TOKEN_ON_UNAUTHORIZED, new RefreshAccessTokenOnUnauthorizedExec(tokenProvider::invalidate))
+                .build();
+
+        eventLogger.log("Initialiserte apache-klient (JWT/mTLS-modus) mot " + config.digipostApiUri);
+        return httpClient;
     }
 
     //Kan sende inn null. Man får da det samme som getEntryPoint()
@@ -600,5 +661,14 @@ public class ApiServiceImpl implements MessageDeliveryApi, InboxApi, DocumentApi
         marshal(jaxbContext, data, bao);
         httpPost.setEntity(new ByteArrayEntity(bao.toByteArray(), ContentType.create(DIGIPOST_MEDIA_TYPE_V8)));
         return send(httpPost);
+    }
+
+    @Override
+    public void close() {
+        try (MutualTlsTokenProvider closedTokenProvider = tokenProvider) {
+            httpClient.close();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to close the http client used for " + digipostUrl, e);
+        }
     }
 }
