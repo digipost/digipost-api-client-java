@@ -59,6 +59,10 @@ public class IdentificationResult {
         return unidentifiedReason;
     }
 
+    /**
+     * @deprecated no longer returned by the API; always {@code null}.
+     */
+    @Deprecated
     public String getPersonAlias() {
         return personAlias;
     }

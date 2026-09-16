@@ -30,6 +30,10 @@ import java.util.Objects;
 @XmlRootElement(name = "identification")
 public class Identification {
 
+    /**
+     * @deprecated no longer has any effect.
+     */
+    @Deprecated
     @XmlAttribute(name = "include-personalias-for-digipost-user")
     protected boolean includePersonaliasForDigipostUser;
 
@@ -48,6 +52,10 @@ public class Identification {
         this(nameAndAddress, false);
     }
 
+    /**
+     * @deprecated use {@link #Identification(NameAndAddress)}.
+     */
+    @Deprecated
     public Identification(final NameAndAddress nameAndAddress, boolean includePersonaliasForDigipostUser) {
         this.nameAndAddress = nameAndAddress;
         this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
@@ -56,6 +64,10 @@ public class Identification {
     public Identification(final DigipostAddress digipostAddress) {
         this(digipostAddress, false);
     }
+    /**
+     * @deprecated use {@link #Identification(DigipostAddress)}.
+     */
+    @Deprecated
     public Identification(final DigipostAddress digipostAddress, boolean includePersonaliasForDigipostUser) {
         this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
         this.digipostAddress = digipostAddress.asString();
@@ -64,6 +76,10 @@ public class Identification {
     public Identification(final PersonalIdentificationNumber personalIdentificationNumber) {
         this(personalIdentificationNumber, false);
     }
+    /**
+     * @deprecated use {@link #Identification(PersonalIdentificationNumber)}.
+     */
+    @Deprecated
     public Identification(final PersonalIdentificationNumber personalIdentificationNumber, boolean includePersonaliasForDigipostUser) {
         this.includePersonaliasForDigipostUser = includePersonaliasForDigipostUser;
         this.personalIdentificationNumber = personalIdentificationNumber.asString();
