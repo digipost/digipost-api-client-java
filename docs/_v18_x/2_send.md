@@ -116,6 +116,32 @@ client.createMessage(message)
         .send();
 ```
 
+Notifications can be scheduled as a number of hours after the letter is delivered, or at specific
+points in time:
+
+```java
+ZonedDateTime specificTime = ZonedDateTime.of(2024, 1, 15, 10, 0, 0, 0, ZoneId.of("Europe/Oslo"));
+
+SmsNotification smsNotification = new SmsNotification(List.of(new ListedTime(specificTime)), List.of(1));
+```
+
+The actual time the SMS is sent may be adjusted to fall within the hours we send SMS notifications,
+see [Digipost notifications](https://www.digipost.no/en/consumer/help-and-contact/notifications) for details.
+
+By default, the SMS notification is not sent if the recipient has already read the letter, or if the
+recipient has opted to not receive sender-initiated SMS notifications. Setting `alwaysSend` to
+`true` overrides both of these. This feature is not enabled by default, and must be activated for the
+specific sender by Digipost admin.
+
+```java
+boolean alwaysSend = true;
+SmsNotification smsNotification = new SmsNotification(null, List.of(1), alwaysSend);
+
+Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF, null,
+                                        smsNotification, null,
+                                        AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
+```
+
 
 ## Send letter with fallback to print
 
@@ -319,7 +345,9 @@ Get a single document as stream:
 
 ```java
 SharedDocument doc1 = sharedDocumentsRequestState.getSharedDocuments().get(0);
-InputStream inputStream = sendClient.getSharedDocumentContentStream(doc1.getSharedDocumentContentStream());
+try (InputStream inputStream = sendClient.getSharedDocumentContentStream(doc1.getSharedDocumentContentStream())) {
+    // use inputStream
+}
 ```
 
 Get link to view a single document on digipostdata.no
@@ -465,3 +493,27 @@ DocumentStatus status = client.getDocumentStatus(senderId, documentUuid);
 System.out.println("Status: " + status.status);
 System.out.println("Channel: " + status.channel);
 ```
+
+
+## Get document events
+
+In addition to `getDocumentStatus`, you can poll for a broader history of events with `getDocumentEvents`.
+This includes events such as `OPENED`, `POSTMARKED`, `PRINT_FAILED`, `SHREDDED` and more - see `DocumentEventType`
+for the full list.
+
+```java
+List<DocumentEvent> events = client.getDocumentEvents(senderId, ZonedDateTime.now().minus(Duration.ofDays(1)), ZonedDateTime.now(), 0, 100)
+        .getEvents();
+
+for (DocumentEvent event : events) {
+    System.out.println(event.getType() + " for document " + event.getUuid() + " at " + event.getCreated());
+}
+```
+
+`maxResults` is a cap on the response, not a guarantee that all events in the time interval are
+returned. If you get back exactly `maxResults` events, there may be more - fetch the same interval
+again with `offset` increased by `maxResults`. You have received all events in the interval once a
+call returns fewer events than `maxResults`.
+
+Events are only retained for 30 days, and there is no way to delete an event through the API - store
+the polling state (e.g. the last `to` timestamp used) so you can resume from where you left off.

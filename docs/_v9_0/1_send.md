@@ -95,7 +95,7 @@ client.createMessage(message)
 ```java
 PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
-// The time the SMS is sent out can be based on time after letter is delivered or a specific date. This example specifies that the SMS should be sent out one day after the letter i delivered.
+// The time the SMS is sent out can be based on time after letter is delivered or a specific date. This example specifies that the SMS should be sent out one hour after the letter i delivered.
 Document primaryDocument = new Document(UUID1, "Document subject", FileType.PDF, null, new SmsNotification(1), null, AuthenticationLevel.PASSWORD, SensitivityLevel.NORMAL);
 
 Message message = Message.MessageBuilder.newMessage(UUID2, primaryDocument)
