@@ -34,6 +34,9 @@ collections:
   v16_x:
     output: true
     permalink: /v16.x/
+  v17_x:
+    output: true
+    permalink: /v17.x/
 
 # list of additional links on the right of the top menu
 headerLinks:
