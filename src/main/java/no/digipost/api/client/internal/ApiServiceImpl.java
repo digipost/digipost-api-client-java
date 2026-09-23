@@ -33,7 +33,6 @@ import no.digipost.api.client.internal.http.request.interceptor.RequestBearerTok
 import no.digipost.api.client.internal.http.request.interceptor.RequestContentHashInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestDateInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestPathInterceptor;
-import no.digipost.api.client.internal.http.request.interceptor.RequestSignatureInterceptor;
 import no.digipost.api.client.internal.http.request.interceptor.RequestUserAgentInterceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseContentSHA256Interceptor;
 import no.digipost.api.client.internal.http.response.interceptor.ResponseDateInterceptor;
@@ -67,7 +66,6 @@ import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequestState;
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.security.Digester;
-import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.security.jwt.JwtAuthConfig;
 import no.digipost.api.client.security.jwt.MutualTlsTokenProvider;
 import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
@@ -148,11 +146,6 @@ public class ApiServiceImpl implements AutoCloseable, MessageDeliveryApi, InboxA
     // which was the case for the pattern "yyyy-MM-dd'T'HH:mm:ss.SSSZZ". See commit messages for 59caeb5737e45a15 and dcf41785a84f42caf935 for details.
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
-    public static ApiServiceImpl withCertificateAuthentication(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, Signer signer) {
-        requireNonNull(signer, "signer cannot be null");
-        return new ApiServiceImpl(config, brokerId, null, apiService -> apiService.createCertificateAuthenticatingHttpClient(httpClientBuilder, signer, config));
-    }
-
     public static ApiServiceImpl withJwtMtlsAuthentication(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
         requireNonNull(jwtAuthConfig, "jwtAuthConfig cannot be null");
         return withMutualTlsTokenProvider(config, httpClientBuilder, brokerId, new MutualTlsTokenProvider(jwtAuthConfig, brokerId, config.digipostApiUri, config.clock));
@@ -169,23 +162,6 @@ public class ApiServiceImpl implements AutoCloseable, MessageDeliveryApi, InboxA
         this.cached = new Cached(() -> fetchEntryPoint(Optional.empty()));
         this.tokenProvider = tokenProvider;
         this.httpClient = httpClientFactory.apply(this);
-    }
-
-    private CloseableHttpClient createCertificateAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, Signer signer, DigipostClientConfig config) {
-        Clock clock = config.clock;
-        CloseableHttpClient httpClient = httpClientBuilder
-                .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, clock))
-                .addRequestInterceptorLast(new RequestUserAgentInterceptor())
-                .addRequestInterceptorLast(new RequestPathInterceptor())
-                .addRequestInterceptorLast(new RequestContentHashInterceptor(config.eventLogger, Digester.sha256, Headers.X_Content_SHA256))
-                .addRequestInterceptorLast(new RequestSignatureInterceptor(signer, config.eventLogger))
-                .addResponseInterceptorLast(new ResponseDateInterceptor(clock))
-                .addResponseInterceptorLast(new ResponseContentSHA256Interceptor())
-                .addResponseInterceptorLast(new ResponseSignatureInterceptor(this::getEntryPoint))
-                .build();
-
-        eventLogger.log("Initialiserte apache-klient (sertifikatmodus) mot " + config.digipostApiUri);
-        return httpClient;
     }
 
     private CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, MutualTlsTokenProvider tokenProvider, DigipostClientConfig config) {
