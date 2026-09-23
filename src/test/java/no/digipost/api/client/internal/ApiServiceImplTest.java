@@ -17,7 +17,6 @@ package no.digipost.api.client.internal;
 
 import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.DigipostClientConfig;
-import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.security.jwt.JwtAuthConfig;
 import no.digipost.api.client.security.jwt.MutualTlsTokenProvider;
 import no.digipost.http.client.HttpClientFactory;
@@ -35,30 +34,12 @@ public class ApiServiceImplTest {
     private static final String P12_RESOURCE = "/no/digipost/api/client/security/jwt/client-cert.p12";
     private static final String P12_PASSWORD = "qwer1234";
 
-    private static final Signer DUMMY_SIGNER = dataToSign -> new byte[0];
-
     @Test
     void bygger_jwt_autentiserende_klient() {
         DigipostClientConfig config = newConfiguration().build();
 
         assertDoesNotThrow(() ->
                 ApiServiceImpl.withJwtMtlsAuthentication(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, jwtAuthConfig()));
-    }
-
-    @Test
-    void bygger_sertifikat_autentiserende_klient() {
-        DigipostClientConfig config = newConfiguration().build();
-
-        assertDoesNotThrow(() ->
-                ApiServiceImpl.withCertificateAuthentication(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, DUMMY_SIGNER));
-    }
-
-    @Test
-    void krever_signer_for_sertifikatbasert_autentisering() {
-        DigipostClientConfig config = newConfiguration().build();
-
-        assertThrows(NullPointerException.class, () ->
-                ApiServiceImpl.withCertificateAuthentication(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, null));
     }
 
     @Test
@@ -79,14 +60,6 @@ public class ApiServiceImplTest {
 
         assertThrows(IllegalStateException.class, tokenProvider::getToken,
                 "token provideren har fortsatt en åpen http-klient, og lekker connection poolen sin");
-    }
-
-    @Test
-    void lukking_av_sertifikatbasert_klient_gaar_greit() {
-        ApiServiceImpl apiService = ApiServiceImpl.withCertificateAuthentication(
-                newConfiguration().build(), HttpClientFactory.createDefaultBuilder(), BROKER_ID, DUMMY_SIGNER);
-
-        assertDoesNotThrow(apiService::close);
     }
 
     private static JwtAuthConfig jwtAuthConfig() {

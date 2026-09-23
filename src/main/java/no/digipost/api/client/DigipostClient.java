@@ -52,7 +52,6 @@ import no.digipost.api.client.representations.sender.SenderInformation;
 import no.digipost.api.client.representations.shareddocuments.ShareDocumentsRequestState;
 import no.digipost.api.client.representations.shareddocuments.SharedDocumentContent;
 import no.digipost.api.client.security.CryptoUtil;
-import no.digipost.api.client.security.Signer;
 import no.digipost.api.client.security.jwt.JwtAuthConfig;
 import no.digipost.api.client.shareddocuments.SharedDocumentsApi;
 import no.digipost.api.client.tag.TagApi;
@@ -76,7 +75,7 @@ import static no.digipost.api.client.util.JAXBContextUtils.jaxbContext;
 
 /**
  * En klient for å sende brev gjennom Digipost. Hvis et objekt av denne klassen
- * er opprettet med et fungerende sertifikat og tilhørende passord, kan man
+ * er opprettet med en klient-ID og et fungerende klientsertifikat, kan man
  * gjøre søk og sende brev gjennom Digipost.
  */
 public class DigipostClient implements AutoCloseable {
@@ -99,29 +98,6 @@ public class DigipostClient implements AutoCloseable {
     private final TagApi tagApi;
     private final SharedDocumentsApi sharedDocumentsApi;
 
-
-    /**
-     * Creates a client that authenticates with the Digipost API using certificate-based request signing.
-     *
-     * @param config the client configuration, e.g. which API to communicate with
-     * @param brokerId the broker permitted to integrate with the Digipost API
-     * @param signer signs each request with the broker's private key
-     */
-    public static DigipostClient withCertificateAuthentication(DigipostClientConfig config, BrokerId brokerId, Signer signer) {
-        return withCertificateAuthentication(config, brokerId, signer, HttpClientFactory.createDefaultBuilder());
-    }
-
-    /**
-     * Creates a client that authenticates with the Digipost API using certificate-based request signing.
-     *
-     * @param config the client configuration, e.g. which API to communicate with
-     * @param brokerId the broker permitted to integrate with the Digipost API
-     * @param signer signs each request with the broker's private key
-     * @param clientBuilder the Apache {@link HttpClientBuilder} used to build the underlying HTTP client, allowing customization of e.g. connection manager, timeouts and proxy settings
-     */
-    public static DigipostClient withCertificateAuthentication(DigipostClientConfig config, BrokerId brokerId, Signer signer, HttpClientBuilder clientBuilder) {
-        return new DigipostClient(config, ApiServiceImpl.withCertificateAuthentication(config, clientBuilder, brokerId, signer));
-    }
 
     /**
      * Creates a client that authenticates with the Digipost API using OAuth 2.0 access tokens
