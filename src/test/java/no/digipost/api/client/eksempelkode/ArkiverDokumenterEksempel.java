@@ -54,7 +54,7 @@ public class ArkiverDokumenterEksempel {
         }
 
         // 2. Vi oppretter en DigipostClient
-        DigipostClient client = DigipostClient.withJwtMtlsAuthentication(DigipostClientConfig.newConfiguration().build(),
+        DigipostClient client = DigipostClient.create(DigipostClientConfig.newConfiguration().build(),
                 AVSENDERS_KONTOID.asBrokerId(), jwtAuthConfig);
 
         // 3. Vi beskriver to dokumenter du ønsker å arkivere i ditt arkiv.

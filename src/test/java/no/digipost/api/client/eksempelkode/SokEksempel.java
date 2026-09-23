@@ -56,7 +56,7 @@ public class SokEksempel {
         }
 
         // 2. Vi oppretter en DigipostClient
-        DigipostClient client = DigipostClient.withJwtMtlsAuthentication(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, jwtAuthConfig);
+        DigipostClient client = DigipostClient.create(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, jwtAuthConfig);
 
         // 3. Vi søker etter personer med matchende navn eller adresse
         List<Recipient> recipients = client.search("Ole Nilsen Stavanger").getRecipients();
