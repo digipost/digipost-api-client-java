@@ -109,7 +109,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 
 import static jakarta.xml.bind.JAXB.unmarshal;
 import static java.util.Objects.requireNonNull;
@@ -152,16 +151,16 @@ public class ApiServiceImpl implements AutoCloseable, MessageDeliveryApi, InboxA
     }
 
     static ApiServiceImpl withMutualTlsTokenProvider(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, MutualTlsTokenProvider tokenProvider) {
-        return new ApiServiceImpl(config, brokerId, tokenProvider, apiService -> apiService.createJwtAuthenticatingHttpClient(httpClientBuilder, tokenProvider, config));
+        return new ApiServiceImpl(config, brokerId, httpClientBuilder, tokenProvider);
     }
 
-    private ApiServiceImpl(DigipostClientConfig config, BrokerId brokerId, MutualTlsTokenProvider tokenProvider, Function<ApiServiceImpl, CloseableHttpClient> httpClientFactory) {
+    private ApiServiceImpl(DigipostClientConfig config, BrokerId brokerId, HttpClientBuilder httpClientBuilder, MutualTlsTokenProvider tokenProvider) {
         this.brokerId = brokerId;
         this.eventLogger = config.eventLogger.withDebugLogTo(LOG);
         this.digipostUrl = config.digipostApiUri;
         this.cached = new Cached(() -> fetchEntryPoint(Optional.empty()));
-        this.tokenProvider = tokenProvider;
-        this.httpClient = httpClientFactory.apply(this);
+        this.tokenProvider = requireNonNull(tokenProvider, "tokenProvider cannot be null");
+        this.httpClient = createJwtAuthenticatingHttpClient(httpClientBuilder, tokenProvider, config);
     }
 
     private CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, MutualTlsTokenProvider tokenProvider, DigipostClientConfig config) {
