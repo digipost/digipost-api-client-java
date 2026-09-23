@@ -26,7 +26,7 @@ import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.SmsNotification;
-import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.security.jwt.JwtAuthConfig;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -50,7 +50,10 @@ public class FallbackTilPrintEksempel {
     // Din virksomhets Digipost-kontoid
     private static final SenderId AVSENDERS_KONTOID = SenderId.of(10987);
 
-    // Passordet sertifikatfilen er beskyttet med
+    // Klient-IDen du fikk da du registrerte klienten hos Digipost
+    private static final String KLIENT_ID = "din-klient-id";
+
+    // Passordet klientsertifikatet er beskyttet med
     private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
 
     public static void main(final String[] args) throws IOException {
@@ -59,16 +62,19 @@ public class FallbackTilPrintEksempel {
         // BouncyCastle
         Security.addProvider(new BouncyCastleProvider());
 
-        // 2. Vi lager en Signer ved å lese inn sertifikatet du har knyttet til
-        // din Digipost-konto (i .p12-formatet)
-        Signer signer;
-        try (InputStream sertifikatInputStream = lesInnSertifikat()) {
-            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, SERTIFIKAT_PASSORD);
+        // 2. Vi setter opp autentiseringen ved å lese inn klientsertifikatet
+        // (i .p12-formatet) som brukes i mTLS-handshaken mot token-endepunktet
+        JwtAuthConfig jwtAuthConfig;
+        try (InputStream sertifikatInputStream = lesInnKlientsertifikat()) {
+            jwtAuthConfig = JwtAuthConfig
+                    .newConfig(KLIENT_ID)
+                    .pkcs12KeyStore(sertifikatInputStream, SERTIFIKAT_PASSORD)
+                    .build();
         }
 
         // 3. Vi oppretter en DigipostClient
-        DigipostClient client = DigipostClient.withCertificateAuthentication(DigipostClientConfig.newConfiguration().build(),
-                                                   AVSENDERS_KONTOID.asBrokerId(), signer);
+        DigipostClient client = DigipostClient.withJwtMtlsAuthentication(DigipostClientConfig.newConfiguration().build(),
+                                                   AVSENDERS_KONTOID.asBrokerId(), jwtAuthConfig);
 
         // 4. Vi oppretter et fødselsnummerobjekt som skal brukes til å
         // identifisere mottaker i Digipost
@@ -109,13 +115,13 @@ public class FallbackTilPrintEksempel {
         return null;
     }
 
-    private static InputStream lesInnSertifikat() {
+    private static InputStream lesInnKlientsertifikat() {
         try {
-            // Leser inn sertifikatet selv med Apache Commons FileUtils.
-            return FileUtils.openInputStream(new File("/path/til/sertifikatfil.p12"));
+            // Leser inn klientsertifikatet selv med Apache Commons FileUtils.
+            return FileUtils.openInputStream(new File("/path/til/klientsertifikat.p12"));
         } catch (IOException e) {
-            // Håndter at sertifikatet ikke kunne leses!
-            throw new RuntimeException("Kunne ikke lese sertifikatfil");
+            // Håndter at klientsertifikatet ikke kunne leses!
+            throw new RuntimeException("Kunne ikke lese klientsertifikatet");
         }
     }
 }

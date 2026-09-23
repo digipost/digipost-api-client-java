@@ -22,7 +22,7 @@ import no.digipost.api.client.representations.Document;
 import no.digipost.api.client.representations.Message;
 import no.digipost.api.client.representations.NameAndAddress;
 import no.digipost.api.client.representations.SmsNotification;
-import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.security.jwt.JwtAuthConfig;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,21 +43,27 @@ public class ForsendelseEksempelNavnogAdresse {
     // Din virksomhets Digipost-kontoid
     private static final SenderId AVSENDERS_KONTOID = SenderId.of(10987);
 
-    // Passordet sertifikatfilen er beskyttet med
+    // Klient-IDen du fikk da du registrerte klienten hos Digipost
+    private static final String KLIENT_ID = "din-klient-id";
+
+    // Passordet klientsertifikatet er beskyttet med
     private static final String SERTIFIKAT_PASSORD = "SertifikatPassord123";
 
     public static void main(final String[] args) throws IOException {
 
-        // 1. Vi lager en Signer ved å lese inn sertifikatet du har knyttet til
-        // din Digipost-konto (i .p12-formatet)
-        Signer signer;
-        try (InputStream sertifikatInputStream = lesInnSertifikat()) {
-            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, SERTIFIKAT_PASSORD);
+        // 1. Vi setter opp autentiseringen ved å lese inn klientsertifikatet
+        // (i .p12-formatet) som brukes i mTLS-handshaken mot token-endepunktet
+        JwtAuthConfig jwtAuthConfig;
+        try (InputStream sertifikatInputStream = lesInnKlientsertifikat()) {
+            jwtAuthConfig = JwtAuthConfig
+                    .newConfig(KLIENT_ID)
+                    .pkcs12KeyStore(sertifikatInputStream, SERTIFIKAT_PASSORD)
+                    .build();
         }
 
         // 2. Vi oppretter en DigipostClient
-        DigipostClient client = DigipostClient.withCertificateAuthentication(DigipostClientConfig.newConfiguration().build(),
-                                                   AVSENDERS_KONTOID.asBrokerId(), signer);
+        DigipostClient client = DigipostClient.withJwtMtlsAuthentication(DigipostClientConfig.newConfiguration().build(),
+                                                   AVSENDERS_KONTOID.asBrokerId(), jwtAuthConfig);
 
         // 3. Vi oppretter et nameandaddress-objekt
         NameAndAddress nameAndAddress = new NameAndAddress("Ola Nordmann", "Gateveien 1", "Oppgang B", "0001", "Oslo");
@@ -82,13 +88,13 @@ public class ForsendelseEksempelNavnogAdresse {
         return null;
     }
 
-    private static InputStream lesInnSertifikat() {
+    private static InputStream lesInnKlientsertifikat() {
         try {
-            // Leser inn sertifikatet
-            return new FileInputStream(new File("/path/til/sertifikatfil.p12"));
+            // Leser inn klientsertifikatet
+            return new FileInputStream(new File("/path/til/klientsertifikat.p12"));
         } catch (FileNotFoundException e) {
-            // Håndter at sertifikatet ikke kunne leses!
-            throw new RuntimeException("Kunne ikke lese sertifikatfil: " + e.getMessage(), e);
+            // Håndter at klientsertifikatet ikke kunne leses!
+            throw new RuntimeException("Kunne ikke lese klientsertifikatet: " + e.getMessage(), e);
         }
     }
 }
