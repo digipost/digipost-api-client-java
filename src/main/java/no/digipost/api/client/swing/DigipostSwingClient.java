@@ -33,7 +33,7 @@ import no.digipost.api.client.representations.PersonalIdentificationNumber;
 import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.SmsNotification;
-import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.security.jwt.JwtAuthConfig;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -85,6 +85,8 @@ public class DigipostSwingClient {
     private JFrame frmDigipostApiClient;
     private JTextField certField;
     private JPasswordField passwordField;
+    private JTextField clientIdField;
+    private JTextField tokenEndpointField;
     private JTextField senderField;
     private JTextField subjectField;
     private JTextField recipientDigipostAddressField;
@@ -558,27 +560,26 @@ public class DigipostSwingClient {
         velgCertPanel.add(helpPanel, BorderLayout.NORTH);
         helpPanel.setLayout(new BorderLayout(0, 0));
 
-        JLabel steg1Label = new JLabel("Steg 1: Velg Sertifikat");
+        JLabel steg1Label = new JLabel("Steg 1: Velg klientsertifikat");
         steg1Label.setFont(new Font("Dialog", Font.BOLD, 16));
         helpPanel.add(steg1Label);
 
         JLabel steg1SubLabel = new JLabel(
-                "<html><br>Før du kan sende brev, må du laste inn sertifikatet som er knyttet til din virksomhets Digipost-konto."
-                        + " Dette må være på .p12-formatet. <br><br>Hvis dette er et Buypass-sertifikat, og du enda ikke har lastet "
-                        + "det opp til Digipost, kan du gjøre dette på <a href='https://www.digipost.no/virksomhet'>"
-                        + "https://www.digipost.no/virksomhet</a>. Les mer om dette i dokumentasjonen.</html>");
+                "<html><br>Før du kan sende brev, må du laste inn klientsertifikatet som brukes i mTLS-handshaken mot "
+                        + "token-endepunktet. Dette må være på .p12-formatet. <br><br>Klient-IDen og klientsertifikatet får du ved å "
+                        + "registrere en klient i Digipost sin OAuth 2-klientautoritet. Les mer om dette i dokumentasjonen.</html>");
         helpPanel.add(steg1SubLabel, BorderLayout.SOUTH);
 
         JPanel certPanel = new JPanel();
         velgCertPanel.add(certPanel, BorderLayout.CENTER);
         GridBagLayout gbl_certPanel = new GridBagLayout();
         gbl_certPanel.columnWidths = new int[] { 0, 0, 0, 0 };
-        gbl_certPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0 };
+        gbl_certPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         gbl_certPanel.columnWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
-        gbl_certPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gbl_certPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
         certPanel.setLayout(gbl_certPanel);
 
-        JLabel certLabel = new JLabel("Sertifikatfil (.p12)");
+        JLabel certLabel = new JLabel("Klientsertifikat (.p12)");
         certPanel.add(certLabel, createGridBagConstraintsForLabel(0, 0));
 
         certField = new JTextField();
@@ -609,18 +610,32 @@ public class DigipostSwingClient {
         certPanel.add(passwordField, createGridBagConstraintsForField(1, 1, 1));
         passwordField.setColumns(10);
 
+        JLabel clientIdLabel = new JLabel("Klient-ID");
+        certPanel.add(clientIdLabel, createGridBagConstraintsForLabel(0, 2));
+
+        clientIdField = new JTextField();
+        certPanel.add(clientIdField, createGridBagConstraintsForField(1, 2, 1));
+        clientIdField.setColumns(10);
+
+        JLabel tokenEndpointLabel = new JLabel("Token-endepunkt");
+        certPanel.add(tokenEndpointLabel, createGridBagConstraintsForLabel(0, 3));
+
+        tokenEndpointField = new JTextField("https://midp.digipost.no/oauth2/token");
+        certPanel.add(tokenEndpointField, createGridBagConstraintsForField(1, 3, 1));
+        tokenEndpointField.setColumns(10);
+
         JLabel avsenderLabel = new JLabel("Avsenders ID");
-        certPanel.add(avsenderLabel, createGridBagConstraintsForLabel(0, 2));
+        certPanel.add(avsenderLabel, createGridBagConstraintsForLabel(0, 4));
 
         senderField = new JTextField();
-        certPanel.add(senderField, createGridBagConstraintsForField(1, 2, 1));
+        certPanel.add(senderField, createGridBagConstraintsForField(1, 4, 1));
         senderField.setColumns(10);
 
         JLabel endpointLabel = new JLabel("API-endpoint URL");
-        certPanel.add(endpointLabel, createGridBagConstraintsForLabel(0, 3));
+        certPanel.add(endpointLabel, createGridBagConstraintsForLabel(0, 5));
 
         endpointField = new JTextField("https://api.digipost.no");
-        certPanel.add(endpointField, createGridBagConstraintsForField(1, 3, 1));
+        certPanel.add(endpointField, createGridBagConstraintsForField(1, 5, 1));
         endpointField.setColumns(10);
 
         JButton nesteButton = new JButton("Neste");
@@ -636,15 +651,21 @@ public class DigipostSwingClient {
                         .digipostApiUri(URI.create(endpointField.getText()))
                         .build();
                 try (InputStream certStream = newInputStream(Paths.get(certField.getText()))) {
-                    client = DigipostClient.withCertificateAuthentication(clientConfig, BrokerId.of(Long.parseLong(senderField.getText())),
-                            Signer.usingKeyFromPKCS12KeyStore(certStream, new String(passwordField.getPassword())));
+                    JwtAuthConfig jwtAuthConfig = JwtAuthConfig
+                            .newConfig(clientIdField.getText())
+                            .tokenEndpoint(tokenEndpointField.getText())
+                            .pkcs12KeyStore(certStream, new String(passwordField.getPassword()))
+                            .build();
+                    client = DigipostClient.withJwtMtlsAuthentication(clientConfig, BrokerId.of(Long.parseLong(senderField.getText())),
+                            jwtAuthConfig);
                 } catch (NumberFormatException e1) {
                     eventLogger.log("FEIL: Avsenders ID må være et tall > 0");
                 } catch (IOException e1) {
-                    eventLogger.log("FEIL: Klarte ikke å lese sertifikatfil:\n" + e1);
+                    eventLogger.log("FEIL: Klarte ikke å lese klientsertifikatet:\n" + e1);
                 } catch (Exception e1) {
                     eventLogger.log("FEIL: Kunne ikke initialisere Digipost-API-klienten. Dette kan f.eks skyldes at"
-                            + " sertifikatfilen var ugyldig, eller at du skrev inn feil passord. Feilmelding var:\n" + e1.getMessage());
+                            + " klientsertifikatet var ugyldig, at du skrev inn feil passord, eller at klient-IDen er ukjent."
+                            + " Feilmelding var:\n" + e1.getMessage());
                 }
             }
         });
@@ -653,11 +674,11 @@ public class DigipostSwingClient {
         GridBagConstraints gbc_verticalStrut = new GridBagConstraints();
         gbc_verticalStrut.insets = new Insets(0, 0, 5, 0);
         gbc_verticalStrut.gridx = 2;
-        gbc_verticalStrut.gridy = 4;
+        gbc_verticalStrut.gridy = 6;
         certPanel.add(verticalStrut, gbc_verticalStrut);
         GridBagConstraints gbc_nesteButton = new GridBagConstraints();
         gbc_nesteButton.gridx = 2;
-        gbc_nesteButton.gridy = 5;
+        gbc_nesteButton.gridy = 7;
         certPanel.add(nesteButton, gbc_nesteButton);
 
         CardLayout l = (CardLayout) contentPane.getLayout();
