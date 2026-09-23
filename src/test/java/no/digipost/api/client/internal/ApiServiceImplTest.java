@@ -51,6 +51,14 @@ public class ApiServiceImplTest {
     }
 
     @Test
+    void krever_token_provider() {
+        DigipostClientConfig config = newConfiguration().build();
+
+        assertThrows(NullPointerException.class, () ->
+                ApiServiceImpl.withMutualTlsTokenProvider(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, null));
+    }
+
+    @Test
     void lukker_ogsaa_token_provideren_sin_http_klient() {
         DigipostClientConfig config = newConfiguration().build();
         MutualTlsTokenProvider tokenProvider = new MutualTlsTokenProvider(jwtAuthConfig(), BROKER_ID, config.digipostApiUri, config.clock);
