@@ -203,7 +203,9 @@ byte stream.
 final ArchiveDocument archiveDocument;
 
 URI getDocumentContentStreamURI = archiveDocument.getDocumentContentStream().orElseThrow();
-InputStream content = client.getArchiveDocumentContentStream(getDocumentContentStreamURI);
+try (InputStream content = client.getArchiveDocumentContentStream(getDocumentContentStreamURI)) {
+    // use content
+}
 ```
 
 ## Update document attributes and/or referenceID

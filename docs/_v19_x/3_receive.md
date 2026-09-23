@@ -33,7 +33,9 @@ Inbox inbox = client.getInbox(SenderId.of(123456));
 InboxDocument documentMetadata = inbox.documents.get(0);
 
 System.out.println("Content type is: " + documentMetadata.getContentType());
-InputStream documentContent = client.getInboxDocumentContent(documentMetadata);
+try (InputStream documentContent = client.getInboxDocumentContent(documentMetadata)) {
+    // use documentContent
+}
 ```
 
 ## Delete document
@@ -55,6 +57,8 @@ InboxDocument documentMetadata = inbox.documents.get(0);
 InboxDocument attachment = documentMetadata.getAttachments().get(0);
 
 System.out.println("Content type is: " + attachment.getContentType());
-InputStream attachmentContent = client.getInboxDocumentContent(attachment);
+try (InputStream attachmentContent = client.getInboxDocumentContent(attachment)) {
+    // use attachmentContent
+}
 ```
 
