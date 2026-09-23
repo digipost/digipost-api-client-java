@@ -22,13 +22,13 @@ import no.digipost.api.client.representations.archive.Archive;
 import no.digipost.api.client.representations.archive.ArchiveDocument;
 import no.digipost.api.client.representations.archive.ArchiveDocumentContent;
 import no.digipost.api.client.representations.archive.Archives;
-import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.security.jwt.JwtAuthConfig;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.Period;
@@ -44,13 +44,19 @@ public class GithubPagesArchiveExamples {
 
     private DigipostClient client;
 
-    public void set_up_client() throws FileNotFoundException {
+    public void set_up_client() throws IOException {
         SenderId senderId = SenderId.of(10987);
 
-        DigipostClient client = DigipostClient.withCertificateAuthentication(
-                DigipostClientConfig.newConfiguration().build(),
-                senderId.asBrokerId(),
-                Signer.usingKeyFromPKCS12KeyStore(new FileInputStream("certificate.p12"), "TheSecretPassword"));
+        JwtAuthConfig jwtAuthConfig;
+        try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("client-cert.p12"))) {
+            jwtAuthConfig = JwtAuthConfig
+                    .newConfig("your-client-id")
+                    .pkcs12KeyStore(sertifikatInputStream, "TheSecretPassword")
+                    .build();
+        }
+
+        DigipostClient client = DigipostClient.withJwtMtlsAuthentication(
+                DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), jwtAuthConfig);
     }
 
     public void get_list_of_archives() throws IOException {
