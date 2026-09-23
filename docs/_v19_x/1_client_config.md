@@ -15,16 +15,12 @@ This client requires Java 11 and `jakarta.xml-bind`.
 ### Configure for production use
 
 To instantiate the client instance you need to supply your assigned _broker ID_, which
-is set up to be permitted to integrate with the Digipost API. In addition, you must choose
-an authentication method. The client supports two:
+is set up to be permitted to integrate with the Digipost API. The client authenticates
+with OAuth 2.0 over mutual TLS (JWT/mTLS): it obtains access tokens over an mTLS-secured
+channel and sends them as bearer tokens.
 
-- **OAuth 2.0 over mutual TLS (JWT/mTLS):** the client obtains access tokens over an
-  mTLS-secured channel and sends them as bearer tokens. Use
-  `DigipostClient.withJwtMtlsAuthentication(...)`.
-- **Certificate-based signing (legacy):** each request is signed with a private key. Use
-  `DigipostClient.withCertificateAuthentication(...)`.
-
-The chosen method is stated explicitly in the factory method you call.
+Certificate-based request signing was removed in 19.0.0. If you are upgrading from 18.x,
+see [Migrating from certificate-based authentication](#migrating-from-certificate-based-authentication).
 
 
 #### JWT/mTLS authentication
@@ -48,9 +44,12 @@ try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("client-
             .build();
 }
 
-DigipostClient client = DigipostClient.withJwtMtlsAuthentication(
+DigipostClient client = DigipostClient.create(
         DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), jwtAuthConfig);
 ```
+
+This example will configure the client to communicate with the regular Digipost production
+environment.
 
 Access tokens are fetched lazily on first use and cached until shortly before they expire.
 They are requested for the API given by `DigipostClientConfig.digipostApiUri`, so you do
@@ -78,28 +77,24 @@ JwtAuthConfig jwtAuthConfig = JwtAuthConfig
 Both parameters have sensible defaults, so pass `HttpClientSettings.DEFAULT` or
 `HttpClientConnectionSettings.DEFAULT` for the one you do not need to change. The timeouts of
 the client talking to the Digipost API itself are configured separately, with the
-`HttpClientBuilder` accepted by `DigipostClient.withJwtMtlsAuthentication(..)`.
+`HttpClientBuilder` accepted by `DigipostClient.create(..)`.
 
 
-#### Certificate-based authentication (legacy)
+### Custom HTTP client
 
-Create a `Signer` instance, e.g. by using a `.p12` file to read the private key used to
-sign the API requests.
+The client uses Apache HttpClient 5 internally. If you need control over the underlying
+HTTP client (e.g. timeouts or proxy settings), you can supply your own `HttpClientBuilder`:
 
 ```java
-SenderId senderId = SenderId.of(123456);
+HttpClientBuilder clientBuilder = HttpClientFactory.createDefaultBuilder();
 
-Signer signer;
-try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certificate.p12"))) {
-    signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, "TheSecretPassword");
-}
-
-DigipostClient client = DigipostClient.withCertificateAuthentication(
-        DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), signer);
+DigipostClient client = DigipostClient.create(
+        DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), jwtAuthConfig, clientBuilder);
 ```
 
-This example will configure the client to communicate with the regular Digipost production
-environment.
+Note that the connection manager of the builder you pass is replaced: the client needs one
+configured with the client certificate, so that the mTLS handshake against the API succeeds.
+
 
 ### Other environments
 
@@ -111,7 +106,7 @@ URI apiUri = URI.create("https://api.test.digipost.no");
 DigipostClientConfig config = DigipostClientConfig.newConfiguration().digipostApiUri(apiUri).build();
 ```
 
-When using JWT/mTLS, also point `JwtAuthConfig` at the token endpoint of that environment:
+Also point `JwtAuthConfig` at the token endpoint of that environment:
 
 ```java
 JwtAuthConfig jwtAuthConfig = JwtAuthConfig
@@ -132,3 +127,45 @@ DigipostClientConfig config = DigipostClientConfig.newConfiguration().digipostAp
 ```
 
 
+### Migrating from certificate-based authentication
+
+Version 19.0.0 removes certificate-based request signing. `Signer`,
+`Signer.usingKeyFromPKCS12KeyStore(..)` and
+`DigipostClient.withCertificateAuthentication(..)` are gone, with no deprecation period.
+18.x is the last version that signs requests. `DigipostClient.withJwtMtlsAuthentication(..)`
+was renamed to `DigipostClient.create(..)` at the same time, as it is now the only way to
+build a client.
+
+To migrate, register a client with the
+Digipost OAuth 2 client authority to get a client ID,
+and replace the `Signer` with a `JwtAuthConfig`:
+
+```java
+// Before (18.x)
+Signer signer;
+try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certificate.p12"))) {
+    signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, "TheSecretPassword");
+}
+
+DigipostClient client = DigipostClient.withCertificateAuthentication(
+        DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), signer);
+
+// After (19.x)
+JwtAuthConfig jwtAuthConfig;
+try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("client-cert.p12"))) {
+    jwtAuthConfig = JwtAuthConfig
+            .newConfig("your-client-id")
+            .pkcs12KeyStore(sertifikatInputStream, "TheSecretPassword")
+            .build();
+}
+
+DigipostClient client = DigipostClient.create(
+        DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), jwtAuthConfig);
+```
+
+Note that the `.p12` is generally **not** the same file. It is no longer a signing key for
+your requests, but the client certificate presented in the mTLS handshake against the token
+endpoint, and it is issued when you register the client.
+
+Nothing else changes. The server still signs its responses and the client still verifies
+them, so your `DigipostClientConfig`, message building and delivery code are untouched.
