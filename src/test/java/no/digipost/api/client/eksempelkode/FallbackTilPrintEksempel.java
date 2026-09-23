@@ -73,7 +73,7 @@ public class FallbackTilPrintEksempel {
         }
 
         // 3. Vi oppretter en DigipostClient
-        DigipostClient client = DigipostClient.withJwtMtlsAuthentication(DigipostClientConfig.newConfiguration().build(),
+        DigipostClient client = DigipostClient.create(DigipostClientConfig.newConfiguration().build(),
                                                    AVSENDERS_KONTOID.asBrokerId(), jwtAuthConfig);
 
         // 4. Vi oppretter et fødselsnummerobjekt som skal brukes til å

@@ -61,7 +61,7 @@ public class BatchSendMessagesEksempel {
 		}
 
 		// 2. Vi oppretter en DigipostClient
-		DigipostClient client = DigipostClient.withJwtMtlsAuthentication(
+		DigipostClient client = DigipostClient.create(
 				DigipostClientConfig.newConfiguration().digipostApiUri(URI.create("http://localhost:8282")).build(),
 				AVSENDERS_KONTOID.asBrokerId(), jwtAuthConfig);
 

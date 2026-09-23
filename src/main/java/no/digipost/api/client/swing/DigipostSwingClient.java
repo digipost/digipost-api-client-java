@@ -656,7 +656,7 @@ public class DigipostSwingClient {
                             .tokenEndpoint(tokenEndpointField.getText())
                             .pkcs12KeyStore(certStream, new String(passwordField.getPassword()))
                             .build();
-                    client = DigipostClient.withJwtMtlsAuthentication(clientConfig, BrokerId.of(Long.parseLong(senderField.getText())),
+                    client = DigipostClient.create(clientConfig, BrokerId.of(Long.parseLong(senderField.getText())),
                             jwtAuthConfig);
                 } catch (NumberFormatException e1) {
                     eventLogger.log("FEIL: Avsenders ID må være et tall > 0");

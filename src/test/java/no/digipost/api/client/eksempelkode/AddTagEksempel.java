@@ -52,7 +52,7 @@ public class AddTagEksempel {
         }
 
         // 2. Vi oppretter en DigipostClient
-        DigipostClient client = DigipostClient.withJwtMtlsAuthentication(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, jwtAuthConfig);
+        DigipostClient client = DigipostClient.create(DigipostClientConfig.newConfiguration().build(), AVSENDERS_KONTOID, jwtAuthConfig);
 
         // 3. Vi oppretter et fødselsnummerobjekt
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");

@@ -146,7 +146,7 @@ public class ApiServiceImpl implements AutoCloseable, MessageDeliveryApi, InboxA
     // which was the case for the pattern "yyyy-MM-dd'T'HH:mm:ss.SSSZZ". See commit messages for 59caeb5737e45a15 and dcf41785a84f42caf935 for details.
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
 
-    public static ApiServiceImpl withJwtMtlsAuthentication(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
+    public static ApiServiceImpl create(DigipostClientConfig config, HttpClientBuilder httpClientBuilder, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
         requireNonNull(jwtAuthConfig, "jwtAuthConfig cannot be null");
         return withMutualTlsTokenProvider(config, httpClientBuilder, brokerId, new MutualTlsTokenProvider(jwtAuthConfig, brokerId, config.digipostApiUri, config.clock));
     }

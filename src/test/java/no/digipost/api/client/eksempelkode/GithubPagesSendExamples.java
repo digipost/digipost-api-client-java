@@ -77,7 +77,7 @@ public class GithubPagesSendExamples {
                     .build();
         }
 
-        DigipostClient client = DigipostClient.withJwtMtlsAuthentication(
+        DigipostClient client = DigipostClient.create(
                 DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), jwtAuthConfig);
     }
 
@@ -252,7 +252,7 @@ public class GithubPagesSendExamples {
                     .build();
         }
 
-        DigipostClient client = DigipostClient.withJwtMtlsAuthentication(config, SENDER_ID.asBrokerId(), jwtAuthConfig);
+        DigipostClient client = DigipostClient.create(config, SENDER_ID.asBrokerId(), jwtAuthConfig);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 

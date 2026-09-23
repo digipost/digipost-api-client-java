@@ -55,7 +55,7 @@ public class GithubPagesArchiveExamples {
                     .build();
         }
 
-        DigipostClient client = DigipostClient.withJwtMtlsAuthentication(
+        DigipostClient client = DigipostClient.create(
                 DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), jwtAuthConfig);
     }
 

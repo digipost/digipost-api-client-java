@@ -39,7 +39,7 @@ public class ApiServiceImplTest {
         DigipostClientConfig config = newConfiguration().build();
 
         assertDoesNotThrow(() ->
-                ApiServiceImpl.withJwtMtlsAuthentication(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, jwtAuthConfig()));
+                ApiServiceImpl.create(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, jwtAuthConfig()));
     }
 
     @Test
@@ -47,7 +47,7 @@ public class ApiServiceImplTest {
         DigipostClientConfig config = newConfiguration().build();
 
         assertThrows(NullPointerException.class, () ->
-                ApiServiceImpl.withJwtMtlsAuthentication(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, null));
+                ApiServiceImpl.create(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, null));
     }
 
     @Test

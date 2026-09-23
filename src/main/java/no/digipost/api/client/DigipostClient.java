@@ -107,8 +107,8 @@ public class DigipostClient implements AutoCloseable {
      * @param brokerId the broker permitted to integrate with the Digipost API
      * @param jwtAuthConfig configures the token endpoint and the client certificate used for mTLS
      */
-    public static DigipostClient withJwtMtlsAuthentication(DigipostClientConfig config, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
-        return withJwtMtlsAuthentication(config, brokerId, jwtAuthConfig, HttpClientFactory.createDefaultBuilder());
+    public static DigipostClient create(DigipostClientConfig config, BrokerId brokerId, JwtAuthConfig jwtAuthConfig) {
+        return create(config, brokerId, jwtAuthConfig, HttpClientFactory.createDefaultBuilder());
     }
 
     /**
@@ -119,8 +119,8 @@ public class DigipostClient implements AutoCloseable {
      * @param jwtAuthConfig configures the token endpoint and the client certificate used for mTLS
      * @param clientBuilder the Apache {@link HttpClientBuilder} used to build the underlying HTTP client, allowing customization of e.g. timeouts and proxy settings. Note that its connection manager is replaced with one configured for the mTLS handshake.
      */
-    public static DigipostClient withJwtMtlsAuthentication(DigipostClientConfig config, BrokerId brokerId, JwtAuthConfig jwtAuthConfig, HttpClientBuilder clientBuilder) {
-        return new DigipostClient(config, ApiServiceImpl.withJwtMtlsAuthentication(config, clientBuilder, brokerId, jwtAuthConfig));
+    public static DigipostClient create(DigipostClientConfig config, BrokerId brokerId, JwtAuthConfig jwtAuthConfig, HttpClientBuilder clientBuilder) {
+        return new DigipostClient(config, ApiServiceImpl.create(config, clientBuilder, brokerId, jwtAuthConfig));
     }
 
     private DigipostClient(DigipostClientConfig config, ApiServiceImpl apiService) {
