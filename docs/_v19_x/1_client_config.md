@@ -91,9 +91,6 @@ DigipostClient client = DigipostClient.create(
         DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), jwtAuthConfig, clientBuilder);
 ```
 
-Note that the connection manager of the builder you pass is replaced: the client needs one
-configured with the client certificate, so that the mTLS handshake against the API succeeds.
-
 
 ### Other environments
 
