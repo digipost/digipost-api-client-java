@@ -13,22 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.security;
+package no.digipost.api.client.security.jwt;
 
-import java.security.PrivateKey;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
+final class SettableClock extends Clock {
 
-final class SignerUsingPrivateKey implements Signer {
+    private volatile Instant now;
 
-    private final PrivateKey privateKey;
+    SettableClock(Instant now) {
+        this.now = now;
+    }
 
-    public SignerUsingPrivateKey(PrivateKey privateKey) {
-        this.privateKey = privateKey;
+    void advance(Duration duration) {
+        now = now.plus(duration);
     }
 
     @Override
-    public byte[] sign(String dataToSign) {
-        return CryptoUtil.sign(privateKey, dataToSign);
+    public Instant instant() {
+        return now;
     }
 
+    @Override
+    public ZoneId getZone() {
+        return ZoneOffset.UTC;
+    }
+
+    @Override
+    public Clock withZone(ZoneId zone) {
+        throw new UnsupportedOperationException();
+    }
 }
