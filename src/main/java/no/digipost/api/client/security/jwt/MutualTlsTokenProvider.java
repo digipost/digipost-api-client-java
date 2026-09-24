@@ -62,7 +62,6 @@ public class MutualTlsTokenProvider implements AutoCloseable {
     private final JwtAuthConfig config;
     private final Clock clock;
     private final CloseableHttpClient tokenClient;
-    private final SSLContext sslContext;
 
     private final List<BasicNameValuePair> oAuthTokenEndpointParams;
 
@@ -77,8 +76,7 @@ public class MutualTlsTokenProvider implements AutoCloseable {
     MutualTlsTokenProvider(JwtAuthConfig config, BrokerId brokerId, URI resourceServerUri, Clock clock, TrustManager[] trustManagers) {
         this.config = config;
         this.clock = clock;
-        this.sslContext = buildSslContext(config, trustManagers);
-        this.tokenClient = buildTokenClient(config, this.sslContext);
+        this.tokenClient = buildTokenClient(config, buildSslContext(config, trustManagers));
         this.oAuthTokenEndpointParams = createOAuth2TokenEndpointParams(config, brokerId, resourceServerUri);
     }
 
@@ -111,10 +109,6 @@ public class MutualTlsTokenProvider implements AutoCloseable {
                 LOG.debug("Discarded the cached access token from {} after it was rejected", config.tokenEndpointUri);
             }
         }
-    }
-
-    public SSLContext getSslContext() {
-        return sslContext;
     }
 
     @Override

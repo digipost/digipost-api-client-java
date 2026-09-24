@@ -78,11 +78,9 @@ import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
-import no.digipost.http.client.HttpClientConnectionManagerFactory;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.ChainElement;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -166,11 +164,6 @@ public class ApiServiceImpl implements AutoCloseable, MessageDeliveryApi, InboxA
     private CloseableHttpClient createJwtAuthenticatingHttpClient(HttpClientBuilder httpClientBuilder, MutualTlsTokenProvider tokenProvider, DigipostClientConfig config) {
         Clock clock = config.clock;
         CloseableHttpClient httpClient = httpClientBuilder
-                .setConnectionManager(HttpClientConnectionManagerFactory.createDefaultBuilder()
-                        .setTlsSocketStrategy(ClientTlsStrategyBuilder.create()
-                                .setSslContext(tokenProvider.getSslContext())
-                                .buildClassic())
-                        .build())
                 .addRequestInterceptorLast(new RequestDateInterceptor(config.eventLogger, clock))
                 .addRequestInterceptorLast(new RequestUserAgentInterceptor())
                 .addRequestInterceptorLast(new RequestPathInterceptor())

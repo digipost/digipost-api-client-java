@@ -64,7 +64,6 @@ public class UnauthorizedRetryTest {
     void startApiAndBuildClient() throws Exception {
         digipostApi = new DigipostApiStub();
         tokenProvider = mock(MutualTlsTokenProvider.class);
-        when(tokenProvider.getSslContext()).thenReturn(javax.net.ssl.SSLContext.getDefault());
 
         DigipostClientConfig config = newConfiguration().digipostApiUri(digipostApi.uri()).build();
         apiService = ApiServiceImpl.withMutualTlsTokenProvider(config, HttpClientFactory.createDefaultBuilder(), BROKER_ID, tokenProvider);
