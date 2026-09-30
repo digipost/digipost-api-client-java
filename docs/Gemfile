@@ -1,7 +1,18 @@
 source 'https://rubygems.org'
 
-require 'json'
-require 'open-uri'
-versions = JSON.parse(OpenURI.open_uri('https://pages.github.com/versions.json').read)
+# Sida bygges av GitHub Pages sin egen bygger, så denne Gemfilen brukes kun til lokal forhåndsvisning.
+# Vi bruker ikke github-pages-gemmen, fordi den låser jekyll-remote-theme til en versjon som krever sårbar rubyzip (< 3.0).
+# Versjonene under speiler det GitHub Pages bruker: https://pages.github.com/versions/
+gem 'jekyll', '3.10.0'
+gem 'kramdown-parser-gfm', '1.1.0'
+gem 'webrick', '~> 1.8'
 
-gem 'github-pages', versions['github-pages'], group: :jekyll_plugins
+group :jekyll_plugins do
+  gem 'jekyll-default-layout', '0.1.5'
+  gem 'jekyll-github-metadata', '2.16.1'
+  gem 'jekyll-optional-front-matter', '0.3.2'
+  gem 'jekyll-readme-index', '0.3.0'
+  gem 'jekyll-redirect-from', '0.16.0'
+  gem 'jekyll-relative-links', '0.6.1'
+  gem 'jekyll-titles-from-headings', '0.5.3'
+end
