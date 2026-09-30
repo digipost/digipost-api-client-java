@@ -85,6 +85,8 @@ public final class HttpResponseUtils {
                     throw new DigipostClientException(ErrorCode.SERVER_ERROR, error.getErrorMessage());
                 case HttpStatus.SC_SERVICE_UNAVAILABLE:
                     throw new DigipostClientException(ErrorCode.API_UNAVAILABLE, error.getErrorMessage());
+                case HttpStatus.SC_TOO_MANY_REQUESTS:
+                    throw new DigipostClientException(ErrorCode.TOO_MANY_REQUESTS, error.getErrorMessage());
                 default:
                     throw new DigipostClientException(error);
             }
