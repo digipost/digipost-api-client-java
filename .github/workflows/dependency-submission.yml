@@ -1,0 +1,26 @@
+# Generert av github-actions-templates, bør ikke endres manuelt
+name: Submit Dependency Snapshot
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 * * 1-5'  # Every weekday at 05:00 UTC
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'pom.xml'
+      - '**/pom.xml'
+      - '.github/workflows/dependency-submission.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Submit Dependency Snapshot
+        uses: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
