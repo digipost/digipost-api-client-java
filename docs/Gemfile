@@ -1,8 +1,4 @@
 source 'https://rubygems.org'
-
-# Sida bygges av GitHub Pages sin egen bygger, så denne Gemfilen brukes kun til lokal forhåndsvisning.
-# Vi bruker ikke github-pages-gemmen, fordi den låser jekyll-remote-theme til en versjon som krever sårbar rubyzip (< 3.0).
-# Versjonene under speiler det GitHub Pages bruker: https://pages.github.com/versions/
 gem 'jekyll', '3.10.0'
 gem 'kramdown-parser-gfm', '1.1.0'
 gem 'webrick', '~> 1.8'
