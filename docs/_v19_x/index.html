@@ -1,10 +1,11 @@
 ---
 identifier: index
 layout: default
+redirect_from: /
 ---
 
 <!-- Documentation -->
-{% for dok in site.v18_x %}
+{% for dok in site.v19_x %}
     {% if dok.identifier != 'index' %}
         <section class="bs-docs-section">
             <h1 id="{{ dok.identifier }}" class="page-header">{{ dok.title }}</h1>
