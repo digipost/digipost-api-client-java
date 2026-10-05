@@ -62,6 +62,6 @@ public class RefreshAccessTokenOnUnauthorizedExec implements ExecChainHandler {
         response.close();
 
         LOG.info("{} was rejected with 401; re-sending it once with a newly fetched access token", scope.exchangeId);
-        return chain.proceed(ClassicRequestBuilder.copy(request).build(), scope);
+        return chain.proceed(ClassicRequestBuilder.copy(scope.originalRequest).build(), scope);
     }
 }
