@@ -137,7 +137,7 @@ Digipost OAuth 2 client authority to get a client ID,
 and replace the `Signer` with a `JwtAuthConfig`:
 
 ```java
-// Before (18.x)
+// Before v19
 Signer signer;
 try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certificate.p12"))) {
     signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, "TheSecretPassword");
@@ -146,7 +146,7 @@ try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certifi
 DigipostClient client = DigipostClient.withCertificateAuthentication(
         DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), signer);
 
-// After (19.x)
+// v19 and onwards
 JwtAuthConfig jwtAuthConfig;
 try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("client-cert.p12"))) {
     jwtAuthConfig = JwtAuthConfig
