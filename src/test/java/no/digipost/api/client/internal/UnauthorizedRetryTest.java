@@ -19,6 +19,8 @@ import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.DigipostClientConfig;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.api.client.errorhandling.ErrorCode;
+import no.digipost.api.client.internal.http.RefreshAccessTokenOnUnauthorizedExec;
+import no.digipost.api.client.internal.http.request.interceptor.RequestBearerTokenInterceptor;
 import no.digipost.api.client.representations.DigipostUri;
 import no.digipost.api.client.representations.EntryPoint;
 import no.digipost.api.client.representations.ErrorMessage;
@@ -27,6 +29,13 @@ import no.digipost.api.client.representations.Link;
 import no.digipost.api.client.representations.Relation;
 import no.digipost.api.client.security.jwt.MutualTlsTokenProvider;
 import no.digipost.http.client.HttpClientFactory;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.ChainElement;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -115,6 +124,41 @@ public class UnauthorizedRetryTest {
     }
 
     /**
+     * {@code ProtocolExec} modifies the request object in place (adding e.g. {@code Content-Length}),
+     * so retrying with a naive copy of that already-modified request makes the built-in
+     * {@code RequestContent} interceptor reject it the second time around. This only shows up for
+     * requests with a body (POST/PUT), which is why the other tests in this file, that only ever
+     * exercise GET, don't catch it.
+     * <p>
+     * Unlike the other tests here, this one does not go through the fully wired client: a real
+     * request/response pair that carries a body would also need to pass the response signature
+     * verification, which is unrelated to the bug this guards against. Instead it wires up just the
+     * two pieces involved in the retry, the same way as in the reported reproduction.
+     */
+    @Test
+    void henter_nytt_token_og_sender_requesten_paa_nytt_for_en_post_med_body() throws Exception {
+        when(tokenProvider.getToken()).thenReturn("rejected-token", "fresh-token");
+        digipostApi.respondWith(unauthorizedByGateway(), ok());
+
+        try (CloseableHttpClient client = HttpClientBuilder.create()
+                .addRequestInterceptorLast(new RequestBearerTokenInterceptor(tokenProvider::getToken))
+                .addExecInterceptorBefore(ChainElement.PROTOCOL.name(), "REFRESH_ACCESS_TOKEN_ON_UNAUTHORIZED",
+                        new RefreshAccessTokenOnUnauthorizedExec(tokenProvider::invalidate))
+                .build()) {
+
+            HttpPost post = new HttpPost(digipostApi.uri().resolve("/messages"));
+            post.setEntity(new ByteArrayEntity("innholdet i brevet".getBytes(), ContentType.TEXT_PLAIN));
+
+            try (ClassicHttpResponse response = client.executeOpen(null, post, null)) {
+                assertThat(response.getCode(), is(SC_OK));
+            }
+        }
+
+        verify(tokenProvider).invalidate("rejected-token");
+        assertThat(digipostApi.receivedAuthorizationHeaders(), contains("Bearer rejected-token", "Bearer fresh-token"));
+    }
+
+    /**
      * A 401 from in front of the Digipost application, i.e. one that is neither dated, hashed
      * nor signed the way the client expects a response from the application itself to be.
      */
@@ -129,5 +173,9 @@ public class UnauthorizedRetryTest {
     private static DigipostApiStub.StubbedResponse entryPoint() {
         return DigipostApiStub.marshalled(SC_OK, new EntryPoint("the-certificate",
                 new Link(Relation.SEARCH, new DigipostUri("/recipients/search"))));
+    }
+
+    private static DigipostApiStub.StubbedResponse ok() {
+        return DigipostApiStub.withoutDigipostHeaders(SC_OK, "OK");
     }
 }
