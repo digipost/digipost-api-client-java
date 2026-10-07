@@ -20,7 +20,6 @@ This software includes third party software subject to the following licenses:
   Bouncy Castle ASN.1 Extension and Utility APIs under Bouncy Castle Licence
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
-  Byte Buddy (without dependencies) under Apache License, Version 2.0
   Caffeine cache under Apache License, Version 2.0
   Checker Qual under The MIT License
   Digipost API Client under Apache License, Version 2.0
