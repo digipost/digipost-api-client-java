@@ -4,7 +4,7 @@ Online documentation:
 https://digipost.github.io/digipost-api-client-java/
 
 The library is available in
-[![Maven Central](https://maven-badges.sml.io/maven-central/no.digipost/digipost-api-client-java/badge.svg)](https://maven-badges.sml.io/maven-central/no.digipost/digipost-api-client-java).
+[![Maven Central](https://img.shields.io/maven-central/v/no.digipost/digipost-api-client-java)](https://central.sonatype.com/artifact/no.digipost/digipost-api-client-java).
 
 ## Creating documentation for a new version
 * Copy the most recent versioned folder within docs/
