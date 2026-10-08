@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.client.security;
+package no.digipost.api.client.internal.http.request.interceptor;
 
-import java.io.InputStream;
-import java.security.PrivateKey;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
-@FunctionalInterface
-public interface Signer {
+public class RequestPathInterceptor implements HttpRequestInterceptor {
 
-    static Signer usingKeyFromPKCS12KeyStore(InputStream keystoreStream, String keyStoreAndKeyPassword) {
-        return Signer.using(CryptoUtil.loadKeyFromP12(keystoreStream, keyStoreAndKeyPassword));
+    public static final String REQUEST_PATH_ATTRIBUTE = "request-path";
+
+    @Override
+    public void process(HttpRequest httpRequest, EntityDetails entityDetails, HttpContext httpContext) {
+        httpContext.setAttribute(REQUEST_PATH_ATTRIBUTE, httpRequest.getPath());
     }
-
-    static Signer using(PrivateKey privateKey) {
-        return new SignerUsingPrivateKey(privateKey);
-    }
-
-    public byte[] sign(String dataToSign);
-
 }
