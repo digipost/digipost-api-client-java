@@ -22,50 +22,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.Security;
-import java.security.Signature;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.util.Enumeration;
 
 public final class CryptoUtil {
     private static final Logger LOG = LoggerFactory.getLogger(CryptoUtil.class);
-
-    public static PrivateKey loadKeyFromP12(final InputStream certificateStream, final String passord) {
-        try {
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            keyStore.load(certificateStream, passord.toCharArray());
-            final Enumeration<String> aliases = keyStore.aliases();
-            while (aliases.hasMoreElements()) {
-                final String alias = aliases.nextElement();
-                LOG.debug("Trying to get private key for alias: " + alias);
-                if (keyStore.isKeyEntry(alias)) {
-                    RSAPrivateCrtKey key = (RSAPrivateCrtKey) keyStore.getKey(alias, passord.toCharArray());
-                    if (key != null) {
-                        LOG.debug("Found private key for alias: " + alias);
-                        return key;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error loading private key", e);
-        }
-        throw new RuntimeException("No private key found in certificate file");
-    }
-
-    public static byte[] sign(final PrivateKey privateKey, final String messageToSign) {
-        Signature instance;
-        try {
-            instance = Signature.getInstance("SHA256WithRSAEncryption");
-            instance.initSign(privateKey);
-            instance.update(messageToSign.getBytes());
-            return instance.sign();
-        } catch (Exception e) {
-            throw new RuntimeException("Det skjedde en feil ved signeringen", e);
-        }
-    }
 
     public static void addBouncyCastleProviderAndVerify_AES256_CBC_Support() {
         try {

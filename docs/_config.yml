@@ -8,8 +8,8 @@ licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
 
 baseurl: "/digipost-api-client-java"
 
-currentVersion: "18.x"
-versions: ["18.x", "17.x", "16.x", "15.x", "13.x", "11.x", "10.x", "9.0", "8.0"]
+currentVersion: "19.x"
+versions: ["19.x", "18.x", "17.x", "16.x", "15.x", "13.x", "11.x", "10.x", "9.0", "8.0"]
 deprecatedVersions: ["8.0", "9.0", "10.x", "11.x", "13.x"]
 
 collections:
@@ -40,6 +40,9 @@ collections:
   v18_x:
     output: true
     permalink: /v18.x/
+  v19_x:
+    output: true
+    permalink: /v19.x/
 
 # list of additional links on the right of the top menu
 headerLinks:
