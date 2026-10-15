@@ -29,12 +29,12 @@ jobs:
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad  # v6.1.0
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '25'
           cache: "maven"
-          gpg-private-key: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PRIVATE }}
+          gpg-private-key: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PRIVATE}}
           mvn-server-credentials: |
             sonatype-central:MAVEN_CENTRAL_TOKEN_USERNAME:MAVEN_CENTRAL_TOKEN_PASSWORD
-          mvn-server-repository-origins: | 
+          mvn-server-repository-origins: |
             sonatype-central:https://central.sonatype.com
           gpg-passphrase-env-var: MAVEN_GPG_PASSPHRASE
       - name: Activate Artifact Signing and Version Suffix
