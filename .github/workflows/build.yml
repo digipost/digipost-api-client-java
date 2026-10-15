@@ -10,8 +10,8 @@ jobs:
     name: Build on Java ${{ matrix.java }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  #v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6  #6.0.1
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
@@ -24,18 +24,20 @@ jobs:
     name: Publish ${{ github.ref_name }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  #v7.0.1
       - name: Set up Java
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6  #6.0.1
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '25'
           cache: "maven"
-          gpg-private-key: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PRIVATE }}
-          server-id: central
-          server-username: MAVEN_CENTRAL_TOKEN_USERNAME
-          server-password: MAVEN_CENTRAL_TOKEN_PASSWORD
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          gpg-private-key: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_PRIVATE}}
+          # Maven settings (generated settings.xml)
+          mvn-server-credentials: |
+            sonatype-central:MAVEN_CENTRAL_TOKEN_USERNAME:MAVEN_CENTRAL_TOKEN_PASSWORD
+          mvn-server-repository-origins: |
+            sonatype-central:https://central.sonatype.com
+          gpg-passphrase-env-var: MAVEN_GPG_PASSPHRASE
       - name: Activate Artifact Signing and Version Suffix
         run: |
           profiles="build-sources-and-javadoc,deploy-to-maven-central"
