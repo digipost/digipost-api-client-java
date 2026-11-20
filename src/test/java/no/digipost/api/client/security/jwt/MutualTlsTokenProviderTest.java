@@ -19,6 +19,7 @@ import no.digipost.api.client.BrokerId;
 import no.digipost.api.client.errorhandling.DigipostClientException;
 import no.digipost.http.client.HttpClientConnectionSettings;
 import no.digipost.http.client.HttpClientSettings;
+import no.digipost.time.ControllableClock;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
@@ -60,13 +61,13 @@ public class MutualTlsTokenProviderTest {
     private static final Instant NOW = Instant.parse("2026-08-14T12:00:00Z");
 
     private TokenEndpointStub tokenEndpoint;
-    private SettableClock clock;
+    private ControllableClock clock;
     private final List<MutualTlsTokenProvider> tokenProviders = new ArrayList<>();
 
     @BeforeEach
     void startTokenEndpoint() throws Exception {
         tokenEndpoint = new TokenEndpointStub();
-        clock = new SettableClock(NOW);
+        clock = ControllableClock.freezedAt(NOW);
     }
 
     @AfterEach
@@ -108,7 +109,7 @@ public class MutualTlsTokenProviderTest {
         MutualTlsTokenProvider tokenProvider = tokenProvider();
 
         tokenProvider.getToken();
-        clock.advance(Duration.ofSeconds(100));
+        clock.timePasses(Duration.ofSeconds(100));
 
         assertThat(tokenProvider.getToken(), is("the-token"));
         assertThat(tokenEndpoint.receivedRequestCount(), is(1));
@@ -120,7 +121,7 @@ public class MutualTlsTokenProviderTest {
         MutualTlsTokenProvider tokenProvider = tokenProvider();
 
         tokenProvider.getToken();
-        clock.advance(Duration.ofSeconds(280));
+        clock.timePasses(Duration.ofSeconds(280));
         tokenEndpoint.respondWith(200, "{\"access_token\":\"second-token\",\"expires_in\":300}");
 
         assertThat(tokenProvider.getToken(), is("second-token"));
@@ -158,11 +159,11 @@ public class MutualTlsTokenProviderTest {
         MutualTlsTokenProvider tokenProvider = tokenProvider();
 
         tokenProvider.getToken();
-        clock.advance(Duration.ofSeconds(100));
+        clock.timePasses(Duration.ofSeconds(100));
         tokenProvider.getToken();
         assertThat("tokenet er gyldig i 300s, så det skal fortsatt være cachet", tokenEndpoint.receivedRequestCount(), is(1));
 
-        clock.advance(Duration.ofSeconds(180));
+        clock.timePasses(Duration.ofSeconds(180));
         tokenProvider.getToken();
         assertThat(tokenEndpoint.receivedRequestCount(), is(2));
     }
