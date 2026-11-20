@@ -86,7 +86,7 @@
             {% for depr in site.deprecatedVersions %}
             {% if page.url contains depr %}
             <div class="alert alert-danger">
-                  This version is deprecated. As of dec 2023 we will only support v16 and higher since we now only support Java >= 11 with jakarta.xml-bind.
+                  This version is deprecated. Please upgrade to 19 as soon as possible.
             </div>
             {% endif %}
           {% endfor %}

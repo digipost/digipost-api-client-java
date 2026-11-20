@@ -9,34 +9,13 @@ licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
 baseurl: "/digipost-api-client-java"
 
 currentVersion: "19.x"
-versions: ["19.x", "18.x", "17.x", "16.x", "15.x", "13.x", "11.x", "10.x", "9.0", "8.0"]
-deprecatedVersions: ["8.0", "9.0", "10.x", "11.x", "13.x"]
+versions: ["19.x", "18.x", "15.x"]
+deprecatedVersions: ["18.x", "15.x"]
 
 collections:
-  v8_0:
-    output: true
-    permalink: /v8.0/
-  v9_0:
-    output: true
-    permalink: /v9.0/
-  v10_x:
-    output: true
-    permalink: /v10.x/
-  v11_x:
-    output: true
-    permalink: /v11.x/
-  v13_x:
-    output: true
-    permalink: /v13.x/
   v15_x:
     output: true
     permalink: /v15.x/
-  v16_x:
-    output: true
-    permalink: /v16.x/
-  v17_x:
-    output: true
-    permalink: /v17.x/
   v18_x:
     output: true
     permalink: /v18.x/
