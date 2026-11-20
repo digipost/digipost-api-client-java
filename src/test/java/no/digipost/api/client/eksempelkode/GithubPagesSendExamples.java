@@ -34,7 +34,7 @@ import no.digipost.api.client.representations.PrintDetails;
 import no.digipost.api.client.representations.PrintRecipient;
 import no.digipost.api.client.representations.SensitivityLevel;
 import no.digipost.api.client.representations.SmsNotification;
-import no.digipost.api.client.security.Signer;
+import no.digipost.api.client.security.jwt.JwtAuthConfig;
 import no.digipost.api.datatypes.types.Address;
 import no.digipost.api.datatypes.types.Appointment;
 import no.digipost.api.datatypes.types.ExternalLink;
@@ -62,20 +62,23 @@ public class GithubPagesSendExamples {
     private static final UUID UUID2 = UUID.randomUUID();
     private static final UUID UUID3 = UUID.randomUUID();
     private static final UUID UUID4 = UUID.randomUUID();
-    private static final String CERTIFICATE_PASSWORD = "passord";
+    private static final String CLIENT_CERTIFICATE_PASSWORD = "passord";
 
     private DigipostClient client;
 
     public void set_up_client() throws IOException {
         SenderId senderId = SenderId.of(123456);
 
-        Signer signer;
-        try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certificate.p12"))) {
-            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, "TheSecretPassword");
+        JwtAuthConfig jwtAuthConfig;
+        try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("client-cert.p12"))) {
+            jwtAuthConfig = JwtAuthConfig
+                    .newConfig("your-client-id")
+                    .pkcs12KeyStore(sertifikatInputStream, "TheSecretPassword")
+                    .build();
         }
 
-        DigipostClient client = new DigipostClient(
-                DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), signer);
+        DigipostClient client = DigipostClient.create(
+                DigipostClientConfig.newConfiguration().build(), senderId.asBrokerId(), jwtAuthConfig);
     }
 
     public void send_one_letter_to_recipient_via_personal_identification_number() throws IOException {
@@ -241,12 +244,15 @@ public class GithubPagesSendExamples {
         // API URL is different when request is sent from NHN
         DigipostClientConfig config = DigipostClientConfig.newConfiguration().digipostApiUri(URI.create("https://api.nhn.digipost.no")).build();
 
-        Signer signer;
-        try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("certificate.p12"))) {
-            signer = Signer.usingKeyFromPKCS12KeyStore(sertifikatInputStream, CERTIFICATE_PASSWORD);
+        JwtAuthConfig jwtAuthConfig;
+        try (InputStream sertifikatInputStream = Files.newInputStream(Paths.get("client-cert.p12"))) {
+            jwtAuthConfig = JwtAuthConfig
+                    .newConfig("your-client-id")
+                    .pkcs12KeyStore(sertifikatInputStream, CLIENT_CERTIFICATE_PASSWORD)
+                    .build();
         }
 
-        DigipostClient client = new DigipostClient(config, SENDER_ID.asBrokerId(), signer);
+        DigipostClient client = DigipostClient.create(config, SENDER_ID.asBrokerId(), jwtAuthConfig);
 
         PersonalIdentificationNumber pin = new PersonalIdentificationNumber("26079833787");
 
